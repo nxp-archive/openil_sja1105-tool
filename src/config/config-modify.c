@@ -580,6 +580,7 @@ static int general_params_table_entry_modify(
 		"vimask",
 		"tpid",
 		"ignore2stf",
+		"tpid2"
 	};
 	uint64_t *fields[] = {
 		&config->general_params[entry_index].vllupformat,
@@ -601,8 +602,9 @@ static int general_params_table_entry_modify(
 		&config->general_params[entry_index].vimask,
 		&config->general_params[entry_index].tpid,
 		&config->general_params[entry_index].ignore2stf,
+		&config->general_params[entry_index].tpid2
 	};
-	int entry_field_counts[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+	int entry_field_counts[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 	uint64_t tmp;
 	int rc;
 
