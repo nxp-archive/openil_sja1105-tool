@@ -36,6 +36,13 @@ LDFLAGS+= $(shell pkg-config --libs   libxml-2.0)
 
 SJA1105_SOURCE  = $(shell find src -name "*.[c|h]")
 SJA1105         = sja1105-tool
+PANDOC          = pandoc
+MANPAGES        = sja1105-tool.1 \
+                  sja1105-tool-config.1 \
+                  sja1105-tool-status.1 \
+                  sja1105-tool-reset.1 \
+                  sja1105-tool-config-format.5 \
+                  sja1105-conf.5
 
 build: $(SJA1105)
 
@@ -44,5 +51,15 @@ $(SJA1105): $(SJA1105_SOURCE)
 
 clean:
 	rm -f $(SJA1105)
+	rm -f $(MANPAGES)
+
+man: $(MANPAGES)
+
+all: build man
+
+%.1: man/%.1.md
+	$(PANDOC) --standalone --to man $^ -o $@
+%.5: man/%.5.md
+	$(PANDOC) --standalone --to man $^ -o $@
 
 .PHONY: clean build
