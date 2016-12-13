@@ -41,8 +41,8 @@ ifneq ($(TOOLCHAIN_X86_SYSROOT),)
 	                  --libs)
 else
 	# Yocto compilation
-	CFLAGS += $(shell xml2-config --cflags)
-	LDFLAGS+= $(shell xml2-config --libs)
+	CFLAGS += $(shell pkg-config --cflags libxml-2.0)
+	LDFLAGS+= $(shell pkg-config --libs libxml-2.0)
 endif
 
 SJA1105_SOURCE  = $(shell find src -name "*.[c|h]")
