@@ -39,6 +39,9 @@ static int entry_get(xmlNode *node, struct sja1105_l2_lookup_params_table *entry
 	rc |= xml_read_field(&entry->shared_learn, "shared_learn", node);
 	rc |= xml_read_field(&entry->no_enf_hostprt, "no_enf_hostprt", node);
 	rc |= xml_read_field(&entry->no_mgmt_learn, "no_mgmt_learn", node);
+	if (rc) {
+		fprintf(stderr, "L2 Lookup Parameters entry is incomplete!\n");
+	}
 	return rc;
 }
 

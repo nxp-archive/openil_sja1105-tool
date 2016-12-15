@@ -43,6 +43,9 @@ static int entry_get(xmlNode *node, struct sja1105_schedule_entry *entry)
 	rc |= xml_read_field(&entry->resmedia, "resmedia", node);
 	rc |= xml_read_field(&entry->vlindex, "vlindex", node);
 	rc |= xml_read_field(&entry->delta, "delta", node);
+	if (rc) {
+		fprintf(stderr, "Schedule entry is incomplete!\n");
+	}
 	return 0;
 }
 
