@@ -29,37 +29,31 @@
 # POSSIBILITY OF SUCH DAMAGE.
 ##############################################################################
 
-CFLAGS         += -Wall -Wextra -g -fstack-protector-all
-
-CFLAGS += $(shell pkg-config --cflags libxml-2.0)
-LDFLAGS+= $(shell pkg-config --libs   libxml-2.0)
-
-SJA1105_SOURCE  = $(shell find src -name "*.[c|h]")
-SJA1105         = sja1105-tool
-PANDOC          = pandoc
-MANPAGES        = sja1105-tool.1 \
-                  sja1105-tool-config.1 \
-                  sja1105-tool-status.1 \
-                  sja1105-tool-reset.1 \
-                  sja1105-tool-config-format.5 \
-                  sja1105-conf.5
+CFLAGS  += -Wall -Wextra -g -fstack-protector-all
+CFLAGS  += $(shell pkg-config --cflags libxml-2.0)
+LDFLAGS += $(shell pkg-config --libs libxml-2.0)
+SRC      = $(shell find src -name "*.[c|h]")
+MANPAGES = docs/man/sja1105-tool.1 \
+           docs/man/sja1105-tool-status.1 \
+           docs/man/sja1105-tool-reset.1 \
+           docs/man/sja1105-tool-config.1 \
+           docs/man/sja1105-tool-config-format.5 \
+           docs/man/sja1105-conf.5
+SJA1105  = sja1105-tool
 
 build: $(SJA1105)
 
-$(SJA1105): $(SJA1105_SOURCE)
+$(SJA1105): $(SRC)
 	$(CC) $(CFLAGS) $(filter %.c, $^) -o $@ $(LDFLAGS)
 
 clean:
-	rm -f $(SJA1105)
-	rm -f $(MANPAGES)
+	rm -f $(SJA1105) $(MANPAGES)
 
 man: $(MANPAGES)
 
 all: build man
 
-%.1: man/%.1.md
-	$(PANDOC) --standalone --to man $^ -o $@
-%.5: man/%.5.md
-	$(PANDOC) --standalone --to man $^ -o $@
+docs/man/%: docs/md/%.md
+	pandoc --standalone --to man $^ -o $@
 
-.PHONY: clean build
+.PHONY: clean build man
