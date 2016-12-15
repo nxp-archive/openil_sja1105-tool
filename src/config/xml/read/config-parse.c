@@ -165,6 +165,7 @@ static int parse_root(xmlNode *root, struct sja1105_config *config)
 		}
 		rc = parse_config_table(node, config);
 		if (rc < 0) {
+			fprintf(stderr, "Could not parse XML file!\n");
 			goto out;
 		}
 	}

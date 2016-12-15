@@ -34,9 +34,18 @@ static int entry_get(xmlNode *node, struct sja1105_l2_forwarding_entry *entry)
 {
 	int rc = 0;
 	rc |= xml_read_field(&entry->bc_domain, "bc_domain", node);
+	if (rc < 0) {
+		fprintf(stderr, "bc_domain read failed\n");
+		goto error;
+	}
 	rc |= xml_read_field(&entry->reach_port, "reach_port", node);
+	if (rc < 0) {
+		fprintf(stderr, "reach_port read failed\n");
+		goto error;
+	}
 	rc |= xml_read_field(&entry->fl_domain, "fl_domain", node);
 	if (rc < 0) {
+		fprintf(stderr, "fl_domain read failed\n");
 		goto error;
 	}
 	rc = xml_read_array(&entry->vlan_pmap, 8, "vlan_pmap", node);
@@ -45,6 +54,9 @@ static int entry_get(xmlNode *node, struct sja1105_l2_forwarding_entry *entry)
 		goto error;
 	}
 error:
+	if (rc) {
+		fprintf(stderr, "L2 Forwarding entry is incomplete!\n");
+	}
 	return rc;
 }
 

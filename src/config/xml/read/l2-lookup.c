@@ -38,6 +38,9 @@ static int entry_get(xmlNode *node, struct sja1105_l2_lookup_entry *entry)
 	rc |= xml_read_field(&entry->destports, "destports", node);
 	rc |= xml_read_field(&entry->enfport, "enfport", node);
 	rc |= xml_read_field(&entry->index, "index", node);
+	if (rc) {
+		fprintf(stderr, "L2 Lookup entry is incomplete!\n");
+	}
 	return 0;
 }
 

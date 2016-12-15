@@ -35,6 +35,9 @@ static int entry_get(xmlNode *node, struct sja1105_schedule_entry_points_params 
 	int rc = 0;
 	rc |= xml_read_field(&entry->clksrc, "clksrc", node);
 	rc |= xml_read_field(&entry->actsubsch, "actsubsch", node);
+	if (rc) {
+		fprintf(stderr, "Schedule Entry Points Parameters entry is incomplete!\n");
+	}
 	return rc;
 }
 

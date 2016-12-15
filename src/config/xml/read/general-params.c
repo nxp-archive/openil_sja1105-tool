@@ -53,6 +53,9 @@ static int entry_get(xmlNode *node, struct sja1105_general_params_table *entry)
 	rc |= xml_read_field(&entry->tpid,        "tpid", node);
 	rc |= xml_read_field(&entry->ignore2stf,  "ignore2stf", node);
 	rc |= xml_read_field(&entry->tpid2,       "tpid2", node);
+	if (rc) {
+		fprintf(stderr, "General Parameters entry is incomplete!\n");
+	}
 	return rc;
 }
 
