@@ -41,7 +41,7 @@ static int entry_get(xmlNode *node, struct sja1105_l2_policing_entry *entry)
 	if (rc) {
 		fprintf(stderr, "L2 Policing entry is incomplete!\n");
 	}
-	return 0;
+	return rc;
 }
 
 static int parse_entry(xmlNode *node, struct sja1105_config *config)

@@ -53,6 +53,7 @@ static int entry_get(xmlNode *node, struct sja1105_l2_forwarding_entry *entry)
 		fprintf(stderr, "Must have exactly 8 VLAN_PMAP entries!\n");
 		goto error;
 	}
+	return 0;
 error:
 	if (rc) {
 		fprintf(stderr, "L2 Forwarding entry is incomplete!\n");
@@ -83,6 +84,7 @@ error:
 
 int l2_forwarding_table_parse(xmlNode *node, struct sja1105_config *config)
 {
+	int rc = 0;
 	xmlNode *c;
 
 	if (node->type != XML_ELEMENT_NODE) {
@@ -94,7 +96,10 @@ int l2_forwarding_table_parse(xmlNode *node, struct sja1105_config *config)
 		if (c->type != XML_ELEMENT_NODE) {
 			continue;
 		}
-		parse_entry(c, config);
+		rc = parse_entry(c, config);
+		if (rc < 0) {
+			goto out;
+		}
 	}
 	return 0;
 }
