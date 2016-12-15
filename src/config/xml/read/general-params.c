@@ -97,6 +97,10 @@ int general_parameters_table_parse(xmlNode *node, struct sja1105_config *config)
 			goto out;
 		}
 	}
+	if (general_config.verbose) {
+		printf("read %d General Parameters entries\n",
+		        config->general_params_count);
+	}
 out:
 	return rc;
 }

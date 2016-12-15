@@ -81,6 +81,10 @@ int schedule_parameters_table_parse(xmlNode *node, struct sja1105_config *config
 			goto out;
 		}
 	}
+	if (general_config.verbose) {
+		printf("read %d Schedule Parameters entries\n",
+		        config->schedule_params_count);
+	}
 out:
 	return rc;
 }

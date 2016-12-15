@@ -35,6 +35,10 @@ int schedule_entry_points_parameters_table_write(xmlTextWriterPtr writer, struct
 	int rc = 0;
 	int i;
 
+	if (general_config.verbose) {
+		printf("writing %d Schedule Entry Points Parameters entries\n",
+		        config->schedule_entry_points_params_count);
+	}
 	for (i = 0; i < config->schedule_entry_points_params_count; i++) {
 		rc |= xmlTextWriterStartElement(writer, BAD_CAST "entry");
 		rc |= xml_write_field(writer, "index", i);
