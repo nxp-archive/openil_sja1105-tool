@@ -31,19 +31,8 @@
 
 CFLAGS         += -Wall -Wextra -g -fstack-protector-all
 
-ifneq ($(TOOLCHAIN_X86_SYSROOT),)
-	# Standalone compilation, "envsetup" was sourced
-	CFLAGS += $(shell xml2-config --prefix=$(TOOLCHAIN_X86_SYSROOT) \
-	                  --exec-prefix=$(TOOLCHAIN_ARM_SYSROOT) \
-	                  --cflags)
-	LDFLAGS+= $(shell xml2-config --prefix=$(TOOLCHAIN_X86_SYSROOT) \
-	                  --exec-prefix=$(TOOLCHAIN_ARM_SYSROOT) \
-	                  --libs)
-else
-	# Yocto compilation
-	CFLAGS += $(shell pkg-config --cflags libxml-2.0)
-	LDFLAGS+= $(shell pkg-config --libs libxml-2.0)
-endif
+CFLAGS += $(shell pkg-config --cflags libxml-2.0)
+LDFLAGS+= $(shell pkg-config --libs   libxml-2.0)
 
 SJA1105_SOURCE  = $(shell find src -name "*.[c|h]")
 SJA1105         = sja1105-tool
