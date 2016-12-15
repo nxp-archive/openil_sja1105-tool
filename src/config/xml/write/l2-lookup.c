@@ -35,6 +35,10 @@ int l2_address_lookup_table_write(xmlTextWriterPtr writer, struct sja1105_config
 	int rc = 0;
 	int i;
 
+	if (general_config.verbose) {
+		printf("writing %d L2 Lookup entries\n",
+		        config->l2_lookup_count);
+	}
 	for (i = 0; i < config->l2_lookup_count; i++) {
 		rc |= xmlTextWriterStartElement(writer, BAD_CAST "entry");
 		rc |= xml_write_field(writer, "vlanid",    config->l2_lookup[i].vlanid);
