@@ -39,6 +39,9 @@ static int entry_get(xmlNode *node, struct sja1105_vlan_lookup_entry *entry)
 	rc |= xml_read_field(&entry->vlan_bc, "vlan_bc", node);
 	rc |= xml_read_field(&entry->tag_port, "tag_port", node);
 	rc |= xml_read_field(&entry->vlanid, "vlanid", node);
+	if (rc) {
+		fprintf(stderr, "VLAN Lookup entry is incomplete!\n");
+	}
 	return rc;
 }
 
@@ -79,6 +82,10 @@ int vlan_lookup_table_parse(xmlNode *node, struct sja1105_config *config)
 		if (rc < 0) {
 			goto out;
 		}
+	}
+	if (general_config.verbose) {
+		printf("read %d VLAN Lookup entries\n",
+		        config->vlan_lookup_count);
 	}
 out:
 	return rc;

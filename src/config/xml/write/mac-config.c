@@ -35,6 +35,10 @@ int mac_configuration_table_write(xmlTextWriterPtr writer, struct sja1105_config
 	int rc = 0;
 	int i;
 
+	if (general_config.verbose) {
+		printf("writing %d MAC Configuration entries\n",
+		        config->mac_config_count);
+	}
 	for (i = 0; i < config->mac_config_count; i++) {
 		rc |= xmlTextWriterStartElement(writer, BAD_CAST "entry");
 		rc |= xml_write_field(writer, "index", i);

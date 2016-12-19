@@ -34,9 +34,18 @@ static int entry_get(xmlNode *node, struct sja1105_l2_forwarding_entry *entry)
 {
 	int rc = 0;
 	rc |= xml_read_field(&entry->bc_domain, "bc_domain", node);
+	if (rc < 0) {
+		fprintf(stderr, "bc_domain read failed\n");
+		goto error;
+	}
 	rc |= xml_read_field(&entry->reach_port, "reach_port", node);
+	if (rc < 0) {
+		fprintf(stderr, "reach_port read failed\n");
+		goto error;
+	}
 	rc |= xml_read_field(&entry->fl_domain, "fl_domain", node);
 	if (rc < 0) {
+		fprintf(stderr, "fl_domain read failed\n");
 		goto error;
 	}
 	rc = xml_read_array(&entry->vlan_pmap, 8, "vlan_pmap", node);
@@ -44,7 +53,11 @@ static int entry_get(xmlNode *node, struct sja1105_l2_forwarding_entry *entry)
 		fprintf(stderr, "Must have exactly 8 VLAN_PMAP entries!\n");
 		goto error;
 	}
+	return 0;
 error:
+	if (rc) {
+		fprintf(stderr, "L2 Forwarding entry is incomplete!\n");
+	}
 	return rc;
 }
 
@@ -71,6 +84,7 @@ error:
 
 int l2_forwarding_table_parse(xmlNode *node, struct sja1105_config *config)
 {
+	int rc = 0;
 	xmlNode *c;
 
 	if (node->type != XML_ELEMENT_NODE) {
@@ -82,8 +96,16 @@ int l2_forwarding_table_parse(xmlNode *node, struct sja1105_config *config)
 		if (c->type != XML_ELEMENT_NODE) {
 			continue;
 		}
-		parse_entry(c, config);
+		rc = parse_entry(c, config);
+		if (rc < 0) {
+			goto out;
+		}
 	}
-	return 0;
+	if (general_config.verbose) {
+		printf("read %d L2 Forwarding entries\n",
+		        config->l2_forwarding_count);
+	}
+out:
+	return rc;
 }
 

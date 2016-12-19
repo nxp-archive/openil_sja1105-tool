@@ -59,6 +59,9 @@ static int entry_get(xmlNode *node, struct sja1105_mac_config_entry *entry)
 	rc |= xml_read_field(&entry->egress, "egress", node);
 	rc |= xml_read_field(&entry->ingress, "ingress", node);
 out:
+	if (rc) {
+		fprintf(stderr, "MAC Configuration entry is incomplete!\n");
+	}
 	return rc;
 }
 
@@ -99,6 +102,10 @@ int mac_configuration_table_parse(xmlNode *node, struct sja1105_config *config)
 		if (rc < 0) {
 			goto out;
 		}
+	}
+	if (general_config.verbose) {
+		printf("read %d MAC Configuration entries\n",
+		        config->mac_config_count);
 	}
 out:
 	return rc;

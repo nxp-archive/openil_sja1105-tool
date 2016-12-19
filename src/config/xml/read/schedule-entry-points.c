@@ -36,6 +36,9 @@ static int entry_get(xmlNode *node, struct sja1105_schedule_entry_points_entry *
 	rc |= xml_read_field(&entry->subschindx, "subschindx", node);
 	rc |= xml_read_field(&entry->delta, "delta", node);
 	rc |= xml_read_field(&entry->address, "address", node);
+	if (rc) {
+		fprintf(stderr, "Schedule Entry Points entry is incomplete!\n");
+	}
 	return rc;
 }
 
@@ -76,6 +79,10 @@ int schedule_entry_points_table_parse(xmlNode *node, struct sja1105_config *conf
 		if (rc < 0) {
 			goto out;
 		}
+	}
+	if (general_config.verbose) {
+		printf("read %d Schedule Entry Points entries\n",
+		        config->schedule_entry_points_count);
 	}
 out:
 	return rc;

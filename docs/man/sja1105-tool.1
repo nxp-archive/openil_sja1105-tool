@@ -1,0 +1,57 @@
+.TH "sja1105\-tool" "1" "" "" "SJA1105\-TOOL"
+.SH NAME
+.PP
+sja1105\-tool \- NXP SJA1105 Configuration Tool
+.SH SYNOPSIS
+.PP
+\f[B]sja1105\-tool\f[] \f[I]VERB\f[] [\f[I]OPTIONS\f[]]
+.PP
+\f[I]VERB\f[] := { config | status | reset }
+.SH DESCRIPTION
+.PP
+The sja1105\-tool is a Linux userspace application for configuring the
+NXP SJA1105 Automotive Ethernet L2 switch.
+.PP
+The communication with the SJA1105 is done over SPI, through the
+character device exported by the kernel at \f[I]/dev/spidevX.Y\f[].
+.PP
+All options are specified to sja1105\-tool through
+\f[I]/etc/sja1105/sja1105.conf\f[], which is read on each command
+invocation.
+.PP
+The tool supports:
+.IP \[bu] 2
+Importing a configuration for the SJA1105 switch from an XML file
+.IP \[bu] 2
+Exporting the current SJA1105 configuration as an XML file
+.IP \[bu] 2
+Uploading the current SJA1105 configuration to the switch through its
+SPI interface
+.IP \[bu] 2
+On\-the\-fly modification of the current SJA1105 configuration through
+command line or scripting interface
+.IP \[bu] 2
+Inspecting the current SJA1105 configuration
+.IP \[bu] 2
+Inspecting the current SJA1105 status
+.IP \[bu] 2
+Resetting the SJA1105 switch
+.SH FILES
+.PP
+\f[I]/etc/sja1105/sja1105.conf\f[] is the configuration file for
+sja1105\-tool.
+.PP
+\f[I]/etc/sja1105/standard\-config.xml\f[] is a sample XML description
+of a basic SJA1105 switch configuration.
+.SH AUTHOR
+.PP
+sja1105\-tool was written by Vladimir Oltean <vladimir.oltean@nxp.com>
+.SH SEE ALSO
+.PP
+sja1105\-conf(5), sja1105\-tool\-config\-format(5),
+sja1105\-tool\-config(1), sja1105\-tool\-status(1),
+sja1105\-tool\-reset(1)
+.SH COMMENTS
+.PP
+This man page was written using pandoc (http://pandoc.org/) by the same
+author.

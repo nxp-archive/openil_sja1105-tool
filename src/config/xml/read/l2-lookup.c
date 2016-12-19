@@ -38,7 +38,10 @@ static int entry_get(xmlNode *node, struct sja1105_l2_lookup_entry *entry)
 	rc |= xml_read_field(&entry->destports, "destports", node);
 	rc |= xml_read_field(&entry->enfport, "enfport", node);
 	rc |= xml_read_field(&entry->index, "index", node);
-	return 0;
+	if (rc) {
+		fprintf(stderr, "L2 Lookup entry is incomplete!\n");
+	}
+	return rc;
 }
 
 static int parse_entry(xmlNode *node, struct sja1105_config *config)
@@ -78,6 +81,10 @@ int l2_address_lookup_table_parse(xmlNode *node, struct sja1105_config *config)
 		if (rc < 0) {
 			goto out;
 		}
+	}
+	if (general_config.verbose) {
+		printf("read %d L2 Lookup entries\n",
+		        config->l2_lookup_count);
 	}
 out:
 	return rc;

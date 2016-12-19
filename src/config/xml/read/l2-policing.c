@@ -38,7 +38,10 @@ static int entry_get(xmlNode *node, struct sja1105_l2_policing_entry *entry)
 	rc |= xml_read_field(&entry->rate, "rate", node);
 	rc |= xml_read_field(&entry->maxlen, "maxlen", node);
 	rc |= xml_read_field(&entry->partition, "partition", node);
-	return 0;
+	if (rc) {
+		fprintf(stderr, "L2 Policing entry is incomplete!\n");
+	}
+	return rc;
 }
 
 static int parse_entry(xmlNode *node, struct sja1105_config *config)
@@ -78,6 +81,10 @@ int l2_policing_table_parse(xmlNode *node, struct sja1105_config *config)
 		if (rc < 0) {
 			goto out;
 		}
+	}
+	if (general_config.verbose) {
+		printf("read %d L2 Policing entries\n",
+		        config->l2_policing_count);
 	}
 out:
 	return rc;

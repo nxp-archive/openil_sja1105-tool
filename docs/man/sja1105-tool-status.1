@@ -1,0 +1,137 @@
+.TH "sja1105\-tool\-status" "1" "" "" "SJA1105\-TOOL"
+.SH NAME
+.PP
+sja1105\-tool\-status \- Status command for NXP sja1105\-tool
+.SH SYNOPSIS
+.PP
+\f[B]sja1105\-tool\f[] status \f[I]AREA\f[] [\f[I]OPTIONS\f[]]
+.PP
+\f[I]AREA\f[] := { general | ports }
+.PP
+\f[B]sja1105\-tool\f[] status general
+.PP
+\f[B]sja1105\-tool\f[] status ports [\f[I]\f[C]PORT_NUMBER\f[]\f[]]
+.SH DESCRIPTION
+.PP
+This command sends SPI messages to the SJA1105 and reads registers from
+the SJA1105 Status Area (see chapter 5.1 in UM10944.pdf).
+Currently the General Status Information (chapter 5.1.1) and Ethernet
+Port Status (chapter 5.1.4) are supported.
+.PP
+Each field name and value is printed on a separate line.
+Field name and field value are space\-separated.
+.SH AREAS
+.TP
+.B general
+The following registers are read from the General Status Information
+area:
+.RS
+.IP \[bu] 2
+General status register 1 (address 03h)
+.IP \[bu] 2
+General status register 2 (address 04h)
+.IP \[bu] 2
+General status register 3 (address 05h)
+.IP \[bu] 2
+General status register 4 (address 06h)
+.IP \[bu] 2
+General status register 5 (address 07h)
+.IP \[bu] 2
+General status register 6 (address 08h)
+.IP \[bu] 2
+General status register 7 (address 09h)
+.IP \[bu] 2
+General status register 8 (address 0Ah)
+.IP \[bu] 2
+General status register 9 (address 0Bh)
+.IP \[bu] 2
+General status register 10 (address 0Ch)
+.IP \[bu] 2
+General status registers 11 to 20 (addresses C0h to C9h)
+.RE
+.TP
+.B ports [\f[I]\f[C]PORT_NUMBER\f[]\f[]]
+The following registers are read from the Ethernet Port Status
+Information area:
+.RS
+.IP \[bu] 2
+Ethernet port status \- MAC\-level diagnostic counters (relative address
+0h)
+.IP \[bu] 2
+Ethernet port status \- diagnostic flags (relative address 1h)
+.IP \[bu] 2
+Ethernet high\-level port status diagnostic counters part 1
+.IP \[bu] 2
+Ethernet high\-level port status diagnostic counters part 2
+.PP
+Differences from UM10944.pdf:
+.IP \[bu] 2
+N_ERG_DISABLED is called N_EGR_DISABLED \- this is a typo in the user
+manual
+.IP \[bu] 2
+POLIECERR is called POLICEERR \- this is a typo in the user manual
+.IP \[bu] 2
+N_RXFRMSH and N_RXFRM have been concatenated into a single 64\-bit field
+named N_RXFRM
+.IP \[bu] 2
+N_RXBYTESH and N_RXBYTE have been concatenated into a single 64\-bit
+field named N_RXBYTE
+.IP \[bu] 2
+N_TXFRMSH and N_TXFRM have been concatenated into a single 64\-bit field
+named N_TXFRM
+.IP \[bu] 2
+N_TXBYTESH and N_TXBYTE have been concatenated into a single 64\-bit
+field named N_TXBYTE
+.PP
+The readout is done for the port specified as
+\f[I]\f[C]PORT_NUMBER\f[]\f[].
+If \f[I]\f[C]PORT_NUMBER\f[]\f[] is not specified, the command prints
+the status of all 5 ports, each port on its own vertical column.
+.RE
+.SH EXAMPLES
+.PP
+The following is a shell script that shows counters for sent, received
+and dropped packets for switch port 2:
+.IP
+.nf
+\f[C]
+#!/bin/sh
+
+export\ status=`sja1105\-tool\ status\ port\ 2`
+port2_sent=`echo\ "$status"\ |\ grep\ "N_TXFRM"\ \ |\ awk\ \[aq]{print\ $2}\[aq]`
+port2_recv=`echo\ "$status"\ |\ grep\ "N_RXFRM"\ \ |\ awk\ \[aq]{print\ $2}\[aq]`
+port2_drop=`echo\ "$status"\ |\ grep\ "N_POLERR"\ |\ awk\ \[aq]{print\ $2}\[aq]`
+echo\ "Port\ 2\ status:\ $port2_sent\ packets\ sent,\ $port2_recv\ packets\ received,\ $port2_drop\ packets\ dropped"
+\f[]
+.fi
+.PP
+The following script checks if the SJA1105 configuration is valid.
+Note that "\f[B]sja1105\-tool config upload\f[]" does not perform this
+check.
+.IP
+.nf
+\f[C]
+#!/bin/sh
+
+if\ [[\ $(sja1105\-tool\ status\ general\ |\ grep\ "CONFIGS"\ |\ awk\ \[aq]{print\ $2}\[aq])\ ==\ "1"\ ]];\ then
+\ \ \ \ echo\ "Device\ configuration\ is\ valid"
+else
+\ \ \ \ echo\ "Device\ configuration\ is\ invalid"
+fi
+\f[]
+.fi
+.SH BUGS
+.PP
+\f[B]sja1105\-tool status ports\f[] does not take into account the
+screen width and max entry count specified in
+\f[B]/etc/sja1105/sja1105.conf\f[].
+.SH AUTHOR
+.PP
+sja1105\-tool was written by Vladimir Oltean <vladimir.oltean@nxp.com>
+.SH SEE ALSO
+.PP
+sja1105\-conf(5), sja1105\-tool\-status(1), sja1105\-tool(1)
+.SH COMMENTS
+.PP
+This man page was written using pandoc (http://pandoc.org/) by the same
+author.

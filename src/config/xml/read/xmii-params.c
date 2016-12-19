@@ -80,6 +80,10 @@ int xmii_mode_parameters_table_parse(xmlNode *node, struct sja1105_config *confi
 			goto out;
 		}
 	}
+	if (general_config.verbose) {
+		printf("read %d xMII Mode Parameters entries\n",
+		        config->xmii_params_count);
+	}
 out:
 	return rc;
 }
