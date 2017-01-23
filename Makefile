@@ -32,7 +32,9 @@
 CFLAGS  += -Wall -Wextra -g -fstack-protector-all
 CFLAGS  += $(shell pkg-config --cflags libxml-2.0)
 LDFLAGS += $(shell pkg-config --libs libxml-2.0)
-SRC      = $(shell find src -name "*.[c|h]")
+SRC      = $(shell find src -name "*.[c|h]")       # All .c and .h files
+DEPS     = $(patsubst %.c, %.o, $(SRC))            # All .o and .h files
+OBJ      = $(filter %.o, $(DEPS))                  # Only the .o files
 MANPAGES = docs/man/sja1105-tool.1 \
            docs/man/sja1105-tool-status.1 \
            docs/man/sja1105-tool-reset.1 \
@@ -43,11 +45,14 @@ SJA1105  = sja1105-tool
 
 build: $(SJA1105)
 
-$(SJA1105): $(SRC)
-	$(CC) $(CFLAGS) $(filter %.c, $^) -o $@ $(LDFLAGS)
+$(SJA1105): $(DEPS)
+	$(CC) $(OBJ) -o $@ $(LDFLAGS)
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $^ -o $@
 
 clean:
-	rm -f $(SJA1105) $(MANPAGES)
+	rm -f $(SJA1105) $(MANPAGES) $(OBJ)
 
 man: $(MANPAGES)
 
