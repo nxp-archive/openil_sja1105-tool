@@ -19,29 +19,25 @@ only the relationship between the XML description and tables found in the PDF.
 For detailed information about the table entries and fields, please consult
 UM10944.pdf.
 
-Below is an approximate description of the Document Type Definition (DTD) for
-the XML language used to describe the SJA1105 configuration tables:
+The XML language used to describe the SJA1105 configuration table should
+contain:
 
-```xml
-<!ELEMENT config (table*)>
-<!ELEMENT table (entry*)>
-<!ATTLIST table name CDATA #REQUIRED>
-<!ELEMENT entry EMPTY>
-<!ATTLIST entry ...>
-```
-
-The DTD above shows there is one root node, of type "config", with zero or more
-children nodes of type "table". Each table is distinguished through its "name"
-attribute, which is a string that can take the values described in section
-[CONFIGURATION TABLE NAMES].
-
-The attribute list of an entry varies according to what table it is a member of.
+* exactly one *config* root element
+* zero or more *table* children elements of *config*. Each *table*
+  element should have an attribute *name* with possible values as described
+  in [CONFIGURATION TABLE NAMES]().
+* each *table* element has zero or more children elements of type *entry*.
+  Elements of this type have attributes that are highly specific to the
+  *name* attribute of their *table* parent element. *entry* elements are
+  not allowed to have children.
 
 The numeric values for each entry field (attribute) are stored by _sja1105-tool_
 as unsigned 64-bit numbers. They must be specified inside quotes, and can be
 expressed in either base 10 (e.g. "15"), base 16 (e.g. "0xf"), base 2
 (e.g. "0b1111") or base 8 (e.g. "017"), whichever is more convenient for
-representation. If 
+representation. If a value larger than the bit width *B* of the specific
+field is used, the field gets truncated to the least significant *B* bits
+of the value.
 
 Fields which are defined as arrays (e.g. "vlan-pmap") should be expressed as a
 list of space-separated numbers, encased in square brackets. The restrictions
@@ -310,22 +306,27 @@ The following facts are noted:
 * The "index" attribute of each entry is not required nor is it
   interpreted by _sja1105-tool_; it is simply for ease of reading.
 * The first 5 entries in the L2 Forwarding Table are per-port.
-    * "bc_domain" indicates the Broadcast Domain. The only limitation
+    * *bc_domain* indicates the Broadcast Domain. The only limitation
       imposed by default is that broadcast frames received on an
-      interface are not to be forwarded on the port it came from.
-      Thus, the broadcast domain of Port 0 is 0b11110 (0xF, Ports 1 to 4), etc.
-    * "reach_port" indicates the Port Reachability for frames received
-      on each ingress port. The same restriction applies as above.
-    * "fl_domain" indicates the Flood Domain (which switch ports should receive
-      a packet whose destination is unknown (not present in the L2
-      Address Lookup table). Same restriction as above applies.
-    * "vlan_pmap" can be used to remap VLAN priorities of ingress packets
-      to different values on egress. Since this feature is unused,
-      vlan_pmap[i] = i.
+      interface should not be forwarded on the port it came from.
+      Thus, the broadcast domain of Port 0 is 0b11110 (0x1E) (Ports 1 to 4),
+      broadcast domain of Port 1 is 0b11101, etc.
+    * *reach_port* indicates the Port Reachability for frames received
+      on each ingress port: "Are frames received from ingress port i
+      allowed to be forwarded on egress port j?" The same restriction applies
+      as above.
+    * *fl_domain* indicates the Flood Domain: "Which switch ports should
+      receive a packet coming from ingress port i whose MAC destination
+      is unknown? (not present in the L2 Address Lookup table)"
+      Same restriction as above applies.
+    * *vlan_pmap* can be used to remap VLAN priorities of ingress packets
+      to different values on egress. In this example the remapping feature
+      is not used, so vlan_pmap[i] = i.
 * The last 8 entries in the L2 Forwarding Table are per-VLAN egress
   priority (determined from the first 5 entries).
-    * "vlan_pmap" is the only meaningful attribute for these entries,
-      and is used to map the pair (egress VLAN priorities x ingress port) to
+    * *vlan_pmap* is the only meaningful attribute for these entries,
+      however it carries a different meaning than for the first 5.
+      It is used to map the pair (egress VLAN priorities x ingress port) to
       one of the 8 physical Priority Queues per egress port. The egress VLAN
       priority of the port is implied from the entry index (must subtract 5),
       and the ingress port number is the "i" in vlan_pmap[i].

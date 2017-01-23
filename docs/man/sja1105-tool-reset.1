@@ -13,12 +13,13 @@ This triggers a warm or cold reset of the software on the switch, which
 returns to an unconfigured state.
 All port counters are reset to zero.
 .PP
+Issuing a Warm Reset only resets the switch core and ACU (Auxilliary
+Configuration Unit), while a Cold Reset also resets the CGU (Clock
+Generation Unit).
+PLL0 will not be reset by this.
+.PP
 Note that the "\f[B]sja1105\-tool config upload\f[]" command issues a
 warm reset to the switch automatically.
-.SH BUGS
-.PP
-The difference in expected behavior between warm and cold reset is
-unclear, since it is not mentioned in UM10944.pdf.
 .SH AUTHOR
 .PP
 sja1105\-tool was written by Vladimir Oltean <vladimir.oltean@nxp.com>
