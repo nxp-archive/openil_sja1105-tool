@@ -18,14 +18,12 @@ This command sends an SPI write message to the Reset Generation Unit (RGU)
 reset of the software on the switch, which returns to an unconfigured
 state. All port counters are reset to zero.
 
+Issuing a Warm Reset only resets the switch core and ACU (Auxilliary
+Configuration Unit), while a Cold Reset also resets the CGU (Clock
+Generation Unit). PLL0 will not be reset by this.
+
 Note that the "**sja1105-tool config upload**" command issues a warm reset 
 to the switch automatically.
-
-BUGS
-====
-
-The difference in expected behavior between warm and cold reset is unclear,
-since it is not mentioned in UM10944.pdf.
 
 AUTHOR
 ======
