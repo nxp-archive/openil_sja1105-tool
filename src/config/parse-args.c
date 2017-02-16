@@ -331,7 +331,7 @@ void config_parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 			goto error;
 		}
 	} else if (strcmp(options[match], "upload") == 0) {
-		struct sja1105_reset_ctrl reset = {.rst_ctrl = RGU_WARM};
+		struct sja1105_reset_ctrl reset = {.rst_ctrl = RGU_COLD};
 
 		rc = config_load(spi_setup->staging_area, &config);
 		if (rc < 0) {
