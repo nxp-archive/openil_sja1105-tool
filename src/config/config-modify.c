@@ -90,6 +90,7 @@ static int schedule_table_entry_modify(
 		&config->schedule[entry_index].resmedia_en,
 		&config->schedule[entry_index].resmedia,
 		&config->schedule[entry_index].vlindex,
+		&config->schedule[entry_index].delta,
 	};
 	int entry_field_counts[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1,};
 	uint64_t tmp;
