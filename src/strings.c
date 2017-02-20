@@ -99,11 +99,16 @@ void formatted_append(char *buffer, char *width_fmt, char *fmt, ...)
 int reliable_uint64_from_string(uint64_t *to, char *from, char **endptr)
 {
 	int   errno_saved = errno;
+	int   base = 0;
 	int   rc = 0;
 	char *p;
 
 	errno = 0;
-	*to = strtoull(from, &p, 0);
+	if (strncmp(from, "0b", 2) == 0) {
+		from += 2;
+		base  = 2;
+	}
+	*to = strtoull(from, &p, base);
 	if (endptr != NULL) {
 		*endptr = p;
 	}
