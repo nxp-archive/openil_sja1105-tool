@@ -163,7 +163,7 @@ static void schedule_params_table_show(struct sja1105_config *config)
 {
 	char  tmp_buf[MAX_SCHEDULE_PARAMS_COUNT][MAX_LINE_SIZE];
 	char *print_bufs[MAX_SCHEDULE_PARAMS_COUNT];
-	char *fmt = "%-30s\n";
+	char *fmt = "%-50s\n";
 	int   i;
 
 	printf("Schedule Parameters Table: %d entries\n", config->schedule_params_count);
