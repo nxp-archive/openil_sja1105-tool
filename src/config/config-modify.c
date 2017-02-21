@@ -137,7 +137,7 @@ static int schedule_entry_points_table_entry_modify(
 
 	if (matches(field_name, "entry-count") == 0) {
 		rc = reliable_uint64_from_string(&tmp, field_val, NULL);
-		config->schedule_count = tmp;
+		config->schedule_entry_points_count = tmp;
 		goto out;
 	}
 	rc = get_match(field_name, options, ARRAY_SIZE(options));
