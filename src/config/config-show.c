@@ -58,7 +58,7 @@ static void schedule_entry_points_table_show(struct sja1105_config *config)
 	printf("Schedule Entry Points Table: %d entries\n", config->schedule_entry_points_count);
 	for (i = 0; i < config->schedule_entry_points_count; i++) {
 		memset(tmp_buf[i], 0, MAX_LINE_SIZE);
-		formatted_append(tmp_buf[i], fmt, "Entry %d:\n", i);
+		formatted_append(tmp_buf[i], fmt, "Entry %d:", i);
 		sja1105_schedule_entry_points_entry_fmt_show(
 				tmp_buf[i], fmt, &config->schedule_entry_points[i]);
 		formatted_append(tmp_buf[i], fmt, "");
