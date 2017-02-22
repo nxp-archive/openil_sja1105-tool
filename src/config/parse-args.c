@@ -40,10 +40,12 @@ static void print_usage(const char *prog)
 {
 	printf("Usage: %s configure <command> [<options>] \n", prog);
 	printf("<command> can be:\n");
+	printf("* new\n");
 	printf("* load <filename.xml>\n");
 	printf("* save <filename.xml>\n");
 	printf("* default <config>, which can be:\n");
 	printf("    * ls1021atsn - load a built-in config compatible with the NXP LS1021ATSN board\n");
+	printf("* modify <table>[<entry_index>] <field> <value>\n");
 	printf("* upload\n");
 	printf("* show [<table>]. If no table is specified, shows entire config.\n");
 	printf("* hexdump [<table>]. If no table is specified, dumps entire config.\n");
@@ -273,6 +275,7 @@ out_1:
 void config_parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 {
 	const char *options[] = {
+		"help",
 		"load",
 		"save",
 		"default",
@@ -292,6 +295,8 @@ void config_parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 	match = get_match(argv[2], options, ARRAY_SIZE(options));
 	if (match < 0) {
 		goto parse_error;
+	} else if (strcmp(options[match], "help") == 0) {
+		print_usage(argv[0]);
 	} else if (strcmp(options[match], "load") == 0) {
 		if (argc != 4) {
 			goto parse_error;
@@ -331,6 +336,9 @@ void config_parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 	} else if (strcmp(options[match], "upload") == 0) {
 		struct sja1105_reset_ctrl reset = {.rst_ctrl = RGU_COLD};
 
+		if (argc != 3) {
+			goto parse_error;
+		}
 		rc = config_load(spi_setup->staging_area, &config);
 		if (rc < 0) {
 			goto error;
@@ -364,12 +372,18 @@ void config_parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 			goto error;
 		}
 	} else if (strcmp(options[match], "new") == 0) {
+		if (argc != 3) {
+			goto parse_error;
+		}
 		memset(&config, 0, sizeof(config));
 		rc = config_save(spi_setup->staging_area, &config);
 		if (rc < 0) {
 			goto error;
 		}
 	} else if (strcmp(options[match], "show") == 0) {
+		if (argc != 3 && argc != 4) {
+			goto parse_error;
+		}
 		rc = config_load(spi_setup->staging_area, &config);
 		if (rc < 0) {
 			goto error;
@@ -379,6 +393,9 @@ void config_parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 			goto error;
 		}
 	} else if (strcmp(options[match], "hexdump") == 0) {
+		if (argc != 3) {
+			goto parse_error;
+		}
 		rc = config_hexdump(spi_setup->staging_area);
 		if (rc < 0) {
 			goto error;
