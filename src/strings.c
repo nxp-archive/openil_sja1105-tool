@@ -34,7 +34,7 @@ int matches(const char *cmd, const char *pattern)
 {
 	if (strlen(cmd) > strlen(pattern))
 		return -1;
-	return strncasecmp(pattern, cmd, strlen(cmd));
+	return strncmp(pattern, cmd, strlen(cmd));
 }
 
 int get_match(const char *cmd, const char **options, int option_count)
