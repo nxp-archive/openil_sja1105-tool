@@ -39,10 +39,18 @@ void print_usage(const char *prog)
 	       /*"   * control\n"*/
 	       "   * status\n"
 	       /*"   * reconf\n"*/
-	       "   * reset\n", prog);
+	       "   * reset\n"
+	       "   * version | -V | --version\n", prog);
 	printf("\n");
 	printf("Type \"%s [command] help\" to see more details.\n", prog);
 	printf("\n");
+}
+
+void print_version(__attribute__((unused)) struct spi_setup *spi_setup,
+                   __attribute__((unused)) int argc,
+                   __attribute__((unused)) char** argv)
+{
+	printf("%s\n", VERSION);
 }
 
 static void parse_args(struct spi_setup *spi_setup, int argc, char **argv)
@@ -52,13 +60,21 @@ static void parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 		"status",
 		/*"reconf",*/
 		/*"control",*/
-		"reset"};
+		"reset",
+		"-V",
+		"version",
+		"--version",
+	};
 	void (*next_parse_args[])(struct spi_setup*, int, char**) = {
 		config_parse_args,
 		status_parse_args,
 		/*reconf_parse_args,*/
 		/*control_parse_args,*/
-		rgu_parse_args};
+		rgu_parse_args,
+		print_version,
+		print_version,
+		print_version,
+	};
 	int  rc;
 
 	if (argc < 2) {
