@@ -43,9 +43,7 @@ static void print_usage(const char *prog)
 	printf("* load <filename.xml>\n");
 	printf("* save <filename.xml>\n");
 	printf("* default <config>, which can be:\n");
-	printf("    * ls1021atsn-standard\n");
-	printf("    * ls1021atsn-policing\n");
-	printf("    * ls1021atsn-scheduling\n");
+	printf("    * ls1021atsn - load a built-in config compatible with the NXP LS1021ATSN board\n");
 	printf("* upload\n");
 	printf("* show [<table>]. If no table is specified, shows entire config.\n");
 	printf("* hexdump [<table>]. If no table is specified, dumps entire config.\n");
