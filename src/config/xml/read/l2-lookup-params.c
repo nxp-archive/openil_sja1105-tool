@@ -82,10 +82,8 @@ int l2_address_lookup_parameters_table_parse(xmlNode *node, struct sja1105_confi
 			goto out;
 		}
 	}
-	if (general_config.verbose) {
-		printf("read %d L2 Lookup Parameters entries\n",
-		        config->l2_lookup_params_count);
-	}
+	logv("read %d L2 Lookup Parameters entries",
+	     config->l2_lookup_params_count);
 out:
 	return rc;
 }

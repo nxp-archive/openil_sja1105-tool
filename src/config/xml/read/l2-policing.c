@@ -82,10 +82,7 @@ int l2_policing_table_parse(xmlNode *node, struct sja1105_config *config)
 			goto out;
 		}
 	}
-	if (general_config.verbose) {
-		printf("read %d L2 Policing entries\n",
-		        config->l2_policing_count);
-	}
+	logv("read %d L2 Policing entries\n", config->l2_policing_count);
 out:
 	return rc;
 }

@@ -56,10 +56,8 @@ int sja1105_reset(const struct spi_setup *spi_setup, struct sja1105_reset_ctrl *
 	reset_ctrl_ptr = tx_buf + SIZE_SPI_MSG_HEADER;
 	generic_table_field_set(reset_ctrl_ptr, &reset->rst_ctrl, 8, 0, 4);
 
-	if (general_config.verbose) {
-		printf("%s resetting switch\n",
-		      (reset->rst_ctrl == RGU_WARM) ? "Warm" : "Cold");
-	}
+	logv("%s resetting switch",
+	    (reset->rst_ctrl == RGU_WARM) ? "Warm" : "Cold");
 	spi_transfer(fd, spi_setup, tx_buf, rx_buf, RGU_MSG_LEN);
 	close(fd);
 	return 0;

@@ -357,9 +357,7 @@ int sja1105_config_show(struct sja1105_config *config, char *table_name)
 	int rc = 0;
 
 	if (table_name == NULL || strlen(table_name) == 0) {
-		if (general_config.verbose) {
-			printf("Showing all config tables\n");
-		}
+		logv("Showing all config tables");
 		for (i = 0; i < ARRAY_SIZE(next_config_table_show); i++) {
 			next_config_table_show[i](config);
 		}

@@ -35,10 +35,7 @@ int schedule_table_write(xmlTextWriterPtr writer, struct sja1105_config *config)
 	int rc = 0;
 	int i;
 
-	if (general_config.verbose) {
-		printf("writing %d Schedule entries\n",
-		        config->schedule_count);
-	}
+	logv("writing %d Schedule entries", config->schedule_count);
 	for (i = 0; i < config->schedule_count; i++) {
 		rc |= xmlTextWriterStartElement(writer, BAD_CAST "entry");
 		rc |= xml_write_field(writer, "index",       i);

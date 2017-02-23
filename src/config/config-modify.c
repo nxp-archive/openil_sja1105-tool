@@ -810,10 +810,8 @@ int config_table_entry_modify(
 	if (rc < 0) {
 		goto out;
 	}
-	if (general_config.verbose) {
-		printf("Table %s, entry %" PRIu64", field %s, value %s\n",
-		       options[rc], entry_index, field_name, field_val);
-	}
+	logv("Table %s, entry %" PRIu64", field %s, value %s",
+	     options[rc], entry_index, field_name, field_val);
 	if (field_name == NULL) {
 		rc = -1;
 		print_usage("sja1105-tool");
