@@ -35,10 +35,7 @@ int general_parameters_table_write(xmlTextWriterPtr writer, struct sja1105_confi
 	int rc = 0;
 	int i;
 
-	if (general_config.verbose) {
-		printf("writing %d General Parameters entries\n",
-		        config->general_params_count);
-	}
+	logv("writing %d General Parameters entries", config->general_params_count);
 	for (i = 0; i < config->general_params_count; i++) {
 		rc |= xmlTextWriterStartElement(writer, BAD_CAST "entry");
 		rc |= xml_write_field(writer, "index",       i);

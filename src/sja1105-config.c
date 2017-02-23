@@ -252,8 +252,8 @@ default_conf:
 		spi_setup->cs_change    = 0;
 		spi_setup->mode         = SPI_CPHA;
 		spi_setup->dry_run      = 0;
-		general_config.verbose          = 0;
-		general_config.debug            = 0;
+		general_config.verbose  = 0;
+		general_config.debug    = 0;
 		general_config.entries_per_line = 1;
 		general_config.screen_width     = 80;
 	}

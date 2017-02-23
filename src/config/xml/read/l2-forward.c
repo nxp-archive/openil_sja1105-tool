@@ -101,10 +101,7 @@ int l2_forwarding_table_parse(xmlNode *node, struct sja1105_config *config)
 			goto out;
 		}
 	}
-	if (general_config.verbose) {
-		printf("read %d L2 Forwarding entries\n",
-		        config->l2_forwarding_count);
-	}
+	logv("read %d L2 Forwarding entries", config->l2_forwarding_count);
 out:
 	return rc;
 }

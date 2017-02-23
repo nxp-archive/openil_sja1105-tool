@@ -80,10 +80,8 @@ int schedule_entry_points_table_parse(xmlNode *node, struct sja1105_config *conf
 			goto out;
 		}
 	}
-	if (general_config.verbose) {
-		printf("read %d Schedule Entry Points entries\n",
-		        config->schedule_entry_points_count);
-	}
+	logv("read %d Schedule Entry Points entries",
+	     config->schedule_entry_points_count);
 out:
 	return rc;
 }

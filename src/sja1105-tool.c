@@ -97,8 +97,6 @@ int main(int argc, char *argv[])
 
 	get_spi_setup(&spi_setup);
 	parse_args(&spi_setup, argc, argv);
-	if (general_config.verbose) {
-		printf("ok\n");
-	}
+	logv("ok");
 	return 0;
 }

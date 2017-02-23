@@ -35,9 +35,7 @@ int configure_spi(const struct spi_setup *spi_setup)
 	int ret = 0;
 	int fd;
 
-	if (general_config.verbose) {
-		printf("configuring device %s\n", spi_setup->device);
-	}
+	logv("configuring device %s", spi_setup->device);
 	fd = open(spi_setup->device, O_RDWR);
 	if (fd < 0) {
 		fprintf(stderr, "can't open device");
@@ -77,11 +75,9 @@ int configure_spi(const struct spi_setup *spi_setup)
 		fprintf(stderr, "can't get max speed hz");
 		goto out_2;
 	}
-	if (general_config.verbose) {
-		printf("spi mode: %d\n", spi_setup->mode);
-		printf("bits per word: %d\n", spi_setup->bits);
-		printf("max speed: %d KHz\n", spi_setup->speed / 1000);
-	}
+	logv("spi mode: %d",      spi_setup->mode);
+	logv("bits per word: %d", spi_setup->bits);
+	logv("max speed: %d KHz", spi_setup->speed / 1000);
 	return fd;
 out_2:
 	close(fd);

@@ -83,10 +83,7 @@ int vlan_lookup_table_parse(xmlNode *node, struct sja1105_config *config)
 			goto out;
 		}
 	}
-	if (general_config.verbose) {
-		printf("read %d VLAN Lookup entries\n",
-		        config->vlan_lookup_count);
-	}
+	logv("read %d VLAN Lookup entries", config->vlan_lookup_count);
 out:
 	return rc;
 }

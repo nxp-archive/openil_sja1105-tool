@@ -103,10 +103,7 @@ int mac_configuration_table_parse(xmlNode *node, struct sja1105_config *config)
 			goto out;
 		}
 	}
-	if (general_config.verbose) {
-		printf("read %d MAC Configuration entries\n",
-		        config->mac_config_count);
-	}
+	logv("read %d MAC Configuration entries", config->mac_config_count);
 out:
 	return rc;
 }

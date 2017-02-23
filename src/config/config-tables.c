@@ -592,8 +592,6 @@ unsigned int sja1105_config_get_length(struct sja1105_config *config)
 	sum += config->general_params_count * SIZE_GENERAL_PARAMS_TABLE;
 	sum += config->xmii_params_count * SIZE_XMII_MODE_PARAMS_TABLE;
 	sum -= 4; /* Last header does not have an extra CRC because there is no data */
-	if (general_config.verbose) {
-		printf("total: %d bytes\n", sum);
-	}
+	logv("total: %d bytes", sum);
 	return sum;
 }

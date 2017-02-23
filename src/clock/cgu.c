@@ -37,9 +37,7 @@ static int mii_clocking_setup(int fd, struct spi_setup *spi_setup, int port, int
 	if (mii_mode != XMII_MODE_MAC && mii_mode != XMII_MODE_PHY) {
 		goto error;
 	}
-	if (general_config.verbose) {
-		printf("configuring mii clocking for port %d...\n", port);
-	}
+	logv("configuring mii clocking for port %d...", port);
 	/* If xmii_mode is MAC, then we have to configure:
 	 *     * MII_TX_CLK
 	 *     * MII_RX_CLK
@@ -81,9 +79,7 @@ static int rmii_clocking_setup(int fd, struct spi_setup *spi_setup, int port, in
 	if (rmii_mode != XMII_MODE_MAC && rmii_mode != XMII_MODE_PHY) {
 		goto error;
 	}
-	if (general_config.verbose) {
-		printf("configuring rmii clocking for port %d...\n", port);
-	}
+	logv("configuring rmii clocking for port %d...", port);
 	rc = sja1105_cgu_idiv_config(fd, spi_setup, port);
 	if (rc < 0) {
 		goto error;
@@ -107,9 +103,7 @@ static int rgmii_clocking_setup(int fd, struct spi_setup *spi_setup, int port)
 {
 	int rc;
 
-	if (general_config.verbose) {
-		printf("configuring rgmii clocking for port %d...\n", port);
-	}
+	logv("configuring rgmii clocking for port %d", port);
 	rc = sja1105_cgu_idiv_config(fd, spi_setup, port);
 	if (rc < 0) {
 		goto error;
