@@ -113,13 +113,13 @@ int reliable_uint64_from_string(uint64_t *to, char *from, char **endptr)
 		*endptr = p;
 	}
 	if (errno) {
-		fprintf(stderr, "Integer overflow occured while reading \"%s\"\n", from);
+		loge("Integer overflow occured while reading \"%s\"", from);
 		rc = -1;
 		goto out;
 	}
 	if (from == p) {
 		/* Read nothing */
-		fprintf(stderr, "No integer stored at \"%s\"\n", from);
+		loge("No integer stored at \"%s\"", from);
 		rc = -1;
 		goto out;
 	}
@@ -151,8 +151,8 @@ int read_array(char *array_str, uint64_t *array_val, int max_count)
 
 	p = trimwhitespace(array_str);
 	if (p[0] != '[') {
-		fprintf(stderr, "Array must contain space-separated elements "
-		        "inside brackets, like [1 2 3]\n");
+		loge("Array must contain space-separated elements "
+		     "inside brackets, like [1 2 3]");
 		rc = -1;
 		goto out;
 	}
@@ -166,12 +166,12 @@ int read_array(char *array_str, uint64_t *array_val, int max_count)
 		}
 		p = trimwhitespace(p);
 		if (p == NULL) {
-			fprintf(stderr, "End of array detected but no \"]\" present!\n");
+			loge("End of array detected but no \"]\" present!");
 			goto out;
 		}
 		count++;
 		if (count > max_count) {
-			fprintf(stderr, "Input array larger than %d elements!\n", max_count);
+			loge("Input array larger than %d elements!", max_count);
 			rc = -1;
 			goto out;
 		}

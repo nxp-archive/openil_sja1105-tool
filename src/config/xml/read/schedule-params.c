@@ -35,7 +35,7 @@ static int entry_get(xmlNode *node, struct sja1105_schedule_params_entry *entry)
 	int rc;
 	rc = xml_read_array(&entry->subscheind, 8, "subscheind", node);
 	if (rc != 8) {
-		fprintf(stderr, "Must have exactly 8 SUBSCHEIND entries!\n");
+		loge("Must have exactly 8 SUBSCHEIND entries!");
 		rc = -1;
 		goto out;
 	}
@@ -49,8 +49,8 @@ static int parse_entry(xmlNode *node, struct sja1105_config *config)
 	int rc;
 
 	if (config->schedule_params_count >= MAX_SCHEDULE_PARAMS_COUNT) {
-		fprintf(stderr, "Cannot have more than %d Schedule Parameters "
-		        "Table entries!\n", MAX_SCHEDULE_PARAMS_COUNT);
+		loge("Cannot have more than %d Schedule Parameters "
+		     "Table entries!", MAX_SCHEDULE_PARAMS_COUNT);
 		rc = -1;
 		goto out;
 	}
@@ -67,8 +67,7 @@ int schedule_parameters_table_parse(xmlNode *node, struct sja1105_config *config
 	int rc = 0;
 
 	if (node->type != XML_ELEMENT_NODE) {
-		fprintf(stderr, "Schedule Parameters Table node must be "
-		        "of element type!\n");
+		loge("Schedule Parameters Table node must be of element type!");
 		rc = -1;
 		goto out;
 	}

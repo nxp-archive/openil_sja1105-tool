@@ -32,7 +32,7 @@
 
 int vl_lookup_table_parse(xmlNode *node, struct sja1105_config *config)
 {
-	fprintf(stderr, "VL Lookup Table not implemented!\n");
+	loge("VL Lookup Table not implemented!");
 	return -1;
 }
 

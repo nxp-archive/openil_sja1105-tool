@@ -51,7 +51,7 @@ int schedule_table_write(xmlTextWriterPtr writer, struct sja1105_config *config)
 		rc |= xml_write_field(writer, "delta",       config->schedule[i].delta);
 		rc |= xmlTextWriterEndElement(writer);
 		if (rc < 0) {
-			fprintf(stderr, "error while writing Schedule Table element %d\n", i);
+			loge("error while writing Schedule Table element %d", i);
 			goto out;
 		}
 	}

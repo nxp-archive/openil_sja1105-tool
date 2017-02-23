@@ -36,7 +36,7 @@ static int entry_get(xmlNode *node, struct sja1105_schedule_entry_points_params 
 	rc |= xml_read_field(&entry->clksrc, "clksrc", node);
 	rc |= xml_read_field(&entry->actsubsch, "actsubsch", node);
 	if (rc) {
-		fprintf(stderr, "Schedule Entry Points Parameters entry is incomplete!\n");
+		loge("Schedule Entry Points Parameters entry is incomplete!");
 	}
 	return rc;
 }
@@ -47,9 +47,8 @@ static int parse_entry(xmlNode *node, struct sja1105_config *config)
 	int rc;
 
 	if (config->schedule_entry_points_params_count >= MAX_SCHEDULE_ENTRY_POINTS_PARAMS_COUNT) {
-		fprintf(stderr, "Cannot have more than %d Schedule Entry Points "
-		        "Parameters Table entries!\n",
-		        MAX_SCHEDULE_ENTRY_POINTS_PARAMS_COUNT);
+		loge("Cannot have more than %d Schedule Entry Points "
+		     "Parameters Table entries!", MAX_SCHEDULE_ENTRY_POINTS_PARAMS_COUNT);
 		rc = -1;
 		goto out;
 	}
@@ -66,8 +65,7 @@ int schedule_entry_points_parameters_table_parse(xmlNode *node, struct sja1105_c
 	int rc = 0;
 
 	if (node->type != XML_ELEMENT_NODE) {
-		fprintf(stderr, "Schedule Entry Points Parameters Table node must be "
-		        "of element type!\n");
+		loge("Schedule Entry Points Parameters Table node must be of element type!");
 		rc = -1;
 		goto out;
 	}

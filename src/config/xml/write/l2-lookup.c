@@ -45,7 +45,7 @@ int l2_address_lookup_table_write(xmlTextWriterPtr writer, struct sja1105_config
 		rc |= xml_write_field(writer, "index",     config->l2_lookup[i].index);
 		rc |= xmlTextWriterEndElement(writer);
 		if (rc < 0) {
-			fprintf(stderr, "error while writing l2_lookup Table element %d\n", i);
+			loge("error while writing l2_lookup Table element %d", i);
 			goto out;
 		}
 	}

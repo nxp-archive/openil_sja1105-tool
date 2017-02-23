@@ -40,7 +40,7 @@ static int entry_get(xmlNode *node, struct sja1105_vlan_lookup_entry *entry)
 	rc |= xml_read_field(&entry->tag_port, "tag_port", node);
 	rc |= xml_read_field(&entry->vlanid, "vlanid", node);
 	if (rc) {
-		fprintf(stderr, "VLAN Lookup entry is incomplete!\n");
+		loge("VLAN Lookup entry is incomplete!");
 	}
 	return rc;
 }
@@ -51,8 +51,8 @@ static int parse_entry(xmlNode *node, struct sja1105_config *config)
 	int rc;
 
 	if (config->vlan_lookup_count >= MAX_VLAN_LOOKUP_COUNT) {
-		fprintf(stderr, "Cannot have more than %d L2 Forwarding "
-		        "Table entries!\n", MAX_VLAN_LOOKUP_COUNT);
+		loge("Cannot have more than %d L2 Forwarding "
+		     "Table entries!", MAX_VLAN_LOOKUP_COUNT);
 		rc = -1;
 		goto out;
 	}
@@ -69,8 +69,7 @@ int vlan_lookup_table_parse(xmlNode *node, struct sja1105_config *config)
 	int rc = 0;
 
 	if (node->type != XML_ELEMENT_NODE) {
-		fprintf(stderr, "VLAN Lookup Table node must be "
-		        "of element type!\n");
+		loge("VLAN Lookup Table node must be of element type!");
 		rc = -1;
 		goto out;
 	}

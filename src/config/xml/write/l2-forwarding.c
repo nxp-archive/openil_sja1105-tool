@@ -45,7 +45,7 @@ int l2_forwarding_table_write(xmlTextWriterPtr writer, struct sja1105_config *co
 		rc |= xml_write_array(writer, "vlan_pmap", config->l2_forwarding[i].vlan_pmap, 8);
 		rc |= xmlTextWriterEndElement(writer);
 		if (rc < 0) {
-			fprintf(stderr, "error while writing l2_forwarding Table element %d\n", i);
+			loge("error while writing l2_forwarding Table element %d", i);
 			goto out;
 		}
 	}

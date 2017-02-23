@@ -35,28 +35,28 @@ static int entry_get(xmlNode *node, struct sja1105_l2_forwarding_entry *entry)
 	int rc = 0;
 	rc |= xml_read_field(&entry->bc_domain, "bc_domain", node);
 	if (rc < 0) {
-		fprintf(stderr, "bc_domain read failed\n");
+		loge("bc_domain read failed");
 		goto error;
 	}
 	rc |= xml_read_field(&entry->reach_port, "reach_port", node);
 	if (rc < 0) {
-		fprintf(stderr, "reach_port read failed\n");
+		loge("reach_port read failed");
 		goto error;
 	}
 	rc |= xml_read_field(&entry->fl_domain, "fl_domain", node);
 	if (rc < 0) {
-		fprintf(stderr, "fl_domain read failed\n");
+		loge("fl_domain read failed");
 		goto error;
 	}
 	rc = xml_read_array(&entry->vlan_pmap, 8, "vlan_pmap", node);
 	if (rc != 8) {
-		fprintf(stderr, "Must have exactly 8 VLAN_PMAP entries!\n");
+		loge("Must have exactly 8 VLAN_PMAP entries!");
 		goto error;
 	}
 	return 0;
 error:
 	if (rc) {
-		fprintf(stderr, "L2 Forwarding entry is incomplete!\n");
+		loge("L2 Forwarding entry is incomplete!");
 	}
 	return rc;
 }
@@ -67,8 +67,8 @@ static int parse_entry(xmlNode *node, struct sja1105_config *config)
 	int rc;
 
 	if (config->l2_forwarding_count >= MAX_L2_FORWARDING_COUNT) {
-		fprintf(stderr, "Cannot have more than %d L2 Forwarding "
-		        "Table entries!\n", MAX_L2_FORWARDING_COUNT);
+		loge("Cannot have more than %d L2 Forwarding "
+		     "Table entries!", MAX_L2_FORWARDING_COUNT);
 		return -1;
 	}
 	memset(&entry, 0, sizeof(entry));
@@ -88,8 +88,7 @@ int l2_forwarding_table_parse(xmlNode *node, struct sja1105_config *config)
 	xmlNode *c;
 
 	if (node->type != XML_ELEMENT_NODE) {
-		fprintf(stderr, "L2 Forwarding Table node must be "
-		        "of element type!\n");
+		loge("L2 Forwarding Table node must be of element type!");
 		return -1;
 	}
 	for (c = node->children; c != NULL; c = c->next) {

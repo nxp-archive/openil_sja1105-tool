@@ -47,7 +47,7 @@ int vlan_lookup_table_write(xmlTextWriterPtr writer, struct sja1105_config *conf
 		rc |= xml_write_field(writer, "vlanid",     config->vlan_lookup[i].vlanid);
 		rc |= xmlTextWriterEndElement(writer);
 		if (rc < 0) {
-			fprintf(stderr, "error while writing vlan_lookup Table element %d\n", i);
+			loge("error while writing vlan_lookup Table element %d", i);
 			goto out;
 		}
 	}

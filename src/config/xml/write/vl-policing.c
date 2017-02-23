@@ -32,7 +32,7 @@
 
 int vl_policing_table_write(xmlTextWriterPtr writer, struct sja1105_config *config)
 {
-	fprintf(stderr, "VL Policing Table not implemented!\n");
+	loge("VL Policing Table not implemented!");
 	return -1;
 }
 

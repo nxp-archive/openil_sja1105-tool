@@ -34,7 +34,7 @@
 
 int sja1105_config_read_from_xml(const char *xml_file, struct sja1105_config *config)
 {
-	fprintf(stderr, "Tree support is not compiled in libxml2!\n");
+	loge("Tree support is not compiled in libxml2!");
 	return -1;
 }
 
@@ -49,8 +49,7 @@ int xml_read_field(void *where, char *field_name, xmlNode *node)
 	field_val = (uint64_t*) where;
 	value = (char*) xmlGetProp(node, (xmlChar*) field_name);
 	if (value == NULL) {
-		fprintf(stderr, "no property named \"%s\"!\n",
-		        field_name);
+		loge("no property named \"%s\"!", field_name);
 		rc = -1;
 		goto out;
 	}
@@ -71,8 +70,7 @@ int xml_read_array(void *where, int max_count, char *field_name, xmlNode *node)
 	/* Get the "field_name" property into our "value" string */
 	value = (char*) xmlGetProp(node, (xmlChar*) field_name);
 	if (value == NULL) {
-		fprintf(stderr, "no property named \"%s\"!\n",
-		        field_name);
+		loge("no property named \"%s\"!", field_name);
 		rc = -1;
 		goto out;
 	}
@@ -132,7 +130,7 @@ static int parse_config_table(xmlNode *node, struct sja1105_config *config)
 	};
 	int rc;
 	if (strcmp((char*) node->name, "table") != 0) {
-		fprintf(stderr, "Invalid node \"%s\", expected \"table\"\n", node->name);
+		loge("Invalid node \"%s\", expected \"table\"", node->name);
 	}
 	table_name = (char*) xmlGetProp(node, (xmlChar*) "name");
 	rc = get_match(table_name, options, ARRAY_SIZE(options));
@@ -150,12 +148,12 @@ static int parse_root(xmlNode *root, struct sja1105_config *config)
 	int rc = 0;
 
 	if (root->type != XML_ELEMENT_NODE) {
-		fprintf(stderr, "Root node must be of element type!\n");
+		loge("Root node must be of element type!");
 		rc = -1;
 		goto out;
 	}
 	if (strcasecmp((char*) root->name, "config")) {
-		fprintf(stderr, "Root node must be named \"config\"!\n");
+		loge("Root node must be named \"config\"!");
 		rc = -1;
 		goto out;
 	}
@@ -165,7 +163,7 @@ static int parse_root(xmlNode *root, struct sja1105_config *config)
 		}
 		rc = parse_config_table(node, config);
 		if (rc < 0) {
-			fprintf(stderr, "Could not parse XML file!\n");
+			loge("Could not parse XML file!");
 			goto out;
 		}
 	}
@@ -187,11 +185,11 @@ int sja1105_config_read_from_xml(const char *xml_file, struct sja1105_config *co
 
 	doc = xmlReadFile(xml_file, NULL, 0);
 	if (doc == NULL) {
-		fprintf(stderr, "could not parse file %s\n", xml_file);
+		loge("could not parse file %s", xml_file);
 	}
 	root = xmlDocGetRootElement(doc);
 	if (!root) {
-		fprintf(stderr, "failed to get root element\n");
+		loge("failed to get root element");
 		goto out;
 	}
 	memset(config, 0, sizeof(*config));

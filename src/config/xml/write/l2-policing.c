@@ -46,7 +46,7 @@ int l2_policing_table_write(xmlTextWriterPtr writer, struct sja1105_config *conf
 		rc |= xml_write_field(writer, "partition", config->l2_policing[i].partition);
 		rc |= xmlTextWriterEndElement(writer);
 		if (rc < 0) {
-			fprintf(stderr, "error while writing l2_policing Table element %d\n", i);
+			loge("error while writing l2_policing Table element %d", i);
 			goto out;
 		}
 	}

@@ -39,7 +39,7 @@ static int entry_get(xmlNode *node, struct sja1105_l2_policing_entry *entry)
 	rc |= xml_read_field(&entry->maxlen, "maxlen", node);
 	rc |= xml_read_field(&entry->partition, "partition", node);
 	if (rc) {
-		fprintf(stderr, "L2 Policing entry is incomplete!\n");
+		loge("L2 Policing entry is incomplete!");
 	}
 	return rc;
 }
@@ -50,8 +50,8 @@ static int parse_entry(xmlNode *node, struct sja1105_config *config)
 	int rc;
 
 	if (config->l2_policing_count >= MAX_L2_POLICING_COUNT) {
-		fprintf(stderr, "Cannot have more than %d L2 Policing "
-		        "Table entries!\n", MAX_L2_POLICING_COUNT);
+		loge("Cannot have more than %d L2 Policing Table entries!",
+		     MAX_L2_POLICING_COUNT);
 		rc = -1;
 		goto out;
 	}
@@ -68,8 +68,7 @@ int l2_policing_table_parse(xmlNode *node, struct sja1105_config *config)
 	int rc = 0;
 
 	if (node->type != XML_ELEMENT_NODE) {
-		fprintf(stderr, "L2 Policing Table node must be "
-		        "of element type!\n");
+		loge("L2 Policing Table node must be of element type!");
 		rc = -1;
 		goto out;
 	}
