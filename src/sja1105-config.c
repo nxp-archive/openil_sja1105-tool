@@ -119,16 +119,16 @@ error:
 	return rc;
 }
 
-static inline int parse_general_config(struct general_config *general_config, char *key, char *value)
+static inline int parse_general_config(char *key, char *value)
 {
 	uint64_t tmp;
 	int rc;
 
 	if (strcmp(key, "verbose") == 0) {
 		if (strcmp(value, "false") == 0) {
-			general_config->verbose = 0;
+			general_config.verbose = 0;
 		} else if (strcmp(value, "true") == 0) {
-			general_config->verbose = 1;
+			general_config.verbose = 1;
 		} else {
 			fprintf(stderr, "Invalid value \"%s\" for verbose. ", value);
 			fprintf(stderr, "Expected true or false.\n");
@@ -136,9 +136,9 @@ static inline int parse_general_config(struct general_config *general_config, ch
 		}
 	} else if (strcmp(key, "debug") == 0) {
 		if (strcmp(value, "false") == 0) {
-			general_config->debug = 0;
+			general_config.debug = 0;
 		} else if (strcmp(value, "true") == 0) {
-			general_config->debug = 1;
+			general_config.debug = 1;
 		} else {
 			fprintf(stderr, "Invalid value \"%s\" for debug. ", value);
 			fprintf(stderr, "Expected true or false.\n");
@@ -149,13 +149,13 @@ static inline int parse_general_config(struct general_config *general_config, ch
 		if (rc < 0) {
 			goto error;
 		}
-		general_config->entries_per_line = tmp;
+		general_config.entries_per_line = tmp;
 	} else if (strcmp(key, "screen-width") == 0) {
 		rc = reliable_uint64_from_string(&tmp, value, NULL);
 		if (rc < 0) {
 			goto error;
 		}
-		general_config->screen_width = tmp;
+		general_config.screen_width = tmp;
 	} else {
 		fprintf(stderr, "Invalid key \"%s\"\n", key);
 		return -1;
@@ -172,7 +172,7 @@ static inline int parse_key_val(struct spi_setup *spi_setup, char *key, char *va
 	if (strcmp(section_hdr, "[spi-setup]") == 0) {
 		parse_spi_setup(spi_setup, key, value);
 	} else if (strcmp(section_hdr, "[general]") == 0) {
-		parse_general_config(&general_config, key, value);
+		parse_general_config(key, value);
 	} else {
 		fprintf(stderr, "Invalid section header \"%s\"\n", section_hdr);
 		return -1;
