@@ -115,7 +115,6 @@
 #define QUIRK_MSB_ON_THE_RIGHT (1 << 0ull)
 #define QUIRK_LITTLE_ENDIAN    (1 << 1ull)
 #define QUIRK_LSW32_IS_FIRST   (1 << 2ull)
-//#define DEBUG
 
 static int get_le_offset(int offset)
 {
@@ -200,11 +199,6 @@ static int generic_table_field_access(
 	tbl_byte_start = tbl_bit_start / 8;
 	tbl_byte_end   = tbl_bit_end / 8;
 
-	if (general_config.debug) {
-		printf("bit start %d end %d, byte start %d end %d\n",
-		       tbl_bit_start, tbl_bit_end, tbl_byte_start, tbl_byte_end);
-	}
-
 	/* tbl_bit_start is expected to be larger than tbl_bit_end */
 	if (tbl_bit_start < tbl_bit_end) {
 		fprintf(stderr, "generic_table_access: invalid function call");
@@ -239,22 +233,12 @@ static int generic_table_field_access(
 		} else {
 			box_bit_end = 0;
 		}
-		if (general_config.debug) {
-			printf("box %d, box start %d end %d\n", box, box_bit_start, box_bit_end);
-		}
 		home_bit_start = ((box * 8) + box_bit_start) - tbl_bit_end;
 		home_bit_end   = ((box * 8) + box_bit_end) - tbl_bit_end;
-		if (general_config.debug) {
-			printf("home start %d end %d\n", home_bit_start, home_bit_end);
-		}
 		home_bit_mask = ONES_TO_RIGHT_OF(home_bit_start) &
 		                ONES_TO_LEFT_OF(home_bit_end);
 		box_bit_mask  = ONES_TO_RIGHT_OF(box_bit_start) &
 		                ONES_TO_LEFT_OF(box_bit_end);
-		if (general_config.debug) {
-			printf("home mask %" PRIX64 ", box mask %X\n",
-			       home_bit_mask, box_bit_mask);
-		}
 
 		box_addr = tbl_len_bytes - box - 1;
 		if (quirks & QUIRK_LITTLE_ENDIAN) {
@@ -262,9 +246,6 @@ static int generic_table_field_access(
 		}
 		if (quirks & QUIRK_LSW32_IS_FIRST) {
 			box_addr = get_reverse_lsw32_offset(box_addr, tbl_len_bytes);
-		}
-		if (general_config.debug) {
-			printf("box %d, box_addr %d\n", box, box_addr);
 		}
 		if (write == 0) {
 			/* Read from table, write to output argument "value" */
@@ -278,9 +259,6 @@ static int generic_table_field_access(
 			}
 			value_to_write >>= box_bit_end;
 			value_to_write <<= home_bit_end;
-			if (general_config.debug) {
-				printf("value_to_write %" PRIX64 "\n", value_to_write);
-			}
 			*value &= ~home_bit_mask;
 			*value |= value_to_write;
 		} else {
@@ -295,9 +273,6 @@ static int generic_table_field_access(
 						&box_bit_mask);
 			}
 			tbl_to_write <<= box_bit_end;
-			if (general_config.debug) {
-				printf("tbl_to_write %" PRIX64 "\n", tbl_to_write);
-			}
 			((uint8_t*) table)[box_addr] &= ~box_bit_mask;
 			((uint8_t*) table)[box_addr] |= tbl_to_write;
 		}
