@@ -44,7 +44,7 @@ int schedule_entry_points_table_write(xmlTextWriterPtr writer, struct sja1105_co
 		rc |= xml_write_field(writer, "address", config->schedule_entry_points[i].address);
 		rc |= xmlTextWriterEndElement(writer);
 		if (rc < 0) {
-			fprintf(stderr, "error while writing Schedule Entry Points Table element %d\n", i);
+			loge("error while writing Schedule Entry Points Table element %d", i);
 			goto out;
 		}
 	}

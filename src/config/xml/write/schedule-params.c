@@ -42,7 +42,7 @@ int schedule_parameters_table_write(xmlTextWriterPtr writer, struct sja1105_conf
 		rc |= xml_write_array(writer, "subscheind", config->schedule_params[i].subscheind, 8);
 		rc |= xmlTextWriterEndElement(writer);
 		if (rc < 0) {
-			fprintf(stderr, "error while writing schedule_params Table element %d\n", i);
+			loge("error while writing schedule_params Table element %d", i);
 			goto out;
 		}
 	}

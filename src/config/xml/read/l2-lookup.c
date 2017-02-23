@@ -39,7 +39,7 @@ static int entry_get(xmlNode *node, struct sja1105_l2_lookup_entry *entry)
 	rc |= xml_read_field(&entry->enfport, "enfport", node);
 	rc |= xml_read_field(&entry->index, "index", node);
 	if (rc) {
-		fprintf(stderr, "L2 Lookup entry is incomplete!\n");
+		loge("L2 Lookup entry is incomplete!");
 	}
 	return rc;
 }
@@ -50,8 +50,8 @@ static int parse_entry(xmlNode *node, struct sja1105_config *config)
 	int rc;
 
 	if (config->l2_lookup_count >= MAX_L2_LOOKUP_COUNT) {
-		fprintf(stderr, "Cannot have more than %d L2 Lookup "
-		        "Table entries!\n", MAX_L2_LOOKUP_COUNT);
+		loge("Cannot have more than %d L2 Lookup "
+		     "Table entries!", MAX_L2_LOOKUP_COUNT);
 		rc = -1;
 		goto out;
 	}
@@ -68,8 +68,7 @@ int l2_address_lookup_table_parse(xmlNode *node, struct sja1105_config *config)
 	int rc = 0;
 
 	if (node->type != XML_ELEMENT_NODE) {
-		fprintf(stderr, "L2 Lookup Table node must be "
-		        "of element type!\n");
+		loge("L2 Lookup Table node must be of element type!");
 		rc = -1;
 		goto out;
 	}

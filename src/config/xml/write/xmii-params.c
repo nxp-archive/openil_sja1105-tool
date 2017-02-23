@@ -42,7 +42,7 @@ int xmii_mode_parameters_table_write(xmlTextWriterPtr writer, struct sja1105_con
 		rc |= xml_write_array(writer, "xmii_mode", config->xmii_params[i].xmii_mode, 5);
 		rc |= xmlTextWriterEndElement(writer);
 		if (rc < 0) {
-			fprintf(stderr, "error while writing xmii_params Table element %d\n", i);
+			loge("error while writing xmii_params Table element %d", i);
 			goto out;
 		}
 	}

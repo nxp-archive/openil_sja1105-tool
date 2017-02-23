@@ -32,7 +32,7 @@
 
 int avb_parameters_table_parse(xmlNode *node, struct sja1105_config *config)
 {
-	fprintf(stderr, "AVB Parameters Table is unimplemented!\n");
+	loge("AVB Parameters Table is unimplemented!");
 	return -1;
 }
 

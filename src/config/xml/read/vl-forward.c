@@ -32,7 +32,7 @@
 
 int vl_forwarding_table_parse(xmlNode *node, struct sja1105_config *config)
 {
-	fprintf(stderr, "VL Forwarding Table not implemented!\n");
+	loge("VL Forwarding Table not implemented!");
 	return -1;
 }
 

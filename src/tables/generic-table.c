@@ -201,25 +201,23 @@ static int generic_table_field_access(
 
 	/* tbl_bit_start is expected to be larger than tbl_bit_end */
 	if (tbl_bit_start < tbl_bit_end) {
-		fprintf(stderr, "generic_table_access: invalid function call");
+		loge("generic_table_access: invalid function call");
 		return -1;
 	}
 
 	value_width = tbl_bit_start - tbl_bit_end + 1;
 	if (value_width > 64) {
-		fprintf(stderr, "generic_table_access: field %d-%d "
-		        "too large for 64 bits!\n",
-		        tbl_bit_start, tbl_bit_end);
+		loge("generic_table_access: field %d-%d too large for 64 bits!",
+		     tbl_bit_start, tbl_bit_end);
 		return -1;
 	}
 
 	if ((write == 1) && (*value >= (1ull << value_width))) {
-		printf("generic_table_access: Warning, cannot store %" PRIX64
-		       " inside %" PRIu64 " bits!\n",
-		       *value, value_width);
+		loge("generic_table_access: Warning, cannot store %" PRIX64
+		     " inside %" PRIu64 " bits!", *value, value_width);
 		*value &= (1ull << value_width) - 1;
-		printf("Truncated value to %" PRIX64 ", this may not be "
-		       "what you want.\n", *value);
+		loge("Truncated value to %" PRIX64 ", this may not be "
+		     "what you want.", *value);
 	}
 
 	for (box = tbl_byte_start; box >= tbl_byte_end; box--) {

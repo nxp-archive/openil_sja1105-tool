@@ -61,7 +61,7 @@ int general_parameters_table_write(xmlTextWriterPtr writer, struct sja1105_confi
 		rc |= xml_write_field(writer, "tpid2", config->general_params[i].tpid2);
 		rc |= xmlTextWriterEndElement(writer);
 		if (rc < 0) {
-			fprintf(stderr, "error while writing general_params Table element %d\n", i);
+			loge("error while writing general_params Table element %d", i);
 			goto out;
 		}
 	}

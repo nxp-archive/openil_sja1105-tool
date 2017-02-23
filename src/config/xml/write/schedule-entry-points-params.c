@@ -44,7 +44,7 @@ int schedule_entry_points_parameters_table_write(xmlTextWriterPtr writer, struct
 		rc |= xml_write_field(writer, "actsubsch", config->schedule_entry_points_params[i].actsubsch);
 		rc |= xmlTextWriterEndElement(writer);
 		if (rc < 0) {
-			fprintf(stderr, "error while writing schedule_entry_points_params Table element %d\n", i);
+			loge("error while writing schedule_entry_points_params Table element %d", i);
 			goto out;
 		}
 	}

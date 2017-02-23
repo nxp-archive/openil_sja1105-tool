@@ -60,7 +60,7 @@ int mac_configuration_table_write(xmlTextWriterPtr writer, struct sja1105_config
 		rc |= xml_write_field(writer, "ingress", config->mac_config[i].ingress);
 		rc |= xmlTextWriterEndElement(writer);
 		if (rc < 0) {
-			fprintf(stderr, "error while writing mac_config Table element %d\n", i);
+			loge("error while writing mac_config Table element %d", i);
 			goto out;
 		}
 	}

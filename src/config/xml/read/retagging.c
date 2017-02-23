@@ -32,7 +32,7 @@
 
 int retagging_table_parse(xmlNode *node, struct sja1105_config *config)
 {
-	fprintf(stderr, "Retagging Table unimplemented!\n");
+	loge("Retagging Table unimplemented!");
 	return -1;
 }
 

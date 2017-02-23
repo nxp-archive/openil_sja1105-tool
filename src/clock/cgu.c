@@ -136,8 +136,8 @@ int sja1105_clocking_setup(struct spi_setup *spi_setup, struct sja1105_xmii_para
 		} else if (params->xmii_mode[i] == XMII_SPEED_RGMII) {
 			rgmii_clocking_setup(fd, spi_setup, i);
 		} else {
-			fprintf(stderr, "Invalid xmii_mode for port %d specified: %"
-			        PRIu64 "\n", i, params->xmii_mode[i]);
+			loge("Invalid xmii_mode for port %d specified: %" PRIu64,
+			     i, params->xmii_mode[i]);
 			rc = -1;
 			goto out_1;
 		}

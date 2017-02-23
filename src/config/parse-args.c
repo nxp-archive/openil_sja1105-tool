@@ -59,7 +59,7 @@ static int reliable_write(int fd, char *buf, int len)
 	do {
 		rc = write(fd, buf + bytes, len - bytes);
 		if (rc < 0) {
-			fprintf(stderr, "could not write to file\n");
+			loge("could not write to file");
 			goto out;
 		}
 		bytes += rc;
@@ -76,7 +76,7 @@ static int reliable_read(int fd, char *buf, int len)
 	do {
 		rc = read(fd, buf + bytes, len - bytes);
 		if (rc < 0) {
-			fprintf(stderr, "read failed\n");
+			loge("read failed");
 			goto out;
 		}
 		bytes += rc;
@@ -95,19 +95,19 @@ int config_hexdump(const char *config_file)
 
 	fd = open(config_file, O_RDONLY);
 	if (fd < 0) {
-		fprintf(stderr, "Config file %s does not exist!\n", config_file);
+		loge("Config file %s does not exist!", config_file);
 		rc = fd;
 		goto out_1;
 	}
 	rc = fstat(fd, &stat);
 	if (rc < 0) {
-		fprintf(stderr, "could not read file size\n");
+		loge("could not read file size");
 		goto out_2;
 	}
 	len = stat.st_size;
 	buf = (char*) malloc(len * sizeof(char));
 	if (!buf) {
-		fprintf(stderr, "malloc failed\n");
+		loge("malloc failed");
 		goto out_2;
 	}
 	rc = reliable_read(fd, buf, len);
@@ -116,7 +116,7 @@ int config_hexdump(const char *config_file)
 	}
 	rc = sja1105_config_hexdump(buf);
 	if (rc < 0) {
-		fprintf(stderr, "error while interpreting config\n");
+		loge("error while interpreting config");
 		goto out_3;
 	}
 	rc = 0;
@@ -138,19 +138,19 @@ int config_load(const char *config_file, struct sja1105_config *config)
 
 	fd = open(config_file, O_RDONLY);
 	if (fd < 0) {
-		fprintf(stderr, "Config file %s does not exist!\n", config_file);
+		loge("Config file %s does not exist!", config_file);
 		rc = fd;
 		goto out_1;
 	}
 	rc = fstat(fd, &stat);
 	if (rc < 0) {
-		fprintf(stderr, "could not read file size\n");
+		loge("could not read file size");
 		goto out_2;
 	}
 	len = stat.st_size;
 	buf = (char*) malloc(len * sizeof(char));
 	if (!buf) {
-		fprintf(stderr, "malloc failed\n");
+		loge("malloc failed");
 		goto out_2;
 	}
 	rc = reliable_read(fd, buf, len);
@@ -159,7 +159,7 @@ int config_load(const char *config_file, struct sja1105_config *config)
 	}
 	rc = sja1105_config_get(buf, config);
 	if (rc < 0) {
-		fprintf(stderr, "error while interpreting config\n");
+		loge("error while interpreting config");
 		goto out_3;
 	}
 	rc = 0;
@@ -181,14 +181,14 @@ int config_save(const char *config_file, struct sja1105_config *config)
 
 	buf = (char*) malloc(len * sizeof(char));
 	if (!buf) {
-		fprintf(stderr, "malloc failed\n");
+		loge("malloc failed");
 		goto out_1;
 	}
 	sja1105_config_set(buf, config);
 
 	fd = open(config_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (fd < 0) {
-		fprintf(stderr, "could not open %s for write\n", config_file);
+		loge("could not open %s for write", config_file);
 		rc = fd;
 		goto out_2;
 	}
@@ -224,14 +224,14 @@ int config_upload(struct spi_setup *spi_setup, struct sja1105_config *config)
 
 	fd = configure_spi(spi_setup);
 	if (fd < 0) {
-		fprintf(stderr, "failed to open spi device\n");
+		loge("failed to open spi device");
 		goto out_1;
 	}
 
 	config_buf_len = sja1105_config_get_length(config) + SIZE_SJA1105_DEVICE_ID;
 	config_buf = (char*) malloc(config_buf_len * sizeof(char));
 	if (!config_buf) {
-		fprintf(stderr, "malloc failed\n");
+		loge("malloc failed");
 		goto out_2;
 	}
 	/* Write Device ID to first 4 bytes of config_buf */
@@ -259,7 +259,7 @@ int config_upload(struct spi_setup *spi_setup, struct sja1105_config *config)
 		rc = spi_transfer(fd, spi_setup, tx_buf, rx_buf,
 		                  SIZE_SPI_MSG_HEADER + chunks[i].size);
 		if (rc < 0) {
-			fprintf(stderr, "spi_transfer failed\n");
+			loge("spi_transfer failed");
 			goto out_3;
 		}
 	}

@@ -186,7 +186,7 @@ int get_port_status(
 
 	rc = spi_transfer(fd, spi_setup, tx_buf, rx_buf, MSG_LEN_MAC);
 	if (rc < 0) {
-		fprintf(stderr, "spi_transfer failed for mac registers\n");
+		loge("spi_transfer failed for mac registers");
 		goto out_1;
 	}
 	sja1105_port_status_get_mac(rx_buf + 4, status);
@@ -202,7 +202,7 @@ int get_port_status(
 
 	rc = spi_transfer(fd, spi_setup, tx_buf, rx_buf, MSG_LEN_HL);
 	if (rc < 0) {
-		fprintf(stderr, "spi_transfer failed for high-level 1 registers\n");
+		loge("spi_transfer failed for high-level 1 registers");
 		goto out_1;
 	}
 	sja1105_port_status_get_hl1(rx_buf + 4, status);
@@ -218,7 +218,7 @@ int get_port_status(
 
 	rc = spi_transfer(fd, spi_setup, tx_buf, rx_buf, MSG_LEN_HL);
 	if (rc < 0) {
-		fprintf(stderr, "spi_transfer failed for high-level 2 registers\n");
+		loge("spi_transfer failed for high-level 2 registers");
 		goto out_1;
 	}
 	sja1105_port_status_get_hl2(rx_buf + 4, status);

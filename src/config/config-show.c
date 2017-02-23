@@ -274,37 +274,37 @@ static void xmii_table_show(struct sja1105_config *config)
 
 static void vl_lookup_table_show(struct sja1105_config *config)
 {
-	fprintf(stderr, "VL Lookup Table unimplemented\n");
+	loge("VL Lookup Table unimplemented");
 }
 
 static void vl_policing_table_show(struct sja1105_config *config)
 {
-	fprintf(stderr, "VL Policing Table unimplemented\n");
+	loge("VL Policing Table unimplemented");
 }
 
 static void vl_fw_table_show(struct sja1105_config *config)
 {
-	fprintf(stderr, "VL Forwarding Table unimplemented\n");
+	loge("VL Forwarding Table unimplemented");
 }
 
 static void retagging_table_show(struct sja1105_config *config)
 {
-	fprintf(stderr, "Retagging Table unimplemented\n");
+	loge("Retagging Table unimplemented");
 }
 
 static void avb_params_table_show(struct sja1105_config *config)
 {
-	fprintf(stderr, "AVB Parameters Table unimplemented\n");
+	loge("AVB Parameters Table unimplemented");
 }
 
 static void clock_sync_params_table_show(struct sja1105_config *config)
 {
-	fprintf(stderr, "Clock Synchronization Table unimplemented\n");
+	loge("Clock Synchronization Table unimplemented");
 }
 
 static void vl_fw_params_table_show(struct sja1105_config *config)
 {
-	fprintf(stderr, "VL Forwarding Parameters Table unimplemented\n");
+	loge("VL Forwarding Parameters Table unimplemented\n");
 }
 
 int sja1105_config_show(struct sja1105_config *config, char *table_name)

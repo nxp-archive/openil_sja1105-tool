@@ -47,7 +47,7 @@ int l2_address_lookup_parameters_table_write(xmlTextWriterPtr writer, struct sja
 		rc |= xml_write_field(writer, "no_mgmt_learn", config->l2_lookup_params[i].no_mgmt_learn);
 		rc |= xmlTextWriterEndElement(writer);
 		if (rc < 0) {
-			fprintf(stderr, "error while writing l2_lookup_params Table element %d\n", i);
+			loge("error while writing l2_lookup_params Table element %d", i);
 			goto out;
 		}
 	}

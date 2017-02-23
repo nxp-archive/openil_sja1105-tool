@@ -43,7 +43,7 @@ int l2_forwarding_parameters_table_write(xmlTextWriterPtr writer, struct sja1105
 		rc |= xml_write_array(writer, "part_spc", config->l2_forwarding_params[i].part_spc, 8);
 		rc |= xmlTextWriterEndElement(writer);
 		if (rc < 0) {
-			fprintf(stderr, "error while writing l2_forwarding_params Table element %d\n", i);
+			loge("error while writing l2_forwarding_params Table element %d", i);
 			goto out;
 		}
 	}

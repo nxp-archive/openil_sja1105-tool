@@ -38,41 +38,41 @@ int configure_spi(const struct spi_setup *spi_setup)
 	logv("configuring device %s", spi_setup->device);
 	fd = open(spi_setup->device, O_RDWR);
 	if (fd < 0) {
-		fprintf(stderr, "can't open device");
+		loge("can't open device");
 		ret = fd;
 		goto out_1;
 	}
 	/* spi mode */
 	ret = ioctl(fd, SPI_IOC_WR_MODE, &spi_setup->mode);
 	if (ret == -1) {
-		fprintf(stderr, "can't set spi mode");
+		loge("can't set spi mode");
 		goto out_2;
 	}
 	ret = ioctl(fd, SPI_IOC_RD_MODE, &spi_setup->mode);
 	if (ret == -1) {
-		fprintf(stderr, "can't get spi mode");
+		loge("can't get spi mode");
 		goto out_2;
 	}
 	/* bits per word */
 	ret = ioctl(fd, SPI_IOC_WR_BITS_PER_WORD, &spi_setup->bits);
 	if (ret == -1) {
-		fprintf(stderr, "can't set bits per word");
+		loge("can't set bits per word");
 		goto out_2;
 	}
 	ret = ioctl(fd, SPI_IOC_RD_BITS_PER_WORD, &spi_setup->bits);
 	if (ret == -1) {
-		fprintf(stderr, "can't get bits per word");
+		loge("can't get bits per word");
 		goto out_2;
 	}
 	/* max speed hz */
 	ret = ioctl(fd, SPI_IOC_WR_MAX_SPEED_HZ, &spi_setup->speed);
 	if (ret == -1) {
-		fprintf(stderr, "can't set max speed hz");
+		loge("can't set max speed hz");
 		goto out_2;
 	}
 	ret = ioctl(fd, SPI_IOC_RD_MAX_SPEED_HZ, &spi_setup->speed);
 	if (ret == -1) {
-		fprintf(stderr, "can't get max speed hz");
+		loge("can't get max speed hz");
 		goto out_2;
 	}
 	logv("spi mode: %d",      spi_setup->mode);
