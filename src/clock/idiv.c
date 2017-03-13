@@ -66,7 +66,8 @@ void sja1105_cgu_idiv_show(struct sja1105_cgu_idiv *idiv)
 	printf("PD        %" PRIX64 "\n", idiv->pd);
 }
 
-int sja1105_cgu_idiv_config(int fd, struct spi_setup *spi_setup, int port)
+int sja1105_cgu_idiv_config(int fd, struct spi_setup *spi_setup,
+                            int port, int enabled, int factor)
 {
 #define MSG_SIZE SIZE_SPI_MSG_HEADER + 4
 	struct  sja1105_spi_message msg;
@@ -75,6 +76,15 @@ int sja1105_cgu_idiv_config(int fd, struct spi_setup *spi_setup, int port)
 	uint8_t rx_buf[MSG_SIZE];
 	/* UM10944.pdf, Table 78, CGU Register overview */
 	int     idiv_offsets[] = {0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
+
+	if (enabled != 0 && enabled != 1) {
+		loge("idiv enabled must be true or false");
+		return -1;
+	}
+	if (enabled == 1 && factor != 1 && factor != 10) {
+		loge("idiv factor must be 1 or 10");
+		return -1;
+	}
 
 	memset(tx_buf, 0, MSG_SIZE);
 	memset(rx_buf, 0, MSG_SIZE);
@@ -86,10 +96,10 @@ int sja1105_cgu_idiv_config(int fd, struct spi_setup *spi_setup, int port)
 	sja1105_spi_message_set(tx_buf, &msg);
 
 	/* Payload */
-	idiv.clksrc    = 0x0A; /* 25MHz */
-	idiv.autoblock = 0;    /* TODO block clk automatically */
-	idiv.idiv      = 0;    /* divide by 1 */
-	idiv.pd        = 1;    /* enabled */
+	idiv.clksrc    = 0x0A;            /* 25MHz */
+	idiv.autoblock = 1;               /* Block clk automatically */
+	idiv.idiv      = factor - 1;      /* Divide by 1 or 10 */
+	idiv.pd        = enabled ? 0 : 1; /* Power down? */
 	sja1105_cgu_idiv_set(tx_buf + SIZE_SPI_MSG_HEADER, &idiv);
 
 	return spi_transfer(fd, spi_setup, tx_buf, rx_buf, MSG_SIZE);

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016, NXP Semiconductors
+ * Copyright (c) 2017, NXP Semiconductors
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,27 +28,24 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
-#ifndef _TABLES_EXTERNAL_H
-#define _TABLES_EXTERNAL_H
+#ifndef _AGU_TABLES_H
+#define _AGU_TABLES_H
 
-#include "agu-tables.h"
-#include "cgu-tables.h"
-#include "rgu-tables.h"
-#include "status-tables.h"
-#include "config-tables.h"
+#include <stdint.h>
 
-int generic_table_field_get(void*, uint64_t*, int, int, int);
-int generic_table_field_set(void*, uint64_t*, int, int, int);
-void generic_table_hexdump(void*, int);
-uint32_t ether_crc32_le(void*, unsigned int);
-void sja1105_table_write_crc(char*, char*);
+#define AGU_ADDR    0x100800
 
-#define CONFIG_ADDR 0x20000
-
-#define SPI_READ  0
-#define SPI_WRITE 1
-
-/* Core */
-#define CORE_ADDR   0x000000
+struct sja1105_cfg_pad_mii_tx {
+	uint64_t d32_os;
+	uint64_t d32_ipud;
+	uint64_t d10_os;
+	uint64_t d10_ipud;
+	uint64_t ctrl_os;
+	uint64_t ctrl_ipud;
+	uint64_t clk_os;
+	uint64_t clk_ih;
+	uint64_t clk_ipud;
+};
 
 #endif
+
