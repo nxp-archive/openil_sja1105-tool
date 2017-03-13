@@ -45,7 +45,8 @@ static int mii_clocking_setup(int fd, struct spi_setup *spi_setup, int port, int
 	 *     * EXT_TX_CLK
 	 *     * EXT_RX_CLK
 	 */
-	rc = sja1105_cgu_idiv_config(fd, spi_setup, port);
+	rc = sja1105_cgu_idiv_config(fd, spi_setup, port,
+	                            (mii_mode == XMII_MODE_PHY), 1);
 	if (rc < 0) {
 		goto error;
 	}
@@ -80,7 +81,7 @@ static int rmii_clocking_setup(int fd, struct spi_setup *spi_setup, int port, in
 		goto error;
 	}
 	logv("configuring rmii clocking for port %d...", port);
-	rc = sja1105_cgu_idiv_config(fd, spi_setup, port);
+	rc = sja1105_cgu_idiv_config(fd, spi_setup, port, 0, 1);
 	if (rc < 0) {
 		goto error;
 	}
@@ -99,16 +100,31 @@ error:
 	return -1;
 }
 
-static int rgmii_clocking_setup(int fd, struct spi_setup *spi_setup, int port)
+static int rgmii_clocking_setup(int fd, struct spi_setup *spi_setup,
+                                int port, int speed_mbps)
 {
 	int rc;
 
-	logv("configuring rgmii clocking for port %d", port);
-	rc = sja1105_cgu_idiv_config(fd, spi_setup, port);
+	logv("configuring rgmii clocking for port %d, speed %dMbps",
+	     port, speed_mbps);
+	if (speed_mbps == 1000) {
+		/* 1000Mbps, IDIV disabled, divide by 1 */
+		rc = sja1105_cgu_idiv_config(fd, spi_setup, port, 0, 1);
+	} else if (speed_mbps == 100) {
+		/* 100Mbps, IDIV enabled, divide by 1 */
+		rc = sja1105_cgu_idiv_config(fd, spi_setup, port, 1, 1);
+	} else if (speed_mbps == 10) {
+		/* 10Mbps, IDIV enabled, divide by 10 */
+		rc = sja1105_cgu_idiv_config(fd, spi_setup, port, 1, 10);
+	}
 	if (rc < 0) {
 		goto error;
 	}
-	rc = sja1105_cgu_rgmii_tx_clk_config(fd, spi_setup, port);
+	rc = sja1105_cgu_rgmii_tx_clk_config(fd, spi_setup, port, speed_mbps);
+	if (rc < 0) {
+		goto error;
+	}
+	rc = sja1105_rgmii_cfg_pad_tx_config(fd, spi_setup, port);
 	if (rc < 0) {
 		goto error;
 	}
@@ -117,8 +133,11 @@ error:
 	return -1;
 }
 
-int sja1105_clocking_setup(struct spi_setup *spi_setup, struct sja1105_xmii_params_table *params)
+int sja1105_clocking_setup(struct spi_setup *spi_setup,
+                           struct sja1105_xmii_params_table *params,
+                           struct sja1105_mac_config_entry  *mac_config)
 {
+	int speed_mbps;
 	int rc;
 	int fd;
 	int i;
@@ -129,12 +148,18 @@ int sja1105_clocking_setup(struct spi_setup *spi_setup, struct sja1105_xmii_para
 	}
 
 	for (i = 0; i < 5; i++) {
+		switch (mac_config[i].speed) {
+		case 1: speed_mbps = 1000; break;
+		case 2: speed_mbps = 100;  break;
+		case 3: speed_mbps = 10;   break;
+		default: loge("auto speed not yet supported"); return -1;
+		}
 		if (params->xmii_mode[i] == XMII_SPEED_MII) {
 			mii_clocking_setup(fd, spi_setup, i, params->phy_mac[i]);
 		} else if (params->xmii_mode[i] == XMII_SPEED_RMII) {
 			rmii_clocking_setup(fd, spi_setup, i, params->phy_mac[i]);
 		} else if (params->xmii_mode[i] == XMII_SPEED_RGMII) {
-			rgmii_clocking_setup(fd, spi_setup, i);
+			rgmii_clocking_setup(fd, spi_setup, i, speed_mbps);
 		} else {
 			loge("Invalid xmii_mode for port %d specified: %" PRIu64,
 			     i, params->xmii_mode[i]);

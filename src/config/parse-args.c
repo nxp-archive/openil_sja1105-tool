@@ -351,7 +351,8 @@ void config_parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 		if (rc < 0) {
 			goto error;
 		}
-		rc = sja1105_clocking_setup(spi_setup, &config.xmii_params[0]);
+		rc = sja1105_clocking_setup(spi_setup, &config.xmii_params[0],
+		                            &config.mac_config[0]);
 		if (rc < 0) {
 			goto error;
 		}
