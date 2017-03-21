@@ -44,7 +44,7 @@ static int entry_get(xmlNode *node, struct sja1105_schedule_entry *entry)
 	rc |= xml_read_field(&entry->vlindex, "vlindex", node);
 	rc |= xml_read_field(&entry->delta, "delta", node);
 	if (rc) {
-		fprintf(stderr, "Schedule entry is incomplete!\n");
+		loge("Schedule entry is incomplete!");
 	}
 	return rc;
 }
@@ -55,8 +55,8 @@ static int parse_entry(xmlNode *node, struct sja1105_config *config)
 	int rc;
 
 	if (config->schedule_count >= MAX_SCHEDULE_COUNT) {
-		fprintf(stderr, "Cannot have more than %d Schedule Table entries!\n",
-		        MAX_SCHEDULE_COUNT);
+		loge("Cannot have more than %d Schedule Table entries!",
+		     MAX_SCHEDULE_COUNT);
 		rc = -1;
 		goto out;
 	}
@@ -73,7 +73,7 @@ int schedule_table_parse(xmlNode *node, struct sja1105_config *config)
 	int rc = 0;
 
 	if (node->type != XML_ELEMENT_NODE) {
-		fprintf(stderr, "Schedule table node must be of element type!\n");
+		loge("Schedule table node must be of element type!");
 		rc = -1;
 		goto out;
 	}
@@ -86,10 +86,7 @@ int schedule_table_parse(xmlNode *node, struct sja1105_config *config)
 			goto out;
 		}
 	}
-	if (general_config.verbose) {
-		printf("read %d Schedule entries\n",
-		        config->schedule_count);
-	}
+	logv("read %d Schedule entries", config->schedule_count);
 out:
 	return rc;
 }

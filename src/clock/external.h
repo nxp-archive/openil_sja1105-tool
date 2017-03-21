@@ -31,6 +31,7 @@
 #ifndef _CGU_EXTERNAL_H
 #define _CGU_EXTERNAL_H
 
-int sja1105_clocking_setup(struct spi_setup*, struct sja1105_xmii_params_table*);
+int sja1105_clocking_setup(struct spi_setup*, struct sja1105_xmii_params_table*,
+                           struct sja1105_mac_config_entry*);
 
 #endif

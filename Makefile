@@ -53,7 +53,7 @@ $(SJA1105): $(DEPS)
 	$(CC) $(CFLAGS) -c $^ -o $@
 
 clean:
-	rm -f $(SJA1105) $(MANPAGES) $(OBJ)
+	rm -f $(SJA1105) $(OBJ)
 
 man: $(MANPAGES)
 

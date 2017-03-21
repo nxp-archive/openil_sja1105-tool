@@ -300,7 +300,7 @@ int sja1105_config_hexdump(void *buf)
 			p += bytes;
 		};
 		if (p != table_end) {
-			fprintf(stderr, "WARNING: Incorrect table length specified in header!\n");
+			loge("WARNING: Incorrect table length specified in header!");
 			printf("Extra:\n");
 			generic_table_hexdump(p, (int) (table_end - p));
 			p = table_end;
@@ -338,9 +338,9 @@ int sja1105_config_get(void *buf, struct sja1105_config *config)
 		computed_crc &= 0xFFFFFFFF;
 		read_crc = hdr.crc & 0xFFFFFFFF;
 		if (read_crc != computed_crc) {
-			fprintf(stderr, "Table header CRC is invalid, exiting.\n");
-			fprintf(stderr, "Read %" PRIX64 ", computed %" PRIX64 "\n",
-			        read_crc, computed_crc);
+			loge("Table header CRC is invalid, exiting.");
+			loge("Read %" PRIX64 ", computed %" PRIX64,
+			     read_crc, computed_crc);
 			goto error;
 		}
 		p += SIZE_TABLE_HEADER;
@@ -355,15 +355,15 @@ int sja1105_config_get(void *buf, struct sja1105_config *config)
 			p += bytes;
 		};
 		if (p != table_end) {
-			fprintf(stderr, "WARNING: Incorrect table length specified in header!\n");
+			loge("WARNING: Incorrect table length specified in header!");
 			p = table_end;
 		}
 		generic_table_field_get(p, &read_crc, 31, 0, 4);
 		p += 4;
 		if (computed_crc != read_crc) {
-			fprintf(stderr, "Data CRC is invalid, exiting.\n");
-			fprintf(stderr, "Read %" PRIX64 ", computed %" PRIX64 "\n",
-			        read_crc, computed_crc);
+			loge("Data CRC is invalid, exiting.");
+			loge("Read %" PRIX64 ", computed %" PRIX64,
+			     read_crc, computed_crc);
 			goto error;
 		}
 	}
@@ -592,8 +592,6 @@ unsigned int sja1105_config_get_length(struct sja1105_config *config)
 	sum += config->general_params_count * SIZE_GENERAL_PARAMS_TABLE;
 	sum += config->xmii_params_count * SIZE_XMII_MODE_PARAMS_TABLE;
 	sum -= 4; /* Last header does not have an extra CRC because there is no data */
-	if (general_config.verbose) {
-		printf("total: %d bytes\n", sum);
-	}
+	logv("total: %d bytes", sum);
 	return sum;
 }

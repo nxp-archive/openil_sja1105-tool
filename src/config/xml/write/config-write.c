@@ -34,7 +34,7 @@
 
 int sja1105_config_write_to_xml(char *filename, struct sja1105_config *config)
 {
-	fprintf(stderr, "Writer or output support is not compiled in libxml!\n");
+	loge("Writer or output support is not compiled in libxml!");
 	return -1;
 }
 
@@ -158,14 +158,14 @@ int sja1105_config_write_to_xml(char *filename, struct sja1105_config *config)
 
 	writer = xmlNewTextWriterFilename(filename, 0);
 	if (writer == NULL) {
-		fprintf(stderr, "cannot create xml writer\n");
+		loge("cannot create xml writer");
 		rc = -1;
 		goto out;
 	}
 	rc |= xmlTextWriterSetIndent(writer, 1);
 	rc |= xmlTextWriterSetIndentString(writer, (const xmlChar*) "\t");
 	if (rc < 0) {
-		fprintf(stderr, "could not set xml indentation\n");
+		loge("could not set xml indentation");
 		goto out;
 	}
 	rc = xmlTextWriterStartDocument(writer, NULL, "UTF-8", NULL);
@@ -178,7 +178,7 @@ int sja1105_config_write_to_xml(char *filename, struct sja1105_config *config)
 	}
 	rc = write_config_tables(writer, config);
 	if (rc < 0) {
-		fprintf(stderr, "could not write config tables\n");
+		loge("could not write config tables");
 		goto out;
 	}
 	rc = xmlTextWriterEndElement(writer);
@@ -187,7 +187,7 @@ int sja1105_config_write_to_xml(char *filename, struct sja1105_config *config)
 	}
 	rc = xmlTextWriterEndDocument(writer);
 	if (rc < 0) {
-		fprintf(stderr, "could not write xml document\n");
+		loge("could not write xml document");
 		goto out;
 	}
 	/*

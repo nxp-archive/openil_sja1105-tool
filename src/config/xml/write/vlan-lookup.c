@@ -35,10 +35,7 @@ int vlan_lookup_table_write(xmlTextWriterPtr writer, struct sja1105_config *conf
 	int rc = 0;
 	int i;
 
-	if (general_config.verbose) {
-		printf("writing %d VLAN Lookup entries\n",
-		        config->vlan_lookup_count);
-	}
+	logv("writing %d VLAN Lookup entries", config->vlan_lookup_count);
 	for (i = 0; i < config->vlan_lookup_count; i++) {
 		rc |= xmlTextWriterStartElement(writer, BAD_CAST "entry");
 		rc |= xml_write_field(writer, "index",      i);
@@ -50,7 +47,7 @@ int vlan_lookup_table_write(xmlTextWriterPtr writer, struct sja1105_config *conf
 		rc |= xml_write_field(writer, "vlanid",     config->vlan_lookup[i].vlanid);
 		rc |= xmlTextWriterEndElement(writer);
 		if (rc < 0) {
-			fprintf(stderr, "error while writing vlan_lookup Table element %d\n", i);
+			loge("error while writing vlan_lookup Table element %d", i);
 			goto out;
 		}
 	}

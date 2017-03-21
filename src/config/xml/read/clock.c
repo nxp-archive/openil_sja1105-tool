@@ -32,7 +32,7 @@
 
 int clock_synchronization_parameters_table_parse(xmlNode *node, struct sja1105_config *config)
 {
-	fprintf(stderr, "Clock Synchronization Parameters Table is unimplemented!\n");
+	loge("Clock Synchronization Parameters Table is unimplemented!");
 	return -1;
 }
 

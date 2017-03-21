@@ -94,9 +94,7 @@ void status_parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 	} else if (strcmp(options[match], "ports") == 0) {
 		if (argc < 4) {
 			port_no = -1;
-			if (general_config.verbose) {
-				printf("showing for all ports\n");
-			}
+			logv("showing for all ports");
 		} else {
 			sscanf(argv[3], "%d", &port_no);
 		}

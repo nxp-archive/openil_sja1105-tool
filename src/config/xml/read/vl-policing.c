@@ -32,7 +32,7 @@
 
 int vl_policing_table_parse(xmlNode *node, struct sja1105_config *config)
 {
-	fprintf(stderr, "VL Policing Table not implemented!\n");
+	loge("VL Policing Table not implemented!\n");
 	return -1;
 }
 

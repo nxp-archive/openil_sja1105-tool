@@ -65,4 +65,28 @@ struct general_config {
 
 extern struct general_config general_config;
 
+/* Macros for conditional, error, verbose and debug logging */
+
+#define verbose_enabled (general_config.verbose)
+#define debug_enabled   (general_config.debug)
+
+#define _log(file, fmt, ...) do { \
+	if (debug_enabled) { \
+		fprintf(file, "%s@%d: " fmt "\n", \
+		__func__, __LINE__, ##__VA_ARGS__); \
+	} else { \
+		fprintf(file, fmt "\n", ##__VA_ARGS__); \
+	} \
+} while(0);
+
+#define logc(file, condition, ...) do { \
+	if (condition) { \
+		_log(file, __VA_ARGS__); \
+	} \
+} while(0);
+
+#define loge(...) _log(stderr, __VA_ARGS__)
+#define logi(...) _log(stdout, __VA_ARGS__)
+#define logv(...) logc(stdout, verbose_enabled, __VA_ARGS__);
+
 #endif

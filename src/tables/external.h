@@ -31,6 +31,7 @@
 #ifndef _TABLES_EXTERNAL_H
 #define _TABLES_EXTERNAL_H
 
+#include "agu-tables.h"
 #include "cgu-tables.h"
 #include "rgu-tables.h"
 #include "status-tables.h"

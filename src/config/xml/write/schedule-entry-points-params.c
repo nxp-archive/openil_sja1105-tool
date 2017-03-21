@@ -35,10 +35,8 @@ int schedule_entry_points_parameters_table_write(xmlTextWriterPtr writer, struct
 	int rc = 0;
 	int i;
 
-	if (general_config.verbose) {
-		printf("writing %d Schedule Entry Points Parameters entries\n",
-		        config->schedule_entry_points_params_count);
-	}
+	logv("writing %d Schedule Entry Points Parameters entries",
+	     config->schedule_entry_points_params_count);
 	for (i = 0; i < config->schedule_entry_points_params_count; i++) {
 		rc |= xmlTextWriterStartElement(writer, BAD_CAST "entry");
 		rc |= xml_write_field(writer, "index", i);
@@ -46,7 +44,7 @@ int schedule_entry_points_parameters_table_write(xmlTextWriterPtr writer, struct
 		rc |= xml_write_field(writer, "actsubsch", config->schedule_entry_points_params[i].actsubsch);
 		rc |= xmlTextWriterEndElement(writer);
 		if (rc < 0) {
-			fprintf(stderr, "error while writing schedule_entry_points_params Table element %d\n", i);
+			loge("error while writing schedule_entry_points_params Table element %d", i);
 			goto out;
 		}
 	}

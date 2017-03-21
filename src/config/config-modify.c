@@ -46,8 +46,9 @@ static int generic_table_entry_modify(
 	int rc;
 
 	if (entry_index >= entry_count) {
-		fprintf(stderr, "Index out of bounds!\n");
-		fprintf(stderr, "Please adjust the entry count of the table (config modify <table> entry-count <value>)\n");
+		loge("Index out of bounds!");
+		loge("Please adjust the entry count of the table:");
+		loge("* config modify <table> entry-count <value>)");
 		rc = -1;
 		goto out;
 	}
@@ -670,7 +671,7 @@ static int vl_lookup_table_entry_modify(
 		char *field_name,
 		char *field_val)
 {
-	fprintf(stderr, "unimplemented\n");
+	loge("unimplemented");
 	return -1;
 }
 
@@ -680,7 +681,7 @@ static int vl_policing_table_entry_modify(
 		char *field_name,
 		char *field_val)
 {
-	fprintf(stderr, "unimplemented\n");
+	loge("unimplemented");
 	return -1;
 }
 
@@ -690,7 +691,7 @@ static int vl_fw_table_entry_modify(
 		char *field_name,
 		char *field_val)
 {
-	fprintf(stderr, "unimplemented\n");
+	loge("unimplemented");
 	return -1;
 }
 
@@ -700,7 +701,7 @@ static int retagging_table_entry_modify(
 		char *field_name,
 		char *field_val)
 {
-	fprintf(stderr, "unimplemented\n");
+	loge("unimplemented");
 	return -1;
 }
 
@@ -710,7 +711,7 @@ static int avb_params_table_entry_modify(
 		char *field_name,
 		char *field_val)
 {
-	fprintf(stderr, "unimplemented\n");
+	loge("unimplemented");
 	return -1;
 }
 
@@ -720,7 +721,7 @@ static int clock_sync_params_table_entry_modify(
 		char *field_name,
 		char *field_val)
 {
-	fprintf(stderr, "unimplemented\n");
+	loge("unimplemented");
 	return -1;
 }
 
@@ -730,7 +731,7 @@ static int vl_fw_params_table_entry_modify(
 		char *field_name,
 		char *field_val)
 {
-	fprintf(stderr, "unimplemented\n");
+	loge("unimplemented");
 	return -1;
 }
 
@@ -810,22 +811,20 @@ int config_table_entry_modify(
 	if (rc < 0) {
 		goto out;
 	}
-	if (general_config.verbose) {
-		printf("Table %s, entry %" PRIu64", field %s, value %s\n",
-		       options[rc], entry_index, field_name, field_val);
-	}
+	logv("Table %s, entry %" PRIu64", field %s, value %s",
+	     options[rc], entry_index, field_name, field_val);
 	if (field_name == NULL) {
 		rc = -1;
 		print_usage("sja1105-tool");
 		goto out;
 	}
 	if (field_val == NULL) {
-		fprintf(stderr, "Please supply a value for field %s!\n", field_name);
+		printf("Please supply a value for field %s!\n", field_name);
 		goto out;
 	}
 	rc = next_table_entry_modify[rc](config, entry_index, field_name, field_val);
 	if (rc < 0) {
-		fprintf(stderr, "modify failed!\n");
+		loge("modify failed!");
 		goto out;
 	}
 out:

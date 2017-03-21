@@ -35,10 +35,7 @@ int mac_configuration_table_write(xmlTextWriterPtr writer, struct sja1105_config
 	int rc = 0;
 	int i;
 
-	if (general_config.verbose) {
-		printf("writing %d MAC Configuration entries\n",
-		        config->mac_config_count);
-	}
+	logv("writing %d MAC Configuration entries", config->mac_config_count);
 	for (i = 0; i < config->mac_config_count; i++) {
 		rc |= xmlTextWriterStartElement(writer, BAD_CAST "entry");
 		rc |= xml_write_field(writer, "index", i);
@@ -63,7 +60,7 @@ int mac_configuration_table_write(xmlTextWriterPtr writer, struct sja1105_config
 		rc |= xml_write_field(writer, "ingress", config->mac_config[i].ingress);
 		rc |= xmlTextWriterEndElement(writer);
 		if (rc < 0) {
-			fprintf(stderr, "error while writing mac_config Table element %d\n", i);
+			loge("error while writing mac_config Table element %d", i);
 			goto out;
 		}
 	}

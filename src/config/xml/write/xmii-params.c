@@ -35,17 +35,14 @@ int xmii_mode_parameters_table_write(xmlTextWriterPtr writer, struct sja1105_con
 	int rc = 0;
 	int i;
 
-	if (general_config.verbose) {
-		printf("writing %d xMII Mode Parameters entries\n",
-		        config->xmii_params_count);
-	}
+	logv("writing %d xMII Mode Parameters entries", config->xmii_params_count);
 	for (i = 0; i < config->xmii_params_count; i++) {
 		rc |= xmlTextWriterStartElement(writer, BAD_CAST "entry");
 		rc |= xml_write_array(writer, "phy_mac", config->xmii_params[i].phy_mac, 5);
 		rc |= xml_write_array(writer, "xmii_mode", config->xmii_params[i].xmii_mode, 5);
 		rc |= xmlTextWriterEndElement(writer);
 		if (rc < 0) {
-			fprintf(stderr, "error while writing xmii_params Table element %d\n", i);
+			loge("error while writing xmii_params Table element %d", i);
 			goto out;
 		}
 	}

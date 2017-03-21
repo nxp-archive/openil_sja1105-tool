@@ -42,8 +42,8 @@ static int parse_spi_mode(struct spi_setup *spi_setup, char *mode)
 	} else if (strcmp(mode, "SPI_CPOL") == 0) {
 		spi_setup->mode |= SPI_CPOL;
 	} else {
-		fprintf(stderr, "Invalid value \"%s\" for mode.", mode);
-		fprintf(stderr, "Expected SPI_CPHA or SPI_CPOL.\n");
+		loge("Invalid value \"%s\" for mode."
+		     "Expected SPI_CPHA or SPI_CPOL.", mode);
 		return -1;
 	}
 	return 0;
@@ -101,47 +101,46 @@ static inline int parse_spi_setup(struct spi_setup *spi_setup, char *key, char *
 		} else if (strcmp(value, "true") == 0) {
 			spi_setup->dry_run = 1;
 		} else {
-			fprintf(stderr, "Invalid value \"%s\" for dry_run. ", value);
-			fprintf(stderr, "Expected true or false.\n");
+			loge("Invalid value \"%s\" for dry_run. "
+			     "Expected true or false.", value);
 			return -1;
 		}
 	} else if (strcmp(key, "staging-area") == 0) {
 		/* FIXME: Memory leak here */
 		spi_setup->staging_area = strdup(value);
 	} else {
-		fprintf(stderr, "Invalid key \"%s\"\n", key);
+		loge("Invalid key \"%s\"", key);
 		return -1;
 	}
 	return 0;
 error:
-	fprintf(stderr, "Invalid value \"%s\" for key \"%s\" in config file\n",
-	        value, key);
+	loge("Invalid value \"%s\" for key \"%s\" in config file", value, key);
 	return rc;
 }
 
-static inline int parse_general_config(struct general_config *general_config, char *key, char *value)
+static inline int parse_general_config(char *key, char *value)
 {
 	uint64_t tmp;
 	int rc;
 
 	if (strcmp(key, "verbose") == 0) {
 		if (strcmp(value, "false") == 0) {
-			general_config->verbose = 0;
+			general_config.verbose = 0;
 		} else if (strcmp(value, "true") == 0) {
-			general_config->verbose = 1;
+			general_config.verbose = 1;
 		} else {
-			fprintf(stderr, "Invalid value \"%s\" for verbose. ", value);
-			fprintf(stderr, "Expected true or false.\n");
+			loge("Invalid value \"%s\" for verbose. "
+			     "Expected true or false.", value);
 			return -1;
 		}
 	} else if (strcmp(key, "debug") == 0) {
 		if (strcmp(value, "false") == 0) {
-			general_config->debug = 0;
+			general_config.debug = 0;
 		} else if (strcmp(value, "true") == 0) {
-			general_config->debug = 1;
+			general_config.debug = 1;
 		} else {
-			fprintf(stderr, "Invalid value \"%s\" for debug. ", value);
-			fprintf(stderr, "Expected true or false.\n");
+			loge("Invalid value \"%s\" for debug. "
+			     "Expected true or false.", value);
 			return -1;
 		}
 	} else if (strcmp(key, "entries-per-line") == 0) {
@@ -149,21 +148,20 @@ static inline int parse_general_config(struct general_config *general_config, ch
 		if (rc < 0) {
 			goto error;
 		}
-		general_config->entries_per_line = tmp;
+		general_config.entries_per_line = tmp;
 	} else if (strcmp(key, "screen-width") == 0) {
 		rc = reliable_uint64_from_string(&tmp, value, NULL);
 		if (rc < 0) {
 			goto error;
 		}
-		general_config->screen_width = tmp;
+		general_config.screen_width = tmp;
 	} else {
-		fprintf(stderr, "Invalid key \"%s\"\n", key);
+		loge("Invalid key \"%s\"", key);
 		return -1;
 	}
 	return 0;
 error:
-	fprintf(stderr, "Invalid value \"%s\" for key \"%s\" in config file\n",
-	        value, key);
+	loge("Invalid value \"%s\" for key \"%s\" in config file", value, key);
 	return rc;
 }
 
@@ -172,9 +170,9 @@ static inline int parse_key_val(struct spi_setup *spi_setup, char *key, char *va
 	if (strcmp(section_hdr, "[spi-setup]") == 0) {
 		parse_spi_setup(spi_setup, key, value);
 	} else if (strcmp(section_hdr, "[general]") == 0) {
-		parse_general_config(&general_config, key, value);
+		parse_general_config(key, value);
 	} else {
-		fprintf(stderr, "Invalid section header \"%s\"\n", section_hdr);
+		loge("Invalid section header \"%s\"", section_hdr);
 		return -1;
 	}
 	return 0;
@@ -218,9 +216,8 @@ int get_spi_setup(struct spi_setup *spi_setup)
 		strsep(&value, "=");
 		if (value == NULL) {
 			/* There was no equal on this line */
-			fprintf(stderr, "Invalid format for line %d: \"%s\"\n",
-			        line_num, line);
-			fprintf(stderr, "Accepted line format: \"<key> = <value>\"\n");
+			loge("Invalid format for line %d: \"%s\"", line_num, line);
+			loge("Accepted line format: \"<key> = <value>\"");
 			rc = -1;
 			goto out;
 		}
@@ -228,8 +225,7 @@ int get_spi_setup(struct spi_setup *spi_setup)
 		value = trimwhitespace(value);
 		rc = parse_key_val(spi_setup, key, value, section_hdr);
 		if (rc < 0) {
-			fprintf(stderr, "Could not parse line %d: \"%s\"\n",
-			        line_num, line);
+			loge("Could not parse line %d: \"%s\"", line_num, line);
 			rc = -1;
 			goto out;
 		}
@@ -242,7 +238,7 @@ out:
 	fclose(fd);
 default_conf:
 	if (rc == -1) {
-		fprintf(stderr, "Invalid config file, using defaults.\n");
+		loge("Invalid config file, using defaults.\n");
 		spi_setup->device       = default_device;
 		spi_setup->staging_area = default_staging_area;
 		spi_setup->mode         = 0;
@@ -252,8 +248,8 @@ default_conf:
 		spi_setup->cs_change    = 0;
 		spi_setup->mode         = SPI_CPHA;
 		spi_setup->dry_run      = 0;
-		general_config.verbose          = 0;
-		general_config.debug            = 0;
+		general_config.verbose  = 0;
+		general_config.debug    = 0;
 		general_config.entries_per_line = 1;
 		general_config.screen_width     = 80;
 	}

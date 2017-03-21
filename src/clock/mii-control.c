@@ -67,7 +67,8 @@ void sja1105_cgu_mii_control_show(struct sja1105_cgu_mii_control *mii_control)
 int sja1105_cgu_rgmii_tx_clk_config(
 		int    fd,
 		struct spi_setup *spi_setup,
-		int    port)
+		int    port,
+		int    speed_mbps)
 {
 #define MSG_SIZE SIZE_SPI_MSG_HEADER + 4
 	struct  sja1105_cgu_mii_control txc;
@@ -76,6 +77,15 @@ int sja1105_cgu_rgmii_tx_clk_config(
 	uint8_t rx_buf[MSG_SIZE];
 	/* UM10944.pdf, Table 78, CGU Register overview */
 	int     txc_offsets[] = {0x16, 0x1D, 0x24, 0x2B, 0x32};
+	int     clksrc;
+
+	if (speed_mbps == 1000) {
+		clksrc = CLKSRC_PLL0;
+	} else {
+		int clk_sources[] = {CLKSRC_IDIV0, CLKSRC_IDIV1, CLKSRC_IDIV2,
+		                     CLKSRC_IDIV3, CLKSRC_IDIV4};
+		clksrc = clk_sources[port];
+	}
 
 	memset(tx_buf, 0, MSG_SIZE);
 	memset(rx_buf, 0, MSG_SIZE);
@@ -87,9 +97,9 @@ int sja1105_cgu_rgmii_tx_clk_config(
 	sja1105_spi_message_set(tx_buf, &msg);
 
 	/* Payload */
-	txc.clksrc    = CLKSRC_PLL0; /* RGMII */
-	txc.autoblock = 1;           /* Autoblock clk while changing clksrc */
-	txc.pd        = 0;           /* XXX Why */
+	txc.clksrc    = clksrc; /* RGMII: 125MHz for 1000, 25MHz for 100, 2.5MHz for 10 */
+	txc.autoblock = 1;      /* Autoblock clk while changing clksrc */
+	txc.pd        = 0;      /* Power Down off => enabled */
 	sja1105_cgu_mii_control_set(tx_buf + SIZE_SPI_MSG_HEADER, &txc);
 
 	return spi_transfer(fd, spi_setup, tx_buf, rx_buf, MSG_SIZE);
@@ -127,7 +137,7 @@ int sja1105_cgu_rmii_ref_clk_config(
 	/* Payload */
 	ref_clk.clksrc    = clk_sources[port];
 	ref_clk.autoblock = 1;           /* Autoblock clk while changing clksrc */
-	ref_clk.pd        = 0;           /* XXX Why */
+	ref_clk.pd        = 0;           /* Power Down off => enabled */
 	sja1105_cgu_mii_control_set(tx_buf + SIZE_SPI_MSG_HEADER, &ref_clk);
 
 	return spi_transfer(fd, spi_setup, tx_buf, rx_buf, MSG_SIZE);
@@ -158,7 +168,7 @@ int sja1105_cgu_rmii_ext_tx_clk_config(
 	/* Payload */
 	ext_tx_clk.clksrc    = CLKSRC_PLL1; /* XXX Did not check this */
 	ext_tx_clk.autoblock = 1;           /* Autoblock clk while changing clksrc */
-	ext_tx_clk.pd        = 0;           /* XXX Why */
+	ext_tx_clk.pd        = 0;           /* Power Down off => enabled */
 	sja1105_cgu_mii_control_set(tx_buf + SIZE_SPI_MSG_HEADER, &ext_tx_clk);
 
 	return spi_transfer(fd, spi_setup, tx_buf, rx_buf, MSG_SIZE);
@@ -296,7 +306,7 @@ int sja1105_cgu_mii_ext_rx_clk_config(
 	/* Payload */
 	mii_ext_rx_clk.clksrc    = clk_sources[port];
 	mii_ext_rx_clk.autoblock = 1;           /* Autoblock clk while changing clksrc */
-	mii_ext_rx_clk.pd        = 0;           /* XXX Why */
+	mii_ext_rx_clk.pd        = 0;           /* Power Down off => enabled */
 	sja1105_cgu_mii_control_set(tx_buf + SIZE_SPI_MSG_HEADER, &mii_ext_rx_clk);
 
 	return spi_transfer(fd, spi_setup, tx_buf, rx_buf, MSG_SIZE);

@@ -40,7 +40,7 @@ static int entry_get(xmlNode *node, struct sja1105_l2_lookup_params_table *entry
 	rc |= xml_read_field(&entry->no_enf_hostprt, "no_enf_hostprt", node);
 	rc |= xml_read_field(&entry->no_mgmt_learn, "no_mgmt_learn", node);
 	if (rc) {
-		fprintf(stderr, "L2 Lookup Parameters entry is incomplete!\n");
+		loge("L2 Lookup Parameters entry is incomplete!");
 	}
 	return rc;
 }
@@ -51,8 +51,8 @@ static int parse_entry(xmlNode *node, struct sja1105_config *config)
 	int rc;
 
 	if (config->l2_lookup_params_count >= MAX_L2_LOOKUP_PARAMS_COUNT) {
-		fprintf(stderr, "Cannot have more than %d L2 Lookup "
-		        "Parameters Table entries!\n", MAX_L2_LOOKUP_PARAMS_COUNT);
+		loge("Cannot have more than %d L2 Lookup "
+		     "Parameters Table entries!", MAX_L2_LOOKUP_PARAMS_COUNT);
 		rc = -1;
 		goto out;
 	}
@@ -69,8 +69,8 @@ int l2_address_lookup_parameters_table_parse(xmlNode *node, struct sja1105_confi
 	int rc = 0;
 
 	if (node->type != XML_ELEMENT_NODE) {
-		fprintf(stderr, "L2 Lookup Parameters Table node must be "
-		        "of element type!\n");
+		loge("L2 Lookup Parameters Table node must be "
+		     "of element type!");
 		rc = -1;
 	}
 	for (c = node->children; c != NULL; c = c->next) {
@@ -82,10 +82,8 @@ int l2_address_lookup_parameters_table_parse(xmlNode *node, struct sja1105_confi
 			goto out;
 		}
 	}
-	if (general_config.verbose) {
-		printf("read %d L2 Lookup Parameters entries\n",
-		        config->l2_lookup_params_count);
-	}
+	logv("read %d L2 Lookup Parameters entries",
+	     config->l2_lookup_params_count);
 out:
 	return rc;
 }

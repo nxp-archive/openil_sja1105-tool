@@ -161,7 +161,7 @@ int status_general(struct spi_setup *spi_setup)
 
 	rc = spi_transfer(fd, spi_setup, tx_buf, rx_buf, MSG_LEN_A);
 	if (rc < 0) {
-		fprintf(stderr, "spi_transfer failed for part A\n");
+		loge("spi_transfer failed for part A");
 		goto error_1;
 	}
 	sja1105_general_status_get_a(rx_buf + 4, &status);
@@ -177,7 +177,7 @@ int status_general(struct spi_setup *spi_setup)
 
 	rc = spi_transfer(fd, spi_setup, tx_buf, rx_buf, MSG_LEN_B);
 	if (rc < 0) {
-		fprintf(stderr, "spi_transfer failed for part B\n");
+		loge("spi_transfer failed for part B");
 		goto error_1;
 	}
 	sja1105_general_status_get_b(rx_buf + 4, &status);

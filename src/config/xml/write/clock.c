@@ -32,7 +32,7 @@
 
 int clock_synchronization_parameters_table_write(xmlTextWriterPtr writer, struct sja1105_config *config)
 {
-	fprintf(stderr, "Clock Synchronization Parameters Table not implemented!\n");
+	loge("Clock Synchronization Parameters Table not implemented!");
 	return -1;
 }
 

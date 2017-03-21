@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016, NXP Semiconductors
+ * Copyright (c) 2017, NXP Semiconductors
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,60 +28,24 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
-#include "internal.h"
+#ifndef _AGU_TABLES_H
+#define _AGU_TABLES_H
 
-static int entry_get(xmlNode *node, struct sja1105_schedule_entry_points_entry *entry)
-{
-	int rc = 0;
-	rc |= xml_read_field(&entry->subschindx, "subschindx", node);
-	rc |= xml_read_field(&entry->delta, "delta", node);
-	rc |= xml_read_field(&entry->address, "address", node);
-	if (rc) {
-		loge("Schedule Entry Points entry is incomplete!");
-	}
-	return rc;
-}
+#include <stdint.h>
 
-static int parse_entry(xmlNode *node, struct sja1105_config *config)
-{
-	struct sja1105_schedule_entry_points_entry entry;
-	int rc;
+#define AGU_ADDR    0x100800
 
-	if (config->schedule_entry_points_count >= MAX_SCHEDULE_ENTRY_POINTS_COUNT) {
-		loge("Cannot have more than %d Schedule Entry Points "
-		     "Table entries!", MAX_SCHEDULE_ENTRY_POINTS_COUNT);
-		rc = -1;
-		goto out;
-	}
-	memset(&entry, 0, sizeof(entry));
-	rc = entry_get(node, &entry);
-	config->schedule_entry_points[config->schedule_entry_points_count++] = entry;
-out:
-	return rc;
-}
+struct sja1105_cfg_pad_mii_tx {
+	uint64_t d32_os;
+	uint64_t d32_ipud;
+	uint64_t d10_os;
+	uint64_t d10_ipud;
+	uint64_t ctrl_os;
+	uint64_t ctrl_ipud;
+	uint64_t clk_os;
+	uint64_t clk_ih;
+	uint64_t clk_ipud;
+};
 
-int schedule_entry_points_table_parse(xmlNode *node, struct sja1105_config *config)
-{
-	xmlNode *c;
-	int rc = 0;
-
-	if (node->type != XML_ELEMENT_NODE) {
-		loge("Schedule Entry Points Table node must be of element type!");
-		rc = -1;
-		goto out;
-	}
-	for (c = node->children; c != NULL; c = c->next) {
-		if (c->type != XML_ELEMENT_NODE) {
-			continue;
-		}
-		rc = parse_entry(c, config);
-		if (rc < 0) {
-			goto out;
-		}
-	}
-	logv("read %d Schedule Entry Points entries",
-	     config->schedule_entry_points_count);
-out:
-	return rc;
-}
+#endif
 

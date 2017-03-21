@@ -32,7 +32,7 @@
 
 int retagging_table_write(xmlTextWriterPtr writer, struct sja1105_config *config)
 {
-	fprintf(stderr, "Retagging Table not implemented!\n");
+	loge("Retagging Table not implemented!");
 	return -1;
 }
 

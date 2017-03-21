@@ -35,17 +35,14 @@ int schedule_parameters_table_write(xmlTextWriterPtr writer, struct sja1105_conf
 	int rc = 0;
 	int i;
 
-	if (general_config.verbose) {
-		printf("writing %d Schedule Parameters entries\n",
-		        config->schedule_params_count);
-	}
+	logv("writing %d Schedule Parameters entries", config->schedule_params_count);
 	for (i = 0; i < config->schedule_params_count; i++) {
 		rc |= xmlTextWriterStartElement(writer, BAD_CAST "entry");
 		rc |= xml_write_field(writer, "index",       i);
 		rc |= xml_write_array(writer, "subscheind", config->schedule_params[i].subscheind, 8);
 		rc |= xmlTextWriterEndElement(writer);
 		if (rc < 0) {
-			fprintf(stderr, "error while writing schedule_params Table element %d\n", i);
+			loge("error while writing schedule_params Table element %d", i);
 			goto out;
 		}
 	}

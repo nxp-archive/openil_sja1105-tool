@@ -32,7 +32,7 @@
 
 int avb_parameters_table_write(xmlTextWriterPtr writer, struct sja1105_config *config)
 {
-	fprintf(stderr, "AVB Parameters Table not implemented!\n");
+	loge("AVB Parameters Table not implemented!");
 	return -1;
 }
 

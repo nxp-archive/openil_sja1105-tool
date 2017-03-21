@@ -54,7 +54,7 @@ static int entry_get(xmlNode *node, struct sja1105_general_params_table *entry)
 	rc |= xml_read_field(&entry->ignore2stf,  "ignore2stf", node);
 	rc |= xml_read_field(&entry->tpid2,       "tpid2", node);
 	if (rc) {
-		fprintf(stderr, "General Parameters entry is incomplete!\n");
+		loge("General Parameters entry is incomplete!");
 	}
 	return rc;
 }
@@ -65,8 +65,8 @@ static int parse_entry(xmlNode *node, struct sja1105_config *config)
 	int rc;
 
 	if (config->general_params_count >= MAX_GENERAL_PARAMS_COUNT) {
-		fprintf(stderr, "Cannot have more than %d General Parameters "
-		        "Table entries!\n", MAX_GENERAL_PARAMS_COUNT);
+		loge("Cannot have more than %d General Parameters Table entries!",
+		     MAX_GENERAL_PARAMS_COUNT);
 		rc = -1;
 		goto out;
 	}
@@ -83,8 +83,7 @@ int general_parameters_table_parse(xmlNode *node, struct sja1105_config *config)
 	int rc = 0;
 
 	if (node->type != XML_ELEMENT_NODE) {
-		fprintf(stderr, "General Parameters Table node must "
-		        "be of element type!\n");
+		loge("General Parameters Table node must be of element type!");
 		rc = -1;
 		goto out;
 	}
@@ -97,10 +96,7 @@ int general_parameters_table_parse(xmlNode *node, struct sja1105_config *config)
 			goto out;
 		}
 	}
-	if (general_config.verbose) {
-		printf("read %d General Parameters entries\n",
-		        config->general_params_count);
-	}
+	logv("read %d General Parameters entries", config->general_params_count);
 out:
 	return rc;
 }
