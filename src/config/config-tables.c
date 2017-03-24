@@ -225,8 +225,21 @@ int sja1105_config_add_entry(struct sja1105_table_header *hdr, void *buf, struct
 		printf("Clock Synchronization Parameters Table Unimplemented\n");
 		return SIZE_CLK_SYNC_PARAMS_TABLE;
 	case BLKID_AVB_PARAMS_TABLE:
-		printf("AVB Parameters Table Unimplemented\n");
+	{
+		struct sja1105_avb_params_table table;
+		int count;
+
+		count = config->avb_params_count;
+		if (count >= MAX_AVB_PARAMS_COUNT) {
+			printf("There can be no more than %d AVB Params Table entries\n",
+			       MAX_AVB_PARAMS_COUNT);
+			return -1;
+		}
+		sja1105_avb_params_table_get(buf, &table);
+		config->avb_params[count++] = table;
+		config->avb_params_count = count;
 		return SIZE_AVB_PARAMS_TABLE;
+	}
 	case BLKID_GENERAL_PARAMS_TABLE:
 	{
 		struct sja1105_general_params_table table;
@@ -523,6 +536,19 @@ int sja1105_config_set(void *buf, struct sja1105_config *config)
 		sja1105_table_write_crc(table_start, p);
 		p += 4;
 	}
+	if (config->avb_params_count) {
+		header.block_id = BLKID_AVB_PARAMS_TABLE;
+		header.len = config->avb_params_count * SIZE_AVB_PARAMS_TABLE / 4;
+		sja1105_table_header_set_with_crc(p, &header);
+		p += SIZE_TABLE_HEADER;
+		table_start = p;
+		for (i = 0; i < config->avb_params_count; i++) {
+			sja1105_avb_params_table_set(p, &config->avb_params[i]);
+			p += SIZE_AVB_PARAMS_TABLE;
+		}
+		sja1105_table_write_crc(table_start, p);
+		p += 4;
+	}
 	if (config->general_params_count) {
 		header.block_id = BLKID_GENERAL_PARAMS_TABLE;
 		header.len = config->general_params_count * SIZE_GENERAL_PARAMS_TABLE / 4;
@@ -574,6 +600,7 @@ unsigned int sja1105_config_get_length(struct sja1105_config *config)
 	header_count += (config->schedule_entry_points_params_count != 0);
 	header_count += (config->l2_lookup_params_count != 0);
 	header_count += (config->l2_forwarding_params_count != 0);
+	header_count += (config->avb_params_count != 0);
 	header_count += (config->general_params_count != 0);
 	header_count += (config->xmii_params_count != 0);
 	header_count += 1; /* Ending header */
@@ -589,6 +616,7 @@ unsigned int sja1105_config_get_length(struct sja1105_config *config)
 	sum += config->schedule_entry_points_params_count * SIZE_SCHEDULE_ENTRY_POINTS_PARAMS_ENTRY;
 	sum += config->l2_lookup_params_count * SIZE_L2_LOOKUP_PARAMS_TABLE;
 	sum += config->l2_forwarding_params_count * SIZE_L2_FORWARDING_PARAMS_TABLE;
+	sum += config->avb_params_count * SIZE_AVB_PARAMS_TABLE;
 	sum += config->general_params_count * SIZE_GENERAL_PARAMS_TABLE;
 	sum += config->xmii_params_count * SIZE_XMII_MODE_PARAMS_TABLE;
 	sum -= 4; /* Last header does not have an extra CRC because there is no data */

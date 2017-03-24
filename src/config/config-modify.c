@@ -707,12 +707,39 @@ static int retagging_table_entry_modify(
 
 static int avb_params_table_entry_modify(
 		struct sja1105_config *config,
-		int entry,
-		char *field_name,
-		char *field_val)
+		int    entry_index,
+		char  *field_name,
+		char  *field_val)
 {
-	loge("unimplemented");
-	return -1;
+	const char *options[] = {
+		"destmeta",
+		"srcmeta",
+	};
+	uint64_t *fields[] = {
+		&config->avb_params[entry_index].destmeta,
+		&config->avb_params[entry_index].srcmeta,
+	};
+	int entry_field_counts[] = {1, 1,};
+	uint64_t tmp;
+	int rc;
+
+	if (matches(field_name, "entry-count") == 0) {
+		rc = reliable_uint64_from_string(&tmp, field_val, NULL);
+		config->avb_params_count = tmp;
+		goto out;
+	}
+	rc = get_match(field_name, options, ARRAY_SIZE(options));
+	if (rc < 0) {
+		goto out;
+	}
+	rc = generic_table_entry_modify(
+			fields[rc],
+			entry_index,
+			config->avb_params_count,
+			entry_field_counts[rc],
+			field_val);
+out:
+	return rc;
 }
 
 static int clock_sync_params_table_entry_modify(
