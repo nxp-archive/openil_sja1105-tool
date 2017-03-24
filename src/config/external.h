@@ -98,6 +98,10 @@ void sja1105_general_params_table_set(void*, struct sja1105_general_params_table
 void sja1105_general_params_table_get(void*, struct sja1105_general_params_table*);
 void sja1105_general_params_table_show(struct sja1105_general_params_table*);
 void sja1105_general_params_table_fmt_show(char*, char*, struct sja1105_general_params_table*);
+void sja1105_avb_params_table_set(void*, struct sja1105_avb_params_table*);
+void sja1105_avb_params_table_get(void*, struct sja1105_avb_params_table*);
+void sja1105_avb_params_table_show(struct sja1105_avb_params_table*);
+void sja1105_avb_params_table_fmt_show(char*, char*, struct sja1105_avb_params_table*);
 int config_table_entry_modify(struct sja1105_config*, char*, char*, char*);
 
 #endif
