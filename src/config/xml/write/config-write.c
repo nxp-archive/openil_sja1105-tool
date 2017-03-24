@@ -119,7 +119,7 @@ int write_config_tables(xmlTextWriterPtr writer, struct sja1105_config *config)
 		config->l2_lookup_params_count,
 		config->l2_forwarding_params_count,
 		0,
-		0,
+		config->avb_params_count,
 		config->general_params_count,
 		0,
 		config->xmii_params_count,
