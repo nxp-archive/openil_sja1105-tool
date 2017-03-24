@@ -30,22 +30,52 @@
  *****************************************************************************/
 #include "internal.h"
 
-int avb_parameters_table_write(xmlTextWriterPtr writer, struct sja1105_config *config)
+static void sja1105_avb_params_table_access(
+		void *buf,
+		struct sja1105_avb_params_table *table,
+		int write)
 {
-	int rc = 0;
-	int i;
+	int  (*get_or_set)(void*, uint64_t*, int, int, int);
+	int    size = SIZE_AVB_PARAMS_TABLE;
 
-	logv("writing %d AVB Parameters entries", config->avb_params_count);
-	for (i = 0; i < config->avb_params_count; i++) {
-		rc |= xmlTextWriterStartElement(writer, BAD_CAST "entry");
-		rc |= xml_write_field(writer, "destmeta", config->avb_params[i].destmeta);
-		rc |= xml_write_field(writer, "srcmeta",  config->avb_params[i].srcmeta);
-		rc |= xmlTextWriterEndElement(writer);
-		if (rc < 0) {
-			loge("error while writing AVB Table element %d", i);
-			goto out;
-		}
+	if (write == 0) {
+		get_or_set = generic_table_field_get;
+		memset(table, 0, sizeof(*table));
+	} else {
+		get_or_set = generic_table_field_set;
+		memset(buf, 0, size);
 	}
-out:
-	return rc;
+	get_or_set(buf, &table->destmeta, 95, 48, size);
+	get_or_set(buf, &table->srcmeta,  47,  0, size);
+}
+
+void sja1105_avb_params_table_set(void *buf,
+                                  struct sja1105_avb_params_table *table)
+{
+	sja1105_avb_params_table_access(buf, table, 1);
+}
+
+void sja1105_avb_params_table_get(void *buf,
+                                  struct sja1105_avb_params_table *table)
+{
+	sja1105_avb_params_table_access(buf, table, 0);
+}
+
+void sja1105_avb_params_table_fmt_show(
+		char *print_buf,
+		char *fmt,
+		struct sja1105_avb_params_table *table)
+{
+	formatted_append(print_buf, fmt, "DESTMETA 0x%" PRIX64, table->destmeta);
+	formatted_append(print_buf, fmt, "SRCMETA  0x%" PRIX64, table->srcmeta);
+}
+
+void sja1105_avb_params_table_show(struct sja1105_avb_params_table *entry)
+{
+	char print_buf[MAX_LINE_SIZE];
+	char *fmt = "%s\n";
+
+	memset(print_buf, 0, MAX_LINE_SIZE);
+	sja1105_avb_params_table_fmt_show(print_buf, fmt, entry);
+	fprintf(stdout, print_buf);
 }

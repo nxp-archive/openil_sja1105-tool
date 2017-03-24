@@ -90,6 +90,7 @@
 #define MAX_L2_FORWARDING_PARAMS_COUNT           1
 #define MAX_GENERAL_PARAMS_COUNT                 1
 #define MAX_XMII_PARAMS_COUNT                    1
+#define MAX_AVB_PARAMS_COUNT                     1
 
 #define SJA1105_DEVICE_ID                        0x9E00030E
 
@@ -235,6 +236,11 @@ struct sja1105_xmii_params_table {
 	uint64_t xmii_mode[5];
 };
 
+struct sja1105_avb_params_table {
+	uint64_t destmeta;
+	uint64_t srcmeta;
+};
+
 struct sja1105_config {
 	struct sja1105_schedule_entry               schedule[MAX_SCHEDULE_COUNT];
 	struct sja1105_schedule_entry_points_entry  schedule_entry_points[MAX_SCHEDULE_ENTRY_POINTS_COUNT];
@@ -247,6 +253,7 @@ struct sja1105_config {
 	struct sja1105_schedule_entry_points_params schedule_entry_points_params[MAX_SCHEDULE_ENTRY_POINTS_PARAMS_COUNT];
 	struct sja1105_l2_lookup_params_table       l2_lookup_params[MAX_L2_LOOKUP_PARAMS_COUNT];
 	struct sja1105_l2_forwarding_params_table   l2_forwarding_params[MAX_L2_FORWARDING_PARAMS_COUNT];
+	struct sja1105_avb_params_table             avb_params[MAX_AVB_PARAMS_COUNT];
 	struct sja1105_general_params_table         general_params[MAX_GENERAL_PARAMS_COUNT];
 	struct sja1105_xmii_params_table            xmii_params[MAX_XMII_PARAMS_COUNT];
 	int    schedule_count;
@@ -260,6 +267,7 @@ struct sja1105_config {
 	int    schedule_entry_points_params_count;
 	int    l2_lookup_params_count;
 	int    l2_forwarding_params_count;
+	int    avb_params_count;
 	int    general_params_count;
 	int    xmii_params_count;
 };

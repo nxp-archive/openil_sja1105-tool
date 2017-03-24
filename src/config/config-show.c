@@ -250,7 +250,7 @@ static void general_params_table_show(struct sja1105_config *config)
 		formatted_append(tmp_buf[i], fmt, "");
 		print_bufs[i] = tmp_buf[i];
 	}
-	show_print_bufs(print_bufs, config->l2_forwarding_params_count);
+	show_print_bufs(print_bufs, config->general_params_count);
 }
 
 static void xmii_table_show(struct sja1105_config *config)
@@ -269,7 +269,7 @@ static void xmii_table_show(struct sja1105_config *config)
 		formatted_append(tmp_buf[i], fmt, "");
 		print_bufs[i] = tmp_buf[i];
 	}
-	show_print_bufs(print_bufs, config->l2_forwarding_params_count);
+	show_print_bufs(print_bufs, config->xmii_params_count);
 }
 
 static void vl_lookup_table_show(struct sja1105_config *config)
@@ -294,7 +294,21 @@ static void retagging_table_show(struct sja1105_config *config)
 
 static void avb_params_table_show(struct sja1105_config *config)
 {
-	loge("AVB Parameters Table unimplemented");
+	char  tmp_buf[MAX_AVB_PARAMS_COUNT][MAX_LINE_SIZE];
+	char *print_bufs[MAX_AVB_PARAMS_COUNT];
+	char *fmt = "%-35s\n";
+	int   i;
+
+	printf("AVB Parameters Table: %d entries\n", config->avb_params_count);
+	for (i = 0; i < config->avb_params_count; i++) {
+		memset(tmp_buf[i], 0, MAX_LINE_SIZE);
+		formatted_append(tmp_buf[i], fmt, "Entry %d:", i);
+		sja1105_avb_params_table_fmt_show(
+				tmp_buf[i], fmt, &config->avb_params[i]);
+		formatted_append(tmp_buf[i], fmt, "");
+		print_bufs[i] = tmp_buf[i];
+	}
+	show_print_bufs(print_bufs, config->avb_params_count);
 }
 
 static void clock_sync_params_table_show(struct sja1105_config *config)
