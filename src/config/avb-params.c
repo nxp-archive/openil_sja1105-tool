@@ -66,8 +66,14 @@ void sja1105_avb_params_table_fmt_show(
 		char *fmt,
 		struct sja1105_avb_params_table *table)
 {
-	formatted_append(print_buf, fmt, "DESTMETA 0x%" PRIX64, table->destmeta);
-	formatted_append(print_buf, fmt, "SRCMETA  0x%" PRIX64, table->srcmeta);
+	char mac_buf[MAC_ADDR_SIZE];
+
+	memset(mac_buf, 0, sizeof(mac_buf));
+	mac_addr_sprintf(mac_buf, table->destmeta);
+	formatted_append(print_buf, fmt, "DESTMETA %s", mac_buf);
+	memset(mac_buf, 0, sizeof(mac_buf));
+	mac_addr_sprintf(mac_buf, table->srcmeta);
+	formatted_append(print_buf, fmt, "SRCMETA  %s", mac_buf);
 }
 
 void sja1105_avb_params_table_show(struct sja1105_avb_params_table *entry)
