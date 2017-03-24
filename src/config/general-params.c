@@ -84,14 +84,24 @@ void sja1105_general_params_table_fmt_show(
 		char *fmt,
 		struct sja1105_general_params_table *table)
 {
+	char mac_buf[MAC_ADDR_SIZE];
+
 	formatted_append(print_buf, fmt, "VLLUPFORMAT 0x%" PRIX64, table->vllupformat);
 	formatted_append(print_buf, fmt, "MIRR_PTACU  0x%" PRIX64, table->mirr_ptacu);
 	formatted_append(print_buf, fmt, "SWITCHID    0x%" PRIX64, table->switchid);
 	formatted_append(print_buf, fmt, "HOSTPRIO    0x%" PRIX64, table->hostprio);
-	formatted_append(print_buf, fmt, "MAC_FLTRES1 0x%" PRIX64, table->mac_fltres1);
-	formatted_append(print_buf, fmt, "MAC_FLTRES0 0x%" PRIX64, table->mac_fltres0);
-	formatted_append(print_buf, fmt, "MAC_FLT1    0x%" PRIX64, table->mac_flt1);
-	formatted_append(print_buf, fmt, "MAC_FLT0    0x%" PRIX64, table->mac_flt0);
+	memset(mac_buf, 0, sizeof(mac_buf));
+	mac_addr_sprintf(mac_buf, table->mac_fltres1);
+	formatted_append(print_buf, fmt, "MAC_FLTRES1 %s", mac_buf);
+	memset(mac_buf, 0, sizeof(mac_buf));
+	mac_addr_sprintf(mac_buf, table->mac_fltres0);
+	formatted_append(print_buf, fmt, "MAC_FLTRES0 %s", mac_buf);
+	memset(mac_buf, 0, sizeof(mac_buf));
+	mac_addr_sprintf(mac_buf, table->mac_flt1);
+	formatted_append(print_buf, fmt, "MAC_FLT1    %s", mac_buf);
+	memset(mac_buf, 0, sizeof(mac_buf));
+	mac_addr_sprintf(mac_buf, table->mac_flt0);
+	formatted_append(print_buf, fmt, "MAC_FLT0    %s", mac_buf);
 	formatted_append(print_buf, fmt, "INCL_SRCPT1 0x%" PRIX64, table->incl_srcpt1);
 	formatted_append(print_buf, fmt, "INCL_SRCPT0 0x%" PRIX64, table->incl_srcpt0);
 	formatted_append(print_buf, fmt, "SEND_META1  0x%" PRIX64, table->send_meta1);

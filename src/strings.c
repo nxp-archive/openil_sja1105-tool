@@ -96,6 +96,35 @@ void formatted_append(char *buffer, char *width_fmt, char *fmt, ...)
 	va_end(args);
 }
 
+int mac_addr_from_string(uint64_t *to, char *from, char **endptr)
+{
+	char    *p = from;
+	uint64_t mac_addr_val = 0;
+	uint64_t byte;
+	int      rc = 0;
+	int      i;
+
+	for (i = 5; i >= 0; i--) {
+		byte = strtoull(p, &p, 16);
+		mac_addr_val |= byte << (i * 8);
+		if (endptr != NULL) {
+			*endptr = p;
+		}
+		if (i == 0 && *p != 0) {
+			logi("exhibit a");
+			/* 6 bytes processed but more are present */
+			rc = -1;
+			goto out;
+		} else if (i != 0 && *p == ':') {
+			p++;
+		}
+	}
+	*to = mac_addr_val;
+out:
+	logi("returning %d", rc);
+	return rc;
+}
+
 int reliable_uint64_from_string(uint64_t *to, char *from, char **endptr)
 {
 	int   errno_saved = errno;
@@ -104,6 +133,10 @@ int reliable_uint64_from_string(uint64_t *to, char *from, char **endptr)
 	char *p;
 
 	errno = 0;
+	if (strchr(from, ':')) {
+		rc = mac_addr_from_string(to, from, endptr);
+		goto out;
+	}
 	if (strncmp(from, "0b", 2) == 0) {
 		from += 2;
 		base  = 2;
@@ -305,5 +338,16 @@ void show_print_bufs(char **print_bufs, int count)
 		linewise_concat(print_bufs + i, increment);
 		i += increment;
 	}
+}
+
+void mac_addr_sprintf(char *buf, uint64_t mac_hexval)
+{
+	snprintf(buf, MAC_ADDR_SIZE, "%.02x:%.02x:%.02x:%.02x:%.02x:%.02x",
+	        (unsigned) (mac_hexval >> 40) & 0xff,
+	        (unsigned) (mac_hexval >> 32) & 0xff,
+	        (unsigned) (mac_hexval >> 24) & 0xff,
+	        (unsigned) (mac_hexval >> 16) & 0xff,
+	        (unsigned) (mac_hexval >>  8) & 0xff,
+	        (unsigned) (mac_hexval >>  0) & 0xff);
 }
 

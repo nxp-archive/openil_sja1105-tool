@@ -71,8 +71,12 @@ void sja1105_l2_lookup_entry_fmt_show(
 		char *fmt,
 		struct sja1105_l2_lookup_entry *entry)
 {
+	char mac_buf[MAC_ADDR_SIZE];
+
 	formatted_append(print_buf, fmt, "VLANID    0x%" PRIX64, entry->vlanid);
-	formatted_append(print_buf, fmt, "MACADDR   0x%" PRIX64, entry->macaddr);
+	memset(mac_buf, 0, sizeof(mac_buf));
+	mac_addr_sprintf(mac_buf, entry->macaddr);
+	formatted_append(print_buf, fmt, "MACADDR   %s", mac_buf);
 	formatted_append(print_buf, fmt, "DESTPORTS 0x%" PRIX64, entry->destports);
 	formatted_append(print_buf, fmt, "ENFPORT   0x%" PRIX64, entry->enfport);
 	formatted_append(print_buf, fmt, "INDEX     0x%" PRIX64, entry->index);
