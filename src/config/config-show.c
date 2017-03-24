@@ -250,7 +250,7 @@ static void general_params_table_show(struct sja1105_config *config)
 		formatted_append(tmp_buf[i], fmt, "");
 		print_bufs[i] = tmp_buf[i];
 	}
-	show_print_bufs(print_bufs, config->l2_forwarding_params_count);
+	show_print_bufs(print_bufs, config->general_params_count);
 }
 
 static void xmii_table_show(struct sja1105_config *config)
@@ -269,7 +269,7 @@ static void xmii_table_show(struct sja1105_config *config)
 		formatted_append(tmp_buf[i], fmt, "");
 		print_bufs[i] = tmp_buf[i];
 	}
-	show_print_bufs(print_bufs, config->l2_forwarding_params_count);
+	show_print_bufs(print_bufs, config->xmii_params_count);
 }
 
 static void vl_lookup_table_show(struct sja1105_config *config)
