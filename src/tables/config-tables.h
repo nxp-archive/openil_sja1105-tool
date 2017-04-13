@@ -93,8 +93,10 @@
 #define MAX_L2_LOOKUP_PARAMS_COUNT               1
 #define MAX_L2_FORWARDING_PARAMS_COUNT           1
 #define MAX_GENERAL_PARAMS_COUNT                 1
+#define MAX_RETAGGING_COUNT                      32
 #define MAX_XMII_PARAMS_COUNT                    1
 #define MAX_AVB_PARAMS_COUNT                     1
+#define MAX_CLK_SYNC_COUNT                       1
 
 #define SJA1105_DEVICE_ID                        0x9E00030E
 
@@ -286,6 +288,60 @@ struct sja1105_vl_forwarding_params_table {
 	uint64_t debugen;
 };
 
+struct sja1105_clk_sync_params_table {
+	uint64_t etssrcpcf;
+	uint64_t waitthsync;
+	uint64_t wfintmout;
+	uint64_t unsytotsyth;
+	uint64_t unsytosyth;
+	uint64_t tsytosyth;
+	uint64_t tsyth;
+	uint64_t tsytousyth;
+	uint64_t syth;
+	uint64_t sytousyth;
+	uint64_t sypriority;
+	uint64_t sydomain;
+	uint64_t stth;
+	uint64_t sttointth;
+	uint64_t pcfsze;
+	uint64_t pcfpriority;
+	uint64_t obvwinsz;
+	uint64_t numunstbcy;
+	uint64_t numstbcy;
+	uint64_t maxtranspclk;
+	uint64_t maxintegcy;
+	uint64_t listentmout;
+	uint64_t intcydur;
+	uint64_t inttotentth;
+	uint64_t vlidout;
+	uint64_t vlidimnmin;
+	uint64_t vlidinmax;
+	uint64_t caentmout;
+	uint64_t accdevwin;
+	uint64_t vlidselect;
+	uint64_t tentsyrelen;
+	uint64_t asytensyen;
+	uint64_t sytostben;
+	uint64_t syrelen;
+	uint64_t sysyen;
+	uint64_t syasyen;
+	uint64_t ipcframesy;
+	uint64_t stabasyen;
+	uint64_t swmaster;
+	uint64_t fullcbg;
+	uint64_t srcport[8];
+};
+
+struct sja1105_retagging_entry {
+	uint64_t egr_port;
+	uint64_t ing_port;
+	uint64_t vlan_ing;
+	uint64_t vlan_egr;
+	uint64_t do_not_learn;
+	uint64_t use_dest_ports;
+	uint64_t destports;
+};
+
 struct sja1105_config {
 	struct sja1105_schedule_entry               schedule[MAX_SCHEDULE_COUNT];
 	struct sja1105_schedule_entry_points_entry  schedule_entry_points[MAX_SCHEDULE_ENTRY_POINTS_COUNT];
@@ -303,7 +359,9 @@ struct sja1105_config {
 	struct sja1105_l2_lookup_params_table       l2_lookup_params[MAX_L2_LOOKUP_PARAMS_COUNT];
 	struct sja1105_l2_forwarding_params_table   l2_forwarding_params[MAX_L2_FORWARDING_PARAMS_COUNT];
 	struct sja1105_avb_params_table             avb_params[MAX_AVB_PARAMS_COUNT];
+	struct sja1105_clk_sync_params_table        clk_sync_params[MAX_CLK_SYNC_COUNT];
 	struct sja1105_general_params_table         general_params[MAX_GENERAL_PARAMS_COUNT];
+	struct sja1105_retagging_entry              retagging[MAX_RETAGGING_COUNT];
 	struct sja1105_xmii_params_table            xmii_params[MAX_XMII_PARAMS_COUNT];
 	int    schedule_count;
 	int    schedule_entry_points_count;
@@ -321,7 +379,9 @@ struct sja1105_config {
 	int    l2_lookup_params_count;
 	int    l2_forwarding_params_count;
 	int    avb_params_count;
+	int    clk_sync_params_count;
 	int    general_params_count;
+	int    retagging_count;
 	int    xmii_params_count;
 };
 
