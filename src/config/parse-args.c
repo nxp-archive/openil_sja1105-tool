@@ -173,9 +173,10 @@ out_1:
 
 int config_save(const char *config_file, struct sja1105_config *config)
 {
-	int fd, rc;
+	int   rc = 0;
 	char *buf;
-	int len;
+	int   len;
+	int   fd;
 
 	len = sja1105_config_get_length(config);
 
@@ -218,8 +219,8 @@ int config_upload(struct spi_setup *spi_setup, struct sja1105_config *config)
 	char  *config_buf;
 	int    config_buf_len;
 	int    crc_len;
+	int    rc = 0;
 	int    fd;
-	int    rc;
 	int    i;
 
 	fd = configure_spi(spi_setup);
@@ -235,9 +236,17 @@ int config_upload(struct spi_setup *spi_setup, struct sja1105_config *config)
 		goto out_2;
 	}
 	/* Write Device ID to first 4 bytes of config_buf */
-	generic_table_field_set(config_buf, &device_id, 31, 0, SIZE_SJA1105_DEVICE_ID);
+	rc = generic_table_field_set(config_buf, &device_id, 31, 0, SIZE_SJA1105_DEVICE_ID);
+	if (rc < 0) {
+		loge("failed to write device id to buffer");
+		goto out_3;
+	}
 	/* Write config tables to config_buf */
-	sja1105_config_set(config_buf + SIZE_SJA1105_DEVICE_ID, config);
+	rc = sja1105_config_set(config_buf + SIZE_SJA1105_DEVICE_ID, config);
+	if (rc < 0) {
+		loge("failed to write config tables to buffer");
+		goto out_3;
+	}
 	/* Recalculate CRC of the last header */
 	/* Don't include the CRC field itself */
 	crc_len = config_buf_len - 4;
@@ -263,7 +272,6 @@ int config_upload(struct spi_setup *spi_setup, struct sja1105_config *config)
 			goto out_3;
 		}
 	}
-	rc = 0;
 out_3:
 	free(config_buf);
 out_2:
