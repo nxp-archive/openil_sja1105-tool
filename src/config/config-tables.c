@@ -402,6 +402,70 @@ static void sja1105_config_patch_vllupformat(struct sja1105_config *config)
 	}
 }
 
+static int sja1105_config_check_valid(struct sja1105_config *config)
+{
+	if (config->schedule_count > 0) {
+		if (config->schedule_entry_points_count == 0) {
+			loge("schedule-table not empty, but schedule-entry-points-table empty");
+			return -1;
+		}
+		if (config->schedule_params_count != MAX_SCHEDULE_PARAMS_COUNT) {
+			loge("schedule-table not empty, but schedule-parameters-table empty");
+			return -1;
+		}
+		if (config->schedule_entry_points_params_count != MAX_SCHEDULE_ENTRY_POINTS_PARAMS_COUNT) {
+			loge("schedule-table not empty, but schedule-entry-points-parameters-table empty");
+			return -1;
+		}
+	}
+	if (config->vl_lookup_count > 0) {
+		if (config->vl_policing_count == 0) {
+			loge("vl-lookup-table not empty, but vl-policing-table empty");
+			return -1;
+		}
+		if (config->vl_forwarding_count == 0)  {
+			loge("vl-lookup-table not empty, but vl-forwarding-table empty");
+			return -1;
+		}
+		if (config->vl_forwarding_params_count != MAX_VL_FORWARDING_PARAMS_COUNT) {
+			loge("vl-forwarding-table not empty, but vl-forwarding-parameters-table empty");
+			return -1;
+		}
+	}
+	if (config->l2_policing_count == 0) {
+		loge("l2-policing-table empty");
+		return -1;
+	}
+	if (config->vlan_lookup_count == 0) {
+		loge("vlan-lookup-table empty");
+		return -1;
+	}
+	if (config->l2_forwarding_count != MAX_L2_FORWARDING_COUNT) {
+		loge("l2-forwarding-table does not have %d entries",
+		     MAX_L2_FORWARDING_PARAMS_COUNT);
+		return -1;
+	}
+	if (config->mac_config_count != MAX_MAC_CONFIG_COUNT) {
+		loge("mac-config-table does not have %d entries",
+		     MAX_MAC_CONFIG_COUNT);
+		return -1;
+	}
+	if (config->l2_forwarding_params_count != MAX_L2_FORWARDING_PARAMS_COUNT) {
+		loge("l2-forwarding-parameters-table does not have %d entries",
+		     MAX_L2_FORWARDING_PARAMS_COUNT);
+		return -1;
+	}
+	if (config->general_params_count != MAX_GENERAL_PARAMS_COUNT) {
+		loge("general-parameters-table is empty");
+		return -1;
+	}
+	if (config->xmii_params_count != MAX_XMII_PARAMS_COUNT) {
+		loge("xmii-mode-parameters-table is empty");
+		return -1;
+	}
+	return 0;
+}
+
 int sja1105_config_get(void *buf, struct sja1105_config *config)
 {
 	struct sja1105_table_header hdr;
@@ -455,7 +519,7 @@ int sja1105_config_get(void *buf, struct sja1105_config *config)
 		}
 	}
 	sja1105_config_patch_vllupformat(config);
-	return 0;
+	return sja1105_config_check_valid(config);
 error:
 	return -1;
 }
@@ -478,10 +542,15 @@ int sja1105_config_set(void *buf, struct sja1105_config *config)
 	}
 
 	struct sja1105_table_header header;
-	char *p = buf;
-	char *table_start;
-	int i;
+	char  *p = buf;
+	char  *table_start;
+	int    rc;
+	int    i;
 
+	rc = sja1105_config_check_valid(config);
+	if (rc < 0) {
+		goto out;
+	}
 	memset(&header, 0, sizeof(header));
 	PUT_CONFIG_IN_BUF_FN(config->schedule_count,
 	                     SIZE_SCHEDULE_ENTRY,
@@ -583,7 +652,8 @@ int sja1105_config_set(void *buf, struct sja1105_config *config)
 	header.len = 0;           /* Marks that header is final */
 	header.crc = 0xDEADBEEF;  /* Will be replaced on-the-fly on "config upload" */
 	sja1105_table_header_set(p, &header);
-	return 0;
+out:
+	return rc;
 }
 
 unsigned int sja1105_config_get_length(struct sja1105_config *config)

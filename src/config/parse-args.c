@@ -185,7 +185,11 @@ int config_save(const char *config_file, struct sja1105_config *config)
 		loge("malloc failed");
 		goto out_1;
 	}
-	sja1105_config_set(buf, config);
+	rc = sja1105_config_set(buf, config);
+	if (rc < 0) {
+		loge("sja1105_config_set failed");
+		goto out_2;
+	}
 
 	fd = open(config_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (fd < 0) {
