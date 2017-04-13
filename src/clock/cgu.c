@@ -103,7 +103,7 @@ error:
 static int rgmii_clocking_setup(int fd, struct spi_setup *spi_setup,
                                 int port, int speed_mbps)
 {
-	int rc;
+	int rc = 0;
 
 	logv("configuring rgmii clocking for port %d, speed %dMbps",
 	     port, speed_mbps);
@@ -118,19 +118,21 @@ static int rgmii_clocking_setup(int fd, struct spi_setup *spi_setup,
 		rc = sja1105_cgu_idiv_config(fd, spi_setup, port, 1, 10);
 	}
 	if (rc < 0) {
-		goto error;
+		loge("configuring idiv failed");
+		goto out;
 	}
 	rc = sja1105_cgu_rgmii_tx_clk_config(fd, spi_setup, port, speed_mbps);
 	if (rc < 0) {
-		goto error;
+		loge("configuring rgmii tx clock failed");
+		goto out;
 	}
 	rc = sja1105_rgmii_cfg_pad_tx_config(fd, spi_setup, port);
 	if (rc < 0) {
-		goto error;
+		loge("configuring tx pad registers failed");
+		goto out;
 	}
-	return 0;
-error:
-	return -1;
+out:
+	return rc;
 }
 
 int sja1105_clocking_setup(struct spi_setup *spi_setup,
@@ -138,7 +140,7 @@ int sja1105_clocking_setup(struct spi_setup *spi_setup,
                            struct sja1105_mac_config_entry  *mac_config)
 {
 	int speed_mbps;
-	int rc;
+	int rc = 0;
 	int fd;
 	int i;
 
@@ -167,7 +169,6 @@ int sja1105_clocking_setup(struct spi_setup *spi_setup,
 			goto out_1;
 		}
 	}
-	rc = 0;
 out_1:
 	close(fd);
 out:

@@ -166,8 +166,8 @@ int get_port_status(
 	struct sja1105_spi_message msg;
 	uint8_t tx_buf[MSG_LEN_HL];
 	uint8_t rx_buf[MSG_LEN_HL];
+	int rc = 0;
 	int fd;
-	int rc;
 
 	fd = configure_spi(spi_setup);
 	if (fd < 0) {
