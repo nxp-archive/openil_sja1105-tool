@@ -43,13 +43,18 @@ int sja1105_config_read_from_xml(const char *xml_file, struct sja1105_config *co
 int xml_read_field(void *where, char *field_name, xmlNode *node)
 {
 	uint64_t *field_val;
-	char     *value;
+	char     *value = NULL;
 	int       rc = 0;
+	xmlNode  *cur;
 
 	field_val = (uint64_t*) where;
-	value = (char*) xmlGetProp(node, (xmlChar*) field_name);
+	for (cur = node->children; cur != NULL; cur = cur->next) {
+		if (xmlStrcmp(cur->name, (const xmlChar*) field_name) == 0) {
+			value = (char*) xmlNodeListGetString(cur->doc, cur->xmlChildrenNode, 1);
+		}
+	}
 	if (value == NULL) {
-		loge("no property named \"%s\"!", field_name);
+		loge("no element named \"%s\"!", field_name);
 		rc = -1;
 		goto out;
 	}
@@ -62,15 +67,20 @@ out:
 int xml_read_array(void *where, int max_count, char *field_name, xmlNode *node)
 {
 	uint64_t *field_val;
-	char     *value;
-	int       rc;
+	char     *value = NULL;
+	int       rc = 0;
+	xmlNode  *cur;
 
 	/* Convert "where" to an array of uint64_t */
 	field_val = (uint64_t*) where;
 	/* Get the "field_name" property into our "value" string */
-	value = (char*) xmlGetProp(node, (xmlChar*) field_name);
+	for (cur = node->children; cur != NULL; cur = cur->next) {
+		if (xmlStrcmp(cur->name, (const xmlChar*) field_name) == 0) {
+			value = (char*) xmlNodeListGetString(cur->doc, cur->xmlChildrenNode, 1);
+		}
+	}
 	if (value == NULL) {
-		loge("no property named \"%s\"!", field_name);
+		loge("no element named \"%s\"!", field_name);
 		rc = -1;
 		goto out;
 	}
@@ -129,10 +139,7 @@ static int parse_config_table(xmlNode *node, struct sja1105_config *config)
 		xmii_mode_parameters_table_parse,
 	};
 	int rc;
-	if (strcmp((char*) node->name, "table") != 0) {
-		loge("Invalid node \"%s\", expected \"table\"", node->name);
-	}
-	table_name = (char*) xmlGetProp(node, (xmlChar*) "name");
+	table_name = (char*) node->name;
 	rc = get_match(table_name, options, ARRAY_SIZE(options));
 	if (rc < 0) {
 		goto out;
@@ -152,8 +159,8 @@ static int parse_root(xmlNode *root, struct sja1105_config *config)
 		rc = -1;
 		goto out;
 	}
-	if (strcasecmp((char*) root->name, "config")) {
-		loge("Root node must be named \"config\"!");
+	if (strcasecmp((char*) root->name, SJA1105_NETCONF_ROOT)) {
+		loge("Root node must be named \"%s\"!", SJA1105_NETCONF_ROOT);
 		rc = -1;
 		goto out;
 	}
@@ -175,9 +182,10 @@ int sja1105_config_read_from_xml(const char *xml_file, struct sja1105_config *co
 {
 	xmlNode *root = NULL;
 	xmlDoc  *doc = NULL;
+	int      rc = 0;
 
 	/*
-	 * this initialize the library and check potential ABI mismatches
+	 * this initializes the library and checks potential ABI mismatches
 	 * between the version it was compiled for and the actual shared
 	 * library used.
 	 */
@@ -193,12 +201,11 @@ int sja1105_config_read_from_xml(const char *xml_file, struct sja1105_config *co
 		goto out;
 	}
 	memset(config, 0, sizeof(*config));
-	return parse_root(root, config);
-
+	rc = parse_root(root, config);
 out:
 	xmlFreeDoc(doc);
 	xmlCleanupParser();
-	return -1;
+	return rc;
 }
 
 #endif
