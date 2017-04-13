@@ -185,11 +185,7 @@ int config_save(const char *config_file, struct sja1105_config *config)
 		loge("malloc failed");
 		goto out_1;
 	}
-	rc = sja1105_config_set(buf, config);
-	if (rc < 0) {
-		loge("sja1105_config_set failed");
-		goto out_2;
-	}
+	sja1105_config_set(buf, config);
 
 	fd = open(config_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (fd < 0) {
@@ -227,6 +223,11 @@ int config_upload(struct spi_setup *spi_setup, struct sja1105_config *config)
 	int    fd;
 	int    i;
 
+	rc = sja1105_config_check_valid(config);
+	if (rc < 0) {
+		loge("config is invalid");
+		goto out_1;
+	}
 	fd = configure_spi(spi_setup);
 	if (fd < 0) {
 		loge("failed to open spi device");
@@ -246,11 +247,7 @@ int config_upload(struct spi_setup *spi_setup, struct sja1105_config *config)
 		goto out_3;
 	}
 	/* Write config tables to config_buf */
-	rc = sja1105_config_set(config_buf + SIZE_SJA1105_DEVICE_ID, config);
-	if (rc < 0) {
-		loge("failed to write config tables to buffer");
-		goto out_3;
-	}
+	sja1105_config_set(config_buf + SIZE_SJA1105_DEVICE_ID, config);
 	/* Recalculate CRC of the last header */
 	/* Don't include the CRC field itself */
 	crc_len = config_buf_len - 4;
