@@ -387,194 +387,102 @@ error:
 
 int sja1105_config_set(void *buf, struct sja1105_config *config)
 {
+#define PUT_CONFIG_IN_BUF_FN(entry_count, entry_size, blk_id, set_fn, array) \
+	if (entry_count) {                                                   \
+		header.block_id = (blk_id);                                  \
+		header.len = (entry_count) * (entry_size) / 4;               \
+		sja1105_table_header_set_with_crc(p, &header);               \
+		p += SIZE_TABLE_HEADER;                                      \
+		table_start = p;                                             \
+		for (i = 0; i < (entry_count); i++) {                        \
+			set_fn(p, &(array)[i]);                              \
+			p += (entry_size);                                   \
+		}                                                            \
+		sja1105_table_write_crc(table_start, p);                     \
+		p += 4;                                                      \
+	}
+
 	struct sja1105_table_header header;
 	char *p = buf;
 	char *table_start;
 	int i;
 
 	memset(&header, 0, sizeof(header));
-	if (config->schedule_count) {
-		header.block_id = BLKID_SCHEDULE_TABLE;
-		header.len = config->schedule_count * SIZE_SCHEDULE_ENTRY / 4;
-		sja1105_table_header_set_with_crc(p, &header);
-		p += SIZE_TABLE_HEADER;
-		table_start = p;
-		for (i = 0; i < config->schedule_count; i++) {
-			sja1105_schedule_entry_set(p, &config->schedule[i]);
-			p += SIZE_SCHEDULE_ENTRY;
-		}
-		sja1105_table_write_crc(table_start, p);
-		p += 4;
-	}
-	if (config->schedule_entry_points_count) {
-		header.block_id = BLKID_SCHEDULE_ENTRY_POINTS_TABLE;
-		header.len = config->schedule_entry_points_count * SIZE_SCHEDULE_ENTRY_POINTS_ENTRY / 4;
-		sja1105_table_header_set_with_crc(p, &header);
-		p += SIZE_TABLE_HEADER;
-		table_start = p;
-		for (i = 0; i < config->schedule_entry_points_count; i++) {
-			sja1105_schedule_entry_points_entry_set(p, &config->schedule_entry_points[i]);
-			p += SIZE_SCHEDULE_ENTRY_POINTS_ENTRY;
-		}
-		sja1105_table_write_crc(table_start, p);
-		p += 4;
-	}
-	if (config->l2_lookup_count) {
-		header.block_id = BLKID_L2_LOOKUP_TABLE;
-		header.len = config->l2_lookup_count * SIZE_L2_LOOKUP_ENTRY / 4;
-		sja1105_table_header_set_with_crc(p, &header);
-		p += SIZE_TABLE_HEADER;
-		table_start = p;
-		for (i = 0; i < config->l2_lookup_count; i++) {
-			sja1105_l2_lookup_entry_set(p, &config->l2_lookup[i]);
-			p += SIZE_L2_LOOKUP_ENTRY;
-		}
-		sja1105_table_write_crc(table_start, p);
-		p += 4;
-	}
-	if (config->l2_policing_count) {
-		header.block_id = BLKID_L2_POLICING_TABLE;
-		header.len = config->l2_policing_count * SIZE_L2_POLICING_ENTRY / 4;
-		sja1105_table_header_set_with_crc(p, &header);
-		p += SIZE_TABLE_HEADER;
-		table_start = p;
-		for (i = 0; i < config->l2_policing_count; i++) {
-			sja1105_l2_policing_entry_set(p, &config->l2_policing[i]);
-			p += SIZE_L2_POLICING_ENTRY;
-		}
-		sja1105_table_write_crc(table_start, p);
-		p += 4;
-	}
-	if (config->vlan_lookup_count) {
-		header.block_id = BLKID_VLAN_LOOKUP_TABLE;
-		header.len = config->vlan_lookup_count * SIZE_VLAN_LOOKUP_ENTRY / 4;
-		sja1105_table_header_set_with_crc(p, &header);
-		p += SIZE_TABLE_HEADER;
-		table_start = p;
-		for (i = 0; i < config->vlan_lookup_count; i++) {
-			sja1105_vlan_lookup_entry_set(p, &config->vlan_lookup[i]);
-			p += SIZE_VLAN_LOOKUP_ENTRY;
-		}
-		sja1105_table_write_crc(table_start, p);
-		p += 4;
-	}
-	if (config->l2_forwarding_count) {
-		header.block_id = BLKID_L2_FORWARDING_TABLE;
-		header.len = config->l2_forwarding_count * SIZE_L2_FORWARDING_ENTRY / 4;
-		sja1105_table_header_set_with_crc(p, &header);
-		p += SIZE_TABLE_HEADER;
-		table_start = p;
-		for (i = 0; i < config->l2_forwarding_count; i++) {
-			sja1105_l2_forwarding_entry_set(p, &config->l2_forwarding[i]);
-			p += SIZE_L2_FORWARDING_ENTRY;
-		}
-		sja1105_table_write_crc(table_start, p);
-		p += 4;
-	}
-	if (config->mac_config_count) {
-		header.block_id = BLKID_MAC_CONFIG_TABLE;
-		header.len = config->mac_config_count * SIZE_MAC_CONFIG_ENTRY / 4;
-		sja1105_table_header_set_with_crc(p, &header);
-		p += SIZE_TABLE_HEADER;
-		table_start = p;
-		for (i = 0; i < config->mac_config_count; i++) {
-			sja1105_mac_config_entry_set(p, &config->mac_config[i]);
-			p += SIZE_MAC_CONFIG_ENTRY;
-		}
-		sja1105_table_write_crc(table_start, p);
-		p += 4;
-	}
-	if (config->schedule_params_count) {
-		header.block_id = BLKID_SCHEDULE_PARAMS_TABLE;
-		header.len = config->schedule_params_count * SIZE_SCHEDULE_PARAMS_ENTRY / 4;
-		sja1105_table_header_set_with_crc(p, &header);
-		p += SIZE_TABLE_HEADER;
-		table_start = p;
-		for (i = 0; i < config->schedule_params_count; i++) {
-			sja1105_schedule_params_entry_set(p, &config->schedule_params[i]);
-			p += SIZE_SCHEDULE_PARAMS_ENTRY;
-		}
-		sja1105_table_write_crc(table_start, p);
-		p += 4;
-	}
-	if (config->schedule_entry_points_params_count) {
-		header.block_id = BLKID_SCHEDULE_ENTRY_POINTS_PARAMS_TABLE;
-		header.len = config->schedule_entry_points_params_count * SIZE_SCHEDULE_ENTRY_POINTS_PARAMS_ENTRY / 4;
-		sja1105_table_header_set_with_crc(p, &header);
-		p += SIZE_TABLE_HEADER;
-		table_start = p;
-		for (i = 0; i < config->schedule_entry_points_params_count; i++) {
-			sja1105_schedule_entry_points_params_set(p, &config->schedule_entry_points_params[i]);
-			p += SIZE_SCHEDULE_ENTRY_POINTS_PARAMS_ENTRY;
-		}
-		sja1105_table_write_crc(table_start, p);
-		p += 4;
-	}
-	if (config->l2_lookup_params_count) {
-		header.block_id = BLKID_L2_LOOKUP_PARAMS_TABLE;
-		header.len = config->l2_lookup_params_count * SIZE_L2_LOOKUP_PARAMS_TABLE / 4;
-		sja1105_table_header_set_with_crc(p, &header);
-		p += SIZE_TABLE_HEADER;
-		table_start = p;
-		for (i = 0; i < config->l2_lookup_params_count; i++) {
-			sja1105_l2_lookup_params_table_set(p, &config->l2_lookup_params[i]);
-			p += SIZE_L2_LOOKUP_PARAMS_TABLE;
-		}
-		sja1105_table_write_crc(table_start, p);
-		p += 4;
-	}
-	if (config->l2_forwarding_params_count) {
-		header.block_id = BLKID_L2_FORWARDING_PARAMS_TABLE;
-		header.len = config->l2_forwarding_params_count * SIZE_L2_FORWARDING_PARAMS_TABLE / 4;
-		sja1105_table_header_set_with_crc(p, &header);
-		p += SIZE_TABLE_HEADER;
-		table_start = p;
-		for (i = 0; i < config->l2_forwarding_params_count; i++) {
-			sja1105_l2_forwarding_params_table_set(p, &config->l2_forwarding_params[i]);
-			p += SIZE_L2_FORWARDING_PARAMS_TABLE;
-		}
-		sja1105_table_write_crc(table_start, p);
-		p += 4;
-	}
-	if (config->avb_params_count) {
-		header.block_id = BLKID_AVB_PARAMS_TABLE;
-		header.len = config->avb_params_count * SIZE_AVB_PARAMS_TABLE / 4;
-		sja1105_table_header_set_with_crc(p, &header);
-		p += SIZE_TABLE_HEADER;
-		table_start = p;
-		for (i = 0; i < config->avb_params_count; i++) {
-			sja1105_avb_params_table_set(p, &config->avb_params[i]);
-			p += SIZE_AVB_PARAMS_TABLE;
-		}
-		sja1105_table_write_crc(table_start, p);
-		p += 4;
-	}
-	if (config->general_params_count) {
-		header.block_id = BLKID_GENERAL_PARAMS_TABLE;
-		header.len = config->general_params_count * SIZE_GENERAL_PARAMS_TABLE / 4;
-		sja1105_table_header_set_with_crc(p, &header);
-		p += SIZE_TABLE_HEADER;
-		table_start = p;
-		for (i = 0; i < config->general_params_count; i++) {
-			sja1105_general_params_table_set(p, &config->general_params[i]);
-			p += SIZE_GENERAL_PARAMS_TABLE;
-		}
-		sja1105_table_write_crc(table_start, p);
-		p += 4;
-	}
-	if (config->xmii_params_count) {
-		header.block_id = BLKID_XMII_MODE_PARAMS_TABLE;
-		header.len = config->xmii_params_count * SIZE_XMII_MODE_PARAMS_TABLE / 4;
-		sja1105_table_header_set_with_crc(p, &header);
-		p += SIZE_TABLE_HEADER;
-		table_start = p;
-		for (i = 0; i < config->xmii_params_count; i++) {
-			sja1105_xmii_params_table_set(p, &config->xmii_params[i]);
-			p += SIZE_XMII_MODE_PARAMS_TABLE;
-		}
-		sja1105_table_write_crc(table_start, p);
-		p += 4;
-	}
+	PUT_CONFIG_IN_BUF_FN(config->schedule_count,
+	                     SIZE_SCHEDULE_ENTRY,
+	                     BLKID_SCHEDULE_TABLE,
+	                     sja1105_schedule_entry_set,
+	                     config->schedule);
+	PUT_CONFIG_IN_BUF_FN(config->schedule_entry_points_count,
+	                     SIZE_SCHEDULE_ENTRY_POINTS_ENTRY,
+	                     BLKID_SCHEDULE_ENTRY_POINTS_TABLE,
+	                     sja1105_schedule_entry_points_entry_set,
+	                     config->schedule_entry_points);
+	PUT_CONFIG_IN_BUF_FN(config->l2_lookup_count,
+	                     SIZE_L2_LOOKUP_ENTRY,
+	                     BLKID_L2_LOOKUP_TABLE,
+	                     sja1105_l2_lookup_entry_set,
+	                     config->l2_lookup);
+	PUT_CONFIG_IN_BUF_FN(config->l2_policing_count,
+	                     SIZE_L2_POLICING_ENTRY,
+	                     BLKID_L2_POLICING_TABLE,
+	                     sja1105_l2_policing_entry_set,
+	                     config->l2_policing);
+	PUT_CONFIG_IN_BUF_FN(config->vlan_lookup_count,
+	                     SIZE_VLAN_LOOKUP_ENTRY,
+	                     BLKID_VLAN_LOOKUP_TABLE,
+	                     sja1105_vlan_lookup_entry_set,
+	                     config->vlan_lookup);
+	PUT_CONFIG_IN_BUF_FN(config->l2_forwarding_count,
+	                     SIZE_L2_FORWARDING_ENTRY,
+	                     BLKID_L2_FORWARDING_TABLE,
+	                     sja1105_l2_forwarding_entry_set,
+	                     config->l2_forwarding);
+	PUT_CONFIG_IN_BUF_FN(config->mac_config_count,
+	                     SIZE_MAC_CONFIG_ENTRY,
+	                     BLKID_MAC_CONFIG_TABLE,
+	                     sja1105_mac_config_entry_set,
+	                     config->mac_config);
+	PUT_CONFIG_IN_BUF_FN(config->schedule_params_count,
+	                     SIZE_SCHEDULE_PARAMS_ENTRY,
+	                     BLKID_SCHEDULE_PARAMS_TABLE,
+	                     sja1105_schedule_params_entry_set,
+	                     config->schedule_params);
+	PUT_CONFIG_IN_BUF_FN(config->schedule_entry_points_params_count,
+	                     SIZE_SCHEDULE_ENTRY_POINTS_PARAMS_ENTRY,
+	                     BLKID_SCHEDULE_ENTRY_POINTS_PARAMS_TABLE,
+	                     sja1105_schedule_entry_points_params_set,
+	                     config->schedule_entry_points_params);
+	PUT_CONFIG_IN_BUF_FN(config->schedule_entry_points_params_count,
+	                     SIZE_SCHEDULE_ENTRY_POINTS_PARAMS_ENTRY,
+	                     BLKID_SCHEDULE_ENTRY_POINTS_PARAMS_TABLE,
+	                     sja1105_schedule_entry_points_params_set,
+	                     config->schedule_entry_points_params);
+	PUT_CONFIG_IN_BUF_FN(config->l2_lookup_params_count,
+	                     SIZE_L2_LOOKUP_PARAMS_TABLE,
+	                     BLKID_L2_LOOKUP_PARAMS_TABLE,
+	                     sja1105_l2_lookup_params_table_set,
+	                     config->l2_lookup_params);
+	PUT_CONFIG_IN_BUF_FN(config->l2_forwarding_params_count,
+	                     SIZE_L2_FORWARDING_PARAMS_TABLE,
+	                     BLKID_L2_FORWARDING_PARAMS_TABLE,
+	                     sja1105_l2_forwarding_params_table_set,
+	                     config->l2_forwarding_params);
+	PUT_CONFIG_IN_BUF_FN(config->avb_params_count,
+	                     SIZE_AVB_PARAMS_TABLE,
+	                     BLKID_AVB_PARAMS_TABLE,
+	                     sja1105_avb_params_table_set,
+	                     config->avb_params);
+	PUT_CONFIG_IN_BUF_FN(config->general_params_count,
+	                     SIZE_GENERAL_PARAMS_TABLE,
+	                     BLKID_GENERAL_PARAMS_TABLE,
+	                     sja1105_general_params_table_set,
+	                     config->general_params);
+	PUT_CONFIG_IN_BUF_FN(config->xmii_params_count,
+	                     SIZE_XMII_MODE_PARAMS_TABLE,
+	                     BLKID_XMII_MODE_PARAMS_TABLE,
+	                     sja1105_xmii_params_table_set,
+	                     config->xmii_params);
 	/* Final header */
 	header.block_id = 0;      /* Does not matter */
 	header.len = 0;           /* Marks that header is final */
