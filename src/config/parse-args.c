@@ -314,6 +314,10 @@ void config_parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 		if (rc < 0) {
 			goto error;
 		}
+		rc = sja1105_config_check_valid(&config);
+		if (rc < 0) {
+			goto error;
+		}
 		rc = config_save(spi_setup->staging_area, &config);
 		if (rc < 0) {
 			goto error;
@@ -323,6 +327,10 @@ void config_parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 			goto parse_error;
 		}
 		rc = config_load(spi_setup->staging_area, &config);
+		if (rc < 0) {
+			goto error;
+		}
+		rc = sja1105_config_check_valid(&config);
 		if (rc < 0) {
 			goto error;
 		}
