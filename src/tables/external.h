@@ -41,7 +41,6 @@ int generic_table_field_get(void*, uint64_t*, int, int, int);
 int generic_table_field_set(void*, uint64_t*, int, int, int);
 void generic_table_hexdump(void*, int);
 uint32_t ether_crc32_le(void*, unsigned int);
-void sja1105_table_write_crc(char*, char*);
 
 #define CONFIG_ADDR 0x20000
 
