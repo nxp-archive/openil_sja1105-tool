@@ -29,7 +29,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 #include "internal.h"
-#include "external.h"
 
 static void sja1105_table_write_crc(char *table_start, char *crc_ptr)
 {

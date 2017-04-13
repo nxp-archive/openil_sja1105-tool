@@ -42,4 +42,14 @@
 #include "../common.h"
 #include "external.h"
 
+int  config_default(struct sja1105_config*, char*);
+unsigned int sja1105_config_get_length(struct sja1105_config*);
+int  sja1105_config_hexdump(void *buf);
+int  sja1105_config_add_entry(struct sja1105_table_header*, void*, struct sja1105_config*);
+int  sja1105_config_get(void*, struct sja1105_config*);
+int  sja1105_config_set(void*, struct sja1105_config*);
+int  sja1105_config_show(struct sja1105_config*, char*);
+int sja1105_config_check_valid(struct sja1105_config*);
+int config_table_entry_modify(struct sja1105_config*, char*, char*, char*);
+
 #endif
