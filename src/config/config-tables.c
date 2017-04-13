@@ -31,7 +31,7 @@
 #include "internal.h"
 #include "external.h"
 
-void sja1105_table_write_crc(char *table_start, char *crc_ptr)
+static void sja1105_table_write_crc(char *table_start, char *crc_ptr)
 {
 	uint64_t computed_crc;
 	int len_bytes;
