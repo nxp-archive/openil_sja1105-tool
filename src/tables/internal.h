@@ -33,6 +33,8 @@
 
 #include <inttypes.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 #include "external.h"
 #include "../common.h"

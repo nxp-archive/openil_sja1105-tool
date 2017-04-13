@@ -249,6 +249,7 @@ struct sja1105_vl_lookup_entry {
 	uint64_t format;
 	uint64_t port;
 	union {
+		/* format == 0 */
 		struct {
 			uint64_t destports;
 			uint64_t iscritical;
@@ -256,6 +257,7 @@ struct sja1105_vl_lookup_entry {
 			uint64_t vlanid;
 			uint64_t vlanprior;
 		};
+		/* format == 1 */
 		struct {
 			uint64_t egrmirr;
 			uint64_t ingrmirr;
