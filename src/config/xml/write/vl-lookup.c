@@ -30,61 +30,35 @@
  *****************************************************************************/
 #include "internal.h"
 
-static int entry_get(xmlNode *node, struct sja1105_vl_policing_entry *entry)
+int vl_lookup_table_write(xmlTextWriterPtr writer, struct sja1105_config *config)
 {
+	struct sja1105_vl_lookup_entry *entry;
 	int rc = 0;
-	rc |= xml_read_field(&entry->type, "type", node);
-	rc |= xml_read_field(&entry->maxlen, "maxlen", node);
-	rc |= xml_read_field(&entry->sharindx, "sharindx", node);
-	if (entry->type == 0) {
-		logv("Reading extra fields for Rate-Constrained VL");
-		rc |= xml_read_field(&entry->bag, "bag", node);
-		rc |= xml_read_field(&entry->jitter, "jitter", node);
-	}
-	if (rc) {
-		loge("VL Policing entry incomplete!");
-	}
-	return rc;
-}
+	int i;
 
-static int parse_entry(xmlNode *node, struct sja1105_config *config)
-{
-	struct sja1105_vl_policing_entry entry;
-	int rc;
-
-	if (config->vl_policing_count >= MAX_VL_POLICING_COUNT) {
-		loge("Cannot have more than %d VL Policing entries!",
-		     MAX_VL_POLICING_COUNT);
-		rc = -1;
-		goto out;
-	}
-	memset(&entry, 0, sizeof(entry));
-	rc = entry_get(node, &entry);
-	config->vl_policing[config->vl_policing_count++] = entry;
-out:
-	return rc;
-}
-
-int vl_policing_table_parse(xmlNode *node, struct sja1105_config *config)
-{
-	xmlNode *c;
-	int rc = 0;
-
-	if (node->type != XML_ELEMENT_NODE) {
-		loge("VL Policing table node must be of element type!");
-		rc = -1;
-		goto out;
-	}
-	for (c = node->children; c != NULL; c = c->next) {
-		if (c->type != XML_ELEMENT_NODE) {
-			continue;
+	logv("writing %d VL Lookup entries", config->vl_lookup_count);
+	for (i = 0; i < config->vl_lookup_count; i++) {
+		rc |= xmlTextWriterStartElement(writer, BAD_CAST "entry");
+		entry = &config->vl_lookup[i];
+		if (entry->format == 0) {
+			rc |= xml_write_field(writer, "destports",  entry->destports);
+			rc |= xml_write_field(writer, "iscritical", entry->iscritical);
+			rc |= xml_write_field(writer, "macaddr",    entry->macaddr);
+			rc |= xml_write_field(writer, "vlanid",     entry->vlanid);
+			rc |= xml_write_field(writer, "port",       entry->port);
+			rc |= xml_write_field(writer, "vlanprior",  entry->vlanprior);
+		} else {
+			rc |= xml_write_field(writer, "egrmirr",    entry->egrmirr);
+			rc |= xml_write_field(writer, "ingrmirr",   entry->ingrmirr);
+			rc |= xml_write_field(writer, "vlld",       entry->vlld);
+			rc |= xml_write_field(writer, "port",       entry->port);
 		}
-		rc = parse_entry(c, config);
+		rc |= xmlTextWriterEndElement(writer);
 		if (rc < 0) {
+			loge("error while writing VL Lookup Table element %d", i);
 			goto out;
 		}
 	}
-	logv("read %d VL Policing entries", config->vl_policing_count);
 out:
 	return rc;
 }

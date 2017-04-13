@@ -119,7 +119,7 @@ static int parse_config_table(xmlNode *node, struct sja1105_config *config)
 		mac_configuration_table_parse,
 		schedule_parameters_table_parse,
 		schedule_entry_points_parameters_table_parse,
-		vl_forwarding_parameters_table_parse,
+		vl_fw_params_table_parse,
 		l2_address_lookup_parameters_table_parse,
 		l2_forwarding_parameters_table_parse,
 		clock_synchronization_parameters_table_parse,

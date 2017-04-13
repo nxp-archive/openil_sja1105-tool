@@ -67,14 +67,53 @@ int sja1105_config_add_entry(struct sja1105_table_header *hdr, void *buf, struct
 		return SIZE_SCHEDULE_ENTRY_POINTS_ENTRY;
 	}
 	case BLKID_VL_LOOKUP_TABLE:
-		printf("VL Lookup Table Unimplemented\n");
+	{
+		struct sja1105_vl_lookup_entry entry;
+		int count;
+
+		count = config->vl_lookup_count;
+		if (count >= MAX_VL_LOOKUP_COUNT) {
+			printf("There can be no more than %d VL Lookup entries\n",
+			       MAX_VL_LOOKUP_COUNT);
+			return -1;
+		}
+		sja1105_vl_lookup_entry_get(buf, &entry);
+		config->vl_lookup[count++] = entry;
+		config->vl_lookup_count = count;
 		return SIZE_VL_LOOKUP_ENTRY;
+	}
 	case BLKID_VL_POLICING_TABLE:
-		printf("VL Policing Table Unimplemented\n");
+	{
+		struct sja1105_vl_policing_entry entry;
+		int count;
+
+		count = config->vl_policing_count;
+		if (count >= MAX_VL_POLICING_COUNT) {
+			printf("There can be no more than %d VL Policing entries\n",
+			       MAX_VL_POLICING_COUNT);
+			return -1;
+		}
+		sja1105_vl_policing_entry_get(buf, &entry);
+		config->vl_policing[count++] = entry;
+		config->vl_policing_count = count;
 		return SIZE_VL_POLICING_ENTRY;
+	}
 	case BLKID_VL_FORWARDING_TABLE:
-		printf("VL Forwarding Table Unimplemented\n");
+	{
+		struct sja1105_vl_forwarding_entry entry;
+		int count;
+
+		count = config->vl_forwarding_count;
+		if (count >= MAX_VL_FORWARDING_COUNT) {
+			printf("There can be no more than %d VL Forwarding entries\n",
+			       MAX_VL_FORWARDING_COUNT);
+			return -1;
+		}
+		sja1105_vl_forwarding_entry_get(buf, &entry);
+		config->vl_forwarding[count++] = entry;
+		config->vl_forwarding_count = count;
 		return SIZE_VL_FORWARDING_ENTRY;
+	}
 	case BLKID_L2_LOOKUP_TABLE:
 	{
 		struct sja1105_l2_lookup_entry entry;
@@ -187,8 +226,21 @@ int sja1105_config_add_entry(struct sja1105_table_header *hdr, void *buf, struct
 		return SIZE_SCHEDULE_ENTRY_POINTS_PARAMS_ENTRY;
 	}
 	case BLKID_VL_FORWARDING_PARAMS_TABLE:
-		printf("VL Forwarding Parameters Table Unimplemented\n");
+	{
+		struct sja1105_vl_forwarding_params_table table;
+		int count;
+
+		count = config->vl_forwarding_params_count;
+		if (count >= MAX_VL_FORWARDING_PARAMS_COUNT) {
+			printf("There can be no more than %d VL Forwarding Parameters entries\n",
+			       MAX_VL_FORWARDING_PARAMS_COUNT);
+			return -1;
+		}
+		sja1105_vl_forwarding_params_table_get(buf, &table);
+		config->vl_forwarding_params_table[count++] = table;
+		config->vl_forwarding_params_count = count;
 		return SIZE_VL_FORWARDING_PARAMS_ENTRY;
+	}
 	case BLKID_L2_LOOKUP_PARAMS_TABLE:
 	{
 		struct sja1105_l2_lookup_params_table table;
@@ -328,6 +380,15 @@ error:
 	return -1;
 }
 
+static void sja1105_config_patch_vllupformat(struct sja1105_config *config)
+{
+	int i;
+
+	for (i = 0; i < config->vl_lookup_count; i++) {
+		config->vl_lookup[i].format = config->general_params->vllupformat;
+	}
+}
+
 int sja1105_config_get(void *buf, struct sja1105_config *config)
 {
 	struct sja1105_table_header hdr;
@@ -380,6 +441,7 @@ int sja1105_config_get(void *buf, struct sja1105_config *config)
 			goto error;
 		}
 	}
+	sja1105_config_patch_vllupformat(config);
 	return 0;
 error:
 	return -1;
@@ -418,6 +480,21 @@ int sja1105_config_set(void *buf, struct sja1105_config *config)
 	                     BLKID_SCHEDULE_ENTRY_POINTS_TABLE,
 	                     sja1105_schedule_entry_points_entry_set,
 	                     config->schedule_entry_points);
+	PUT_CONFIG_IN_BUF_FN(config->vl_lookup_count,
+	                     SIZE_VL_LOOKUP_ENTRY,
+	                     BLKID_VL_LOOKUP_TABLE,
+	                     sja1105_vl_lookup_entry_set,
+	                     config->vl_lookup);
+	PUT_CONFIG_IN_BUF_FN(config->vl_policing_count,
+	                     SIZE_VL_POLICING_ENTRY,
+	                     BLKID_VL_POLICING_TABLE,
+	                     sja1105_vl_policing_entry_set,
+	                     config->vl_policing);
+	PUT_CONFIG_IN_BUF_FN(config->vl_forwarding_count,
+	                     SIZE_VL_FORWARDING_ENTRY,
+	                     BLKID_VL_FORWARDING_TABLE,
+	                     sja1105_vl_forwarding_entry_set,
+	                     config->vl_forwarding);
 	PUT_CONFIG_IN_BUF_FN(config->l2_lookup_count,
 	                     SIZE_L2_LOOKUP_ENTRY,
 	                     BLKID_L2_LOOKUP_TABLE,
@@ -453,6 +530,11 @@ int sja1105_config_set(void *buf, struct sja1105_config *config)
 	                     BLKID_SCHEDULE_ENTRY_POINTS_PARAMS_TABLE,
 	                     sja1105_schedule_entry_points_params_set,
 	                     config->schedule_entry_points_params);
+	PUT_CONFIG_IN_BUF_FN(config->vl_forwarding_params_count,
+	                     SIZE_VL_FORWARDING_PARAMS_ENTRY,
+	                     BLKID_VL_FORWARDING_PARAMS_TABLE,
+	                     sja1105_vl_forwarding_params_table_set,
+	                     config->vl_forwarding_params_table);
 	PUT_CONFIG_IN_BUF_FN(config->schedule_entry_points_params_count,
 	                     SIZE_SCHEDULE_ENTRY_POINTS_PARAMS_ENTRY,
 	                     BLKID_SCHEDULE_ENTRY_POINTS_PARAMS_TABLE,
@@ -499,6 +581,9 @@ unsigned int sja1105_config_get_length(struct sja1105_config *config)
 	/* Table headers */
 	header_count += (config->schedule_count != 0);
 	header_count += (config->schedule_entry_points_count != 0);
+	header_count += (config->vl_lookup_count != 0);
+	header_count += (config->vl_policing_count != 0);
+	header_count += (config->vl_forwarding_count != 0);
 	header_count += (config->l2_lookup_count != 0);
 	header_count += (config->l2_policing_count != 0);
 	header_count += (config->vlan_lookup_count != 0);
@@ -506,6 +591,7 @@ unsigned int sja1105_config_get_length(struct sja1105_config *config)
 	header_count += (config->mac_config_count != 0);
 	header_count += (config->schedule_params_count != 0);
 	header_count += (config->schedule_entry_points_params_count != 0);
+	header_count += (config->vl_forwarding_params_count != 0);
 	header_count += (config->l2_lookup_params_count != 0);
 	header_count += (config->l2_forwarding_params_count != 0);
 	header_count += (config->avb_params_count != 0);
@@ -515,6 +601,9 @@ unsigned int sja1105_config_get_length(struct sja1105_config *config)
 	sum += header_count * (SIZE_TABLE_HEADER + 4); /* plus CRC at the end */
 	sum += config->schedule_count * SIZE_SCHEDULE_ENTRY;
 	sum += config->schedule_entry_points_count * SIZE_SCHEDULE_ENTRY_POINTS_ENTRY;
+	sum += config->vl_lookup_count * SIZE_VL_LOOKUP_ENTRY;
+	sum += config->vl_policing_count * SIZE_VL_POLICING_ENTRY;
+	sum += config->vl_forwarding_count * SIZE_VL_FORWARDING_ENTRY;
 	sum += config->l2_lookup_count * SIZE_L2_LOOKUP_ENTRY;
 	sum += config->l2_policing_count * SIZE_L2_POLICING_ENTRY;
 	sum += config->vlan_lookup_count * SIZE_VLAN_LOOKUP_ENTRY;
@@ -522,6 +611,7 @@ unsigned int sja1105_config_get_length(struct sja1105_config *config)
 	sum += config->mac_config_count * SIZE_MAC_CONFIG_ENTRY;
 	sum += config->schedule_params_count * SIZE_SCHEDULE_PARAMS_ENTRY;
 	sum += config->schedule_entry_points_params_count * SIZE_SCHEDULE_ENTRY_POINTS_PARAMS_ENTRY;
+	sum += config->vl_forwarding_params_count * SIZE_VL_FORWARDING_PARAMS_ENTRY;
 	sum += config->l2_lookup_params_count * SIZE_L2_LOOKUP_PARAMS_TABLE;
 	sum += config->l2_forwarding_params_count * SIZE_L2_FORWARDING_PARAMS_TABLE;
 	sum += config->avb_params_count * SIZE_AVB_PARAMS_TABLE;

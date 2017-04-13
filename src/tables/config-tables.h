@@ -79,6 +79,9 @@
 
 #define MAX_SCHEDULE_COUNT                       1024
 #define MAX_SCHEDULE_ENTRY_POINTS_COUNT          2048
+#define MAX_VL_LOOKUP_COUNT                      1024
+#define MAX_VL_POLICING_COUNT                    1024
+#define MAX_VL_FORWARDING_COUNT                  1024
 #define MAX_L2_LOOKUP_COUNT                      1024
 #define MAX_L2_POLICING_COUNT                    45
 #define MAX_VLAN_LOOKUP_COUNT                    4096
@@ -86,6 +89,7 @@
 #define MAX_MAC_CONFIG_COUNT                     5
 #define MAX_SCHEDULE_PARAMS_COUNT                1
 #define MAX_SCHEDULE_ENTRY_POINTS_PARAMS_COUNT   1
+#define MAX_VL_FORWARDING_PARAMS_COUNT           1
 #define MAX_L2_LOOKUP_PARAMS_COUNT               1
 #define MAX_L2_FORWARDING_PARAMS_COUNT           1
 #define MAX_GENERAL_PARAMS_COUNT                 1
@@ -241,9 +245,51 @@ struct sja1105_avb_params_table {
 	uint64_t srcmeta;
 };
 
+struct sja1105_vl_lookup_entry {
+	uint64_t format;
+	uint64_t port;
+	union {
+		struct {
+			uint64_t destports;
+			uint64_t iscritical;
+			uint64_t macaddr;
+			uint64_t vlanid;
+			uint64_t vlanprior;
+		};
+		struct {
+			uint64_t egrmirr;
+			uint64_t ingrmirr;
+			uint64_t vlld; /* XXX I think this should be called vlid */
+		};
+	};
+};
+
+struct sja1105_vl_policing_entry {
+	uint64_t type;
+	uint64_t maxlen;
+	uint64_t sharindx;
+	uint64_t bag;
+	uint64_t jitter;
+};
+
+struct sja1105_vl_forwarding_entry {
+	uint64_t type;
+	uint64_t priority;
+	uint64_t partition;
+	uint64_t destports;
+};
+
+struct sja1105_vl_forwarding_params_table {
+	uint64_t partspc[8];
+	uint64_t debugen;
+};
+
 struct sja1105_config {
 	struct sja1105_schedule_entry               schedule[MAX_SCHEDULE_COUNT];
 	struct sja1105_schedule_entry_points_entry  schedule_entry_points[MAX_SCHEDULE_ENTRY_POINTS_COUNT];
+	struct sja1105_vl_lookup_entry              vl_lookup[MAX_VL_LOOKUP_COUNT];
+	struct sja1105_vl_policing_entry            vl_policing[MAX_VL_POLICING_COUNT];
+	struct sja1105_vl_forwarding_entry          vl_forwarding[MAX_VL_FORWARDING_COUNT];
 	struct sja1105_l2_lookup_entry              l2_lookup[MAX_L2_LOOKUP_COUNT];
 	struct sja1105_l2_policing_entry            l2_policing[MAX_L2_POLICING_COUNT];
 	struct sja1105_vlan_lookup_entry            vlan_lookup[MAX_VLAN_LOOKUP_COUNT];
@@ -251,6 +297,7 @@ struct sja1105_config {
 	struct sja1105_mac_config_entry             mac_config[MAX_MAC_CONFIG_COUNT];
 	struct sja1105_schedule_params_entry        schedule_params[MAX_SCHEDULE_PARAMS_COUNT];
 	struct sja1105_schedule_entry_points_params schedule_entry_points_params[MAX_SCHEDULE_ENTRY_POINTS_PARAMS_COUNT];
+	struct sja1105_vl_forwarding_params_table   vl_forwarding_params_table[MAX_VL_FORWARDING_PARAMS_COUNT];
 	struct sja1105_l2_lookup_params_table       l2_lookup_params[MAX_L2_LOOKUP_PARAMS_COUNT];
 	struct sja1105_l2_forwarding_params_table   l2_forwarding_params[MAX_L2_FORWARDING_PARAMS_COUNT];
 	struct sja1105_avb_params_table             avb_params[MAX_AVB_PARAMS_COUNT];
@@ -258,6 +305,9 @@ struct sja1105_config {
 	struct sja1105_xmii_params_table            xmii_params[MAX_XMII_PARAMS_COUNT];
 	int    schedule_count;
 	int    schedule_entry_points_count;
+	int    vl_lookup_count;
+	int    vl_policing_count;
+	int    vl_forwarding_count;
 	int    l2_lookup_count;
 	int    l2_policing_count;
 	int    vlan_lookup_count;
@@ -265,6 +315,7 @@ struct sja1105_config {
 	int    mac_config_count;
 	int    schedule_params_count;
 	int    schedule_entry_points_params_count;
+	int    vl_forwarding_params_count;
 	int    l2_lookup_params_count;
 	int    l2_forwarding_params_count;
 	int    avb_params_count;
