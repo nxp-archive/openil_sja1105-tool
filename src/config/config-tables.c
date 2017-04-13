@@ -401,7 +401,7 @@ static void sja1105_config_patch_vllupformat(struct sja1105_config *config)
 	}
 }
 
-static int sja1105_config_check_valid(struct sja1105_config *config)
+int sja1105_config_check_valid(struct sja1105_config *config)
 {
 	if (config->schedule_count > 0) {
 		if (config->schedule_entry_points_count == 0) {
@@ -518,12 +518,12 @@ int sja1105_config_get(void *buf, struct sja1105_config *config)
 		}
 	}
 	sja1105_config_patch_vllupformat(config);
-	return sja1105_config_check_valid(config);
+	return 0;
 error:
 	return -1;
 }
 
-int sja1105_config_set(void *buf, struct sja1105_config *config)
+void sja1105_config_set(void *buf, struct sja1105_config *config)
 {
 #define PUT_CONFIG_IN_BUF_FN(entry_count, entry_size, blk_id, set_fn, array) \
 	if (entry_count) {                                                   \
@@ -543,13 +543,8 @@ int sja1105_config_set(void *buf, struct sja1105_config *config)
 	struct sja1105_table_header header;
 	char  *p = buf;
 	char  *table_start;
-	int    rc;
 	int    i;
 
-	rc = sja1105_config_check_valid(config);
-	if (rc < 0) {
-		goto out;
-	}
 	memset(&header, 0, sizeof(header));
 	PUT_CONFIG_IN_BUF_FN(config->schedule_count,
 	                     SIZE_SCHEDULE_ENTRY,
@@ -651,8 +646,6 @@ int sja1105_config_set(void *buf, struct sja1105_config *config)
 	header.len = 0;           /* Marks that header is final */
 	header.crc = 0xDEADBEEF;  /* Will be replaced on-the-fly on "config upload" */
 	sja1105_table_header_set(p, &header);
-out:
-	return rc;
 }
 
 unsigned int sja1105_config_get_length(struct sja1105_config *config)
