@@ -126,7 +126,6 @@ static void l2_fw_table_show(struct sja1105_config *config)
 	char  tmp_buf[MAX_L2_FORWARDING_COUNT][MAX_LINE_SIZE];
 	char *print_bufs[MAX_L2_FORWARDING_COUNT];
 	char *fmt = "%-45s\n";
-	int   increment;
 	int   i;
 
 	printf("L2 Forwarding Table: %d entries\n", config->l2_forwarding_count);
@@ -145,7 +144,6 @@ static void mac_config_table_show(struct sja1105_config *config)
 	char  tmp_buf[MAX_MAC_CONFIG_COUNT][MAX_LINE_SIZE];
 	char *print_bufs[MAX_MAC_CONFIG_COUNT];
 	char *fmt = "%-60s\n";
-	int   increment;
 	int   i;
 
 	printf("MAC Configuration Table: %d entries\n", config->mac_config_count);
