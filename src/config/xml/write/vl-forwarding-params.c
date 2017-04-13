@@ -32,7 +32,20 @@
 
 int vl_forwarding_parameters_table_write(xmlTextWriterPtr writer, struct sja1105_config *config)
 {
-	loge("VL Forwarding Parameters Table not implemented!");
-	return -1;
-}
+	int rc = 0;
+	int i;
 
+	logv("writing %d VL Forwarding Params entries", config->vl_forwarding_params_count);
+	for (i = 0; i < config->vl_forwarding_params_count; i++) {
+		rc |= xmlTextWriterStartElement(writer, BAD_CAST "entry");
+		rc |= xml_write_array(writer, "partspc", config->vl_forwarding_params_table[i].partspc, 8);
+		rc |= xml_write_field(writer, "debugen", config->vl_forwarding_params_table[i].debugen);
+		rc |= xmlTextWriterEndElement(writer);
+		if (rc < 0) {
+			loge("error while writing VL Forwarding Params Table");
+			goto out;
+		}
+	}
+out:
+	return rc;
+}

@@ -52,7 +52,7 @@ int l2_forwarding_table_parse(xmlNode *node, struct sja1105_config *config);
 int mac_configuration_table_parse(xmlNode *node, struct sja1105_config *config);
 int schedule_parameters_table_parse(xmlNode *node, struct sja1105_config *config);
 int schedule_entry_points_parameters_parse(xmlNode *node, struct sja1105_config *config);
-int vl_forwarding_parameters_table_parse(xmlNode *node, struct sja1105_config *config);
+int vl_fw_params_table_parse(xmlNode *node, struct sja1105_config *config);
 int l2_address_lookup_parameters_table_parse(xmlNode *node, struct sja1105_config *config);
 int l2_forwarding_parameters_table_parse(xmlNode *node, struct sja1105_config *config);
 int avb_parameters_table_parse(xmlNode *node, struct sja1105_config *config);

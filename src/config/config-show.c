@@ -274,17 +274,59 @@ static void xmii_table_show(struct sja1105_config *config)
 
 static void vl_lookup_table_show(struct sja1105_config *config)
 {
-	loge("VL Lookup Table unimplemented");
+	char  tmp_buf[MAX_VL_LOOKUP_COUNT][MAX_LINE_SIZE];
+	char *print_bufs[MAX_VL_LOOKUP_COUNT];
+	char *fmt = "%-35s\n";
+	int   i;
+
+	printf("VL Lookup Table: %d entries\n", config->vl_lookup_count);
+	for (i = 0; i < config->vl_lookup_count; i++) {
+		memset(tmp_buf[i], 0, MAX_LINE_SIZE);
+		formatted_append(tmp_buf[i], fmt, "Entry %d:", i);
+		sja1105_vl_lookup_entry_fmt_show(
+				tmp_buf[i], fmt, &config->vl_lookup[i]);
+		formatted_append(tmp_buf[i], fmt, "");
+		print_bufs[i] = tmp_buf[i];
+	}
+	show_print_bufs(print_bufs, config->vl_lookup_count);
 }
 
 static void vl_policing_table_show(struct sja1105_config *config)
 {
-	loge("VL Policing Table unimplemented");
+	char  tmp_buf[MAX_VL_POLICING_COUNT][MAX_LINE_SIZE];
+	char *print_bufs[MAX_VL_POLICING_COUNT];
+	char *fmt = "%-35s\n";
+	int   i;
+
+	printf("VL Policing Table: %d entries\n", config->vl_policing_count);
+	for (i = 0; i < config->vl_policing_count; i++) {
+		memset(tmp_buf[i], 0, MAX_LINE_SIZE);
+		formatted_append(tmp_buf[i], fmt, "Entry %d:", i);
+		sja1105_vl_policing_entry_fmt_show(
+				tmp_buf[i], fmt, &config->vl_policing[i]);
+		formatted_append(tmp_buf[i], fmt, "");
+		print_bufs[i] = tmp_buf[i];
+	}
+	show_print_bufs(print_bufs, config->vl_policing_count);
 }
 
 static void vl_fw_table_show(struct sja1105_config *config)
 {
-	loge("VL Forwarding Table unimplemented");
+	char  tmp_buf[MAX_VL_FORWARDING_COUNT][MAX_LINE_SIZE];
+	char *print_bufs[MAX_VL_FORWARDING_COUNT];
+	char *fmt = "%-35s\n";
+	int   i;
+
+	printf("VL Forwarding Table: %d entries\n", config->vl_forwarding_count);
+	for (i = 0; i < config->vl_forwarding_count; i++) {
+		memset(tmp_buf[i], 0, MAX_LINE_SIZE);
+		formatted_append(tmp_buf[i], fmt, "Entry %d:", i);
+		sja1105_vl_forwarding_entry_fmt_show(
+				tmp_buf[i], fmt, &config->vl_forwarding[i]);
+		formatted_append(tmp_buf[i], fmt, "");
+		print_bufs[i] = tmp_buf[i];
+	}
+	show_print_bufs(print_bufs, config->vl_forwarding_count);
 }
 
 static void retagging_table_show(struct sja1105_config *config)
@@ -318,7 +360,22 @@ static void clock_sync_params_table_show(struct sja1105_config *config)
 
 static void vl_fw_params_table_show(struct sja1105_config *config)
 {
-	loge("VL Forwarding Parameters Table unimplemented\n");
+	char  tmp_buf[MAX_VL_FORWARDING_PARAMS_COUNT][MAX_LINE_SIZE];
+	char *print_bufs[MAX_VL_FORWARDING_PARAMS_COUNT];
+	char *fmt = "%-35s\n";
+	int   i;
+
+	printf("VL Forwarding Parameters Table: %d entries\n", config->vl_forwarding_params_count);
+	for (i = 0; i < config->vl_forwarding_params_count; i++) {
+		memset(tmp_buf[i], 0, MAX_LINE_SIZE);
+		formatted_append(tmp_buf[i], fmt, "Entry %d:", i);
+		sja1105_vl_forwarding_params_table_fmt_show(
+				tmp_buf[i], fmt,
+				&config->vl_forwarding_params_table[i]);
+		formatted_append(tmp_buf[i], fmt, "");
+		print_bufs[i] = tmp_buf[i];
+	}
+	show_print_bufs(print_bufs, config->vl_forwarding_params_count);
 }
 
 int sja1105_config_show(struct sja1105_config *config, char *table_name)

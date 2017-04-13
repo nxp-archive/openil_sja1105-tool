@@ -102,6 +102,22 @@ void sja1105_avb_params_table_set(void*, struct sja1105_avb_params_table*);
 void sja1105_avb_params_table_get(void*, struct sja1105_avb_params_table*);
 void sja1105_avb_params_table_show(struct sja1105_avb_params_table*);
 void sja1105_avb_params_table_fmt_show(char*, char*, struct sja1105_avb_params_table*);
+void sja1105_vl_forwarding_params_table_set(void*, struct sja1105_vl_forwarding_params_table*);
+void sja1105_vl_forwarding_params_table_get(void*, struct sja1105_vl_forwarding_params_table*);
+void sja1105_vl_forwarding_params_table_show(struct sja1105_vl_forwarding_params_table*);
+void sja1105_vl_forwarding_params_table_fmt_show(char*, char*, struct sja1105_vl_forwarding_params_table*);
+void sja1105_vl_forwarding_entry_set(void*, struct sja1105_vl_forwarding_entry*);
+void sja1105_vl_forwarding_entry_get(void*, struct sja1105_vl_forwarding_entry*);
+void sja1105_vl_forwarding_entry_show(struct sja1105_vl_forwarding_entry*);
+void sja1105_vl_forwarding_entry_fmt_show(char*, char*, struct sja1105_vl_forwarding_entry*);
+void sja1105_vl_policing_entry_set(void*, struct sja1105_vl_policing_entry*);
+void sja1105_vl_policing_entry_get(void*, struct sja1105_vl_policing_entry*);
+void sja1105_vl_policing_entry_show(struct sja1105_vl_policing_entry*);
+void sja1105_vl_policing_entry_fmt_show(char*, char*, struct sja1105_vl_policing_entry*);
+void sja1105_vl_lookup_entry_set(void*, struct sja1105_vl_lookup_entry*);
+void sja1105_vl_lookup_entry_get(void*, struct sja1105_vl_lookup_entry*);
+void sja1105_vl_lookup_entry_show(struct sja1105_vl_lookup_entry*);
+void sja1105_vl_lookup_entry_fmt_show(char*, char*, struct sja1105_vl_lookup_entry*);
 int config_table_entry_modify(struct sja1105_config*, char*, char*, char*);
 
 #endif

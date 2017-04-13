@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016, NXP Semiconductors
+ * Copyright (c) 2017, NXP Semiconductors
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,26 @@
 
 int vl_policing_table_write(xmlTextWriterPtr writer, struct sja1105_config *config)
 {
-	loge("VL Policing Table not implemented!");
-	return -1;
+	int rc = 0;
+	int i;
+
+	logv("writing %d VL Policing entries", config->vl_policing_count);
+	for (i = 0; i < config->vl_policing_count; i++) {
+		rc |= xmlTextWriterStartElement(writer, BAD_CAST "entry");
+		rc |= xml_write_field(writer, "type",     config->vl_policing[i].type);
+		rc |= xml_write_field(writer, "maxlen",   config->vl_policing[i].maxlen);
+		rc |= xml_write_field(writer, "sharindx", config->vl_policing[i].sharindx);
+		if (config->vl_policing[i].type == 0) {
+			rc |= xml_write_field(writer, "bag",    config->vl_policing[i].bag);
+			rc |= xml_write_field(writer, "jitter", config->vl_policing[i].jitter);
+		}
+		rc |= xmlTextWriterEndElement(writer);
+		if (rc < 0) {
+			loge("error while writing VL Policing Table element %d", i);
+			goto out;
+		}
+	}
+out:
+	return rc;
 }
 
