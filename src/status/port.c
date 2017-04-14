@@ -151,7 +151,7 @@ void sja1105_port_status_get_hl2(void *buf, struct sja1105_port_status *status)
 	generic_table_field_get(p + 0x0, &status->n_not_reach,    31,  0, 4);
 }
 
-int get_port_status(
+int sja1105_port_status_get(
 		const struct spi_setup *spi_setup,
 		struct sja1105_port_status *status,
 		int port)
@@ -242,7 +242,7 @@ void status_ports(const struct spi_setup *spi_setup, int port_no)
 			print_buf[i] = (char*) calloc(size, sizeof(char));
 		}
 		for (i = 0; i < 5; i++) {
-			get_port_status(spi_setup, &status, i);
+			sja1105_port_status_get(spi_setup, &status, i);
 			sja1105_port_status_show(&status, i, print_buf[i]);
 		}
 		linewise_concat(print_buf, 5);
@@ -253,7 +253,7 @@ void status_ports(const struct spi_setup *spi_setup, int port_no)
 	} else {
 		/* Show for single port */
 		print_buf[0] = (char*) calloc(size, sizeof(char));
-		get_port_status(spi_setup, &status, port_no);
+		sja1105_port_status_get(spi_setup, &status, port_no);
 		sja1105_port_status_show(&status, port_no, print_buf[0]);
 		printf("%s\n", print_buf[0]);
 		free(print_buf[0]);

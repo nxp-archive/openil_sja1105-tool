@@ -31,9 +31,9 @@
 #include "internal.h"
 
 /* TODO: change usage */
-static void print_usage(const char *prog)
+static void print_usage()
 {
-	printf("Usage: %s status [ type ] [ options ]\n", prog);
+	printf("Usage: sja1105-tool status [ type ] [ options ]\n");
 	printf("[ type ] can be:\n");
 	printf(" * general -> General Status Information Register\n");
 	/*printf(" * sync    -> Synchronization Status Register\n");*/
@@ -63,14 +63,17 @@ void status_parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 	int port_no;
 	int match;
 
-	if (argc < 3) {
+	if (argc < 1) {
 		goto error;
 	}
-	match = get_match(argv[2], options, ARRAY_SIZE(options));
+	match = get_match(argv[0], options, ARRAY_SIZE(options));
 	if (match < 0) {
 		goto error;
 	} else if (strcmp(options[match], "general") == 0) {
-		status_general(spi_setup);
+		struct sja1105_general_status status;
+		sja1105_general_status_get(spi_setup, &status);
+		/* Display the collected general status registers */
+		sja1105_general_status_show(&status);
 	/*} else if (strcmp(options[match], "sync") == 0) {*/
 		/*status_sync(spi_setup);*/
 	/*} else if (strcmp(options[match], "vl") == 0) {*/
@@ -92,11 +95,11 @@ void status_parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 		/*}*/
 		/*status_vl_memory(spi_setup, partition);*/
 	} else if (strcmp(options[match], "ports") == 0) {
-		if (argc < 4) {
+		if (argc < 2) {
 			port_no = -1;
 			logv("showing for all ports");
 		} else {
-			sscanf(argv[3], "%d", &port_no);
+			sscanf(argv[1], "%d", &port_no);
 		}
 		status_ports(spi_setup, port_no);
 	/*} else if (strcmp(options[match], "ptp") == 0) {*/
@@ -106,7 +109,7 @@ void status_parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 	}
 	return;
 error:
-	print_usage(argv[0]);
+	print_usage();
 	exit(0);
 }
 

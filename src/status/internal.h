@@ -41,6 +41,8 @@
 #include "../common.h"
 
 void status_ports(const struct spi_setup *spi_setup, int port_no);
-int status_general(struct spi_setup *spi_setup);
+void sja1105_general_status_show(struct sja1105_general_status*);
+int  sja1105_general_status_get(struct spi_setup*,
+                                struct sja1105_general_status*);
 
 #endif
