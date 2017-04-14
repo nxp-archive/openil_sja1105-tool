@@ -105,6 +105,16 @@ static inline int parse_spi_setup(struct spi_setup *spi_setup, char *key, char *
 			     "Expected true or false.", value);
 			return -1;
 		}
+	} else if (strcmp(key, "auto_flush") == 0) {
+		if (strcmp(value, "false") == 0) {
+			spi_setup->flush = 0;
+		} else if (strcmp(value, "true") == 0) {
+			spi_setup->flush = 1;
+		} else {
+			loge("Invalid value \"%s\" for autoflush. "
+			     "Expected true or false.", value);
+			return -1;
+		}
 	} else if (strcmp(key, "staging-area") == 0) {
 		/* FIXME: Memory leak here */
 		spi_setup->staging_area = strdup(value);
@@ -118,16 +128,17 @@ error:
 	return rc;
 }
 
-static inline int parse_general_config(char *key, char *value)
+static inline int parse_general_config(struct general_config *general_conf,
+                                       char *key, char *value)
 {
 	uint64_t tmp;
 	int rc;
 
 	if (strcmp(key, "verbose") == 0) {
 		if (strcmp(value, "false") == 0) {
-			general_config.verbose = 0;
+			general_conf->verbose = 0;
 		} else if (strcmp(value, "true") == 0) {
-			general_config.verbose = 1;
+			general_conf->verbose = 1;
 		} else {
 			loge("Invalid value \"%s\" for verbose. "
 			     "Expected true or false.", value);
@@ -135,9 +146,9 @@ static inline int parse_general_config(char *key, char *value)
 		}
 	} else if (strcmp(key, "debug") == 0) {
 		if (strcmp(value, "false") == 0) {
-			general_config.debug = 0;
+			general_conf->debug = 0;
 		} else if (strcmp(value, "true") == 0) {
-			general_config.debug = 1;
+			general_conf->debug = 1;
 		} else {
 			loge("Invalid value \"%s\" for debug. "
 			     "Expected true or false.", value);
@@ -148,13 +159,13 @@ static inline int parse_general_config(char *key, char *value)
 		if (rc < 0) {
 			goto error;
 		}
-		general_config.entries_per_line = tmp;
+		general_conf->entries_per_line = tmp;
 	} else if (strcmp(key, "screen-width") == 0) {
 		rc = reliable_uint64_from_string(&tmp, value, NULL);
 		if (rc < 0) {
 			goto error;
 		}
-		general_config.screen_width = tmp;
+		general_conf->screen_width = tmp;
 	} else {
 		loge("Invalid key \"%s\"", key);
 		return -1;
@@ -165,12 +176,14 @@ error:
 	return rc;
 }
 
-static inline int parse_key_val(struct spi_setup *spi_setup, char *key, char *value, char *section_hdr)
+static inline int parse_key_val(struct spi_setup *spi_setup,
+                                struct general_config *general_conf,
+                                char *key, char *value, char *section_hdr)
 {
 	if (strcmp(section_hdr, "[spi-setup]") == 0) {
 		parse_spi_setup(spi_setup, key, value);
 	} else if (strcmp(section_hdr, "[general]") == 0) {
-		parse_general_config(key, value);
+		parse_general_config(general_conf, key, value);
 	} else {
 		loge("Invalid section header \"%s\"", section_hdr);
 		return -1;
@@ -178,9 +191,9 @@ static inline int parse_key_val(struct spi_setup *spi_setup, char *key, char *va
 	return 0;
 }
 
-int get_spi_setup(struct spi_setup *spi_setup)
+int read_config_file(char *filename, struct spi_setup *spi_setup,
+                     struct general_config *general_conf)
 {
-	const char *conf_file = SJA1105_CONF_FILE;
 	char  line[MAX_LINE_SIZE];
 	int   line_num = 0;
 	int   rc;
@@ -189,12 +202,14 @@ int get_spi_setup(struct spi_setup *spi_setup)
 	char *p;
 	FILE *fd;
 
-	fd = fopen(conf_file, "r");
+	fd = fopen(filename, "r");
 	if (!fd) {
-		printf("%s not present, loading default config\n", conf_file);
+		printf("%s not present, loading default config\n", filename);
 		rc = -1;
 		goto default_conf;
 	}
+	memset(spi_setup, 0, sizeof(*spi_setup));
+	memset(general_conf, 0, sizeof(*general_conf));
 	while (fgets(line, MAX_LINE_SIZE, fd)) {
 		p = trimwhitespace(line);
 		if (strlen(p) == 0 || p == NULL) {
@@ -223,7 +238,8 @@ int get_spi_setup(struct spi_setup *spi_setup)
 		}
 		key   = trimwhitespace(p);
 		value = trimwhitespace(value);
-		rc = parse_key_val(spi_setup, key, value, section_hdr);
+		rc = parse_key_val(spi_setup, general_conf,
+		                   key, value, section_hdr);
 		if (rc < 0) {
 			loge("Could not parse line %d: \"%s\"", line_num, line);
 			rc = -1;
@@ -248,10 +264,11 @@ default_conf:
 		spi_setup->cs_change    = 0;
 		spi_setup->mode         = SPI_CPHA;
 		spi_setup->dry_run      = 0;
-		general_config.verbose  = 0;
-		general_config.debug    = 0;
-		general_config.entries_per_line = 1;
-		general_config.screen_width     = 80;
+		spi_setup->flush        = 0;
+		general_conf->verbose   = 0;
+		general_conf->debug     = 0;
+		general_conf->entries_per_line = 1;
+		general_conf->screen_width     = 80;
 	}
 	return rc;
 }

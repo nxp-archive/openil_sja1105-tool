@@ -30,9 +30,9 @@
  *****************************************************************************/
 #include "internal.h"
 
-static void print_usage(const char *prog)
+static void print_usage()
 {
-	printf("Usage: %s reset [ cold | warm ] \n", prog);
+	printf("Usage: sja1105-tool reset [ cold | warm ] \n");
 }
 
 int sja1105_reset(const struct spi_setup *spi_setup, struct sja1105_reset_ctrl *reset)
@@ -69,19 +69,19 @@ int rgu_parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 {
 	struct sja1105_reset_ctrl reset;
 
-	if (argc < 3) {
+	if (argc < 1) {
 		goto parse_error;
 	}
-	if (matches(argv[2], "warm") == 0) {
+	if (matches(argv[0], "warm") == 0) {
 		reset.rst_ctrl = RGU_WARM;
-	} else if (matches(argv[2], "cold") == 0) {
+	} else if (matches(argv[0], "cold") == 0) {
 		reset.rst_ctrl = RGU_COLD;
 	} else {
 		goto parse_error;
 	}
 	return sja1105_reset(spi_setup, &reset);
 parse_error:
-	print_usage(argv[0]);
+	print_usage();
 	return -1;
 }
 

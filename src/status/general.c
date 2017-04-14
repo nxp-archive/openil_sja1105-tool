@@ -132,13 +132,13 @@ void sja1105_general_status_show(struct sja1105_general_status *status)
 	}
 }
 
-int status_general(struct spi_setup *spi_setup)
+int sja1105_general_status_get(struct spi_setup *spi_setup,
+                               struct sja1105_general_status *status)
 {
 #define SIZE_GENERAL_STATUS_A 0x0D * 4 /* 0x00 to 0x0C */
 #define SIZE_GENERAL_STATUS_B 0x0A * 4 /* 0xC0 to 0xC9 */
 #define MSG_LEN_A             SIZE_GENERAL_STATUS_A + SIZE_SPI_MSG_HEADER
 #define MSG_LEN_B             SIZE_GENERAL_STATUS_B + SIZE_SPI_MSG_HEADER
-	struct sja1105_general_status status;
 	struct sja1105_spi_message msg;
 	uint8_t tx_buf[MSG_LEN_A];
 	uint8_t rx_buf[MSG_LEN_A];
@@ -164,7 +164,7 @@ int status_general(struct spi_setup *spi_setup)
 		loge("spi_transfer failed for part A");
 		goto error_1;
 	}
-	sja1105_general_status_get_a(rx_buf + 4, &status);
+	sja1105_general_status_get_a(rx_buf + 4, status);
 
 	/* Part B - base address 0xC0 */
 	memset(tx_buf, 0, MSG_LEN_B);
@@ -180,10 +180,8 @@ int status_general(struct spi_setup *spi_setup)
 		loge("spi_transfer failed for part B");
 		goto error_1;
 	}
-	sja1105_general_status_get_b(rx_buf + 4, &status);
+	sja1105_general_status_get_b(rx_buf + 4, status);
 
-	/* Display the collected general status registers */
-	sja1105_general_status_show(&status);
 	close(fd);
 	return 0;
 error_1:

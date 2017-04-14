@@ -47,4 +47,6 @@
 #include "status/external.h"
 #include "spi/external.h"
 
+int read_config_file(char*, struct spi_setup*, struct general_config*);
+
 #endif
