@@ -611,11 +611,6 @@ void sja1105_config_set(void *buf, struct sja1105_config *config)
 	                     BLKID_VL_FORWARDING_PARAMS_TABLE,
 	                     sja1105_vl_forwarding_params_table_set,
 	                     config->vl_forwarding_params_table);
-	PUT_CONFIG_IN_BUF_FN(config->schedule_entry_points_params_count,
-	                     SIZE_SCHEDULE_ENTRY_POINTS_PARAMS_ENTRY,
-	                     BLKID_SCHEDULE_ENTRY_POINTS_PARAMS_TABLE,
-	                     sja1105_schedule_entry_points_params_set,
-	                     config->schedule_entry_points_params);
 	PUT_CONFIG_IN_BUF_FN(config->l2_lookup_params_count,
 	                     SIZE_L2_LOOKUP_PARAMS_TABLE,
 	                     BLKID_L2_LOOKUP_PARAMS_TABLE,
