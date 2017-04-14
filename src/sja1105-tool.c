@@ -92,6 +92,19 @@ error:
 	exit(0);
 }
 
+void cleanup(struct spi_setup *spi_setup)
+{
+	if (spi_setup->device) {
+		free((char*) spi_setup->device);
+	}
+	if (spi_setup->staging_area) {
+		free((char*) spi_setup->staging_area);
+	}
+	if (spi_setup->fd) {
+		close(spi_setup->fd);
+	}
+}
+
 int main(int argc, char *argv[])
 {
 	struct spi_setup spi_setup;
@@ -100,6 +113,7 @@ int main(int argc, char *argv[])
 	argc--; argv++;
 	read_config_file(SJA1105_CONF_FILE, &spi_setup, &general_config);
 	parse_args(&spi_setup, argc, argv);
+	cleanup(&spi_setup);
 	logv("ok");
 	return 0;
 }

@@ -65,7 +65,6 @@ void sja1105_cgu_mii_control_show(struct sja1105_cgu_mii_control *mii_control)
 }
 
 int sja1105_cgu_rgmii_tx_clk_config(
-		int    fd,
 		struct spi_setup *spi_setup,
 		int    port,
 		int    speed_mbps)
@@ -102,11 +101,10 @@ int sja1105_cgu_rgmii_tx_clk_config(
 	txc.pd        = 0;      /* Power Down off => enabled */
 	sja1105_cgu_mii_control_set(tx_buf + SIZE_SPI_MSG_HEADER, &txc);
 
-	return spi_transfer(fd, spi_setup, tx_buf, rx_buf, MSG_SIZE);
+	return spi_transfer(spi_setup, tx_buf, rx_buf, MSG_SIZE);
 }
 
 int sja1105_cgu_rmii_ref_clk_config(
-		int    fd,
 		struct spi_setup *spi_setup,
 		int    port)
 {
@@ -140,11 +138,10 @@ int sja1105_cgu_rmii_ref_clk_config(
 	ref_clk.pd        = 0;           /* Power Down off => enabled */
 	sja1105_cgu_mii_control_set(tx_buf + SIZE_SPI_MSG_HEADER, &ref_clk);
 
-	return spi_transfer(fd, spi_setup, tx_buf, rx_buf, MSG_SIZE);
+	return spi_transfer(spi_setup, tx_buf, rx_buf, MSG_SIZE);
 }
 
 int sja1105_cgu_rmii_ext_tx_clk_config(
-		int    fd,
 		struct spi_setup *spi_setup,
 		int    port)
 {
@@ -171,11 +168,10 @@ int sja1105_cgu_rmii_ext_tx_clk_config(
 	ext_tx_clk.pd        = 0;           /* Power Down off => enabled */
 	sja1105_cgu_mii_control_set(tx_buf + SIZE_SPI_MSG_HEADER, &ext_tx_clk);
 
-	return spi_transfer(fd, spi_setup, tx_buf, rx_buf, MSG_SIZE);
+	return spi_transfer(spi_setup, tx_buf, rx_buf, MSG_SIZE);
 }
 
 int sja1105_cgu_mii_tx_clk_config(
-		int    fd,
 		struct spi_setup *spi_setup,
 		int    port)
 {
@@ -202,11 +198,10 @@ int sja1105_cgu_mii_tx_clk_config(
 	mii_tx_clk.pd        = 0;           /* XXX Why */
 	sja1105_cgu_mii_control_set(tx_buf + SIZE_SPI_MSG_HEADER, &mii_tx_clk);
 
-	return spi_transfer(fd, spi_setup, tx_buf, rx_buf, MSG_SIZE);
+	return spi_transfer(spi_setup, tx_buf, rx_buf, MSG_SIZE);
 }
 
 int sja1105_cgu_mii_rx_clk_config(
-		int    fd,
 		struct spi_setup *spi_setup,
 		int    port)
 {
@@ -233,11 +228,10 @@ int sja1105_cgu_mii_rx_clk_config(
 	mii_rx_clk.pd        = 0;           /* XXX Why */
 	sja1105_cgu_mii_control_set(tx_buf + SIZE_SPI_MSG_HEADER, &mii_rx_clk);
 
-	return spi_transfer(fd, spi_setup, tx_buf, rx_buf, MSG_SIZE);
+	return spi_transfer(spi_setup, tx_buf, rx_buf, MSG_SIZE);
 }
 
 int sja1105_cgu_mii_ext_tx_clk_config(
-		int    fd,
 		struct spi_setup *spi_setup,
 		int    port)
 {
@@ -271,11 +265,10 @@ int sja1105_cgu_mii_ext_tx_clk_config(
 	mii_ext_tx_clk.pd        = 0;           /* XXX Why */
 	sja1105_cgu_mii_control_set(tx_buf + SIZE_SPI_MSG_HEADER, &mii_ext_tx_clk);
 
-	return spi_transfer(fd, spi_setup, tx_buf, rx_buf, MSG_SIZE);
+	return spi_transfer(spi_setup, tx_buf, rx_buf, MSG_SIZE);
 }
 
 int sja1105_cgu_mii_ext_rx_clk_config(
-		int    fd,
 		struct spi_setup *spi_setup,
 		int    port)
 {
@@ -309,6 +302,6 @@ int sja1105_cgu_mii_ext_rx_clk_config(
 	mii_ext_rx_clk.pd        = 0;           /* Power Down off => enabled */
 	sja1105_cgu_mii_control_set(tx_buf + SIZE_SPI_MSG_HEADER, &mii_ext_rx_clk);
 
-	return spi_transfer(fd, spi_setup, tx_buf, rx_buf, MSG_SIZE);
+	return spi_transfer(spi_setup, tx_buf, rx_buf, MSG_SIZE);
 }
 
