@@ -223,11 +223,6 @@ int config_upload(struct spi_setup *spi_setup, struct sja1105_config *config)
 	int    fd;
 	int    i;
 
-	rc = sja1105_config_check_valid(config);
-	if (rc < 0) {
-		loge("config is invalid");
-		goto out_1;
-	}
 	fd = configure_spi(spi_setup);
 	if (fd < 0) {
 		loge("failed to open spi device");
@@ -303,6 +298,11 @@ int config_flush(struct spi_setup *spi_setup, struct sja1105_config *config)
 	if (status.device_id != SJA1105_DEVICE_ID) {
 		loge("read device id %" PRIx64 ", expected %" PRIx64,
 		     status.device_id, SJA1105_DEVICE_ID);
+		goto out;
+	}
+	rc = sja1105_config_check_valid(config);
+	if (rc < 0) {
+		loge("cannot upload config, because it is not valid");
 		goto out;
 	}
 	rc = sja1105_reset(spi_setup, &reset);
