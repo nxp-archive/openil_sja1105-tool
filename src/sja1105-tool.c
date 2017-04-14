@@ -77,7 +77,7 @@ static void parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 	};
 	int  rc;
 
-	if (argc < 2) {
+	if (argc < 1) {
 		goto error;
 	}
 	rc = get_match(argv[0], options, ARRAY_SIZE(options));
