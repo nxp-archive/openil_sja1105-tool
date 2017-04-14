@@ -31,7 +31,7 @@
 #ifndef _SJA1105_TOOL_COMMON_H
 #define _SJA1105_TOOL_COMMON_H
 
-#define SJA1105_NETCONF_ROOT "sja1105-config"
+#define SJA1105_NETCONF_ROOT "sja1105"
 #define SJA1105_NETCONF_NS   "http://nxp.com/ns/yang/tsn/sja1105"
 #define SJA1105_CONF_FILE    "/etc/sja1105/sja1105.conf"
 
