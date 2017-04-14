@@ -56,7 +56,6 @@ static inline int parse_spi_setup(struct spi_setup *spi_setup, char *key, char *
 	uint64_t tmp;
 
 	if (strcmp(key, "device") == 0) {
-		/* FIXME: Memory leak here */
 		spi_setup->device = strdup(value);
 	} else if (strcmp(key, "bits") == 0) {
 		rc = reliable_uint64_from_string(&tmp, value, NULL);
@@ -116,7 +115,6 @@ static inline int parse_spi_setup(struct spi_setup *spi_setup, char *key, char *
 			return -1;
 		}
 	} else if (strcmp(key, "staging-area") == 0) {
-		/* FIXME: Memory leak here */
 		spi_setup->staging_area = strdup(value);
 	} else {
 		loge("Invalid key \"%s\"", key);

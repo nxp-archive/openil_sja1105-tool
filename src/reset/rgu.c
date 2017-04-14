@@ -41,12 +41,6 @@ int sja1105_reset(const struct spi_setup *spi_setup, struct sja1105_reset_ctrl *
 	uint8_t tx_buf[RGU_MSG_LEN];
 	uint8_t rx_buf[RGU_MSG_LEN];
 	uint8_t *reset_ctrl_ptr;
-	int fd;
-
-	fd = configure_spi(spi_setup);
-	if (fd < 0) {
-		goto out_1;
-	}
 
 	msg.access     = SPI_WRITE;
 	msg.read_count = 0;
@@ -58,16 +52,13 @@ int sja1105_reset(const struct spi_setup *spi_setup, struct sja1105_reset_ctrl *
 
 	logv("%s resetting switch",
 	    (reset->rst_ctrl == RGU_WARM) ? "Warm" : "Cold");
-	spi_transfer(fd, spi_setup, tx_buf, rx_buf, RGU_MSG_LEN);
-	close(fd);
-	return 0;
-out_1:
-	return -1;
+	return spi_transfer(spi_setup, tx_buf, rx_buf, RGU_MSG_LEN);
 }
 
 int rgu_parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 {
 	struct sja1105_reset_ctrl reset;
+	int rc;
 
 	if (argc < 1) {
 		goto parse_error;
@@ -79,9 +70,15 @@ int rgu_parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 	} else {
 		goto parse_error;
 	}
+	rc = configure_spi(spi_setup);
+	if (rc < 0) {
+		loge("configure_spi failed");
+		goto out;
+	}
 	return sja1105_reset(spi_setup, &reset);
 parse_error:
 	print_usage();
+out:
 	return -1;
 }
 

@@ -39,6 +39,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <stdint.h>
+#include <unistd.h>
 #include <inttypes.h>
 #include <linux/spi/spidev.h>
 #include "common.h"

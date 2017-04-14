@@ -37,6 +37,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include "../status/external.h"
 #include "../reset/external.h"
 #include "../spi/external.h"
 #include "../common.h"
