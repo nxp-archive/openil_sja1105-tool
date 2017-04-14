@@ -44,7 +44,11 @@ int xml_write_field(xmlTextWriterPtr writer, char *field, uint64_t value)
 {
 	char print_buf[MAX_LINE_SIZE];
 
-	snprintf(print_buf, MAX_LINE_SIZE, "0x%" PRIX64, value);
+	if (!strcmp(field, "index"))
+		snprintf(print_buf, MAX_LINE_SIZE, "%" PRIu64, value);
+	else
+		snprintf(print_buf, MAX_LINE_SIZE, "0x%" PRIX64, value);
+
 	return xmlTextWriterWriteElement(writer, BAD_CAST field, BAD_CAST print_buf);
 }
 
