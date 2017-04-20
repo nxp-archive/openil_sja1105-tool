@@ -72,10 +72,7 @@ void sja1105_table_header_set_with_crc(
 	 * and finally re-copy the table with the proper
 	 * CRC in place */
 	sja1105_table_header_set(buf, hdr);
-	/* XXX: Why is truncation needed to 0xFFFFFFFF?!
-	 * The crc is an unsigned integer, it should
-	 * not sign-extend, but it does.*/
-	hdr->crc = ether_crc32_le(buf, SIZE_TABLE_HEADER - 4) & 0xFFFFFFFF;
+	hdr->crc = ether_crc32_le(buf, SIZE_TABLE_HEADER - 4);
 	generic_table_field_set(buf + SIZE_TABLE_HEADER - 4, &hdr->crc, 31, 0, 4);
 }
 

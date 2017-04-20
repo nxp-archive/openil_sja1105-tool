@@ -36,9 +36,6 @@ static void sja1105_table_write_crc(char *table_start, char *crc_ptr)
 	int len_bytes;
 
 	len_bytes = (int) (crc_ptr - table_start);
-	/* XXX: Why is truncation needed to 0xFFFFFFFF?!
-	 * The crc is an unsigned integer, it should
-	 * not sign-extend, but it does.*/
 	computed_crc = ether_crc32_le(table_start, len_bytes);
 	generic_table_field_set(crc_ptr, &computed_crc, 31, 0, 4);
 }

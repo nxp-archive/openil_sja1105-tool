@@ -195,7 +195,7 @@ int sja1105_cgu_mii_tx_clk_config(
 	/* Payload */
 	mii_tx_clk.clksrc    = CLKSRC_PLL1; /* XXX This is surely wrong */
 	mii_tx_clk.autoblock = 1;           /* Autoblock clk while changing clksrc */
-	mii_tx_clk.pd        = 0;           /* XXX Why */
+	mii_tx_clk.pd        = 0;           /* Power Down off => enabled */
 	sja1105_cgu_mii_control_set(tx_buf + SIZE_SPI_MSG_HEADER, &mii_tx_clk);
 
 	return spi_transfer(spi_setup, tx_buf, rx_buf, MSG_SIZE);
@@ -225,7 +225,7 @@ int sja1105_cgu_mii_rx_clk_config(
 	/* Payload */
 	mii_rx_clk.clksrc    = CLKSRC_PLL1;
 	mii_rx_clk.autoblock = 1;           /* Autoblock clk while changing clksrc */
-	mii_rx_clk.pd        = 0;           /* XXX Why */
+	mii_rx_clk.pd        = 0;           /* Power Down off => enabled */
 	sja1105_cgu_mii_control_set(tx_buf + SIZE_SPI_MSG_HEADER, &mii_rx_clk);
 
 	return spi_transfer(spi_setup, tx_buf, rx_buf, MSG_SIZE);
@@ -262,7 +262,7 @@ int sja1105_cgu_mii_ext_tx_clk_config(
 	/* Payload */
 	mii_ext_tx_clk.clksrc    = clk_sources[port];
 	mii_ext_tx_clk.autoblock = 1;           /* Autoblock clk while changing clksrc */
-	mii_ext_tx_clk.pd        = 0;           /* XXX Why */
+	mii_ext_tx_clk.pd        = 0;           /* Power Down off => enabled */
 	sja1105_cgu_mii_control_set(tx_buf + SIZE_SPI_MSG_HEADER, &mii_ext_tx_clk);
 
 	return spi_transfer(spi_setup, tx_buf, rx_buf, MSG_SIZE);
