@@ -288,14 +288,19 @@ int config_flush(struct spi_setup *spi_setup, struct sja1105_config *config)
 	struct sja1105_general_status status;
 	int rc;
 
+	/* Check that we are talking with the right device over SPI */
 	rc = sja1105_general_status_get(spi_setup, &status);
 	if (rc < 0) {
 		goto out;
 	}
-	if (status.device_id != SJA1105_DEVICE_ID) {
-		loge("read device id %" PRIx64 ", expected %" PRIx64,
-		     status.device_id, SJA1105_DEVICE_ID);
-		goto out;
+	if (spi_setup->dry_run == 0) {
+		/* These checks simply cannot pass (and do not even
+		 * make sense to have) if we are in dry run mode */
+		if (status.device_id != SJA1105_DEVICE_ID) {
+			loge("read device id %" PRIx64 ", expected %" PRIx64,
+			     status.device_id, SJA1105_DEVICE_ID);
+			goto out;
+		}
 	}
 	rc = sja1105_config_check_valid(config);
 	if (rc < 0) {
@@ -315,24 +320,29 @@ int config_flush(struct spi_setup *spi_setup, struct sja1105_config *config)
 	if (rc < 0) {
 		goto out;
 	}
-	rc = sja1105_general_status_get(spi_setup, &status);
-	if (rc < 0) {
-		goto out;
-	}
-	if (status.ids == 1) {
-		loge("not responding to configured device id");
-		goto out;
-	}
-	if (status.crcchkl == 1) {
-		loge("local crc failed while uploading config");
-		goto out;
-	}
-	if (status.crcchkg == 1) {
-		loge("global crc failed while uploading config");
-		goto out;
-	}
-	if (status.configs == 0) {
-		loge("configuration is invalid");
+	/* Check that SJA1105 responded well to the config upload */
+	if (spi_setup->dry_run == 0) {
+		/* These checks simply cannot pass (and do not even
+		 * make sense to have) if we are in dry run mode */
+		rc = sja1105_general_status_get(spi_setup, &status);
+		if (rc < 0) {
+			goto out;
+		}
+		if (status.ids == 1) {
+			loge("not responding to configured device id");
+			goto out;
+		}
+		if (status.crcchkl == 1) {
+			loge("local crc failed while uploading config");
+			goto out;
+		}
+		if (status.crcchkg == 1) {
+			loge("global crc failed while uploading config");
+			goto out;
+		}
+		if (status.configs == 0) {
+			loge("configuration is invalid");
+		}
 	}
 out:
 	return rc;
