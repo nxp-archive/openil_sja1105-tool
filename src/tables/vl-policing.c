@@ -45,7 +45,7 @@ static void sja1105_vl_policing_entry_access(
 		get_or_set = generic_table_field_set;
 		memset(buf, 0, size);
 	}
-	get_or_set(buf, &entry->type,      63, 58, size);
+	get_or_set(buf, &entry->type,      63, 63, size);
 	get_or_set(buf, &entry->maxlen,    62, 52, size);
 	get_or_set(buf, &entry->sharindx,  51, 42, size);
 	loge("ALA");
@@ -79,8 +79,8 @@ void sja1105_vl_policing_entry_fmt_show(
 	formatted_append(print_buf, fmt, "MAXLEN    0x%" PRIX64, entry->maxlen);
 	formatted_append(print_buf, fmt, "SHARINDX  0x%" PRIX64, entry->sharindx);
 	if (entry->type == 0) {
-		formatted_append(print_buf, fmt, "BAG     0x%" PRIX64, entry->bag);
-		formatted_append(print_buf, fmt, "JITTER  0x%" PRIX64, entry->jitter);
+		formatted_append(print_buf, fmt, "BAG       0x%" PRIX64, entry->bag);
+		formatted_append(print_buf, fmt, "JITTER    0x%" PRIX64, entry->jitter);
 	}
 }
 
