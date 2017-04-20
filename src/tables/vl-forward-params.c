@@ -49,7 +49,7 @@ static void sja1105_vl_forwarding_params_table_access(
 	}
 	offset = 16;
 	for (i = 0; i < 8; i++) {
-		get_or_set(buf, &table->partspc[i], offset + 0, offset + 9, size);
+		get_or_set(buf, &table->partspc[i], offset + 9, offset + 0, size);
 		offset += 10;
 	}
 	get_or_set(buf, &table->debugen, 15, 15, size);
