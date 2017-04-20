@@ -103,6 +103,7 @@ int spi_transfer(const struct spi_setup *spi_setup, const void *tx, void *rx, in
 	};
 
 	if (spi_setup->dry_run) {
+		printf("spi-transfer: size %d bytes\n", size);
 		generic_table_hexdump((void*) tx, size);
 		return 0;
 	} else {
