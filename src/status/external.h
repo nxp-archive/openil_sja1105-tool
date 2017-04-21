@@ -33,6 +33,7 @@
 
 #include "../spi/external.h"
 
-void status_parse_args(struct spi_setup *spi_setup, int argc, char **argv);
+int  sja1105_general_status_get(struct spi_setup*, struct sja1105_general_status*);
+void status_parse_args(struct spi_setup*, int, char**);
 
 #endif

@@ -152,7 +152,7 @@ void sja1105_port_status_get_hl2(void *buf, struct sja1105_port_status *status)
 }
 
 int sja1105_port_status_get(
-		const struct spi_setup *spi_setup,
+		struct spi_setup *spi_setup,
 		struct sja1105_port_status *status,
 		int port)
 {
@@ -167,10 +167,9 @@ int sja1105_port_status_get(
 	uint8_t tx_buf[MSG_LEN_HL];
 	uint8_t rx_buf[MSG_LEN_HL];
 	int rc = 0;
-	int fd;
 
-	fd = configure_spi(spi_setup);
-	if (fd < 0) {
+	rc = configure_spi(spi_setup);
+	if (rc < 0) {
 		goto out;
 	}
 	memset(status, 0, sizeof(*status));
@@ -184,10 +183,10 @@ int sja1105_port_status_get(
 	msg.address    = CORE_ADDR + mac_base_addr[port];
 	sja1105_spi_message_set(tx_buf, &msg);
 
-	rc = spi_transfer(fd, spi_setup, tx_buf, rx_buf, MSG_LEN_MAC);
+	rc = spi_transfer(spi_setup, tx_buf, rx_buf, MSG_LEN_MAC);
 	if (rc < 0) {
 		loge("spi_transfer failed for mac registers");
-		goto out_1;
+		goto out;
 	}
 	sja1105_port_status_get_mac(rx_buf + 4, status);
 
@@ -200,10 +199,10 @@ int sja1105_port_status_get(
 	msg.address    = CORE_ADDR + high_level_1_base_addr[port];
 	sja1105_spi_message_set(tx_buf, &msg);
 
-	rc = spi_transfer(fd, spi_setup, tx_buf, rx_buf, MSG_LEN_HL);
+	rc = spi_transfer(spi_setup, tx_buf, rx_buf, MSG_LEN_HL);
 	if (rc < 0) {
 		loge("spi_transfer failed for high-level 1 registers");
-		goto out_1;
+		goto out;
 	}
 	sja1105_port_status_get_hl1(rx_buf + 4, status);
 
@@ -216,19 +215,17 @@ int sja1105_port_status_get(
 	msg.address    = CORE_ADDR + high_level_2_base_addr[port];
 	sja1105_spi_message_set(tx_buf, &msg);
 
-	rc = spi_transfer(fd, spi_setup, tx_buf, rx_buf, MSG_LEN_HL);
+	rc = spi_transfer(spi_setup, tx_buf, rx_buf, MSG_LEN_HL);
 	if (rc < 0) {
 		loge("spi_transfer failed for high-level 2 registers");
-		goto out_1;
+		goto out;
 	}
 	sja1105_port_status_get_hl2(rx_buf + 4, status);
-out_1:
-	close(fd);
 out:
 	return rc;
 }
 
-void status_ports(const struct spi_setup *spi_setup, int port_no)
+void status_ports(struct spi_setup *spi_setup, int port_no)
 {
 	struct sja1105_port_status status;
 	char *print_buf[5];

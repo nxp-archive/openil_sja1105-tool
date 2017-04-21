@@ -88,7 +88,7 @@ void test_fn()
 	sja1105_cfg_pad_mii_tx_show(&pad_mii_tx);
 }
 
-int sja1105_rgmii_cfg_pad_tx_config(int fd, struct spi_setup *spi_setup, int port)
+int sja1105_rgmii_cfg_pad_tx_config(struct spi_setup *spi_setup, int port)
 {
 #define MSG_SIZE SIZE_SPI_MSG_HEADER + 4
 	struct  sja1105_spi_message msg;
@@ -119,7 +119,7 @@ int sja1105_rgmii_cfg_pad_tx_config(int fd, struct spi_setup *spi_setup, int por
 	pad_mii_tx.clk_ipud  = 2; /* TX_CLK input stage (default) */
 	sja1105_cfg_pad_mii_tx_set(tx_buf + SIZE_SPI_MSG_HEADER, &pad_mii_tx);
 
-	return spi_transfer(fd, spi_setup, tx_buf, rx_buf, MSG_SIZE);
+	return spi_transfer(spi_setup, tx_buf, rx_buf, MSG_SIZE);
 }
 
 

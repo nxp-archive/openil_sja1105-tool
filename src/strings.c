@@ -121,7 +121,6 @@ int mac_addr_from_string(uint64_t *to, char *from, char **endptr)
 	}
 	*to = mac_addr_val;
 out:
-	logi("returning %d", rc);
 	return rc;
 }
 

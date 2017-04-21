@@ -219,12 +219,11 @@ int config_upload(struct spi_setup *spi_setup, struct sja1105_config *config)
 	char  *config_buf;
 	int    config_buf_len;
 	int    crc_len;
-	int    rc = 0;
-	int    fd;
+	int    rc;
 	int    i;
 
-	fd = configure_spi(spi_setup);
-	if (fd < 0) {
+	rc = configure_spi(spi_setup);
+	if (rc < 0) {
 		loge("failed to open spi device");
 		goto out_1;
 	}
@@ -239,7 +238,7 @@ int config_upload(struct spi_setup *spi_setup, struct sja1105_config *config)
 	rc = generic_table_field_set(config_buf, &device_id, 31, 0, SIZE_SJA1105_DEVICE_ID);
 	if (rc < 0) {
 		loge("failed to write device id to buffer");
-		goto out_3;
+		goto out_2;
 	}
 	/* Write config tables to config_buf */
 	sja1105_config_set(config_buf + SIZE_SJA1105_DEVICE_ID, config);
@@ -261,17 +260,15 @@ int config_upload(struct spi_setup *spi_setup, struct sja1105_config *config)
 		/* Combine chunks[i].msg and chunks[i].buf into tx_buf */
 		spi_message_aggregate(tx_buf, &chunks[i].msg, chunks[i].buf, chunks[i].size);
 		/* Send it out */
-		rc = spi_transfer(fd, spi_setup, tx_buf, rx_buf,
+		rc = spi_transfer(spi_setup, tx_buf, rx_buf,
 		                  SIZE_SPI_MSG_HEADER + chunks[i].size);
 		if (rc < 0) {
 			loge("spi_transfer failed");
-			goto out_3;
+			goto out_2;
 		}
 	}
-out_3:
-	free(config_buf);
 out_2:
-	close(fd);
+	free(config_buf);
 out_1:
 	return rc;
 }
@@ -376,10 +373,6 @@ void config_parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 		if (rc < 0) {
 			goto error;
 		}
-		rc = sja1105_config_check_valid(&config);
-		if (rc < 0) {
-			goto error;
-		}
 		rc = config_save(spi_setup->staging_area, &config);
 		if (rc < 0) {
 			goto error;
@@ -395,10 +388,6 @@ void config_parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 			goto parse_error;
 		}
 		rc = config_load(spi_setup->staging_area, &config);
-		if (rc < 0) {
-			goto error;
-		}
-		rc = sja1105_config_check_valid(&config);
 		if (rc < 0) {
 			goto error;
 		}

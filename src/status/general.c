@@ -142,12 +142,11 @@ int sja1105_general_status_get(struct spi_setup *spi_setup,
 	struct sja1105_spi_message msg;
 	uint8_t tx_buf[MSG_LEN_A];
 	uint8_t rx_buf[MSG_LEN_A];
-	int fd;
 	int rc;
 
-	fd = configure_spi(spi_setup);
-	if (fd < 0) {
-		goto error;
+	rc = configure_spi(spi_setup);
+	if (rc < 0) {
+		goto out;
 	}
 
 	/* Part A - base address 0x00 */
@@ -159,10 +158,10 @@ int sja1105_general_status_get(struct spi_setup *spi_setup,
 	msg.address    = CORE_ADDR;
 	sja1105_spi_message_set(tx_buf, &msg);
 
-	rc = spi_transfer(fd, spi_setup, tx_buf, rx_buf, MSG_LEN_A);
+	rc = spi_transfer(spi_setup, tx_buf, rx_buf, MSG_LEN_A);
 	if (rc < 0) {
 		loge("spi_transfer failed for part A");
-		goto error_1;
+		goto out;
 	}
 	sja1105_general_status_get_a(rx_buf + 4, status);
 
@@ -175,18 +174,13 @@ int sja1105_general_status_get(struct spi_setup *spi_setup,
 	msg.address    = CORE_ADDR + 0xC0;
 	sja1105_spi_message_set(tx_buf, &msg);
 
-	rc = spi_transfer(fd, spi_setup, tx_buf, rx_buf, MSG_LEN_B);
+	rc = spi_transfer(spi_setup, tx_buf, rx_buf, MSG_LEN_B);
 	if (rc < 0) {
 		loge("spi_transfer failed for part B");
-		goto error_1;
+		goto out;
 	}
 	sja1105_general_status_get_b(rx_buf + 4, status);
-
-	close(fd);
-	return 0;
-error_1:
-	close(fd);
-error:
-	return -1;
+out:
+	return rc;
 }
 
