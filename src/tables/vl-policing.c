@@ -48,9 +48,7 @@ static void sja1105_vl_policing_entry_access(
 	get_or_set(buf, &entry->type,      63, 63, size);
 	get_or_set(buf, &entry->maxlen,    62, 52, size);
 	get_or_set(buf, &entry->sharindx,  51, 42, size);
-	loge("ALA");
 	if (entry->type == 0) {
-		loge("BALA");
 		get_or_set(buf, &entry->bag,    41, 28, size);
 		get_or_set(buf, &entry->jitter, 27, 18, size);
 	}
