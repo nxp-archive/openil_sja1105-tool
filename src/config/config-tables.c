@@ -398,6 +398,39 @@ static void sja1105_config_patch_vllupformat(struct sja1105_config *config)
 	}
 }
 
+int sja1105_config_check_memory_size(struct sja1105_config *config)
+{
+	int max_mem;
+	int mem = 0;
+	int i;
+
+	for (i = 0; i < 8; i++) {
+		mem += config->l2_forwarding_params[0].part_spc[i];
+	}
+	if (config->vl_forwarding_params_count) {
+		for (i = 0; i < 8; i++) {
+			mem += config->vl_forwarding_params_table[0].partspc[i];
+		}
+	}
+	if (config->retagging_count > 0) {
+		max_mem = MAX_FRAME_MEMORY_RETAGGING;
+	} else {
+		max_mem = MAX_FRAME_MEMORY;
+	}
+	if (mem > max_mem) {
+		loge("Not allowed to overcommit frame memory. "
+		     "This is asking for trouble.");
+		loge("L2 memory partitions and VL memory partitions "
+		     "share the same space.");
+		loge("The sum of all 16 memory partitions is not allowed "
+		     "to be larger than %d 128-byte blocks.", max_mem);
+		loge("Please adjust l2-forwarding-parameters-table.part_spc "
+		     "and/or vl-forwarding-parameters-table.partspc.");
+		return -1;
+	}
+	return 0;
+}
+
 int sja1105_config_check_valid(struct sja1105_config *config)
 {
 	if (config->schedule_count > 0) {
@@ -459,7 +492,7 @@ int sja1105_config_check_valid(struct sja1105_config *config)
 		loge("xmii-mode-parameters-table is empty");
 		return -1;
 	}
-	return 0;
+	return sja1105_config_check_memory_size(config);
 }
 
 int sja1105_config_get(void *buf, struct sja1105_config *config)

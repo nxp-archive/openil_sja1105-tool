@@ -98,6 +98,9 @@
 #define MAX_AVB_PARAMS_COUNT                     1
 #define MAX_CLK_SYNC_COUNT                       1
 
+#define MAX_FRAME_MEMORY                         929
+#define MAX_FRAME_MEMORY_RETAGGING               910
+
 #define SJA1105_DEVICE_ID                        0x9E00030Eull
 
 struct sja1105_schedule_entry {
