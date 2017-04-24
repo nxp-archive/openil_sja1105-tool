@@ -30,62 +30,65 @@
  *****************************************************************************/
 #include "internal.h"
 
-static int entry_get(xmlNode *node, struct sja1105_vl_policing_entry *entry)
+static void sja1105_vl_policing_entry_access(
+		void *buf,
+		struct sja1105_vl_policing_entry *entry,
+		int write)
 {
-	int rc = 0;
-	rc |= xml_read_field(&entry->type, "type", node);
-	rc |= xml_read_field(&entry->maxlen, "maxlen", node);
-	rc |= xml_read_field(&entry->sharindx, "sharindx", node);
+	int  (*get_or_set)(void*, uint64_t*, int, int, int);
+	int    size = SIZE_VL_POLICING_ENTRY;
+
+	if (write == 0) {
+		get_or_set = generic_table_field_get;
+		memset(entry, 0, sizeof(*entry));
+	} else {
+		get_or_set = generic_table_field_set;
+		memset(buf, 0, size);
+	}
+	get_or_set(buf, &entry->type,      63, 63, size);
+	get_or_set(buf, &entry->maxlen,    62, 52, size);
+	get_or_set(buf, &entry->sharindx,  51, 42, size);
 	if (entry->type == 0) {
-		logv("Reading extra fields for Rate-Constrained VL");
-		rc |= xml_read_field(&entry->bag, "bag", node);
-		rc |= xml_read_field(&entry->jitter, "jitter", node);
+		get_or_set(buf, &entry->bag,    41, 28, size);
+		get_or_set(buf, &entry->jitter, 27, 18, size);
 	}
-	if (rc) {
-		loge("VL Policing entry incomplete!");
-	}
-	return rc;
 }
 
-static int parse_entry(xmlNode *node, struct sja1105_config *config)
+void sja1105_vl_policing_entry_set(
+		void *buf,
+		struct sja1105_vl_policing_entry *entry)
 {
-	struct sja1105_vl_policing_entry entry;
-	int rc;
-
-	if (config->vl_policing_count >= MAX_VL_POLICING_COUNT) {
-		loge("Cannot have more than %d VL Policing entries!",
-		     MAX_VL_POLICING_COUNT);
-		rc = -1;
-		goto out;
-	}
-	memset(&entry, 0, sizeof(entry));
-	rc = entry_get(node, &entry);
-	config->vl_policing[config->vl_policing_count++] = entry;
-out:
-	return rc;
+	sja1105_vl_policing_entry_access(buf, entry, 1);
 }
 
-int vl_policing_table_parse(xmlNode *node, struct sja1105_config *config)
+void sja1105_vl_policing_entry_get(
+		void *buf,
+		struct sja1105_vl_policing_entry *entry)
 {
-	xmlNode *c;
-	int rc = 0;
+	sja1105_vl_policing_entry_access(buf, entry, 0);
+}
 
-	if (node->type != XML_ELEMENT_NODE) {
-		loge("VL Policing table node must be of element type!");
-		rc = -1;
-		goto out;
+void sja1105_vl_policing_entry_fmt_show(
+		char *print_buf,
+		char *fmt,
+		struct sja1105_vl_policing_entry *entry)
+{
+	formatted_append(print_buf, fmt, "TYPE      0x%" PRIX64, entry->type);
+	formatted_append(print_buf, fmt, "MAXLEN    0x%" PRIX64, entry->maxlen);
+	formatted_append(print_buf, fmt, "SHARINDX  0x%" PRIX64, entry->sharindx);
+	if (entry->type == 0) {
+		formatted_append(print_buf, fmt, "BAG       0x%" PRIX64, entry->bag);
+		formatted_append(print_buf, fmt, "JITTER    0x%" PRIX64, entry->jitter);
 	}
-	for (c = node->children; c != NULL; c = c->next) {
-		if (c->type != XML_ELEMENT_NODE) {
-			continue;
-		}
-		rc = parse_entry(c, config);
-		if (rc < 0) {
-			goto out;
-		}
-	}
-	logv("read %d VL Policing entries", config->vl_policing_count);
-out:
-	return rc;
+}
+
+void sja1105_vl_policing_entry_show(struct sja1105_vl_policing_entry *entry)
+{
+	char print_buf[MAX_LINE_SIZE];
+	char *fmt = "%s\n";
+
+	memset(print_buf, 0, MAX_LINE_SIZE);
+	sja1105_vl_policing_entry_fmt_show(print_buf, fmt, entry);
+	fprintf(stdout, print_buf);
 }
 

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016, NXP Semiconductors
+ * Copyright (c) 2017, NXP Semiconductors
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,34 @@
 
 int vl_lookup_table_write(xmlTextWriterPtr writer, struct sja1105_config *config)
 {
-	loge("VL Lookup Table not implemented!");
-	return -1;
+	struct sja1105_vl_lookup_entry *entry;
+	int rc = 0;
+	int i;
+
+	logv("writing %d VL Lookup entries", config->vl_lookup_count);
+	for (i = 0; i < config->vl_lookup_count; i++) {
+		rc |= xmlTextWriterStartElement(writer, BAD_CAST "entry");
+		entry = &config->vl_lookup[i];
+		if (entry->format == 0) {
+			rc |= xml_write_field(writer, "destports",  entry->destports);
+			rc |= xml_write_field(writer, "iscritical", entry->iscritical);
+			rc |= xml_write_field(writer, "macaddr",    entry->macaddr);
+			rc |= xml_write_field(writer, "vlanid",     entry->vlanid);
+			rc |= xml_write_field(writer, "port",       entry->port);
+			rc |= xml_write_field(writer, "vlanprior",  entry->vlanprior);
+		} else {
+			rc |= xml_write_field(writer, "egrmirr",    entry->egrmirr);
+			rc |= xml_write_field(writer, "ingrmirr",   entry->ingrmirr);
+			rc |= xml_write_field(writer, "vlld",       entry->vlld);
+			rc |= xml_write_field(writer, "port",       entry->port);
+		}
+		rc |= xmlTextWriterEndElement(writer);
+		if (rc < 0) {
+			loge("error while writing VL Lookup Table element %d", i);
+			goto out;
+		}
+	}
+out:
+	return rc;
 }
 

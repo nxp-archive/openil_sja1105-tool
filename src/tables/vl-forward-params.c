@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016, NXP Semiconductors
+ * Copyright (c) 2017, NXP Semiconductors
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,16 +30,64 @@
  *****************************************************************************/
 #include "internal.h"
 
-void sja1105_table_write_crc(char *table_start, char *crc_ptr)
+static void sja1105_vl_forwarding_params_table_access(
+		void *buf,
+		struct sja1105_vl_forwarding_params_table *table,
+		int write)
 {
-	uint64_t computed_crc;
-	int len_bytes;
+	int  (*get_or_set)(void*, uint64_t*, int, int, int);
+	int    size = SIZE_VL_FORWARDING_PARAMS_ENTRY;
+	int    offset;
+	int    i;
 
-	len_bytes = (int) (crc_ptr - table_start);
-	/* XXX: Why is truncation needed to 0xFFFFFFFF?!
-	 * The crc is an unsigned integer, it should
-	 * not sign-extend, but it does.*/
-	computed_crc = ether_crc32_le(table_start, len_bytes);
-	generic_table_field_set(crc_ptr, &computed_crc, 31, 0, 4);
+	if (write == 0) {
+		get_or_set = generic_table_field_get;
+		memset(table, 0, sizeof(*table));
+	} else {
+		get_or_set = generic_table_field_set;
+		memset(buf, 0, size);
+	}
+	offset = 16;
+	for (i = 0; i < 8; i++) {
+		get_or_set(buf, &table->partspc[i], offset + 9, offset + 0, size);
+		offset += 10;
+	}
+	get_or_set(buf, &table->debugen, 15, 15, size);
+}
+
+void sja1105_vl_forwarding_params_table_set(
+		void *buf,
+		struct sja1105_vl_forwarding_params_table *table)
+{
+	sja1105_vl_forwarding_params_table_access(buf, table, 1);
+}
+
+void sja1105_vl_forwarding_params_table_get(
+		void *buf,
+		struct sja1105_vl_forwarding_params_table *table)
+{
+	sja1105_vl_forwarding_params_table_access(buf, table, 0);
+}
+
+void sja1105_vl_forwarding_params_table_fmt_show(
+		char *print_buf,
+		char *fmt,
+		struct sja1105_vl_forwarding_params_table *table)
+{
+	char buf[MAX_LINE_SIZE];
+
+	print_array(buf, table->partspc, 8);
+	formatted_append(print_buf, fmt, "PARTSPC  %s", table->partspc);
+	formatted_append(print_buf, fmt, "DEBUGEN  0x%" PRIX64, table->debugen);
+}
+
+void sja1105_vl_forwarding_params_table_show(struct sja1105_vl_forwarding_params_table *table)
+{
+	char print_buf[MAX_LINE_SIZE];
+	char *fmt = "%s\n";
+
+	memset(print_buf, 0, MAX_LINE_SIZE);
+	sja1105_vl_forwarding_params_table_fmt_show(print_buf, fmt, table);
+	fprintf(stdout, print_buf);
 }
 

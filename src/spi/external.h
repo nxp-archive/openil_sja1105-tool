@@ -43,11 +43,12 @@ struct spi_setup {
 	int         cs_change;
 	int         dry_run;
 	const char *staging_area;
+	int         flush;
+	int         fd;
 };
 
-int spi_transfer(int fd, const struct spi_setup*, const void *tx, void *rx, int size);
-int configure_spi(const struct spi_setup *spi_setup);
-int get_spi_setup(struct spi_setup *spi_setup);
+int spi_transfer(const struct spi_setup*, const void *tx, void *rx, int size);
+int configure_spi(struct spi_setup *spi_setup);
 void sja1105_spi_message_get(void*, struct sja1105_spi_message*);
 void sja1105_spi_message_set(void*, struct sja1105_spi_message*);
 void sja1105_spi_message_show(struct sja1105_spi_message*);
@@ -57,6 +58,5 @@ void spi_message_aggregate(char*, struct sja1105_spi_message*, char*, int);
 #define SIZE_SJA1105_DEVICE_ID 4
 #define SIZE_SPI_MSG_HEADER    4
 #define SIZE_SPI_MSG_MAXLEN    64 * 4
-
 
 #endif

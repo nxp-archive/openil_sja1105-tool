@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016, NXP Semiconductors
+ * Copyright (c) 2017, NXP Semiconductors
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,15 +28,61 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
-#ifndef _TABLES_INTERNAL_H
-#define _TABLES_INTERNAL_H
+#include "internal.h"
 
-#include <inttypes.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include "external.h"
-#include "../common.h"
+static void sja1105_vl_forwarding_entry_access(
+		void *buf,
+		struct sja1105_vl_forwarding_entry *entry,
+		int write)
+{
+	int  (*get_or_set)(void*, uint64_t*, int, int, int);
+	int    size = SIZE_VL_FORWARDING_ENTRY;
 
-#endif
+	if (write == 0) {
+		get_or_set = generic_table_field_get;
+		memset(entry, 0, sizeof(*entry));
+	} else {
+		get_or_set = generic_table_field_set;
+		memset(buf, 0, size);
+	}
+	get_or_set(buf, &entry->type,      31, 31, size);
+	get_or_set(buf, &entry->priority,  30, 28, size);
+	get_or_set(buf, &entry->partition, 27, 25, size);
+	get_or_set(buf, &entry->destports, 24, 20, size);
+}
+
+void sja1105_vl_forwarding_entry_set(
+		void *buf,
+		struct sja1105_vl_forwarding_entry *entry)
+{
+	sja1105_vl_forwarding_entry_access(buf, entry, 1);
+}
+
+void sja1105_vl_forwarding_entry_get(
+		void *buf,
+		struct sja1105_vl_forwarding_entry *entry)
+{
+	sja1105_vl_forwarding_entry_access(buf, entry, 0);
+}
+
+void sja1105_vl_forwarding_entry_fmt_show(
+		char *print_buf,
+		char *fmt,
+		struct sja1105_vl_forwarding_entry *entry)
+{
+	formatted_append(print_buf, fmt, "TYPE      0x%" PRIX64, entry->type);
+	formatted_append(print_buf, fmt, "PRIORITY  0x%" PRIX64, entry->priority);
+	formatted_append(print_buf, fmt, "PARTITION 0x%" PRIX64, entry->partition);
+	formatted_append(print_buf, fmt, "DESTPORTS 0x%" PRIX64, entry->destports);
+}
+
+void sja1105_vl_forwarding_entry_show(struct sja1105_vl_forwarding_entry *entry)
+{
+	char print_buf[MAX_LINE_SIZE];
+	char *fmt = "%s\n";
+
+	memset(print_buf, 0, MAX_LINE_SIZE);
+	sja1105_vl_forwarding_entry_fmt_show(print_buf, fmt, entry);
+	fprintf(stdout, print_buf);
+}
+

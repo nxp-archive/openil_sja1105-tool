@@ -30,11 +30,15 @@
  *****************************************************************************/
 #include "internal.h"
 
-int configure_spi(const struct spi_setup *spi_setup)
+int configure_spi(struct spi_setup *spi_setup)
 {
 	int ret = 0;
 	int fd;
 
+	if (spi_setup->fd) {
+		logv("fd still open, reusing");
+		return spi_setup->fd;
+	}
 	logv("configuring device %s", spi_setup->device);
 	fd = open(spi_setup->device, O_RDWR);
 	if (fd < 0) {
@@ -75,6 +79,7 @@ int configure_spi(const struct spi_setup *spi_setup)
 		loge("can't get max speed hz");
 		goto out_2;
 	}
+	spi_setup->fd = fd;
 	logv("spi mode: %d",      spi_setup->mode);
 	logv("bits per word: %d", spi_setup->bits);
 	logv("max speed: %d KHz", spi_setup->speed / 1000);
@@ -85,7 +90,7 @@ out_1:
 	return fd;
 }
 
-int spi_transfer(int fd, const struct spi_setup *spi_setup, const void *tx, void *rx, int size)
+int spi_transfer(const struct spi_setup *spi_setup, const void *tx, void *rx, int size)
 {
 	struct spi_ioc_transfer tr = {
 		.tx_buf        = (unsigned long)tx,
@@ -98,10 +103,11 @@ int spi_transfer(int fd, const struct spi_setup *spi_setup, const void *tx, void
 	};
 
 	if (spi_setup->dry_run) {
+		printf("spi-transfer: size %d bytes\n", size);
 		generic_table_hexdump((void*) tx, size);
 		return 0;
 	} else {
 		memset(rx, 0, size);
-		return ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
+		return ioctl(spi_setup->fd, SPI_IOC_MESSAGE(1), &tr);
 	}
 }

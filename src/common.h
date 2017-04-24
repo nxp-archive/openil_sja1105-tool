@@ -31,7 +31,9 @@
 #ifndef _SJA1105_TOOL_COMMON_H
 #define _SJA1105_TOOL_COMMON_H
 
-#define SJA1105_CONF_FILE "/etc/sja1105/sja1105.conf"
+#define SJA1105_NETCONF_ROOT "sja1105"
+#define SJA1105_NETCONF_NS   "http://nxp.com/ns/yang/tsn/sja1105"
+#define SJA1105_CONF_FILE    "/etc/sja1105/sja1105.conf"
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
@@ -43,6 +45,14 @@
 
 #define MAX_LINE_SIZE 2048
 #define MAC_ADDR_SIZE 18
+
+struct general_config {
+	char *staging_area;
+	int   screen_width;
+	int   entries_per_line;
+	int   verbose;
+	int   debug;
+};
 
 int   get_multiline_buf_width(char *buf);
 int   get_entry_count_to_fit_screen(char **print_bufs, int count);
@@ -56,14 +66,6 @@ void  print_array(char *print_buf, uint64_t *array, int count);
 int   read_array(char *array_str, uint64_t *array_val, int max_count);
 int   reliable_uint64_from_string(uint64_t *to, char *from, char**);
 void  mac_addr_sprintf(char *buf, uint64_t mac_hexval);
-
-struct general_config {
-	char *staging_area;
-	int   screen_width;
-	int   entries_per_line;
-	int   verbose;
-	int   debug;
-};
 
 extern struct general_config general_config;
 

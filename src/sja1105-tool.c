@@ -31,18 +31,18 @@
  *****************************************************************************/
 #include "internal.h"
 
-void print_usage(const char *prog)
+void print_usage()
 {
-	printf("Usage: %s [command] [options] \n"
+	printf("Usage: sja1105-tool [command] [options] \n"
 	       "command can be one of:\n"
 	       "   * config\n"
 	       /*"   * control\n"*/
 	       "   * status\n"
 	       /*"   * reconf\n"*/
 	       "   * reset\n"
-	       "   * version | -V | --version\n", prog);
+	       "   * version | -V | --version\n");
 	printf("\n");
-	printf("Type \"%s [command] help\" to see more details.\n", prog);
+	printf("Type \"sja1105-tool [command] help\" to see more details.\n");
 	printf("\n");
 }
 
@@ -77,26 +77,43 @@ static void parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 	};
 	int  rc;
 
-	if (argc < 2) {
+	if (argc < 1) {
 		goto error;
 	}
-	rc = get_match(argv[1], options, ARRAY_SIZE(options));
+	rc = get_match(argv[0], options, ARRAY_SIZE(options));
 	if (rc < 0) {
 		goto error;
 	}
+	argc--; argv++;
 	next_parse_args[rc](spi_setup, argc, argv);
 	return;
 error:
-	print_usage(argv[0]);
+	print_usage();
 	exit(0);
+}
+
+void cleanup(struct spi_setup *spi_setup)
+{
+	if (spi_setup->device) {
+		free((char*) spi_setup->device);
+	}
+	if (spi_setup->staging_area) {
+		free((char*) spi_setup->staging_area);
+	}
+	if (spi_setup->fd) {
+		close(spi_setup->fd);
+	}
 }
 
 int main(int argc, char *argv[])
 {
 	struct spi_setup spi_setup;
 
-	get_spi_setup(&spi_setup);
+	/* discard program name */
+	argc--; argv++;
+	read_config_file(SJA1105_CONF_FILE, &spi_setup, &general_config);
 	parse_args(&spi_setup, argc, argv);
+	cleanup(&spi_setup);
 	logv("ok");
 	return 0;
 }

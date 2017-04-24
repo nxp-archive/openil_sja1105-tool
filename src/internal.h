@@ -39,6 +39,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <stdint.h>
+#include <unistd.h>
 #include <inttypes.h>
 #include <linux/spi/spidev.h>
 #include "common.h"
@@ -46,5 +47,7 @@
 #include "reset/external.h"
 #include "status/external.h"
 #include "spi/external.h"
+
+int read_config_file(char*, struct spi_setup*, struct general_config*);
 
 #endif

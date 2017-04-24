@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016, NXP Semiconductors
+ * Copyright (c) 2017, NXP Semiconductors
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,23 @@
 
 int vl_forwarding_table_write(xmlTextWriterPtr writer, struct sja1105_config *config)
 {
-	loge("VL Forwarding Table not implemented!");
-	return -1;
+	int rc = 0;
+	int i;
+
+	logv("writing %d VL Forwarding entries", config->vl_forwarding_count);
+	for (i = 0; i < config->vl_forwarding_count; i++) {
+		rc |= xmlTextWriterStartElement(writer, BAD_CAST "entry");
+		rc |= xml_write_field(writer, "type",      config->vl_forwarding[i].type);
+		rc |= xml_write_field(writer, "priority",  config->vl_forwarding[i].priority);
+		rc |= xml_write_field(writer, "partition", config->vl_forwarding[i].partition);
+		rc |= xml_write_field(writer, "destports", config->vl_forwarding[i].destports);
+		rc |= xmlTextWriterEndElement(writer);
+		if (rc < 0) {
+			loge("error while writing VL Forwarding Table element %d", i);
+			goto out;
+		}
+	}
+out:
+	return rc;
 }
 

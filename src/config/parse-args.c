@@ -36,16 +36,16 @@
 #include "xml/read/external.h"
 #include "xml/write/external.h"
 
-static void print_usage(const char *prog)
+static void print_usage()
 {
-	printf("Usage: %s configure <command> [<options>] \n", prog);
+	printf("Usage: sja1105-tool config <command> [<options>] \n");
 	printf("<command> can be:\n");
 	printf("* new\n");
-	printf("* load <filename.xml>\n");
+	printf("* load [-f|--flush] <filename.xml>\n");
 	printf("* save <filename.xml>\n");
-	printf("* default <config>, which can be:\n");
+	printf("* default [-f|--flush] <config>, which can be:\n");
 	printf("    * ls1021atsn - load a built-in config compatible with the NXP LS1021ATSN board\n");
-	printf("* modify <table>[<entry_index>] <field> <value>\n");
+	printf("* modify [-f|--flush] <table>[<entry_index>] <field> <value>\n");
 	printf("* upload\n");
 	printf("* show [<table>]. If no table is specified, shows entire config.\n");
 	printf("* hexdump [<table>]. If no table is specified, dumps entire config.\n");
@@ -173,9 +173,10 @@ out_1:
 
 int config_save(const char *config_file, struct sja1105_config *config)
 {
-	int fd, rc;
+	int   rc = 0;
 	char *buf;
-	int len;
+	int   len;
+	int   fd;
 
 	len = sja1105_config_get_length(config);
 
@@ -218,12 +219,11 @@ int config_upload(struct spi_setup *spi_setup, struct sja1105_config *config)
 	char  *config_buf;
 	int    config_buf_len;
 	int    crc_len;
-	int    fd;
 	int    rc;
 	int    i;
 
-	fd = configure_spi(spi_setup);
-	if (fd < 0) {
+	rc = configure_spi(spi_setup);
+	if (rc < 0) {
 		loge("failed to open spi device");
 		goto out_1;
 	}
@@ -235,7 +235,11 @@ int config_upload(struct spi_setup *spi_setup, struct sja1105_config *config)
 		goto out_2;
 	}
 	/* Write Device ID to first 4 bytes of config_buf */
-	generic_table_field_set(config_buf, &device_id, 31, 0, SIZE_SJA1105_DEVICE_ID);
+	rc = generic_table_field_set(config_buf, &device_id, 31, 0, SIZE_SJA1105_DEVICE_ID);
+	if (rc < 0) {
+		loge("failed to write device id to buffer");
+		goto out_2;
+	}
 	/* Write config tables to config_buf */
 	sja1105_config_set(config_buf + SIZE_SJA1105_DEVICE_ID, config);
 	/* Recalculate CRC of the last header */
@@ -256,19 +260,91 @@ int config_upload(struct spi_setup *spi_setup, struct sja1105_config *config)
 		/* Combine chunks[i].msg and chunks[i].buf into tx_buf */
 		spi_message_aggregate(tx_buf, &chunks[i].msg, chunks[i].buf, chunks[i].size);
 		/* Send it out */
-		rc = spi_transfer(fd, spi_setup, tx_buf, rx_buf,
+		rc = spi_transfer(spi_setup, tx_buf, rx_buf,
 		                  SIZE_SPI_MSG_HEADER + chunks[i].size);
 		if (rc < 0) {
 			loge("spi_transfer failed");
-			goto out_3;
+			goto out_2;
 		}
 	}
-	rc = 0;
-out_3:
-	free(config_buf);
 out_2:
-	close(fd);
+	free(config_buf);
 out_1:
+	return rc;
+}
+
+void get_flush_mode(struct spi_setup *spi_setup, int *argc, char ***argv)
+{
+	if ((*argc) && ((strcmp(*argv[0], "-f") == 0 ||
+	                (strcmp(*argv[0], "--force") == 0)))) {
+		spi_setup->flush = 1;
+		(*argc)--; (*argv)++;
+	}
+}
+
+int config_flush(struct spi_setup *spi_setup, struct sja1105_config *config)
+{
+	struct sja1105_reset_ctrl     reset = {.rst_ctrl = RGU_COLD};
+	struct sja1105_general_status status;
+	int rc;
+
+	/* Check that we are talking with the right device over SPI */
+	rc = sja1105_general_status_get(spi_setup, &status);
+	if (rc < 0) {
+		goto out;
+	}
+	if (spi_setup->dry_run == 0) {
+		/* These checks simply cannot pass (and do not even
+		 * make sense to have) if we are in dry run mode */
+		if (status.device_id != SJA1105_DEVICE_ID) {
+			loge("read device id %" PRIx64 ", expected %" PRIx64,
+			     status.device_id, SJA1105_DEVICE_ID);
+			goto out;
+		}
+	}
+	rc = sja1105_config_check_valid(config);
+	if (rc < 0) {
+		loge("cannot upload config, because it is not valid");
+		goto out;
+	}
+	rc = sja1105_reset(spi_setup, &reset);
+	if (rc < 0) {
+		goto out;
+	}
+	rc = config_upload(spi_setup, config);
+	if (rc < 0) {
+		goto out;
+	}
+	rc = sja1105_clocking_setup(spi_setup, &config->xmii_params[0],
+	                           &config->mac_config[0]);
+	if (rc < 0) {
+		goto out;
+	}
+	/* Check that SJA1105 responded well to the config upload */
+	if (spi_setup->dry_run == 0) {
+		/* These checks simply cannot pass (and do not even
+		 * make sense to have) if we are in dry run mode */
+		rc = sja1105_general_status_get(spi_setup, &status);
+		if (rc < 0) {
+			goto out;
+		}
+		if (status.ids == 1) {
+			loge("not responding to configured device id");
+			goto out;
+		}
+		if (status.crcchkl == 1) {
+			loge("local crc failed while uploading config");
+			goto out;
+		}
+		if (status.crcchkg == 1) {
+			loge("global crc failed while uploading config");
+			goto out;
+		}
+		if (status.configs == 0) {
+			loge("configuration is invalid");
+		}
+	}
+out:
 	return rc;
 }
 
@@ -285,23 +361,25 @@ void config_parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 		"show",
 		"hexdump",
 	};
-	int match;
 	struct sja1105_config config;
+	int match;
 	int rc;
 
-	if (argc < 3) {
+	if (argc < 1) {
 		goto parse_error;
 	}
-	match = get_match(argv[2], options, ARRAY_SIZE(options));
+	match = get_match(argv[0], options, ARRAY_SIZE(options));
+	argc--; argv++;
 	if (match < 0) {
 		goto parse_error;
 	} else if (strcmp(options[match], "help") == 0) {
-		print_usage(argv[0]);
+		print_usage();
 	} else if (strcmp(options[match], "load") == 0) {
-		if (argc != 4) {
+		get_flush_mode(spi_setup, &argc, &argv);
+		if (argc != 1) {
 			goto parse_error;
 		}
-		rc = sja1105_config_read_from_xml(argv[3], &config);
+		rc = sja1105_config_read_from_xml(argv[0], &config);
 		if (rc < 0) {
 			goto error;
 		}
@@ -309,23 +387,30 @@ void config_parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 		if (rc < 0) {
 			goto error;
 		}
+		if (spi_setup->flush) {
+			rc = config_flush(spi_setup, &config);
+			if (rc < 0) {
+				goto error;
+			}
+		}
 	} else if (strcmp(options[match], "save") == 0) {
-		if (argc != 4) {
+		if (argc != 1) {
 			goto parse_error;
 		}
 		rc = config_load(spi_setup->staging_area, &config);
 		if (rc < 0) {
 			goto error;
 		}
-		rc = sja1105_config_write_to_xml(argv[3], &config);
+		rc = sja1105_config_write_to_xml(argv[0], &config);
 		if (rc < 0) {
 			goto error;
 		}
 	} else if (strcmp(options[match], "default") == 0) {
-		if (argc != 4) {
+		get_flush_mode(spi_setup, &argc, &argv);
+		if (argc != 1) {
 			goto parse_error;
 		}
-		rc = config_default(&config, argv[3]);
+		rc = config_default(&config, argv[0]);
 		if (rc < 0) {
 			goto error;
 		}
@@ -333,30 +418,26 @@ void config_parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 		if (rc < 0) {
 			goto error;
 		}
+		if (spi_setup->flush) {
+			rc = config_flush(spi_setup, &config);
+			if (rc < 0) {
+				goto error;
+			}
+		}
 	} else if (strcmp(options[match], "upload") == 0) {
-		struct sja1105_reset_ctrl reset = {.rst_ctrl = RGU_COLD};
-
-		if (argc != 3) {
+		if (argc != 0) {
 			goto parse_error;
 		}
 		rc = config_load(spi_setup->staging_area, &config);
 		if (rc < 0) {
 			goto error;
 		}
-		rc = sja1105_reset(spi_setup, &reset);
-		if (rc < 0) {
-			goto error;
-		}
-		rc = config_upload(spi_setup, &config);
-		if (rc < 0) {
-			goto error;
-		}
-		rc = sja1105_clocking_setup(spi_setup, &config.xmii_params[0],
-		                            &config.mac_config[0]);
+		rc = config_flush(spi_setup, &config);
 		if (rc < 0) {
 			goto error;
 		}
 	} else if (strcmp(options[match], "modify") == 0) {
+		get_flush_mode(spi_setup, &argc, &argv);
 		/*if (argc != 6) {*/
 			/*goto parse_error;*/
 		/*}*/
@@ -364,7 +445,7 @@ void config_parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 		if (rc < 0) {
 			goto error;
 		}
-		rc = config_table_entry_modify(&config, argv[3], argv[4], argv[5]);
+		rc = config_table_entry_modify(&config, argv[0], argv[1], argv[2]);
 		if (rc < 0) {
 			goto error;
 		}
@@ -372,8 +453,14 @@ void config_parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 		if (rc < 0) {
 			goto error;
 		}
+		if (spi_setup->flush) {
+			rc = config_flush(spi_setup, &config);
+			if (rc < 0) {
+				goto error;
+			}
+		}
 	} else if (strcmp(options[match], "new") == 0) {
-		if (argc != 3) {
+		if (argc != 0) {
 			goto parse_error;
 		}
 		memset(&config, 0, sizeof(config));
@@ -382,19 +469,19 @@ void config_parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 			goto error;
 		}
 	} else if (strcmp(options[match], "show") == 0) {
-		if (argc != 3 && argc != 4) {
+		if (argc != 0 && argc != 1) {
 			goto parse_error;
 		}
 		rc = config_load(spi_setup->staging_area, &config);
 		if (rc < 0) {
 			goto error;
 		}
-		rc = sja1105_config_show(&config, argv[3]);
+		rc = sja1105_config_show(&config, argv[0]);
 		if (rc < 0) {
 			goto error;
 		}
 	} else if (strcmp(options[match], "hexdump") == 0) {
-		if (argc != 3) {
+		if (argc != 0) {
 			goto parse_error;
 		}
 		rc = config_hexdump(spi_setup->staging_area);
@@ -406,7 +493,7 @@ void config_parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 	}
 	return;
 parse_error:
-	print_usage(argv[0]);
+	print_usage();
 error:
 	exit(-1);
 }

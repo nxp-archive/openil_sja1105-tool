@@ -44,8 +44,12 @@ int xml_write_field(xmlTextWriterPtr writer, char *field, uint64_t value)
 {
 	char print_buf[MAX_LINE_SIZE];
 
-	snprintf(print_buf, MAX_LINE_SIZE, "0x%" PRIX64, value);
-	return xmlTextWriterWriteAttribute(writer, BAD_CAST field, BAD_CAST print_buf);
+	if (!strcmp(field, "index"))
+		snprintf(print_buf, MAX_LINE_SIZE, "%" PRIu64, value);
+	else
+		snprintf(print_buf, MAX_LINE_SIZE, "0x%" PRIX64, value);
+
+	return xmlTextWriterWriteElement(writer, BAD_CAST field, BAD_CAST print_buf);
 }
 
 int xml_write_array(xmlTextWriterPtr writer, char *field, uint64_t *values, int count)
@@ -53,7 +57,7 @@ int xml_write_array(xmlTextWriterPtr writer, char *field, uint64_t *values, int 
 	char print_buf[MAX_LINE_SIZE];
 
 	print_array(print_buf, values, count);
-	return xmlTextWriterWriteAttribute(writer, BAD_CAST field, BAD_CAST print_buf);
+	return xmlTextWriterWriteElement(writer, BAD_CAST field, BAD_CAST print_buf);
 }
 
 int write_config_tables(xmlTextWriterPtr writer, struct sja1105_config *config)
@@ -105,9 +109,9 @@ int write_config_tables(xmlTextWriterPtr writer, struct sja1105_config *config)
 	uint64_t entry_counts[] = {
 		config->schedule_count,
 		config->schedule_entry_points_count,
-		0,
-		0,
-		0,
+		config->vl_lookup_count,
+		config->vl_policing_count,
+		config->vl_forwarding_count,
 		config->l2_lookup_count,
 		config->l2_policing_count,
 		config->vlan_lookup_count,
@@ -115,13 +119,13 @@ int write_config_tables(xmlTextWriterPtr writer, struct sja1105_config *config)
 		config->mac_config_count,
 		config->schedule_params_count,
 		config->schedule_entry_points_params_count,
-		0,
+		config->vl_forwarding_params_count,
 		config->l2_lookup_params_count,
 		config->l2_forwarding_params_count,
-		0,
+		config->clk_sync_params_count,
 		config->avb_params_count,
 		config->general_params_count,
-		0,
+		config->retagging_count,
 		config->xmii_params_count,
 	};
 	int rc = 0;
@@ -129,10 +133,7 @@ int write_config_tables(xmlTextWriterPtr writer, struct sja1105_config *config)
 
 	for (i = 0; i < ARRAY_SIZE(options); i++) {
 		if (entry_counts[i]) {
-			rc |= xmlTextWriterStartElement(writer, BAD_CAST "table");
-			rc |= xmlTextWriterWriteAttribute(writer,
-			      BAD_CAST "name",
-			      BAD_CAST options[i]);
+			rc |= xmlTextWriterStartElement(writer, BAD_CAST options[i]);
 			rc |= next_write_config_table[i](writer, config);
 			rc |= xmlTextWriterEndElement(writer);
 			if (rc < 0) {
@@ -172,10 +173,12 @@ int sja1105_config_write_to_xml(char *filename, struct sja1105_config *config)
 	if (rc < 0) {
 		goto out;
 	}
-	rc = xmlTextWriterStartElement(writer, BAD_CAST "config");
+	rc = xmlTextWriterStartElement(writer, BAD_CAST SJA1105_NETCONF_ROOT);
 	if (rc < 0) {
 		goto out;
 	}
+	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "xmlns",
+	                                 BAD_CAST SJA1105_NETCONF_NS);
 	rc = write_config_tables(writer, config);
 	if (rc < 0) {
 		loge("could not write config tables");

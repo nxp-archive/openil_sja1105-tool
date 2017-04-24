@@ -44,20 +44,20 @@
 void sja1105_cgu_idiv_set(void*, struct sja1105_cgu_idiv*);
 void sja1105_cgu_idiv_get(void*, struct sja1105_cgu_idiv*);
 void sja1105_cgu_idiv_show(struct sja1105_cgu_idiv*);
-int  sja1105_cgu_idiv_config(int, struct spi_setup*, int, int, int);
+int  sja1105_cgu_idiv_config(struct spi_setup*, int, int, int);
 void sja1105_cgu_mii_control_set(void*, struct sja1105_cgu_mii_control*);
 void sja1105_cgu_mii_control_get(void*, struct sja1105_cgu_mii_control*);
 void sja1105_cgu_mii_control_show(struct sja1105_cgu_mii_control*);
-int  sja1105_cgu_rgmii_tx_clk_config(int, struct spi_setup*, int, int);
-int  sja1105_cgu_rmii_ref_clk_config(int, struct spi_setup*, int);
-int  sja1105_cgu_rmii_ext_tx_clk_config(int, struct spi_setup*, int);
-int  sja1105_cgu_mii_tx_clk_config(int, struct spi_setup*, int);
-int  sja1105_cgu_mii_rx_clk_config(int, struct spi_setup*, int);
-int  sja1105_cgu_mii_ext_tx_clk_config(int, struct spi_setup*, int);
-int  sja1105_cgu_mii_ext_rx_clk_config(int, struct spi_setup*, int);
+int  sja1105_cgu_rgmii_tx_clk_config(struct spi_setup*, int, int);
+int  sja1105_cgu_rmii_ref_clk_config(struct spi_setup*, int);
+int  sja1105_cgu_rmii_ext_tx_clk_config(struct spi_setup*, int);
+int  sja1105_cgu_mii_tx_clk_config(struct spi_setup*, int);
+int  sja1105_cgu_mii_rx_clk_config(struct spi_setup*, int);
+int  sja1105_cgu_mii_ext_tx_clk_config(struct spi_setup*, int);
+int  sja1105_cgu_mii_ext_rx_clk_config(struct spi_setup*, int);
 void sja1105_cgu_pll_control_set(void*, struct sja1105_cgu_pll_control*);
 void sja1105_cgu_pll_control_get(void*, struct sja1105_cgu_pll_control*);
 void sja1105_cgu_pll_control_show(struct sja1105_cgu_pll_control*);
-int  sja1105_rgmii_cfg_pad_tx_config(int, struct spi_setup*, int);
+int  sja1105_rgmii_cfg_pad_tx_config(struct spi_setup*, int);
 
 #endif

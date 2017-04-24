@@ -667,32 +667,137 @@ out:
 
 static int vl_lookup_table_entry_modify(
 		struct sja1105_config *config,
-		int entry,
-		char *field_name,
-		char *field_val)
+		int    entry_index,
+		char  *field_name,
+		char  *field_val)
 {
-	loge("unimplemented");
-	return -1;
+	const char *options[] = {
+		"port",
+		"destports",
+		"iscritical",
+		"macaddr",
+		"vlanid",
+		"vlanprior",
+		"egrmirr",
+		"ingrmirr",
+		"vlld",
+	};
+	uint64_t *fields[] = {
+		&config->vl_lookup[entry_index].port,
+		&config->vl_lookup[entry_index].destports,
+		&config->vl_lookup[entry_index].iscritical,
+		&config->vl_lookup[entry_index].macaddr,
+		&config->vl_lookup[entry_index].vlanid,
+		&config->vl_lookup[entry_index].vlanprior,
+		&config->vl_lookup[entry_index].egrmirr,
+		&config->vl_lookup[entry_index].ingrmirr,
+		&config->vl_lookup[entry_index].vlld,
+	};
+	int entry_field_counts[] = {1, 1, 1, 1, 1, 1, 1, 1, 1,};
+	uint64_t tmp;
+	int rc;
+
+	if (matches(field_name, "entry-count") == 0) {
+		rc = reliable_uint64_from_string(&tmp, field_val, NULL);
+		config->vl_lookup_count = tmp;
+		goto out;
+	}
+	rc = get_match(field_name, options, ARRAY_SIZE(options));
+	if (rc < 0) {
+		goto out;
+	}
+	rc = generic_table_entry_modify(
+			fields[rc],
+			entry_index,
+			config->vl_lookup_count,
+			entry_field_counts[rc],
+			field_val);
+out:
+	return rc;
 }
 
 static int vl_policing_table_entry_modify(
 		struct sja1105_config *config,
-		int entry,
-		char *field_name,
-		char *field_val)
+		int    entry_index,
+		char  *field_name,
+		char  *field_val)
 {
-	loge("unimplemented");
-	return -1;
+	const char *options[] = {
+		"type",
+		"maxlen",
+		"sharindx",
+		"bag",
+		"jitter",
+	};
+	uint64_t *fields[] = {
+		&config->vl_policing[entry_index].type,
+		&config->vl_policing[entry_index].maxlen,
+		&config->vl_policing[entry_index].sharindx,
+		&config->vl_policing[entry_index].bag,
+		&config->vl_policing[entry_index].jitter,
+	};
+	int entry_field_counts[] = {1, 1, 1, 1, 1,};
+	uint64_t tmp;
+	int rc;
+
+	if (matches(field_name, "entry-count") == 0) {
+		rc = reliable_uint64_from_string(&tmp, field_val, NULL);
+		config->vl_policing_count = tmp;
+		goto out;
+	}
+	rc = get_match(field_name, options, ARRAY_SIZE(options));
+	if (rc < 0) {
+		goto out;
+	}
+	rc = generic_table_entry_modify(
+			fields[rc],
+			entry_index,
+			config->vl_policing_count,
+			entry_field_counts[rc],
+			field_val);
+out:
+	return rc;
 }
 
 static int vl_fw_table_entry_modify(
 		struct sja1105_config *config,
-		int entry,
-		char *field_name,
-		char *field_val)
+		int    entry_index,
+		char  *field_name,
+		char  *field_val)
 {
-	loge("unimplemented");
-	return -1;
+	const char *options[] = {
+		"type",
+		"priority",
+		"partition",
+		"destports",
+	};
+	uint64_t *fields[] = {
+		&config->vl_forwarding[entry_index].type,
+		&config->vl_forwarding[entry_index].priority,
+		&config->vl_forwarding[entry_index].partition,
+		&config->vl_forwarding[entry_index].destports,
+	};
+	int entry_field_counts[] = {1, 1, 1, 1,};
+	uint64_t tmp;
+	int rc;
+
+	if (matches(field_name, "entry-count") == 0) {
+		rc = reliable_uint64_from_string(&tmp, field_val, NULL);
+		config->vl_forwarding_count = tmp;
+		goto out;
+	}
+	rc = get_match(field_name, options, ARRAY_SIZE(options));
+	if (rc < 0) {
+		goto out;
+	}
+	rc = generic_table_entry_modify(
+			fields[rc],
+			entry_index,
+			config->vl_forwarding_count,
+			entry_field_counts[rc],
+			field_val);
+out:
+	return rc;
 }
 
 static int retagging_table_entry_modify(
@@ -754,12 +859,39 @@ static int clock_sync_params_table_entry_modify(
 
 static int vl_fw_params_table_entry_modify(
 		struct sja1105_config *config,
-		int entry,
-		char *field_name,
-		char *field_val)
+		int    entry_index,
+		char  *field_name,
+		char  *field_val)
 {
-	loge("unimplemented");
-	return -1;
+	const char *options[] = {
+		"partspc",
+		"debugen",
+	};
+	uint64_t *fields[] = {
+		config->vl_forwarding_params_table[entry_index].partspc,
+		&config->vl_forwarding_params_table[entry_index].debugen,
+	};
+	int entry_field_counts[] = {8, 1,};
+	uint64_t tmp;
+	int rc;
+
+	if (matches(field_name, "entry-count") == 0) {
+		rc = reliable_uint64_from_string(&tmp, field_val, NULL);
+		config->vl_forwarding_params_count = tmp;
+		goto out;
+	}
+	rc = get_match(field_name, options, ARRAY_SIZE(options));
+	if (rc < 0) {
+		goto out;
+	}
+	rc = generic_table_entry_modify(
+			fields[rc],
+			entry_index,
+			config->vl_forwarding_params_count,
+			entry_field_counts[rc],
+			field_val);
+out:
+	return rc;
 }
 
 int config_table_entry_modify(
