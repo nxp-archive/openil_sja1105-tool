@@ -106,3 +106,15 @@ man 5 sja1105-conf                # File format for sja1105-tool configuration
 man 5 sja1105-tool-config-format  # File format for XML switch configuration tables
 ```
 
+To also get PDF versions:
+
+```bash
+cd docs/md
+sudo apt-get install pandoc texlive
+pandoc --standalone -t latex sja1105-tool-reset.1.md -o ../pdf/sja1105-tool-reset.1.pdf
+pandoc --standalone -t latex sja1105-tool-status.1.md -o ../pdf/sja1105-tool-status.1.pdf
+pandoc --standalone -t latex sja1105-tool-config-format.5.md -o ../pdf/sja1105-tool-config-format.5.pdf
+pandoc --standalone -t latex sja1105-tool-config.1.md -o ../pdf/sja1105-tool-config.1.pdf
+pandoc --standalone -t latex sja1105-tool.1.md -o ../pdf/sja1105-tool.1.pdf
+pandoc --standalone -t latex sja1105-conf.5.md -o ../pdf/sja1105-conf.5.pdf
+```
