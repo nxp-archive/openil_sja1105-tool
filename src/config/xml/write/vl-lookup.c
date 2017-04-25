@@ -50,7 +50,7 @@ int vl_lookup_table_write(xmlTextWriterPtr writer, struct sja1105_config *config
 		} else {
 			rc |= xml_write_field(writer, "egrmirr",    entry->egrmirr);
 			rc |= xml_write_field(writer, "ingrmirr",   entry->ingrmirr);
-			rc |= xml_write_field(writer, "vlld",       entry->vlld);
+			rc |= xml_write_field(writer, "vlid",       entry->vlid);
 			rc |= xml_write_field(writer, "port",       entry->port);
 		}
 		rc |= xmlTextWriterEndElement(writer);

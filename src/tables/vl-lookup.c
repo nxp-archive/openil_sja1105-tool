@@ -57,7 +57,7 @@ static void sja1105_vl_lookup_entry_access(
 		logv("Interpreting vllupformat as 1");
 		get_or_set(buf, &entry->egrmirr,    95, 91, size);
 		get_or_set(buf, &entry->ingrmirr,   90, 90, size);
-		get_or_set(buf, &entry->vlld,       57, 42, size);
+		get_or_set(buf, &entry->vlid,       57, 42, size);
 		get_or_set(buf, &entry->port,       29, 27, size);
 	}
 }
@@ -97,7 +97,7 @@ void sja1105_vl_lookup_entry_fmt_show(
 		logv("Interpreting vllupformat as 1");
 		formatted_append(print_buf, fmt, "EGRMIRR    0x%" PRIX64, entry->egrmirr);
 		formatted_append(print_buf, fmt, "INGRMIRR   0x%" PRIX64, entry->ingrmirr);
-		formatted_append(print_buf, fmt, "VLLD       0x%" PRIX64, entry->vlld);
+		formatted_append(print_buf, fmt, "VLID       0x%" PRIX64, entry->vlid);
 		formatted_append(print_buf, fmt, "PORT       0x%" PRIX64, entry->port);
 	}
 }
