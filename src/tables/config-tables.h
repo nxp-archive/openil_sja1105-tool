@@ -136,8 +136,8 @@ struct sja1105_general_params_table {
 	uint64_t casc_port;
 	uint64_t host_port;
 	uint64_t mirr_port;
-	uint64_t vimarker;
-	uint64_t vimask;
+	uint64_t vlmarker;
+	uint64_t vlmask;
 	uint64_t tpid;
 	uint64_t ignore2stf;
 	uint64_t tpid2;

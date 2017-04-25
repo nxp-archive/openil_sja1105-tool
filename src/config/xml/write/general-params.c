@@ -54,8 +54,8 @@ int general_parameters_table_write(xmlTextWriterPtr writer, struct sja1105_confi
 		rc |= xml_write_field(writer, "casc_port", config->general_params[i].casc_port);
 		rc |= xml_write_field(writer, "host_port", config->general_params[i].host_port);
 		rc |= xml_write_field(writer, "mirr_port", config->general_params[i].mirr_port);
-		rc |= xml_write_field(writer, "vimarker", config->general_params[i].vimarker);
-		rc |= xml_write_field(writer, "vimask", config->general_params[i].vimask);
+		rc |= xml_write_field(writer, "vlmarker", config->general_params[i].vlmarker);
+		rc |= xml_write_field(writer, "vlmask", config->general_params[i].vlmask);
 		rc |= xml_write_field(writer, "tpid", config->general_params[i].tpid);
 		rc |= xml_write_field(writer, "ignore2stf", config->general_params[i].ignore2stf);
 		rc |= xml_write_field(writer, "tpid2", config->general_params[i].tpid2);
