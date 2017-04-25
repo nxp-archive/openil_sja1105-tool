@@ -266,7 +266,7 @@ struct sja1105_vl_lookup_entry {
 		struct {
 			uint64_t egrmirr;
 			uint64_t ingrmirr;
-			uint64_t vlld; /* XXX I think this should be called vlid */
+			uint64_t vlid;
 		};
 	};
 };

@@ -680,7 +680,7 @@ static int vl_lookup_table_entry_modify(
 		"vlanprior",
 		"egrmirr",
 		"ingrmirr",
-		"vlld",
+		"vlid",
 	};
 	uint64_t *fields[] = {
 		&config->vl_lookup[entry_index].port,
@@ -691,7 +691,7 @@ static int vl_lookup_table_entry_modify(
 		&config->vl_lookup[entry_index].vlanprior,
 		&config->vl_lookup[entry_index].egrmirr,
 		&config->vl_lookup[entry_index].ingrmirr,
-		&config->vl_lookup[entry_index].vlld,
+		&config->vl_lookup[entry_index].vlid,
 	};
 	int entry_field_counts[] = {1, 1, 1, 1, 1, 1, 1, 1, 1,};
 	uint64_t tmp;
