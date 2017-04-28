@@ -80,6 +80,25 @@ dry_run
     just print the SPI messages as a hexdump to stdout. No communication
     is performed over SPI.
 
+auto_flush
+
+: - Sets the flush condition to true for some of the sja1105-tool commands
+    that perform modifications to the staging area, and after which the
+    configuration is still likely to be valid. Commands in this category
+    are: "**sja1105-tool config modify**", "**sja1105-tool config
+    load**", "**sja1105-tool config default**", but not "**sja1105-tool
+    config new**". Also see sja1105-tool-config(1).
+
+  - Even if "auto_flush" is set to false here, the flush condition can
+    be forced to true by invoking the commands mentioned above with the
+    -f|--flush argument.
+
+  - If the flush condition is set to true, care must be taken that all
+    intermediate configurations are valid, or else the respective
+    sja1105-tool command will fail. For a list of the checks performed
+    on the configuration by the sja1105-tool see
+    sja1105-tool-config-format(5).
+
 THE GENERAL SECTION
 -------------------
 
@@ -129,9 +148,10 @@ EXAMPLE
 	cs_change    = 0
 	mode         = SPI_CPHA
 	dry_run      = false
+	auto_flush   = false
 
 [general]
-	screen-width     = 200
+	screen-width     = 120
 	entries-per-line = 10
 	verbose          = false
 
@@ -152,6 +172,8 @@ SEE ALSO
 ========
 
 sja1105-tool(1)
+sja1105-tool-config(1)
+sja1105-tool-config-format(5)
 
 COMMENTS
 ========

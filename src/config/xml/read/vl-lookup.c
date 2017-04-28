@@ -45,7 +45,7 @@ static int entry_get(xmlNode *node, struct sja1105_vl_lookup_entry *entry)
 		logv("Interpreting VL Lookup Table as vllupformat 1");
 		rc |= xml_read_field(&entry->egrmirr,    "egrmirr",    node);
 		rc |= xml_read_field(&entry->ingrmirr,   "ingrmirr",   node);
-		rc |= xml_read_field(&entry->vlld,       "vlld",       node);
+		rc |= xml_read_field(&entry->vlid,       "vlid",       node);
 	}
 	if (rc) {
 		loge("VL Lookup Table incomplete!");

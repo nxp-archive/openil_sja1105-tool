@@ -136,8 +136,8 @@ struct sja1105_general_params_table {
 	uint64_t casc_port;
 	uint64_t host_port;
 	uint64_t mirr_port;
-	uint64_t vimarker;
-	uint64_t vimask;
+	uint64_t vlmarker;
+	uint64_t vlmask;
 	uint64_t tpid;
 	uint64_t ignore2stf;
 	uint64_t tpid2;
@@ -266,7 +266,7 @@ struct sja1105_vl_lookup_entry {
 		struct {
 			uint64_t egrmirr;
 			uint64_t ingrmirr;
-			uint64_t vlld; /* XXX I think this should be called vlid */
+			uint64_t vlid;
 		};
 	};
 };

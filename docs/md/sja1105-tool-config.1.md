@@ -12,24 +12,24 @@ SYNOPSIS
 
 **sja1105-tool** config show \[_`TABLE_NAME`_\]
 
-**sja1105-tool** config default _`BUILTIN_CONFIG`_
+**sja1105-tool** config default [-f|--flush] _`BUILTIN_CONFIG`_
 
 **sja1105-tool** config upload
 
 **sja1105-tool** config save _`XML_FILE`_
 
-**sja1105-tool** config load _`XML_FILE`_
+**sja1105-tool** config load [-f|--flush] _`XML_FILE`_
 
 **sja1105-tool** config hexdump
 
 **sja1105-tool** config new
 
-**sja1105-tool** config modify _`TABLE_NAME`_\[_`ENTRY_INDEX`_\]
+**sja1105-tool** config modify [-f|--flush] _`TABLE_NAME`_\[_`ENTRY_INDEX`_\]
                  _`FIELD_NAME`_ _`FIELD_NEW_VALUE`_
 
 _ACTION_ := { show | default | upload | save | load | hexdump | new | modify }
 
-_`BUILTIN_CONFIG`_ := { ls1021atsn-standard | ls1021atsn-policing | ls1021atsn-scheduling }
+_`BUILTIN_CONFIG`_ := { ls1021atsn | ... ? }
 
 _`TABLE-NAME`_ := { schedule-table | schedule-entry-points-table | vl-lookup-table |
                       vl-policing-table | vl-forwarding-table | l2-address-lookup-table |
@@ -74,34 +74,61 @@ show \[_`TABLE_NAME`_\]
       properties under the \[general\] section of **/etc/sja1105/sja1105.conf**
       are taken into account for this operation.
 
-default _ls1021atsn-standard_ | _ls1021atsn-policing_ | _ls1021atsn-scheduling_
+default [-f|--flush] _ls1021atsn_
 
-:   - These three configurations are builtin into the sja1105-tool. They are
-      only guaranteed to provide a meaningful configuration for the LS1021ATSN
-      board. The builtin configurations are saved to the staging area.
+:   - This configuration is built into the sja1105-tool. It is only
+      guaranteed to provide a meaningful configuration for the NXP LS1021ATSN
+      board. The builtin configuration is saved to the staging area.
+      Run "**sja1105-tool config show**" to see its contents.
+
+    - Invoking with -f or --flush activates the flush condition. See
+      sja1105-tool-config(1) for more details.
 
 upload
 
 :   - Read the configuration stored in the staging area, packetize it in 260-byte
       messages and "commit" (send) it over SPI to the SJA1105 switch.
 
-    - The SJA1105 switch needs a warm reset prior to this operation. The reset
+    - The SJA1105 switch needs a cold reset prior to this operation. The reset
       command is issued automatically before sending the configuration.
+
+    - Prior to committing the configuration to the SJA1105 switch,
+      some basic validity checks are performed. See
+      sja1105-tool-config-format(5) for more details.
+
+    - Some checks are made to make sure that the device at the other end
+      is really a SJA1105 (responds 9e00030e to the device id query) and
+      that it responds positively to the configuration we are uploading
+      (CRC checks, validity checks apart from our own).
 
     - After the configuration is sent to the switch, a proper Clock Generation
       Unit (CGU, see chapter 5.3 in UM10944.pdf) configuration is determined
       from the xMII Mode Parameters Table present in the staging area. The CGU
       configuration is programmed automatically at the end of this command.
 
+    - If the flush condition is true (either because "auto_flush" is set
+      to true in /etc/sja1105/sja1105.conf or because another command
+      was run with -f|--flush, this command is performed automatically
+      after each modification brought to the staging area through the
+      sja1105-tool. See sja1105-conf(5) for more details.
+
+    - If the "dry_run" option is set to true in /etc/sja1105/sja1105.conf,
+      then no write operation will actually be performed to SPI,
+      regardless of the flush condition value. Instead, a hexdump of the
+      SPI messages will be printed to stdout. Also see sja1105-conf(5).
+
 save _`XML_FILE`_
 
 :   - Read the configuration stored in the staging area and export it in a
       human-readable form to the _`XML_FILE`_ specified.
 
-load _`XML_FILE`_
+load [-f|--flush] _`XML_FILE`_
 
 :   - Import the SJA1105 switch configuration stored in the _`XML_FILE`_ specified,
       and write it to the staging area.
+
+    - Invoking with -f or --flush activates the flush condition. See
+      sja1105-tool-config(1) for more details.
 
 hexdump
 
@@ -113,7 +140,7 @@ new
 
 :   - Write an empty SJA1105 switch configuration to the staging area.
 
-modify _`TABLE_NAME`_\[_`ENTRY_INDEX`_\] _`FIELD_NAME`_ _`FIELD_NEW_VALUE`_
+modify [-f|--flush] _`TABLE_NAME`_\[_`ENTRY_INDEX`_\] _`FIELD_NAME`_ _`FIELD_NEW_VALUE`_
 
 :   - Change the entry _`ENTRY_INDEX`_ of _`TABLE_NAME`_: set _`FIELD_NAME`_
       to _`FIELD_NEW_VALUE`_.
@@ -137,22 +164,17 @@ modify _`TABLE_NAME`_\[_`ENTRY_INDEX`_\] _`FIELD_NAME`_ _`FIELD_NEW_VALUE`_
       specified to the sja1105-tool enclosed in quotes. This prevents the shell
       from interpreting array elements as separate parameters.
 
+    - Invoking with -f or --flush activates the flush condition. See
+      sja1105-tool-config(1) for more details.
+
 BUGS
 ====
 
 Showing a single entry of a configuration table is currently not supported.
 
-The entry count of configuration tables is not checked to be consistent with
-the requirements specified in UM10944.pdf.
-
 The following configuration tables are currently unsupported:
 
-* VL Lookup Table (TABLE := vl-lookup-table)
-* VL Policing Table (TABLE := vl-policing-table)
-* VL Forwarding Table (TABLE := vl-forwarding-table)
-* VL Forwarding Parameters Table (TABLE := vl-forwarding-parameters-table)
 * Clock Synchronization Parameters Table (TABLE := clock-synchronization-parameters-table)
-* AVB Parameters Table (TABLE := avb-parameters-table)
 * Retagging Table (TABLE := retagging-table)
 
 AUTHOR

@@ -60,8 +60,8 @@ static void sja1105_general_params_table_access(
 	get_or_set(buf, &table->casc_port,   115, 113, size);
 	get_or_set(buf, &table->host_port,   112, 110, size);
 	get_or_set(buf, &table->mirr_port,   109, 107, size);
-	get_or_set(buf, &table->vimarker,    106, 75,  size);
-	get_or_set(buf, &table->vimask,      74, 43,   size);
+	get_or_set(buf, &table->vlmarker,    106, 75,  size);
+	get_or_set(buf, &table->vlmask,      74, 43,   size);
 	get_or_set(buf, &table->tpid,        42, 27,   size);
 	get_or_set(buf, &table->ignore2stf,  26, 26,   size);
 	get_or_set(buf, &table->tpid2,       25, 10,   size);
@@ -109,8 +109,8 @@ void sja1105_general_params_table_fmt_show(
 	formatted_append(print_buf, fmt, "CASC_PORT   0x%" PRIX64, table->casc_port);
 	formatted_append(print_buf, fmt, "HOST_PORT   0x%" PRIX64, table->host_port);
 	formatted_append(print_buf, fmt, "MIRR_PORT   0x%" PRIX64, table->mirr_port);
-	formatted_append(print_buf, fmt, "VIMARKER    0x%" PRIX64, table->vimarker);
-	formatted_append(print_buf, fmt, "VIMASK      0x%" PRIX64, table->vimask);
+	formatted_append(print_buf, fmt, "VLMARKER    0x%" PRIX64, table->vlmarker);
+	formatted_append(print_buf, fmt, "VLMASK      0x%" PRIX64, table->vlmask);
 	formatted_append(print_buf, fmt, "TPID        0x%" PRIX64, table->tpid);
 	formatted_append(print_buf, fmt, "IGNORE2STF  0x%" PRIX64, table->ignore2stf);
 	formatted_append(print_buf, fmt, "TPID2       0x%" PRIX64, table->tpid2);

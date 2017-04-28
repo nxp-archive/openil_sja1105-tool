@@ -577,8 +577,8 @@ static int general_params_table_entry_modify(
 		"casc_port",
 		"host_port",
 		"mirr_port",
-		"vimarker",
-		"vimask",
+		"vlmarker",
+		"vlmask",
 		"tpid",
 		"ignore2stf",
 		"tpid2"
@@ -599,8 +599,8 @@ static int general_params_table_entry_modify(
 		&config->general_params[entry_index].casc_port,
 		&config->general_params[entry_index].host_port,
 		&config->general_params[entry_index].mirr_port,
-		&config->general_params[entry_index].vimarker,
-		&config->general_params[entry_index].vimask,
+		&config->general_params[entry_index].vlmarker,
+		&config->general_params[entry_index].vlmask,
 		&config->general_params[entry_index].tpid,
 		&config->general_params[entry_index].ignore2stf,
 		&config->general_params[entry_index].tpid2
@@ -680,7 +680,7 @@ static int vl_lookup_table_entry_modify(
 		"vlanprior",
 		"egrmirr",
 		"ingrmirr",
-		"vlld",
+		"vlid",
 	};
 	uint64_t *fields[] = {
 		&config->vl_lookup[entry_index].port,
@@ -691,7 +691,7 @@ static int vl_lookup_table_entry_modify(
 		&config->vl_lookup[entry_index].vlanprior,
 		&config->vl_lookup[entry_index].egrmirr,
 		&config->vl_lookup[entry_index].ingrmirr,
-		&config->vl_lookup[entry_index].vlld,
+		&config->vl_lookup[entry_index].vlid,
 	};
 	int entry_field_counts[] = {1, 1, 1, 1, 1, 1, 1, 1, 1,};
 	uint64_t tmp;
