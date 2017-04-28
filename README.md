@@ -98,12 +98,13 @@ Documentation
 The following manual pages are provided:
 
 ```bash
-man sja1105-tool                  # General command overview
-man sja1105-tool-config           # Detailed usage of sja1105-tool config
-man sja1105-tool-status           # Detailed usage of sja1105-tool status
-man sja1105-tool-reset            # Detailed usage of sja1105-tool reset
-man 5 sja1105-conf                # File format for sja1105-tool configuration
-man 5 sja1105-tool-config-format  # File format for XML switch configuration tables
+cd docs/man
+man -l ./sja1105-tool.1                # General command overview
+man -l ./sja1105-tool-config.1         # Detailed usage of sja1105-tool config
+man -l ./sja1105-tool-status.1         # Detailed usage of sja1105-tool status
+man -l ./sja1105-tool-reset.1          # Detailed usage of sja1105-tool reset
+man -l ./sja1105-conf.5                # File format for sja1105-tool configuration
+man -l ./sja1105-tool-config-format.5  # File format for XML switch configuration tables
 ```
 
 To also get PDF versions:
