@@ -22,7 +22,7 @@ Issuing a Warm Reset only resets the switch core and ACU (Auxilliary
 Configuration Unit), while a Cold Reset also resets the CGU (Clock
 Generation Unit). PLL0 will not be reset by this.
 
-Note that the "**sja1105-tool config upload**" command issues a warm reset 
+Note that the "**sja1105-tool config upload**" command issues a cold reset 
 to the switch automatically.
 
 AUTHOR
