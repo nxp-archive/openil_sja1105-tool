@@ -276,7 +276,7 @@ out_1:
 void get_flush_mode(struct spi_setup *spi_setup, int *argc, char ***argv)
 {
 	if ((*argc) && ((strcmp(*argv[0], "-f") == 0 ||
-	                (strcmp(*argv[0], "--force") == 0)))) {
+	                (strcmp(*argv[0], "--flush") == 0)))) {
 		spi_setup->flush = 1;
 		(*argc)--; (*argv)++;
 	}
