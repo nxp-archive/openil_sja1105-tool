@@ -38,6 +38,7 @@ int vl_forwarding_table_write(xmlTextWriterPtr writer, struct sja1105_config *co
 	logv("writing %d VL Forwarding entries", config->vl_forwarding_count);
 	for (i = 0; i < config->vl_forwarding_count; i++) {
 		rc |= xmlTextWriterStartElement(writer, BAD_CAST "entry");
+		rc |= xml_write_field(writer, "index",     i);
 		rc |= xml_write_field(writer, "type",      config->vl_forwarding[i].type);
 		rc |= xml_write_field(writer, "priority",  config->vl_forwarding[i].priority);
 		rc |= xml_write_field(writer, "partition", config->vl_forwarding[i].partition);
