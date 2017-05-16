@@ -39,6 +39,7 @@ int vl_lookup_table_write(xmlTextWriterPtr writer, struct sja1105_config *config
 	logv("writing %d VL Lookup entries", config->vl_lookup_count);
 	for (i = 0; i < config->vl_lookup_count; i++) {
 		rc |= xmlTextWriterStartElement(writer, BAD_CAST "entry");
+		rc |= xml_write_field(writer, "index", i);
 		entry = &config->vl_lookup[i];
 		if (entry->format == 0) {
 			rc |= xml_write_field(writer, "destports",  entry->destports);

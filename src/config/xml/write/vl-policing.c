@@ -38,6 +38,7 @@ int vl_policing_table_write(xmlTextWriterPtr writer, struct sja1105_config *conf
 	logv("writing %d VL Policing entries", config->vl_policing_count);
 	for (i = 0; i < config->vl_policing_count; i++) {
 		rc |= xmlTextWriterStartElement(writer, BAD_CAST "entry");
+		rc |= xml_write_field(writer, "index",    i);
 		rc |= xml_write_field(writer, "type",     config->vl_policing[i].type);
 		rc |= xml_write_field(writer, "maxlen",   config->vl_policing[i].maxlen);
 		rc |= xml_write_field(writer, "sharindx", config->vl_policing[i].sharindx);
