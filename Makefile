@@ -29,31 +29,48 @@
 # POSSIBILITY OF SUCH DAMAGE.
 ##############################################################################
 VERSION  = $(or $(shell test -d .git && git describe --tags), "untagged")
-CFLAGS  += -DVERSION=\"${VERSION}\"
-CFLAGS  += -Wall -Wextra -g -fstack-protector-all
-CFLAGS  += $(shell pkg-config --cflags libxml-2.0)
-LDFLAGS += $(shell pkg-config --libs libxml-2.0)
-SRC      = $(shell find src -name "*.[c|h]")       # All .c and .h files
-DEPS     = $(patsubst %.c, %.o, $(SRC))            # All .o and .h files
-OBJ      = $(filter %.o, $(DEPS))                  # Only the .o files
+LIB_CFLAGS  += -Wall -Wextra -g -fstack-protector-all -Isrc -fPIE
+LIB_LDFLAGS +=
+
+BIN_CFLAGS  += -DVERSION=\"${VERSION}\"
+BIN_CFLAGS  += -Wall -Wextra -g -fstack-protector-all -Isrc
+BIN_CFLAGS  += $(shell pkg-config --cflags libxml-2.0)
+BIN_LDFLAGS += $(shell pkg-config --libs libxml-2.0)
+BIN_LDFLAGS += -L. -lsja1105
+
+BIN_SRC  = $(shell find src/tool -name "*.[c|h]")  # All .c and .h files
+BIN_DEPS = $(patsubst %.c, %.o, $(BIN_SRC))        # All .o and .h files
+BIN_OBJ  = $(filter %.o, $(BIN_DEPS))              # Only the .o files
+
+LIB_SRC  = $(shell find src/lib -name "*.[c|h]")   # All .c and .h files
+LIB_DEPS = $(patsubst %.c, %.o, $(LIB_SRC))        # All .o and .h files
+LIB_OBJ  = $(filter %.o, $(LIB_DEPS))              # Only the .o files
+
 MANPAGES = docs/man/sja1105-tool.1 \
            docs/man/sja1105-tool-status.1 \
            docs/man/sja1105-tool-reset.1 \
            docs/man/sja1105-tool-config.1 \
            docs/man/sja1105-tool-config-format.5 \
            docs/man/sja1105-conf.5
-SJA1105  = sja1105-tool
+SJA1105_BIN = sja1105-tool
+SJA1105_LIB = libsja1105.so
 
-build: $(SJA1105)
+build: $(SJA1105_LIB) $(SJA1105_BIN)
 
-$(SJA1105): $(DEPS)
-	$(CC) $(OBJ) -o $@ $(LDFLAGS)
+$(SJA1105_LIB): $(LIB_DEPS)
+	$(CC) -shared $(LIB_OBJ) -o $@ $(LIB_LDFLAGS)
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c $^ -o $@
+$(SJA1105_BIN): $(BIN_DEPS)
+	$(CC) $(BIN_OBJ) -o $@ $(BIN_LDFLAGS)
+
+src/tool/%.o: src/tool/%.c
+	$(CC) $(BIN_CFLAGS) -c $^ -o $@
+
+src/lib/%.o: src/lib/%.c
+	$(CC) $(LIB_CFLAGS) -c $^ -o $@
 
 clean:
-	rm -f $(SJA1105) $(OBJ)
+	rm -f $(SJA1105_BIN) $(BIN_OBJ) $(SJA1105_LIB) $(LIB_OBJ)
 
 man: $(MANPAGES)
 
