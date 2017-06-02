@@ -86,12 +86,6 @@ make
 # However, this step requires the "pandoc" package to be installed.
 ```
 
-Yocto integration
------------------
-
-To include the sja1105-tool inside a Bitbake layer, please see the Bitbake recipe 
-Readme [here](http://sw-stash.freescale.net/users/b56933/repos/sja1105-tool-bitbake/browse).
-
 Documentation
 -------------
 
