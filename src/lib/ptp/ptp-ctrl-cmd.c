@@ -37,9 +37,9 @@
 #include <lib/include/spi.h>
 #include <common.h>
 
-static void sja1105_ptp_control_access(
+static void sja1105_ptp_ctrl_cmd_access(
 		void *buf,
-		struct sja1105_ptp_control *ptp_control,
+		struct sja1105_ptp_ctrl_cmd *ptp_control,
 		int write)
 {
 	int  (*get_or_set)(void*, uint64_t*, int, int, int);
@@ -62,17 +62,17 @@ static void sja1105_ptp_control_access(
 	get_or_set(buf, &ptp_control->clk_add_mode,        0,  0, 4);
 }
 
-void sja1105_ptp_control_set(void *buf, struct sja1105_ptp_control *ptp_control)
+void sja1105_ptp_ctrl_cmd_set(void *buf, struct sja1105_ptp_ctrl_cmd *ptp_control)
 {
-	sja1105_ptp_control_access(buf, ptp_control, 1);
+	sja1105_ptp_ctrl_cmd_access(buf, ptp_control, 1);
 }
 
-void sja1105_ptp_control_get(void *buf, struct sja1105_ptp_control *ptp_control)
+void sja1105_ptp_ctrl_cmd_get(void *buf, struct sja1105_ptp_ctrl_cmd *ptp_control)
 {
-	sja1105_ptp_control_access(buf, ptp_control, 0);
+	sja1105_ptp_ctrl_cmd_access(buf, ptp_control, 0);
 }
 
-void sja1105_ptp_control_show(struct sja1105_ptp_control *ptp_control)
+void sja1105_ptp_ctrl_cmd_show(struct sja1105_ptp_ctrl_cmd *ptp_control)
 {
 	printf("VALID      %" PRIX64 "\n", ptp_control->valid);
 	printf("PTPSTRTSCH %" PRIX64 "\n", ptp_control->start_schedule);
@@ -84,12 +84,11 @@ void sja1105_ptp_control_show(struct sja1105_ptp_control *ptp_control)
 	printf("PTPCLKADD  %" PRIX64 "\n", ptp_control->clk_add_mode);
 }
 
-int sja1105_ptp_control_cmd(struct spi_setup *spi_setup,
-                            struct sja1105_ptp_control *ptp_control)
+int sja1105_ptp_ctrl_cmd_send(struct spi_setup *spi_setup,
+                              struct sja1105_ptp_ctrl_cmd *ptp_control)
 {
-#define PTP_CONTROL_ADDR 0x17
-#define SIZE_PTP_CONTROL 4
-#define MSG_LEN          SIZE_PTP_CONTROL + SIZE_SPI_MSG_HEADER
+	const int PTP_CONTROL_ADDR = 0x17;
+	const int MSG_LEN = SIZE_SPI_MSG_HEADER + 4;
 	struct sja1105_spi_message msg;
 	uint8_t tx_buf[MSG_LEN];
 	uint8_t rx_buf[MSG_LEN];
@@ -102,11 +101,11 @@ int sja1105_ptp_control_cmd(struct spi_setup *spi_setup,
 	memset(rx_buf, 0, MSG_LEN);
 
 	msg.access     = SPI_WRITE;
-	msg.read_count = SIZE_PTP_CONTROL / 4;
+	msg.read_count = 0;
 	msg.address    = CORE_ADDR + PTP_CONTROL_ADDR;
 	sja1105_spi_message_set(tx_buf, &msg);
 
-	sja1105_ptp_control_set(tx_buf + SIZE_SPI_MSG_HEADER, ptp_control);
+	sja1105_ptp_ctrl_cmd_set(tx_buf + SIZE_SPI_MSG_HEADER, ptp_control);
 
 	rc = spi_transfer(spi_setup, tx_buf, rx_buf, MSG_LEN);
 	if (rc < 0) {
@@ -123,3 +122,63 @@ out:
 	return rc;
 };
 
+int sja1105_ptp_start_schedule(struct spi_setup *spi_setup)
+{
+	struct sja1105_ptp_ctrl_cmd ptp_control;
+
+	memset(&ptp_control, 0, sizeof(ptp_control));
+	ptp_control.valid = 1;
+	ptp_control.start_schedule = 1;
+	return sja1105_ptp_ctrl_cmd_send(spi_setup, &ptp_control);
+}
+
+int sja1105_ptp_stop_schedule(struct spi_setup *spi_setup)
+{
+	struct sja1105_ptp_ctrl_cmd ptp_control;
+
+	memset(&ptp_control, 0, sizeof(ptp_control));
+	ptp_control.valid = 1;
+	ptp_control.stop_schedule = 1;
+	return sja1105_ptp_ctrl_cmd_send(spi_setup, &ptp_control);
+}
+
+int sja1105_ptp_start_pin_toggle(struct spi_setup *spi_setup)
+{
+	struct sja1105_ptp_ctrl_cmd ptp_control;
+
+	memset(&ptp_control, 0, sizeof(ptp_control));
+	ptp_control.valid = 1;
+	ptp_control.start_pin_toggle = 1;
+	return sja1105_ptp_ctrl_cmd_send(spi_setup, &ptp_control);
+}
+
+int sja1105_ptp_stop_pin_toggle(struct spi_setup *spi_setup)
+{
+	struct sja1105_ptp_ctrl_cmd ptp_control;
+
+	memset(&ptp_control, 0, sizeof(ptp_control));
+	ptp_control.valid = 1;
+	ptp_control.stop_pin_toggle = 1;
+	return sja1105_ptp_ctrl_cmd_send(spi_setup, &ptp_control);
+}
+
+int sja1105_ptp_reset(struct spi_setup *spi_setup)
+{
+	struct sja1105_ptp_ctrl_cmd ptp_control;
+
+	memset(&ptp_control, 0, sizeof(ptp_control));
+	ptp_control.valid = 1;
+	ptp_control.reset = 1;
+	return sja1105_ptp_ctrl_cmd_send(spi_setup, &ptp_control);
+}
+
+int sja1105_ptp_set_add_mode(struct spi_setup *spi_setup,
+                             enum sja1105_ptp_clk_add_mode mode)
+{
+	struct sja1105_ptp_ctrl_cmd ptp_control;
+
+	memset(&ptp_control, 0, sizeof(ptp_control));
+	ptp_control.valid = 1;
+	ptp_control.clk_add_mode = mode;
+	return sja1105_ptp_ctrl_cmd_send(spi_setup, &ptp_control);
+}
