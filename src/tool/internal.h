@@ -37,6 +37,7 @@
 
 int read_config_file(char*, struct spi_setup*, struct general_config*);
 int rgu_parse_args(struct spi_setup *spi_setup, int argc, char **argv);
+int ptp_parse_args(struct spi_setup *spi_setup, int argc, char **argv);
 int config_parse_args(struct spi_setup *spi_setup, int argc, char **argv);
 int status_parse_args(struct spi_setup *spi_setup, int argc, char **argv);
 int config_table_entry_modify(

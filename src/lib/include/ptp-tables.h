@@ -38,7 +38,7 @@ enum sja1105_ptp_clk_add_mode {
 	PTP_ADD_MODE,
 };
 
-struct sja1105_ptp_control {
+struct sja1105_ptp_ctrl_cmd {
 	uint64_t valid;
 	uint64_t start_schedule;     /* PTPSTRTSCH */
 	uint64_t stop_schedule;      /* PTPSTOPSCH */
@@ -49,14 +49,18 @@ struct sja1105_ptp_control {
 	uint64_t clk_add_mode;       /* PTPCLKADD */
 };
 
+/* PTP static config */
 struct sja1105_ptp_config {
 	uint64_t pin_duration;               /* PTPPINDUR */
 	uint64_t pin_start;                  /* PTPPINST */
 	uint64_t schedule_time;              /* PTPSCHTM */
 	uint64_t schedule_correction_period; /* PTPCLKCORP */
 	uint64_t clk_rate;                   /* PTPCLKRATE */
-	uint64_t ts_clk_val;                 /* PTPTSCLK */
-	uint64_t clk_val;                    /* PTPCLKVAL */
+	uint64_t ts_based_on_ptpclk;         /* CORRCLK4TS */
+	uint64_t clk_add_mode;               /* PTPCLKADD */
+	uint64_t schedule_autostart;         /* PTPSTRTSCH */
+	uint64_t pin_toggle_autostart;       /* STARTPTPCP */
 };
+/* PTP dynamic registers: PTPTSCLK, PTPCLKVAL */
 
 #endif
