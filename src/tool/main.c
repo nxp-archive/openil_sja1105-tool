@@ -41,9 +41,7 @@ void print_usage()
 	printf("Usage: sja1105-tool [command] [options] \n"
 	       "command can be one of:\n"
 	       "   * config\n"
-	       /*"   * control\n"*/
 	       "   * status\n"
-	       /*"   * reconf\n"*/
 	       "   * reset\n"
 	       "   * version | -V | --version\n");
 	printf("\n");
@@ -64,8 +62,6 @@ static int parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 	const char *options[] = {
 		"configure",
 		"status",
-		/*"reconf",*/
-		/*"control",*/
 		"reset",
 		"-V",
 		"version",
@@ -74,8 +70,6 @@ static int parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 	int (*next_parse_args[])(struct spi_setup*, int, char**) = {
 		config_parse_args,
 		status_parse_args,
-		/*reconf_parse_args,*/
-		/*control_parse_args,*/
 		rgu_parse_args,
 		print_version,
 		print_version,
