@@ -38,11 +38,13 @@ BIN_CFLAGS  += $(shell pkg-config --cflags libxml-2.0)
 BIN_LDFLAGS += $(shell pkg-config --libs libxml-2.0)
 BIN_LDFLAGS += -L. -lsja1105
 
-BIN_SRC  = $(shell find src/tool -name "*.[c|h]")  # All .c and .h files
+BIN_SRC  = src/common.c src/common.h
+LIB_SRC  = src/common.c src/common.h
+BIN_SRC += $(shell find src/tool -name "*.[c|h]")  # All .c and .h files
 BIN_DEPS = $(patsubst %.c, %.o, $(BIN_SRC))        # All .o and .h files
 BIN_OBJ  = $(filter %.o, $(BIN_DEPS))              # Only the .o files
 
-LIB_SRC  = $(shell find src/lib -name "*.[c|h]")   # All .c and .h files
+LIB_SRC += $(shell find src/lib -name "*.[c|h]")   # All .c and .h files
 LIB_DEPS = $(patsubst %.c, %.o, $(LIB_SRC))        # All .o and .h files
 LIB_OBJ  = $(filter %.o, $(LIB_DEPS))              # Only the .o files
 
@@ -62,6 +64,9 @@ $(SJA1105_LIB): $(LIB_DEPS)
 
 $(SJA1105_BIN): $(BIN_DEPS)
 	$(CC) $(BIN_OBJ) -o $@ $(BIN_LDFLAGS)
+
+src/common.o: src/common.c
+	$(CC) $(LIB_CFLAGS) -c $^ -o $@
 
 src/tool/%.o: src/tool/%.c
 	$(CC) $(BIN_CFLAGS) -c $^ -o $@

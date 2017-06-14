@@ -35,6 +35,19 @@
 #include <lib/include/config.h>
 #include <lib/include/spi.h>
 
+struct general_config {
+	char *staging_area;
+	int   screen_width;
+	int   entries_per_line;
+	int   verbose;
+	int   debug;
+};
+
+/* defined in src/tool/sja1105-config.c */
+extern struct general_config general_config;
+extern int SJA1105_VERBOSE_CONDITION;
+extern int SJA1105_DEBUG_CONDITION;
+
 int read_config_file(char*, struct sja1105_spi_setup*, struct general_config*);
 int rgu_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv);
 int ptp_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv);
@@ -51,5 +64,18 @@ int sja1105_config_show(struct sja1105_config *config, char *table_name);
 char *trimwhitespace(char *str);
 int   matches(const char*, const char*);
 int   get_match(const char*, const char**, int);
+int   get_multiline_buf_width(char *buf);
+int   get_entry_count_to_fit_screen(char **print_bufs, int count);
+void  show_print_bufs(char **print_bufs, int count);
+void  linewise_concat(char **buffers, int count);
+int   read_array(char *array_str, uint64_t *array_val, int max_count);
+int   reliable_uint64_from_string(uint64_t *to, char *from, char**);
+
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+#define min(x, y) (((x) < (y)) ? (x) : (y))
+
+#define SJA1105_NETCONF_ROOT "sja1105"
+#define SJA1105_NETCONF_NS   "http://nxp.com/ns/yang/tsn/sja1105"
+#define SJA1105_CONF_FILE    "/etc/sja1105/sja1105.conf"
 
 #endif

@@ -36,6 +36,7 @@
 /* These are our own include files */
 #include <lib/include/config.h>
 #include <lib/include/gtable.h>
+#include <lib/helpers.h>
 #include <common.h>
 
 static void sja1105_l2_lookup_entry_access(

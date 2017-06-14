@@ -38,6 +38,8 @@
 /* These are our include files */
 #include <lib/include/config.h>
 #include <common.h>
+/* This is the top-level _SJA1105_TOOL_INTERNAL header */
+#include <tool/internal.h>
 
 int xml_write_field(xmlTextWriterPtr, char*, uint64_t);
 int xml_write_array(xmlTextWriterPtr, char*, uint64_t*, int);

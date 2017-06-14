@@ -34,8 +34,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <errno.h>
-/* For va_start and va_end */
-#include <stdarg.h>
 /* For isspace */
 #include <ctype.h>
 #include <inttypes.h>
@@ -92,20 +90,6 @@ out:
 	free(cmd_matches);
 out_1:
 	return (match_count == 1) ? match_index : -1;
-}
-
-void formatted_append(char *buffer, char *width_fmt, char *fmt, ...)
-{
-	char temp_buf[MAX_LINE_SIZE];
-	va_list args;
-	va_start(args, fmt);
-
-	/* Print the args into temp_buf according to fmt */
-	vsprintf(temp_buf, fmt, args);
-	/* Append the temp_buf to the output buffer width-formatted */
-	sprintf(buffer + strlen(buffer), width_fmt, temp_buf);
-
-	va_end(args);
 }
 
 int mac_addr_from_string(uint64_t *to, char *from, char **endptr)
@@ -170,21 +154,6 @@ int reliable_uint64_from_string(uint64_t *to, char *from, char **endptr)
 	errno = errno_saved;
 out:
 	return rc;
-}
-
-void print_array(char *print_buf, uint64_t *array, int count)
-{
-	int written;
-	char *p;
-	int i;
-
-	written = snprintf(print_buf, MAX_LINE_SIZE, "[");
-	p = print_buf + written;
-	for (i = 0; i < count; i++) {
-		written += snprintf(p, MAX_LINE_SIZE - written, "0x%" PRIX64 " ", array[i]);
-		p = print_buf + written;
-	}
-	snprintf(p, MAX_LINE_SIZE, "]");
 }
 
 int read_array(char *array_str, uint64_t *array_val, int max_count)
@@ -349,16 +318,5 @@ void show_print_bufs(char **print_bufs, int count)
 		linewise_concat(print_bufs + i, increment);
 		i += increment;
 	}
-}
-
-void mac_addr_sprintf(char *buf, uint64_t mac_hexval)
-{
-	snprintf(buf, MAC_ADDR_SIZE, "%.02x:%.02x:%.02x:%.02x:%.02x:%.02x",
-	        (unsigned) (mac_hexval >> 40) & 0xff,
-	        (unsigned) (mac_hexval >> 32) & 0xff,
-	        (unsigned) (mac_hexval >> 24) & 0xff,
-	        (unsigned) (mac_hexval >> 16) & 0xff,
-	        (unsigned) (mac_hexval >>  8) & 0xff,
-	        (unsigned) (mac_hexval >>  0) & 0xff);
 }
 

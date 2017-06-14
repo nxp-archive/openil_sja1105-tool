@@ -517,7 +517,7 @@ int sja1105_config_get(void *buf, struct sja1105_config *config)
 		if (hdr.len == 0) {
 			break;
 		}
-		if (general_config.verbose) {
+		if (SJA1105_VERBOSE_CONDITION) {
 			sja1105_table_header_show(&hdr);
 		}
 		computed_crc = ether_crc32_le(p, SIZE_TABLE_HEADER - 4);
