@@ -47,10 +47,6 @@ int sja1105_spi_configure(struct sja1105_spi_setup *spi_setup)
 	int ret = 0;
 	int fd;
 
-	if (spi_setup->fd) {
-		logv("fd still open, reusing");
-		return spi_setup->fd;
-	}
 	logv("configuring device %s", spi_setup->device);
 	fd = open(spi_setup->device, O_RDWR);
 	if (fd < 0) {
