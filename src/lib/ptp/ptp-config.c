@@ -230,3 +230,31 @@ int sja1105_ptp_clk_add(struct sja1105_spi_setup *spi_setup, uint64_t value)
 out:
 	return rc;
 }
+
+int sja1105_ptp_clk_rate_set(struct sja1105_spi_setup *spi_setup,
+                             uint64_t value)
+{
+	const int PTPCLKRATE_ADDR = 0x1A;
+	const int MSG_LEN = SIZE_SPI_MSG_HEADER + 4;
+	struct sja1105_spi_message msg;
+	uint8_t tx_buf[MSG_LEN];
+	uint8_t rx_buf[MSG_LEN];
+	int rc;
+
+	memset(rx_buf, 0, MSG_LEN);
+
+	msg.access     = SPI_WRITE;
+	msg.read_count = 0;
+	msg.address    = CORE_ADDR + PTPCLKRATE_ADDR;
+	sja1105_spi_message_set(tx_buf, &msg);
+
+	generic_table_field_set(tx_buf + SIZE_SPI_MSG_HEADER, &value, 31, 0, 4);
+
+	rc = sja1105_spi_transfer(spi_setup, tx_buf, rx_buf, MSG_LEN);
+	if (rc < 0) {
+		loge("sja1105_spi_transfer failed");
+		goto out;
+	}
+out:
+	return rc;
+}
