@@ -38,6 +38,8 @@
 /* These are our include files */
 #include <lib/include/config.h>
 #include <common.h>
+/* This is the top-level _SJA1105_TOOL_INTERNAL header */
+#include <tool/internal.h>
 
 int schedule_table_parse(xmlNode *node, struct sja1105_config *config);
 int schedule_entry_points_table_parse(xmlNode *node, struct sja1105_config *config);

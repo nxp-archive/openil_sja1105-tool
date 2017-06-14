@@ -42,6 +42,8 @@ const char *default_staging_area = "/etc/sja1105/.staging";
 const char *default_device = "/dev/spidev0.1";
 
 struct general_config general_config;
+int SJA1105_VERBOSE_CONDITION;
+int SJA1105_DEBUG_CONDITION;
 
 static int parse_spi_mode(struct sja1105_spi_setup *spi_setup, char *mode)
 {
@@ -190,6 +192,8 @@ static inline int parse_key_val(struct sja1105_spi_setup *spi_setup,
 		parse_spi_setup(spi_setup, key, value);
 	} else if (strcmp(section_hdr, "[general]") == 0) {
 		parse_general_config(general_conf, key, value);
+		SJA1105_VERBOSE_CONDITION = general_conf->verbose;
+		SJA1105_DEBUG_CONDITION   = general_conf->debug;
 	} else {
 		loge("Invalid section header \"%s\"", section_hdr);
 		return -1;

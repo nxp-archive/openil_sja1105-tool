@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016, NXP Semiconductors
+ * Copyright (c) 2017, NXP Semiconductors
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,38 +28,21 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
-#ifndef _SJA1105_TOOL_COMMON_H
-#define _SJA1105_TOOL_COMMON_H
-
 #include <stdint.h>
-#include <stdio.h>
+#include <common.h>
+#include "helpers.h"
 
-#define MAX_LINE_SIZE 2048
+int __attribute__((weak)) SJA1105_DEBUG_CONDITION   = 0;
+int __attribute__((weak)) SJA1105_VERBOSE_CONDITION = 0;
 
-/* Macros for conditional, error, verbose and debug logging */
-extern int SJA1105_DEBUG_CONDITION;
-extern int SJA1105_VERBOSE_CONDITION;
+void mac_addr_sprintf(char *buf, uint64_t mac_hexval)
+{
+	snprintf(buf, MAC_ADDR_SIZE, "%.02x:%.02x:%.02x:%.02x:%.02x:%.02x",
+	        (unsigned) (mac_hexval >> 40) & 0xff,
+	        (unsigned) (mac_hexval >> 32) & 0xff,
+	        (unsigned) (mac_hexval >> 24) & 0xff,
+	        (unsigned) (mac_hexval >> 16) & 0xff,
+	        (unsigned) (mac_hexval >>  8) & 0xff,
+	        (unsigned) (mac_hexval >>  0) & 0xff);
+}
 
-#define _log(file, fmt, ...) do { \
-	if (SJA1105_DEBUG_CONDITION) { \
-		fprintf(file, "%s@%d: " fmt "\n", \
-		__func__, __LINE__, ##__VA_ARGS__); \
-	} else { \
-		fprintf(file, fmt "\n", ##__VA_ARGS__); \
-	} \
-} while(0);
-
-#define logc(file, condition, ...) do { \
-	if (condition) { \
-		_log(file, __VA_ARGS__); \
-	} \
-} while(0);
-
-#define loge(...) _log(stderr, __VA_ARGS__)
-#define logi(...) _log(stdout, __VA_ARGS__)
-#define logv(...) logc(stdout, SJA1105_VERBOSE_CONDITION, __VA_ARGS__);
-
-void formatted_append(char *buffer, char *width_fmt, char *fmt, ...);
-void print_array(char *print_buf, uint64_t *array, int count);
-
-#endif
