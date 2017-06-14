@@ -272,10 +272,10 @@ int config_upload(struct sja1105_spi_setup *spi_setup, struct sja1105_config *co
 		/* Combine chunks[i].msg and chunks[i].buf into tx_buf */
 		spi_message_aggregate(tx_buf, &chunks[i].msg, chunks[i].buf, chunks[i].size);
 		/* Send it out */
-		rc = spi_transfer(spi_setup, tx_buf, rx_buf,
+		rc = sja1105_spi_transfer(spi_setup, tx_buf, rx_buf,
 		                  SIZE_SPI_MSG_HEADER + chunks[i].size);
 		if (rc < 0) {
-			loge("spi_transfer failed");
+			loge("sja1105_spi_transfer failed");
 			goto out_2;
 		}
 	}

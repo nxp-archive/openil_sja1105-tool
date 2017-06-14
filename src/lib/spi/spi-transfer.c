@@ -102,7 +102,8 @@ out_1:
 	return fd;
 }
 
-int spi_transfer(const struct sja1105_spi_setup *spi_setup, const void *tx, void *rx, int size)
+int sja1105_spi_transfer(const struct sja1105_spi_setup *spi_setup,
+                         const void *tx, void *rx, int size)
 {
 	struct spi_ioc_transfer tr = {
 		.tx_buf        = (unsigned long)tx,

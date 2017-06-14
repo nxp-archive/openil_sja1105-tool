@@ -107,9 +107,9 @@ int sja1105_ptp_ctrl_cmd_send(struct sja1105_spi_setup *spi_setup,
 
 	sja1105_ptp_ctrl_cmd_set(tx_buf + SIZE_SPI_MSG_HEADER, ptp_control);
 
-	rc = spi_transfer(spi_setup, tx_buf, rx_buf, MSG_LEN);
+	rc = sja1105_spi_transfer(spi_setup, tx_buf, rx_buf, MSG_LEN);
 	if (rc < 0) {
-		loge("spi_transfer failed");
+		loge("sja1105_spi_transfer failed");
 		goto out;
 	}
 	/* TODO: examine rx_buf.

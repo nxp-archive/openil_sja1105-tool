@@ -193,9 +193,9 @@ int sja1105_port_status_get(
 	msg.address    = CORE_ADDR + mac_base_addr[port];
 	sja1105_spi_message_set(tx_buf, &msg);
 
-	rc = spi_transfer(spi_setup, tx_buf, rx_buf, MSG_LEN_MAC);
+	rc = sja1105_spi_transfer(spi_setup, tx_buf, rx_buf, MSG_LEN_MAC);
 	if (rc < 0) {
-		loge("spi_transfer failed for mac registers");
+		loge("sja1105_spi_transfer failed for mac registers");
 		goto out;
 	}
 	sja1105_port_status_get_mac(rx_buf + 4, status);
@@ -209,9 +209,9 @@ int sja1105_port_status_get(
 	msg.address    = CORE_ADDR + high_level_1_base_addr[port];
 	sja1105_spi_message_set(tx_buf, &msg);
 
-	rc = spi_transfer(spi_setup, tx_buf, rx_buf, MSG_LEN_HL);
+	rc = sja1105_spi_transfer(spi_setup, tx_buf, rx_buf, MSG_LEN_HL);
 	if (rc < 0) {
-		loge("spi_transfer failed for high-level 1 registers");
+		loge("sja1105_spi_transfer failed for high-level 1 registers");
 		goto out;
 	}
 	sja1105_port_status_get_hl1(rx_buf + 4, status);
@@ -225,9 +225,9 @@ int sja1105_port_status_get(
 	msg.address    = CORE_ADDR + high_level_2_base_addr[port];
 	sja1105_spi_message_set(tx_buf, &msg);
 
-	rc = spi_transfer(spi_setup, tx_buf, rx_buf, MSG_LEN_HL);
+	rc = sja1105_spi_transfer(spi_setup, tx_buf, rx_buf, MSG_LEN_HL);
 	if (rc < 0) {
-		loge("spi_transfer failed for high-level 2 registers");
+		loge("sja1105_spi_transfer failed for high-level 2 registers");
 		goto out;
 	}
 	sja1105_port_status_get_hl2(rx_buf + 4, status);

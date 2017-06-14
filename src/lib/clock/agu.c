@@ -127,7 +127,7 @@ int sja1105_rgmii_cfg_pad_tx_config(struct sja1105_spi_setup *spi_setup, int por
 	pad_mii_tx.clk_ipud  = 2; /* TX_CLK input stage (default) */
 	sja1105_cfg_pad_mii_tx_set(tx_buf + SIZE_SPI_MSG_HEADER, &pad_mii_tx);
 
-	return spi_transfer(spi_setup, tx_buf, rx_buf, MSG_SIZE);
+	return sja1105_spi_transfer(spi_setup, tx_buf, rx_buf, MSG_SIZE);
 }
 
 

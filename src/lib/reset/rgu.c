@@ -51,5 +51,5 @@ int sja1105_reset(const struct sja1105_spi_setup *spi_setup, struct sja1105_rese
 
 	logv("%s resetting switch",
 	    (reset->rst_ctrl == RGU_WARM) ? "Warm" : "Cold");
-	return spi_transfer(spi_setup, tx_buf, rx_buf, RGU_MSG_LEN);
+	return sja1105_spi_transfer(spi_setup, tx_buf, rx_buf, RGU_MSG_LEN);
 }
