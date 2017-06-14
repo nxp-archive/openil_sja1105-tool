@@ -33,6 +33,14 @@
 
 #include <stdint.h>
 
+#define SJA1105_PTPCLKCORP_ADDR 0x1D
+#define SJA1105_PTPTSCLK_ADDR   0x1B
+#define SJA1105_PTPCLKRATE_ADDR 0x1A
+#define SJA1105_PTPCLKVAL_ADDR  0x18
+#define SJA1105_PTPPINDUR_ADDR  0x16
+#define SJA1105_PTPPINST_ADDR   0x14
+#define SJA1105_PTPSCHTM_ADDR   0x12
+
 enum sja1105_ptp_clk_add_mode {
 	PTP_SET_MODE = 0,
 	PTP_ADD_MODE,
@@ -55,12 +63,10 @@ struct sja1105_ptp_config {
 	uint64_t pin_start;                  /* PTPPINST */
 	uint64_t schedule_time;              /* PTPSCHTM */
 	uint64_t schedule_correction_period; /* PTPCLKCORP */
-	uint64_t clk_rate;                   /* PTPCLKRATE */
 	uint64_t ts_based_on_ptpclk;         /* CORRCLK4TS */
-	uint64_t clk_add_mode;               /* PTPCLKADD */
 	uint64_t schedule_autostart;         /* PTPSTRTSCH */
 	uint64_t pin_toggle_autostart;       /* STARTPTPCP */
 };
-/* PTP dynamic registers: PTPTSCLK, PTPCLKVAL */
+/* PTP dynamic registers: PTPTSCLK, PTPCLKVAL, PTPCLKRATE */
 
 #endif
