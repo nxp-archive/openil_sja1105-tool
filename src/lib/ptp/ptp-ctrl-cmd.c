@@ -94,10 +94,6 @@ int sja1105_ptp_ctrl_cmd_send(struct sja1105_spi_setup *spi_setup,
 	uint8_t rx_buf[MSG_LEN];
 	int rc;
 
-	rc = configure_spi(spi_setup);
-	if (rc < 0) {
-		goto out;
-	}
 	memset(rx_buf, 0, MSG_LEN);
 
 	msg.access     = SPI_WRITE;

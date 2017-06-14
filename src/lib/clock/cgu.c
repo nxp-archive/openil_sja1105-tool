@@ -152,11 +152,6 @@ int sja1105_clocking_setup(struct sja1105_spi_setup *spi_setup,
 	int rc;
 	int i;
 
-	rc = configure_spi(spi_setup);
-	if (rc < 0) {
-		goto out;
-	}
-
 	for (i = 0; i < 5; i++) {
 		switch (mac_config[i].speed) {
 		case 1: speed_mbps = 1000; break;

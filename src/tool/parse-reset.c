@@ -53,9 +53,9 @@ int rgu_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv)
 	} else {
 		goto parse_error;
 	}
-	rc = configure_spi(spi_setup);
+	rc = sja1105_spi_configure(spi_setup);
 	if (rc < 0) {
-		loge("configure_spi failed");
+		loge("failed to open spi device");
 		goto out;
 	}
 	return sja1105_reset(spi_setup, &reset);

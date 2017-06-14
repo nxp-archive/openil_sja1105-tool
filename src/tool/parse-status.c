@@ -28,6 +28,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include "internal.h"
@@ -51,6 +52,50 @@ static void print_usage()
 	/*printf(" * ptp     -> PTP Control Register Values\n");*/
 }
 
+static int sja1105_status_ports(struct sja1105_spi_setup *spi_setup,
+                                int port_no)
+{
+	struct sja1105_port_status status;
+	char *print_buf[5];
+	/* XXX Maybe not quite right? */
+	int   size = 10 * MAX_LINE_SIZE;
+	int   rc;
+	int   i;
+
+	if (port_no == -1) {
+		/* Show for all ports */
+		for (i = 0; i < 5; i++) {
+			print_buf[i] = (char*) calloc(size, sizeof(char));
+		}
+		for (i = 0; i < 5; i++) {
+			rc = sja1105_port_status_get(spi_setup, &status, i);
+			if (rc < 0) {
+				loge("sja1105_port_status_get failed");
+				goto out;
+			}
+			sja1105_port_status_show(&status, i, print_buf[i]);
+		}
+		linewise_concat(print_buf, 5);
+
+		for (i = 0; i < 5; i++) {
+			free(print_buf[i]);
+		}
+	} else {
+		/* Show for single port */
+		print_buf[0] = (char*) calloc(size, sizeof(char));
+		rc = sja1105_port_status_get(spi_setup, &status, port_no);
+		if (rc < 0) {
+			loge("sja1105_port_status_get failed");
+			goto out;
+		}
+		sja1105_port_status_show(&status, port_no, print_buf[0]);
+		printf("%s\n", print_buf[0]);
+		free(print_buf[0]);
+	}
+out:
+	return rc;
+}
+
 int status_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv)
 {
 	const char *options[] = {
@@ -65,16 +110,26 @@ int status_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 	/*int partition;*/
 	int port_no;
 	int match;
+	int rc;
 
 	if (argc < 1) {
-		goto error;
+		goto parse_error;
 	}
 	match = get_match(argv[0], options, ARRAY_SIZE(options));
 	if (match < 0) {
-		goto error;
+		goto parse_error;
 	} else if (strcmp(options[match], "general") == 0) {
 		struct sja1105_general_status status;
-		sja1105_general_status_get(spi_setup, &status);
+		rc = sja1105_spi_configure(spi_setup);
+		if (rc < 0) {
+			loge("sja1105_spi_configure failed");
+			goto error;
+		}
+		rc = sja1105_general_status_get(spi_setup, &status);
+		if (rc < 0) {
+			loge("failed to get general status");
+			goto error;
+		}
 		/* Display the collected general status registers */
 		sja1105_general_status_show(&status);
 	/*} else if (strcmp(options[match], "sync") == 0) {*/
@@ -104,15 +159,25 @@ int status_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 		} else {
 			sscanf(argv[1], "%d", &port_no);
 		}
-		sja1105_status_ports(spi_setup, port_no);
+		rc = sja1105_spi_configure(spi_setup);
+		if (rc < 0) {
+			loge("sja1105_spi_configure failed");
+			goto error;
+		}
+		rc = sja1105_status_ports(spi_setup, port_no);
+		if (rc < 0) {
+			loge("failed to get port status");
+			goto error;
+		}
 	/*} else if (strcmp(options[match], "ptp") == 0) {*/
 		/*status_ptp(spi_setup);*/
 	} else {
-		goto error;
+		goto parse_error;
 	}
 	return 0;
-error:
+parse_error:
 	print_usage();
+error:
 	return -1;
 }
 

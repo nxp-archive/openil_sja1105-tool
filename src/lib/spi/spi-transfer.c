@@ -42,7 +42,7 @@
 #include <lib/include/spi.h>
 #include <common.h>
 
-int configure_spi(struct sja1105_spi_setup *spi_setup)
+int sja1105_spi_configure(struct sja1105_spi_setup *spi_setup)
 {
 	int ret = 0;
 	int fd;
