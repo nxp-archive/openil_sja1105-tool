@@ -34,11 +34,11 @@
 #include "ptp-tables.h"
 #include "spi.h"
 
-void sja1105_ptp_config_get(void *buf, struct sja1105_ptp_config*);
-void sja1105_ptp_config_set(void *buf, struct sja1105_ptp_config*);
-void sja1105_ptp_config_show(struct sja1105_ptp_config*);
-int  sja1105_ptp_config_cmd(struct sja1105_spi_setup*,
-                            struct sja1105_ptp_config*);
+/* Static PTP configuration */
+int sja1105_ptp_configure(struct sja1105_spi_setup*,
+                          struct sja1105_ptp_config*);
+
+/* Dynamic PTP commands */
 int  sja1105_ptp_ts_clk_get(struct sja1105_spi_setup*, uint64_t*);
 int  sja1105_ptp_clk_get(struct sja1105_spi_setup*, uint64_t*);
 int  sja1105_ptp_clk_set(struct sja1105_spi_setup*, uint64_t);

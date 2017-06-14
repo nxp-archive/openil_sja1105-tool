@@ -108,12 +108,6 @@ int sja1105_ptp_ctrl_cmd_send(struct sja1105_spi_setup *spi_setup,
 		loge("sja1105_spi_transfer failed");
 		goto out;
 	}
-	/* TODO: examine rx_buf.
-	 * start_schedule on read is found 1 if clksrc is set to ptp (11)
-	 * and the schedule is running correctly
-	 * stop_schedule is found 1 on read if clksrc is set to ptp
-	 * and the schedule stopped successfully
-	 **/
 out:
 	return rc;
 };
