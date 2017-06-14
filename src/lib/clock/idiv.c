@@ -75,7 +75,7 @@ void sja1105_cgu_idiv_show(struct sja1105_cgu_idiv *idiv)
 	printf("PD        %" PRIX64 "\n", idiv->pd);
 }
 
-int sja1105_cgu_idiv_config(struct spi_setup *spi_setup,
+int sja1105_cgu_idiv_config(struct sja1105_spi_setup *spi_setup,
                             int port, int enabled, int factor)
 {
 #define MSG_SIZE SIZE_SPI_MSG_HEADER + 4

@@ -142,7 +142,7 @@ void sja1105_general_status_show(struct sja1105_general_status *status)
 	}
 }
 
-int sja1105_general_status_get(struct spi_setup *spi_setup,
+int sja1105_general_status_get(struct sja1105_spi_setup *spi_setup,
                                struct sja1105_general_status *status)
 {
 #define SIZE_GENERAL_STATUS_A 0x0D * 4 /* 0x00 to 0x0C */

@@ -96,7 +96,7 @@ void test_fn()
 	sja1105_cfg_pad_mii_tx_show(&pad_mii_tx);
 }
 
-int sja1105_rgmii_cfg_pad_tx_config(struct spi_setup *spi_setup, int port)
+int sja1105_rgmii_cfg_pad_tx_config(struct sja1105_spi_setup *spi_setup, int port)
 {
 #define MSG_SIZE SIZE_SPI_MSG_HEADER + 4
 	struct  sja1105_spi_message msg;

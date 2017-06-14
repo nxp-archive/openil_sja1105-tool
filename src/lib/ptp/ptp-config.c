@@ -89,7 +89,7 @@ void sja1105_ptp_config_show(struct sja1105_ptp_config *ptp_config)
 	printf("PTPCLKRATE %" PRIX64 "\n", ptp_config->clk_rate);
 }
 
-int sja1105_ptp_config_cmd(struct spi_setup *spi_setup,
+int sja1105_ptp_config_cmd(struct sja1105_spi_setup *spi_setup,
                            struct sja1105_ptp_config *ptp_config)
 {
 	const int PTP_CONFIG_ADDR = 0x12;
@@ -128,7 +128,7 @@ out:
 	return rc;
 }
 
-int sja1105_ptp_ts_clk_get(struct spi_setup *spi_setup, uint64_t *value)
+int sja1105_ptp_ts_clk_get(struct sja1105_spi_setup *spi_setup, uint64_t *value)
 {
 	const int PTPTSCLK_ADDR = 0x1B;
 	const int MSG_LEN = SIZE_SPI_MSG_HEADER + 8;
@@ -158,7 +158,7 @@ out:
 	return rc;
 }
 
-int sja1105_ptp_clk_get(struct spi_setup *spi_setup, uint64_t *value)
+int sja1105_ptp_clk_get(struct sja1105_spi_setup *spi_setup, uint64_t *value)
 {
 	const int PTPCLKVAL_ADDR = 0x18;
 	const int MSG_LEN = SIZE_SPI_MSG_HEADER + 8;
@@ -188,7 +188,7 @@ out:
 	return rc;
 }
 
-int sja1105_ptp_clk_write(struct spi_setup *spi_setup, uint64_t value)
+int sja1105_ptp_clk_write(struct sja1105_spi_setup *spi_setup, uint64_t value)
 {
 	const int PTPCLKVAL_ADDR = 0x18;
 	const int MSG_LEN = SIZE_SPI_MSG_HEADER + 8;
@@ -219,7 +219,7 @@ out:
 	return rc;
 }
 
-int sja1105_ptp_clk_set(struct spi_setup *spi_setup, uint64_t value)
+int sja1105_ptp_clk_set(struct sja1105_spi_setup *spi_setup, uint64_t value)
 {
 	int rc;
 
@@ -233,7 +233,7 @@ out:
 	return rc;
 }
 
-int sja1105_ptp_clk_add(struct spi_setup *spi_setup, uint64_t value)
+int sja1105_ptp_clk_add(struct sja1105_spi_setup *spi_setup, uint64_t value)
 {
 	int rc;
 

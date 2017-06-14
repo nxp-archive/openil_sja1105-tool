@@ -51,7 +51,7 @@ static void print_usage()
 	/*printf(" * ptp     -> PTP Control Register Values\n");*/
 }
 
-int status_parse_args(struct spi_setup *spi_setup, int argc, char **argv)
+int status_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv)
 {
 	const char *options[] = {
 		"general",

@@ -42,7 +42,7 @@
 #include <lib/include/spi.h>
 #include <common.h>
 
-int configure_spi(struct spi_setup *spi_setup)
+int configure_spi(struct sja1105_spi_setup *spi_setup)
 {
 	int ret = 0;
 	int fd;
@@ -102,7 +102,7 @@ out_1:
 	return fd;
 }
 
-int spi_transfer(const struct spi_setup *spi_setup, const void *tx, void *rx, int size)
+int spi_transfer(const struct sja1105_spi_setup *spi_setup, const void *tx, void *rx, int size)
 {
 	struct spi_ioc_transfer tr = {
 		.tx_buf        = (unsigned long)tx,

@@ -84,7 +84,7 @@ void sja1105_ptp_ctrl_cmd_show(struct sja1105_ptp_ctrl_cmd *ptp_control)
 	printf("PTPCLKADD  %" PRIX64 "\n", ptp_control->clk_add_mode);
 }
 
-int sja1105_ptp_ctrl_cmd_send(struct spi_setup *spi_setup,
+int sja1105_ptp_ctrl_cmd_send(struct sja1105_spi_setup *spi_setup,
                               struct sja1105_ptp_ctrl_cmd *ptp_control)
 {
 	const int PTP_CONTROL_ADDR = 0x17;
@@ -122,7 +122,7 @@ out:
 	return rc;
 };
 
-int sja1105_ptp_start_schedule(struct spi_setup *spi_setup)
+int sja1105_ptp_start_schedule(struct sja1105_spi_setup *spi_setup)
 {
 	struct sja1105_ptp_ctrl_cmd ptp_control;
 
@@ -132,7 +132,7 @@ int sja1105_ptp_start_schedule(struct spi_setup *spi_setup)
 	return sja1105_ptp_ctrl_cmd_send(spi_setup, &ptp_control);
 }
 
-int sja1105_ptp_stop_schedule(struct spi_setup *spi_setup)
+int sja1105_ptp_stop_schedule(struct sja1105_spi_setup *spi_setup)
 {
 	struct sja1105_ptp_ctrl_cmd ptp_control;
 
@@ -142,7 +142,7 @@ int sja1105_ptp_stop_schedule(struct spi_setup *spi_setup)
 	return sja1105_ptp_ctrl_cmd_send(spi_setup, &ptp_control);
 }
 
-int sja1105_ptp_start_pin_toggle(struct spi_setup *spi_setup)
+int sja1105_ptp_start_pin_toggle(struct sja1105_spi_setup *spi_setup)
 {
 	struct sja1105_ptp_ctrl_cmd ptp_control;
 
@@ -152,7 +152,7 @@ int sja1105_ptp_start_pin_toggle(struct spi_setup *spi_setup)
 	return sja1105_ptp_ctrl_cmd_send(spi_setup, &ptp_control);
 }
 
-int sja1105_ptp_stop_pin_toggle(struct spi_setup *spi_setup)
+int sja1105_ptp_stop_pin_toggle(struct sja1105_spi_setup *spi_setup)
 {
 	struct sja1105_ptp_ctrl_cmd ptp_control;
 
@@ -162,7 +162,7 @@ int sja1105_ptp_stop_pin_toggle(struct spi_setup *spi_setup)
 	return sja1105_ptp_ctrl_cmd_send(spi_setup, &ptp_control);
 }
 
-int sja1105_ptp_reset(struct spi_setup *spi_setup)
+int sja1105_ptp_reset(struct sja1105_spi_setup *spi_setup)
 {
 	struct sja1105_ptp_ctrl_cmd ptp_control;
 
@@ -172,7 +172,7 @@ int sja1105_ptp_reset(struct spi_setup *spi_setup)
 	return sja1105_ptp_ctrl_cmd_send(spi_setup, &ptp_control);
 }
 
-int sja1105_ptp_set_add_mode(struct spi_setup *spi_setup,
+int sja1105_ptp_set_add_mode(struct sja1105_spi_setup *spi_setup,
                              enum sja1105_ptp_clk_add_mode mode)
 {
 	struct sja1105_ptp_ctrl_cmd ptp_control;
