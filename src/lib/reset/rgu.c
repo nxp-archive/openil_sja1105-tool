@@ -34,7 +34,7 @@
 #include <lib/include/spi.h>
 #include <common.h>
 
-int sja1105_reset(const struct spi_setup *spi_setup, struct sja1105_reset_ctrl *reset)
+int sja1105_reset(const struct sja1105_spi_setup *spi_setup, struct sja1105_reset_ctrl *reset)
 {
 	struct sja1105_spi_message msg;
 	uint8_t tx_buf[RGU_MSG_LEN];

@@ -34,6 +34,6 @@
 #include "spi.h"
 #include "rgu-tables.h"
 
-int sja1105_reset(const struct spi_setup*, struct sja1105_reset_ctrl*);
+int sja1105_reset(const struct sja1105_spi_setup*, struct sja1105_reset_ctrl*);
 
 #endif

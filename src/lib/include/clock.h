@@ -38,32 +38,16 @@
 void sja1105_cgu_mii_control_set(void *buf, struct sja1105_cgu_mii_control *mii_control);
 void sja1105_cgu_mii_control_get(void *buf, struct sja1105_cgu_mii_control *mii_control);
 void sja1105_cgu_mii_control_show(struct sja1105_cgu_mii_control *mii_control);
-int sja1105_cgu_rmii_ref_clk_config(
-		struct spi_setup *spi_setup,
-		int    port);
-int sja1105_cgu_rmii_ext_tx_clk_config(
-		struct spi_setup *spi_setup,
-		int    port);
-int sja1105_cgu_mii_tx_clk_config(
-		struct spi_setup *spi_setup,
-		int    port);
-int sja1105_cgu_mii_rx_clk_config(
-		struct spi_setup *spi_setup,
-		int    port);
-int sja1105_cgu_mii_ext_tx_clk_config(
-		struct spi_setup *spi_setup,
-		int    port);
-int sja1105_cgu_mii_ext_rx_clk_config(
-		struct spi_setup *spi_setup,
-		int    port);
-int sja1105_cgu_rgmii_tx_clk_config(
-		struct spi_setup *spi_setup,
-		int    port,
-		int    speed_mbps);
-int sja1105_rgmii_cfg_pad_tx_config(struct spi_setup *spi_setup, int port);
-int sja1105_cgu_idiv_config(struct spi_setup *spi_setup,
-                            int port, int enabled, int factor);
-int sja1105_clocking_setup(struct spi_setup*, struct sja1105_xmii_params_table*,
+int sja1105_cgu_rmii_ref_clk_config(struct sja1105_spi_setup*, int);
+int sja1105_cgu_rmii_ext_tx_clk_config(struct sja1105_spi_setup*, int);
+int sja1105_cgu_mii_tx_clk_config(struct sja1105_spi_setup*, int);
+int sja1105_cgu_mii_rx_clk_config(struct sja1105_spi_setup*, int);
+int sja1105_cgu_mii_ext_tx_clk_config(struct sja1105_spi_setup*, int);
+int sja1105_cgu_mii_ext_rx_clk_config(struct sja1105_spi_setup*, int);
+int sja1105_cgu_rgmii_tx_clk_config(struct sja1105_spi_setup*, int, int);
+int sja1105_rgmii_cfg_pad_tx_config(struct sja1105_spi_setup *spi_setup, int port);
+int sja1105_cgu_idiv_config(struct sja1105_spi_setup*, int, int, int);
+int sja1105_clocking_setup(struct sja1105_spi_setup*, struct sja1105_xmii_params_table*,
                            struct sja1105_mac_config_entry*);
 
 #endif

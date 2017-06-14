@@ -38,7 +38,7 @@ static void print_usage()
 	printf("Usage: sja1105-tool reset [ cold | warm ] \n");
 }
 
-int rgu_parse_args(struct spi_setup *spi_setup, int argc, char **argv)
+int rgu_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv)
 {
 	struct sja1105_reset_ctrl reset;
 	int rc;

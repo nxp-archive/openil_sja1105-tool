@@ -49,15 +49,15 @@ void print_usage()
 	printf("\n");
 }
 
-int print_version(__attribute__((unused)) struct spi_setup *spi_setup,
-                   __attribute__((unused)) int argc,
-                   __attribute__((unused)) char** argv)
+int print_version(__attribute__((unused)) struct sja1105_spi_setup *spi_setup,
+                  __attribute__((unused)) int argc,
+                  __attribute__((unused)) char** argv)
 {
 	printf("%s\n", VERSION);
 	return 0;
 }
 
-static int parse_args(struct spi_setup *spi_setup, int argc, char **argv)
+static int parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv)
 {
 	const char *options[] = {
 		"configure",
@@ -68,7 +68,7 @@ static int parse_args(struct spi_setup *spi_setup, int argc, char **argv)
 		"version",
 		"--version",
 	};
-	int (*next_parse_args[])(struct spi_setup*, int, char**) = {
+	int (*next_parse_args[])(struct sja1105_spi_setup*, int, char**) = {
 		config_parse_args,
 		status_parse_args,
 		rgu_parse_args,
@@ -93,7 +93,7 @@ error:
 	return -1;
 }
 
-void cleanup(struct spi_setup *spi_setup)
+void cleanup(struct sja1105_spi_setup *spi_setup)
 {
 	if (spi_setup->device) {
 		free((char*) spi_setup->device);
@@ -108,7 +108,7 @@ void cleanup(struct spi_setup *spi_setup)
 
 int main(int argc, char *argv[])
 {
-	struct spi_setup spi_setup;
+	struct sja1105_spi_setup spi_setup;
 	int rc;
 
 	/* discard program name */

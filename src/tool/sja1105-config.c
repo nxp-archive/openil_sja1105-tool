@@ -43,7 +43,7 @@ const char *default_device = "/dev/spidev0.1";
 
 struct general_config general_config;
 
-static int parse_spi_mode(struct spi_setup *spi_setup, char *mode)
+static int parse_spi_mode(struct sja1105_spi_setup *spi_setup, char *mode)
 {
 	if (strcmp(mode, "SPI_CPHA") == 0) {
 		spi_setup->mode |= SPI_CPHA;
@@ -57,7 +57,7 @@ static int parse_spi_mode(struct spi_setup *spi_setup, char *mode)
 	return 0;
 }
 
-static inline int parse_spi_setup(struct spi_setup *spi_setup, char *key, char *value)
+static inline int parse_spi_setup(struct sja1105_spi_setup *spi_setup, char *key, char *value)
 {
 	char *mode;
 	int rc;
@@ -182,7 +182,7 @@ error:
 	return rc;
 }
 
-static inline int parse_key_val(struct spi_setup *spi_setup,
+static inline int parse_key_val(struct sja1105_spi_setup *spi_setup,
                                 struct general_config *general_conf,
                                 char *key, char *value, char *section_hdr)
 {
@@ -197,7 +197,7 @@ static inline int parse_key_val(struct spi_setup *spi_setup,
 	return 0;
 }
 
-int read_config_file(char *filename, struct spi_setup *spi_setup,
+int read_config_file(char *filename, struct sja1105_spi_setup *spi_setup,
                      struct general_config *general_conf)
 {
 	char  line[MAX_LINE_SIZE];

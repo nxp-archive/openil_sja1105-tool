@@ -162,7 +162,7 @@ void sja1105_port_status_get_hl2(void *buf, struct sja1105_port_status *status)
 }
 
 int sja1105_port_status_get(
-		struct spi_setup *spi_setup,
+		struct sja1105_spi_setup *spi_setup,
 		struct sja1105_port_status *status,
 		int port)
 {
@@ -235,7 +235,7 @@ out:
 	return rc;
 }
 
-void sja1105_status_ports(struct spi_setup *spi_setup, int port_no)
+void sja1105_status_ports(struct sja1105_spi_setup *spi_setup, int port_no)
 {
 	struct sja1105_port_status status;
 	char *print_buf[5];

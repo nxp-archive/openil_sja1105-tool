@@ -34,16 +34,16 @@
 #include "status-tables.h"
 #include "spi.h"
 
-int  sja1105_general_status_get(struct spi_setup*, struct sja1105_general_status*);
+int  sja1105_general_status_get(struct sja1105_spi_setup*, struct sja1105_general_status*);
 void sja1105_general_status_show(struct sja1105_general_status *status);
 void sja1105_port_status_show(
 		struct sja1105_port_status *status,
 		int    port,
 		char  *print_buf);
 int sja1105_port_status_get(
-		struct spi_setup *spi_setup,
+		struct sja1105_spi_setup *spi_setup,
 		struct sja1105_port_status *status,
 		int port);
-void sja1105_status_ports(struct spi_setup *spi_setup, int port_no);
+void sja1105_status_ports(struct sja1105_spi_setup *spi_setup, int port_no);
 
 #endif

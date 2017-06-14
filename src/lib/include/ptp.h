@@ -37,23 +37,25 @@
 void sja1105_ptp_config_get(void *buf, struct sja1105_ptp_config*);
 void sja1105_ptp_config_set(void *buf, struct sja1105_ptp_config*);
 void sja1105_ptp_config_show(struct sja1105_ptp_config*);
-int  sja1105_ptp_config_cmd(struct spi_setup*, struct sja1105_ptp_config*);
-int  sja1105_ptp_ts_clk_get(struct spi_setup*, uint64_t*);
-int  sja1105_ptp_clk_get(struct spi_setup*, uint64_t*);
-int  sja1105_ptp_clk_set(struct spi_setup*, uint64_t);
-int  sja1105_ptp_clk_add(struct spi_setup*, uint64_t);
+int  sja1105_ptp_config_cmd(struct sja1105_spi_setup*,
+                            struct sja1105_ptp_config*);
+int  sja1105_ptp_ts_clk_get(struct sja1105_spi_setup*, uint64_t*);
+int  sja1105_ptp_clk_get(struct sja1105_spi_setup*, uint64_t*);
+int  sja1105_ptp_clk_set(struct sja1105_spi_setup*, uint64_t);
+int  sja1105_ptp_clk_add(struct sja1105_spi_setup*, uint64_t);
 
 void sja1105_ptp_ctrl_cmd_get(void *buf, struct sja1105_ptp_ctrl_cmd*);
 void sja1105_ptp_ctrl_cmd_set(void *buf, struct sja1105_ptp_ctrl_cmd*);
 void sja1105_ptp_ctrl_cmd_show(struct sja1105_ptp_ctrl_cmd*);
-int  sja1105_ptp_ctrl_cmd_cmd(struct spi_setup*, struct sja1105_ptp_ctrl_cmd*);
+int  sja1105_ptp_ctrl_cmd_cmd(struct sja1105_spi_setup*,
+                              struct sja1105_ptp_ctrl_cmd*);
 
-int  sja1105_ptp_start_schedule(struct spi_setup*);
-int  sja1105_ptp_stop_schedule(struct spi_setup*);
-int  sja1105_ptp_start_pin_toggle(struct spi_setup*);
-int  sja1105_ptp_stop_pin_toggle(struct spi_setup*);
-int  sja1105_ptp_reset(struct spi_setup*);
-int  sja1105_ptp_set_add_mode(struct spi_setup*,
+int  sja1105_ptp_start_schedule(struct sja1105_spi_setup*);
+int  sja1105_ptp_stop_schedule(struct sja1105_spi_setup*);
+int  sja1105_ptp_start_pin_toggle(struct sja1105_spi_setup*);
+int  sja1105_ptp_stop_pin_toggle(struct sja1105_spi_setup*);
+int  sja1105_ptp_reset(struct sja1105_spi_setup*);
+int  sja1105_ptp_set_add_mode(struct sja1105_spi_setup*,
                               enum sja1105_ptp_clk_add_mode);
 
 #endif

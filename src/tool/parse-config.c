@@ -218,7 +218,7 @@ out_1:
 	return rc;
 }
 
-int config_upload(struct spi_setup *spi_setup, struct sja1105_config *config)
+int config_upload(struct sja1105_spi_setup *spi_setup, struct sja1105_config *config)
 {
 	struct   sja1105_table_header final_header;
 	char    *final_header_ptr;
@@ -285,7 +285,7 @@ out_1:
 	return rc;
 }
 
-void get_flush_mode(struct spi_setup *spi_setup, int *argc, char ***argv)
+void get_flush_mode(struct sja1105_spi_setup *spi_setup, int *argc, char ***argv)
 {
 	if ((*argc) && ((strcmp(*argv[0], "-f") == 0 ||
 	                (strcmp(*argv[0], "--flush") == 0)))) {
@@ -294,7 +294,7 @@ void get_flush_mode(struct spi_setup *spi_setup, int *argc, char ***argv)
 	}
 }
 
-int config_flush(struct spi_setup *spi_setup, struct sja1105_config *config)
+int config_flush(struct sja1105_spi_setup *spi_setup, struct sja1105_config *config)
 {
 	struct sja1105_reset_ctrl     reset = {.rst_ctrl = RGU_COLD};
 	struct sja1105_general_status status;
@@ -360,7 +360,7 @@ out:
 	return rc;
 }
 
-int config_parse_args(struct spi_setup *spi_setup, int argc, char **argv)
+int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv)
 {
 	const char *options[] = {
 		"help",

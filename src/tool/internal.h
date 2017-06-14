@@ -35,11 +35,11 @@
 #include <lib/include/config.h>
 #include <lib/include/spi.h>
 
-int read_config_file(char*, struct spi_setup*, struct general_config*);
-int rgu_parse_args(struct spi_setup *spi_setup, int argc, char **argv);
-int ptp_parse_args(struct spi_setup *spi_setup, int argc, char **argv);
-int config_parse_args(struct spi_setup *spi_setup, int argc, char **argv);
-int status_parse_args(struct spi_setup *spi_setup, int argc, char **argv);
+int read_config_file(char*, struct sja1105_spi_setup*, struct general_config*);
+int rgu_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv);
+int ptp_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv);
+int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv);
+int status_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv);
 int config_table_entry_modify(
 		struct sja1105_config *config,
 		char *table_name,

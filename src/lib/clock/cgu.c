@@ -39,7 +39,7 @@
 #include <lib/include/spi.h>
 #include <common.h>
 
-static int mii_clocking_setup(struct spi_setup *spi_setup, int port, int mii_mode)
+static int mii_clocking_setup(struct sja1105_spi_setup *spi_setup, int port, int mii_mode)
 {
 	int rc;
 
@@ -82,7 +82,7 @@ error:
 	return -1;
 }
 
-static int rmii_clocking_setup(struct spi_setup *spi_setup, int port, int rmii_mode)
+static int rmii_clocking_setup(struct sja1105_spi_setup *spi_setup, int port, int rmii_mode)
 {
 	int rc;
 
@@ -109,7 +109,7 @@ error:
 	return -1;
 }
 
-static int rgmii_clocking_setup(struct spi_setup *spi_setup,
+static int rgmii_clocking_setup(struct sja1105_spi_setup *spi_setup,
                                 int port, int speed_mbps)
 {
 	int rc = 0;
@@ -144,7 +144,7 @@ out:
 	return rc;
 }
 
-int sja1105_clocking_setup(struct spi_setup *spi_setup,
+int sja1105_clocking_setup(struct sja1105_spi_setup *spi_setup,
                            struct sja1105_xmii_params_table *params,
                            struct sja1105_mac_config_entry  *mac_config)
 {

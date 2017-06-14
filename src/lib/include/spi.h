@@ -34,7 +34,7 @@
 #include <linux/spi/spidev.h>
 #include <stdint.h>
 
-struct spi_setup {
+struct sja1105_spi_setup {
 	const char *device;
 	uint8_t     mode;
 	uint8_t     bits;
@@ -59,8 +59,8 @@ struct sja1105_spi_chunk {
 	int   size;
 };
 
-int spi_transfer(const struct spi_setup*, const void *tx, void *rx, int size);
-int configure_spi(struct spi_setup *spi_setup);
+int spi_transfer(const struct sja1105_spi_setup*, const void *tx, void *rx, int size);
+int configure_spi(struct sja1105_spi_setup *spi_setup);
 void sja1105_spi_message_get(void*, struct sja1105_spi_message*);
 void sja1105_spi_message_set(void*, struct sja1105_spi_message*);
 void sja1105_spi_message_show(struct sja1105_spi_message*);
