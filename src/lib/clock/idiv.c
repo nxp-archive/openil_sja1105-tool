@@ -111,6 +111,6 @@ int sja1105_cgu_idiv_config(struct sja1105_spi_setup *spi_setup,
 	idiv.pd        = enabled ? 0 : 1; /* Power down? */
 	sja1105_cgu_idiv_set(tx_buf + SIZE_SPI_MSG_HEADER, &idiv);
 
-	return spi_transfer(spi_setup, tx_buf, rx_buf, MSG_SIZE);
+	return sja1105_spi_transfer(spi_setup, tx_buf, rx_buf, MSG_SIZE);
 }
 
