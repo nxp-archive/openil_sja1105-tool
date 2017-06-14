@@ -28,7 +28,6 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
-#include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -178,10 +177,6 @@ int sja1105_port_status_get(
 	uint8_t rx_buf[MSG_LEN_HL];
 	int rc = 0;
 
-	rc = configure_spi(spi_setup);
-	if (rc < 0) {
-		goto out;
-	}
 	memset(status, 0, sizeof(*status));
 
 	/* MAC area */
@@ -233,37 +228,5 @@ int sja1105_port_status_get(
 	sja1105_port_status_get_hl2(rx_buf + 4, status);
 out:
 	return rc;
-}
-
-void sja1105_status_ports(struct sja1105_spi_setup *spi_setup, int port_no)
-{
-	struct sja1105_port_status status;
-	char *print_buf[5];
-	/* XXX Maybe not quite right? */
-	int   size = 10 * MAX_LINE_SIZE;
-	int   i;
-
-	if (port_no == -1) {
-		/* Show for all ports */
-		for (i = 0; i < 5; i++) {
-			print_buf[i] = (char*) calloc(size, sizeof(char));
-		}
-		for (i = 0; i < 5; i++) {
-			sja1105_port_status_get(spi_setup, &status, i);
-			sja1105_port_status_show(&status, i, print_buf[i]);
-		}
-		linewise_concat(print_buf, 5);
-
-		for (i = 0; i < 5; i++) {
-			free(print_buf[i]);
-		}
-	} else {
-		/* Show for single port */
-		print_buf[0] = (char*) calloc(size, sizeof(char));
-		sja1105_port_status_get(spi_setup, &status, port_no);
-		sja1105_port_status_show(&status, port_no, print_buf[0]);
-		printf("%s\n", print_buf[0]);
-		free(print_buf[0]);
-	}
 }
 

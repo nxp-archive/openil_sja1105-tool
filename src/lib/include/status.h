@@ -44,6 +44,5 @@ int sja1105_port_status_get(
 		struct sja1105_spi_setup *spi_setup,
 		struct sja1105_port_status *status,
 		int port);
-void sja1105_status_ports(struct sja1105_spi_setup *spi_setup, int port_no);
 
 #endif

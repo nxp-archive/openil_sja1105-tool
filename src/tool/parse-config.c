@@ -234,23 +234,17 @@ int config_upload(struct sja1105_spi_setup *spi_setup, struct sja1105_config *co
 	int    rc;
 	int    i;
 
-	rc = configure_spi(spi_setup);
-	if (rc < 0) {
-		loge("failed to open spi device");
-		goto out_1;
-	}
-
 	config_buf_len = sja1105_config_get_length(config) + SIZE_SJA1105_DEVICE_ID;
 	config_buf = (char*) malloc(config_buf_len * sizeof(char));
 	if (!config_buf) {
 		loge("malloc failed");
-		goto out_2;
+		goto out;
 	}
 	/* Write Device ID to first 4 bytes of config_buf */
 	rc = generic_table_field_set(config_buf, &device_id, 31, 0, SIZE_SJA1105_DEVICE_ID);
 	if (rc < 0) {
 		loge("failed to write device id to buffer");
-		goto out_2;
+		goto out_free;
 	}
 	/* Write config tables to config_buf */
 	sja1105_config_set(config_buf + SIZE_SJA1105_DEVICE_ID, config);
@@ -273,15 +267,15 @@ int config_upload(struct sja1105_spi_setup *spi_setup, struct sja1105_config *co
 		spi_message_aggregate(tx_buf, &chunks[i].msg, chunks[i].buf, chunks[i].size);
 		/* Send it out */
 		rc = sja1105_spi_transfer(spi_setup, tx_buf, rx_buf,
-		                  SIZE_SPI_MSG_HEADER + chunks[i].size);
+		                          SIZE_SPI_MSG_HEADER + chunks[i].size);
 		if (rc < 0) {
 			loge("sja1105_spi_transfer failed");
-			goto out_2;
+			goto out_free;
 		}
 	}
-out_2:
+out_free:
 	free(config_buf);
-out_1:
+out:
 	return rc;
 }
 
@@ -400,6 +394,11 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 			goto error;
 		}
 		if (spi_setup->flush) {
+			rc = sja1105_spi_configure(spi_setup);
+			if (rc < 0) {
+				loge("sja1105_spi_configure failed");
+				goto error;
+			}
 			rc = config_flush(spi_setup, &config);
 			if (rc < 0) {
 				goto error;
@@ -431,6 +430,11 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 			goto error;
 		}
 		if (spi_setup->flush) {
+			rc = sja1105_spi_configure(spi_setup);
+			if (rc < 0) {
+				loge("sja1105_spi_configure failed");
+				goto error;
+			}
 			rc = config_flush(spi_setup, &config);
 			if (rc < 0) {
 				goto error;
@@ -442,6 +446,11 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 		}
 		rc = config_load(spi_setup->staging_area, &config);
 		if (rc < 0) {
+			goto error;
+		}
+		rc = sja1105_spi_configure(spi_setup);
+		if (rc < 0) {
+			loge("sja1105_spi_configure failed");
 			goto error;
 		}
 		rc = config_flush(spi_setup, &config);
@@ -466,6 +475,11 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 			goto error;
 		}
 		if (spi_setup->flush) {
+			rc = sja1105_spi_configure(spi_setup);
+			if (rc < 0) {
+				loge("sja1105_spi_configure failed");
+				goto error;
+			}
 			rc = config_flush(spi_setup, &config);
 			if (rc < 0) {
 				goto error;

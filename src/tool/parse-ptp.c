@@ -71,10 +71,20 @@ int ptp_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv)
 			goto parse_error;
 		}
 		if (matches(argv[1], "ts-clk") == 0) {
+			rc = sja1105_spi_configure(spi_setup);
+			if (rc < 0) {
+				loge("sja1105_spi_configure failed");
+				goto error;
+			}
 			rc = sja1105_ptp_ts_clk_get(spi_setup, &tmp);
 			printf("%f\n", (float)((tmp * 8) / 1000000000.0));
 		}
 		else if (matches(argv[1], "clk") == 0) {
+			rc = sja1105_spi_configure(spi_setup);
+			if (rc < 0) {
+				loge("sja1105_spi_configure failed");
+				goto error;
+			}
 			rc = sja1105_ptp_clk_get(spi_setup, &tmp);
 			printf("%f\n", (float)((tmp * 8) / 1000000000.0));
 		} else {
@@ -93,6 +103,11 @@ int ptp_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv)
 				loge("invalid int at \"%s\"", argv[2]);
 				goto parse_error;
 			}
+			rc = sja1105_spi_configure(spi_setup);
+			if (rc < 0) {
+				loge("sja1105_spi_configure failed");
+				goto error;
+			}
 			rc = sja1105_ptp_clk_set(spi_setup, tmp);
 		} else {
 			loge("unknown token \"%s\"", argv[1]);
@@ -109,6 +124,11 @@ int ptp_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv)
 				loge("invalid int at \"%s\"", argv[2]);
 				goto parse_error;
 			}
+			rc = sja1105_spi_configure(spi_setup);
+			if (rc < 0) {
+				loge("sja1105_spi_configure failed");
+				goto error;
+			}
 			rc = sja1105_ptp_clk_add(spi_setup, tmp);
 		} else {
 			loge("unknown token \"%s\"", argv[1]);
@@ -118,6 +138,11 @@ int ptp_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv)
 			loge("Expecting no arguments");
 			goto parse_error;
 		}
+		rc = sja1105_spi_configure(spi_setup);
+		if (rc < 0) {
+			loge("sja1105_spi_configure failed");
+			goto error;
+		}
 		rc = sja1105_ptp_reset(spi_setup);
 	} else if (matches(argv[0], "start") == 0) {
 		if (argc != 2) {
@@ -125,8 +150,18 @@ int ptp_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv)
 			goto parse_error;
 		}
 		if (matches(argv[1], "schedule") == 0) {
+			rc = sja1105_spi_configure(spi_setup);
+			if (rc < 0) {
+				loge("sja1105_spi_configure failed");
+				goto error;
+			}
 			rc = sja1105_ptp_start_schedule(spi_setup);
 		} else if (matches(argv[1], "pin-toggle") == 0) {
+			rc = sja1105_spi_configure(spi_setup);
+			if (rc < 0) {
+				loge("sja1105_spi_configure failed");
+				goto error;
+			}
 			rc = sja1105_ptp_start_pin_toggle(spi_setup);
 		} else {
 			loge("unknown token \"%s\"", argv[1]);
@@ -137,8 +172,18 @@ int ptp_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv)
 			goto parse_error;
 		}
 		if (matches(argv[1], "schedule") == 0) {
+			rc = sja1105_spi_configure(spi_setup);
+			if (rc < 0) {
+				loge("sja1105_spi_configure failed");
+				goto error;
+			}
 			rc = sja1105_ptp_stop_schedule(spi_setup);
 		} else if (matches(argv[1], "pin-toggle") == 0) {
+			rc = sja1105_spi_configure(spi_setup);
+			if (rc < 0) {
+				loge("sja1105_spi_configure failed");
+				goto error;
+			}
 			rc = sja1105_ptp_stop_pin_toggle(spi_setup);
 		} else {
 			loge("unknown token \"%s\"", argv[1]);
@@ -148,6 +193,11 @@ int ptp_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv)
 			loge("Expecting no arguments");
 			goto parse_error;
 		}
+		rc = sja1105_spi_configure(spi_setup);
+		if (rc < 0) {
+			loge("sja1105_spi_configure failed");
+			goto error;
+		}
 		rc = sja1105_ptp_update(spi_setup);
 	} else {
 		loge("unknown token \"%s\"", argv[0]);
@@ -156,6 +206,7 @@ int ptp_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv)
 	return rc;
 parse_error:
 	print_usage();
+error:
 	return -1;
 }
 

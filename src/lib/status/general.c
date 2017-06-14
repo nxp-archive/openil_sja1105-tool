@@ -154,11 +154,6 @@ int sja1105_general_status_get(struct sja1105_spi_setup *spi_setup,
 	uint8_t rx_buf[MSG_LEN_A];
 	int rc;
 
-	rc = configure_spi(spi_setup);
-	if (rc < 0) {
-		goto out;
-	}
-
 	/* Part A - base address 0x00 */
 	memset(tx_buf, 0, MSG_LEN_A);
 	memset(rx_buf, 0, MSG_LEN_A);
