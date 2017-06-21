@@ -417,11 +417,23 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 			goto error;
 		}
 	} else if (strcmp(options[match], "default") == 0) {
+		const char *default_config_options[] = {
+			"ls1021atsn",
+		};
+		enum sja1105_default_config default_configs[] = {
+			LS1021ATSN,
+		};
 		get_flush_mode(spi_setup, &argc, &argv);
 		if (argc != 1) {
 			goto parse_error;
 		}
-		rc = sja1105_config_default(&config, argv[0]);
+		match = get_match(argv[0], default_config_options,
+		                  ARRAY_SIZE(default_config_options));
+		if (match < 0) {
+			loge("Unrecognized default config %s", argv[0]);
+			goto error;
+		}
+		rc = sja1105_config_default(&config, default_configs[match]);
 		if (rc < 0) {
 			goto error;
 		}
