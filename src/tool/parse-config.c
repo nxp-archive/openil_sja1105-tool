@@ -241,7 +241,7 @@ int config_upload(struct sja1105_spi_setup *spi_setup, struct sja1105_config *co
 		goto out;
 	}
 	/* Write Device ID to first 4 bytes of config_buf */
-	rc = generic_table_field_set(config_buf, &device_id, 31, 0, SIZE_SJA1105_DEVICE_ID);
+	rc = gtable_pack(config_buf, &device_id, 31, 0, SIZE_SJA1105_DEVICE_ID);
 	if (rc < 0) {
 		loge("failed to write device id to buffer");
 		goto out_free;

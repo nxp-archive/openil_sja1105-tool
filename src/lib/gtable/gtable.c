@@ -31,7 +31,8 @@
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <common.h>
+#include <errno.h>
+#include <lib/include/gtable.h>
 
 /* these are *inclusive* */
 #define ONES_TO_RIGHT_OF(x) ((1ull << ((x) + 1)) - 1)
@@ -45,79 +46,9 @@
 		y = z; \
 	}
 
-/*
- * Bit 63 always means bit offset 7 of byte 7, albeit only logically.
- * The question is: where do we lay this bit out in memory?
- * Normally, we would do it like this:
- *
- * 63 62 61 60 59 58 57 56 55 54 53 52 51 50 49 48 47 46 45 44 43 42 41 40 39 38 37 36 35 34 33 32
- * 7                       6                       5                        4
- * 31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
- * 3                       2                       1                        0
- *
- *
- * If QUIRK_MSB_ON_THE_RIGHT is set, we do it like this:
- *
- * 56 57 58 59 60 61 62 63 48 49 50 51 52 53 54 55 40 41 42 43 44 45 46 47 32 33 34 35 36 37 38 39
- * 7                       6                        5                       4
- * 24 25 26 27 28 29 30 31 16 17 18 19 20 21 22 23  8  9 10 11 12 13 14 15  0  1  2  3  4  5  6  7
- * 3                       2                        1                       0
- *
- *
- * If QUIRK_LITTLE_ENDIAN is set, we do it like this:
- *
- * 39 38 37 36 35 34 33 32 47 46 45 44 43 42 41 40 55 54 53 52 51 50 49 48 63 62 61 60 59 58 57 56
- * 4                       5                       6                       7
- * 7  6  5  4  3  2  1  0  15 14 13 12 11 10  9  8 23 22 21 20 19 18 17 16 31 30 29 28 27 26 25 24
- * 0                       1                       2                       3
- *
- *
- * If QUIRK_MSB_ON_THE_RIGHT and QUIRK_LITTLE_ENDIAN are both set, we do it like this:
- *
- * 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63
- * 4                       5                       6                       7
- * 0  1  2  3  4  5  6  7  8   9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
- * 0                       1                       2                       3
- *
- *
- * If just QUIRK_LSW32_IS_FIRST is set, we do it like this:
- *
- * 31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
- * 3                       2                       1                        0
- * 63 62 61 60 59 58 57 56 55 54 53 52 51 50 49 48 47 46 45 44 43 42 41 40 39 38 37 36 35 34 33 32
- * 7                       6                       5                        4
- *
- *
- * If QUIRK_LSW32_IS_FIRST and QUIRK_MSB_ON_THE_RIGHT are set, we do it like this:
- *
- * 24 25 26 27 28 29 30 31 16 17 18 19 20 21 22 23  8  7  6  2 11 10  9  8  7  6  5  4  3  2  1  0
- * 3                       2                        1                       0
- * 56 57 58 59 60 61 62 63 48 49 50 51 52 53 54 55 40 41 42 43 44 45 46 47 32 33 34 35 36 37 38 39
- * 7                       6                        5                       4
- *
- *
- * If QUIRK_LSW32_IS_FIRST and QUIRK_LITTLE_ENDIAN are set, it looks like this:
- *
- * 7  6  5  4  3  2  1  0  15 14 13 12 11 10  9  8 23 22 21 20 19 18 17 16 31 30 29 28 27 26 25 24
- * 0                       1                       2                       3
- * 39 38 37 36 35 34 33 32 47 46 45 44 43 42 41 40 55 54 53 52 51 50 49 48 63 62 61 60 59 58 57 56
- * 4                       5                       6                       7
- *
- *
- * If QUIRK_LSW32_IS_FIRST, QUIRK_LITTLE_ENDIAN and QUIRK_MSB_ON_THE_RIGHT are set, it looks like this:
- *
- * 0  1  2  3  4  5  6  7  8   9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
- * 0                       1                       2                       3
- * 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63
- * 4                       5                       6                       7
- *
- *
- * We always think of our offsets as if there were no quirk,
- * and we translate them afterwards, before accessing the table.
- */
-#define QUIRK_MSB_ON_THE_RIGHT (1 << 0ull)
-#define QUIRK_LITTLE_ENDIAN    (1 << 1ull)
-#define QUIRK_LSW32_IS_FIRST   (1 << 2ull)
+#define loge(fmt, ...) fprintf(stderr, fmt "\n", ##__VA_ARGS__)
+
+int g_quirks = QUIRK_LSW32_IS_FIRST;
 
 static int get_le_offset(int offset)
 {
@@ -170,7 +101,7 @@ static void correct_for_msb_right_quirk(
 			 ONES_TO_LEFT_OF(*box_bit_end);
 }
 
-static int generic_table_field_access(
+static int gtable_field_access(
 		void     *table,
 		uint64_t *value,
 		int       tbl_bit_start,
@@ -204,19 +135,19 @@ static int generic_table_field_access(
 
 	/* tbl_bit_start is expected to be larger than tbl_bit_end */
 	if (tbl_bit_start < tbl_bit_end) {
-		loge("generic_table_access: invalid function call");
-		return -1;
+		loge("gtable_access: invalid function call");
+		return -EINVAL;
 	}
 
 	value_width = tbl_bit_start - tbl_bit_end + 1;
 	if (value_width > 64) {
-		loge("generic_table_access: field %d-%d too large for 64 bits!",
+		loge("gtable_access: field %d-%d too large for 64 bits!",
 		     tbl_bit_start, tbl_bit_end);
-		return -1;
+		return -ERANGE;
 	}
 
 	if ((write == 1) && (*value >= (1ull << value_width))) {
-		loge("generic_table_access: Warning, cannot store %" PRIX64
+		loge("gtable_access: Warning, cannot store %" PRIX64
 		     " inside %" PRIu64 " bits!", *value, value_width);
 		*value &= (1ull << value_width) - 1;
 		loge("Truncated value to %" PRIX64 ", this may not be "
@@ -281,29 +212,21 @@ static int generic_table_field_access(
 	return 0;
 }
 
-int generic_table_field_get(
-		void     *table,
-		uint64_t *value,
-		int       start,
-		int       end,
-		int       len_bytes)
+int gtable_unpack(void *buf, uint64_t *value, int start, int end,
+                  int len_bytes)
 {
-	return generic_table_field_access(table, value, start, end,
-	                           len_bytes, 0, QUIRK_LSW32_IS_FIRST);
+	return gtable_field_access(buf, value, start, end,
+	                           len_bytes, 0, g_quirks);
 }
 
-int generic_table_field_set(
-		void     *table,
-		uint64_t *value,
-		int       start,
-		int       end,
-		int       len_bytes)
+int gtable_pack(void *buf, uint64_t *value, int start, int end,
+                int len_bytes)
 {
-	return generic_table_field_access(table, value, start, end,
-	                           len_bytes, 1, QUIRK_LSW32_IS_FIRST);
+	return gtable_field_access(buf, value, start, end,
+	                           len_bytes, 1, g_quirks);
 }
 
-void generic_table_hexdump(void *table, int len)
+void gtable_hexdump(void *table, int len)
 {
 	uint8_t *p = (uint8_t*) table;
 	int i;
@@ -323,7 +246,7 @@ void generic_table_hexdump(void *table, int len)
 	printf("\n");
 }
 
-void generic_table_bitdump(void *table, int len)
+void gtable_bitdump(void *table, int len)
 {
 	uint8_t *p = (uint8_t*) table;
 	int i, bit;
@@ -344,6 +267,16 @@ void generic_table_bitdump(void *table, int len)
 		printf(" ");
 	}
 	printf("\n");
+}
+
+int gtable_configure(int quirks)
+{
+	g_quirks = quirks;
+	/* Check that no other one-hot bits are set */
+	quirks &= ~(1 << QUIRK_LSW32_IS_FIRST);
+	quirks &= ~(1 << QUIRK_LITTLE_ENDIAN);
+	quirks &= ~(1 << QUIRK_MSB_ON_THE_RIGHT);
+	return (quirks == 0) ? 0 : -EINVAL;
 }
 
 static uint32_t crc32_add(uint32_t crc, uint8_t byte)
@@ -373,11 +306,7 @@ uint32_t ether_crc32_le(void *buf, unsigned int len)
 	/* seed */
 	crc = 0xFFFFFFFF;
 	for (i = 0; i < len; i += 4) {
-		generic_table_field_get(
-				buf + i,
-				&chunk,
-				31, 0,
-				4);
+		gtable_unpack(buf + i, &chunk, 31, 0, 4);
 		crc = crc32_add(crc, chunk & 0xFF);
 		crc = crc32_add(crc, (chunk >> 8) & 0xFF);
 		crc = crc32_add(crc, (chunk >> 16) & 0xFF);

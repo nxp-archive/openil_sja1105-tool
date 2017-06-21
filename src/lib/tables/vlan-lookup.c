@@ -43,22 +43,22 @@ static void sja1105_vlan_lookup_entry_access(
 		struct sja1105_vlan_lookup_entry *entry,
 		int write)
 {
-	int  (*get_or_set)(void*, uint64_t*, int, int, int);
+	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
 	int    size = SIZE_VLAN_LOOKUP_ENTRY;
 
 	if (write == 0) {
-		get_or_set = generic_table_field_get;
+		pack_or_unpack = gtable_unpack;
 		memset(entry, 0, sizeof(*entry));
 	} else {
-		get_or_set = generic_table_field_set;
+		pack_or_unpack = gtable_pack;
 		memset(buf, 0, size);
 	}
-	get_or_set(buf, &entry->ving_mirr,  63, 59, size);
-	get_or_set(buf, &entry->vegr_mirr,  58, 54, size);
-	get_or_set(buf, &entry->vmemb_port, 53, 49, size);
-	get_or_set(buf, &entry->vlan_bc,    48, 44, size);
-	get_or_set(buf, &entry->tag_port,   43, 39, size);
-	get_or_set(buf, &entry->vlanid,     38, 27, size);
+	pack_or_unpack(buf, &entry->ving_mirr,  63, 59, size);
+	pack_or_unpack(buf, &entry->vegr_mirr,  58, 54, size);
+	pack_or_unpack(buf, &entry->vmemb_port, 53, 49, size);
+	pack_or_unpack(buf, &entry->vlan_bc,    48, 44, size);
+	pack_or_unpack(buf, &entry->tag_port,   43, 39, size);
+	pack_or_unpack(buf, &entry->vlanid,     38, 27, size);
 }
 
 void sja1105_vlan_lookup_entry_set(

@@ -43,26 +43,26 @@ static void sja1105_schedule_entry_access(
 		struct sja1105_schedule_entry *entry,
 		int write)
 {
-	int (*get_or_set)(void*, uint64_t*, int, int, int);
+	int (*pack_or_unpack)(void*, uint64_t*, int, int, int);
 	int size = SIZE_SCHEDULE_ENTRY;
 
 	if (write == 0) {
-		get_or_set = generic_table_field_get;
+		pack_or_unpack = gtable_unpack;
 		memset(entry, 0, sizeof(*entry));
 	} else {
-		get_or_set = generic_table_field_set;
+		pack_or_unpack = gtable_pack;
 		memset(buf, 0, size);
 	}
-	get_or_set(buf, &entry->winstindex,  63, 54, size);
-	get_or_set(buf, &entry->winend,      53, 53, size);
-	get_or_set(buf, &entry->winst,       52, 52, size);
-	get_or_set(buf, &entry->destports,   51, 47, size);
-	get_or_set(buf, &entry->setvalid,    46, 46, size);
-	get_or_set(buf, &entry->txen,        45, 45, size);
-	get_or_set(buf, &entry->resmedia_en, 44, 44, size);
-	get_or_set(buf, &entry->resmedia,    43, 36, size);
-	get_or_set(buf, &entry->vlindex,     35, 26, size);
-	get_or_set(buf, &entry->delta,       25, 8,  size);
+	pack_or_unpack(buf, &entry->winstindex,  63, 54, size);
+	pack_or_unpack(buf, &entry->winend,      53, 53, size);
+	pack_or_unpack(buf, &entry->winst,       52, 52, size);
+	pack_or_unpack(buf, &entry->destports,   51, 47, size);
+	pack_or_unpack(buf, &entry->setvalid,    46, 46, size);
+	pack_or_unpack(buf, &entry->txen,        45, 45, size);
+	pack_or_unpack(buf, &entry->resmedia_en, 44, 44, size);
+	pack_or_unpack(buf, &entry->resmedia,    43, 36, size);
+	pack_or_unpack(buf, &entry->vlindex,     35, 26, size);
+	pack_or_unpack(buf, &entry->delta,       25, 8,  size);
 }
 
 void sja1105_schedule_entry_get(void *buf, struct sja1105_schedule_entry *entry)

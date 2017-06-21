@@ -59,9 +59,9 @@ static int sja1105_ptp_config_cmd(struct sja1105_spi_setup *spi_setup,
 	if (read_or_write == SPI_READ) {
 		memset(tx_buf + SIZE_SPI_MSG_HEADER, 0, size_bytes);
 	} else if (read_or_write == SPI_WRITE) {
-		generic_table_field_set(tx_buf + SIZE_SPI_MSG_HEADER,
-		                        value, 8 * size_bytes - 1, 0,
-		                        size_bytes);
+		gtable_pack(tx_buf + SIZE_SPI_MSG_HEADER,
+		            value, 8 * size_bytes - 1, 0,
+		            size_bytes);
 	} else {
 		loge("read_or_write must be SPI_READ or SPI_WRITE");
 		goto out;
@@ -73,9 +73,9 @@ static int sja1105_ptp_config_cmd(struct sja1105_spi_setup *spi_setup,
 		goto out;
 	}
 	if (read_or_write == SPI_READ) {
-		generic_table_field_get(rx_buf + SIZE_SPI_MSG_HEADER,
-		                        value, 8 * size_bytes - 1, 0,
-		                        size_bytes);
+		gtable_unpack(rx_buf + SIZE_SPI_MSG_HEADER,
+		              value, 8 * size_bytes - 1, 0,
+		              size_bytes);
 	}
 out:
 	return rc;

@@ -41,20 +41,20 @@
 
 static void sja1105_cgu_idiv_access(void *buf, struct sja1105_cgu_idiv *idiv, int write)
 {
-	int  (*get_or_set)(void*, uint64_t*, int, int, int);
+	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
 	int    size = 4;
 
 	if (write == 0) {
-		get_or_set = generic_table_field_get;
+		pack_or_unpack = gtable_unpack;
 		memset(idiv, 0, sizeof(*idiv));
 	} else {
-		get_or_set = generic_table_field_set;
+		pack_or_unpack = gtable_pack;
 		memset(buf, 0, size);
 	}
-	get_or_set(buf, &idiv->clksrc,    28, 24, 4);
-	get_or_set(buf, &idiv->autoblock, 11, 11, 4);
-	get_or_set(buf, &idiv->idiv,       5,  2, 4);
-	get_or_set(buf, &idiv->pd,         0,  0, 4);
+	pack_or_unpack(buf, &idiv->clksrc,    28, 24, 4);
+	pack_or_unpack(buf, &idiv->autoblock, 11, 11, 4);
+	pack_or_unpack(buf, &idiv->idiv,       5,  2, 4);
+	pack_or_unpack(buf, &idiv->pd,         0,  0, 4);
 }
 
 void sja1105_cgu_idiv_set(void *buf, struct sja1105_cgu_idiv *idiv)

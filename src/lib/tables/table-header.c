@@ -43,19 +43,19 @@ void sja1105_table_header_access(
 		struct sja1105_table_header *hdr,
 		int write)
 {
-	int (*get_or_set)(void*, uint64_t*, int, int, int);
+	int (*pack_or_unpack)(void*, uint64_t*, int, int, int);
 	int size = SIZE_TABLE_HEADER;
 
 	if (write == 0) {
-		get_or_set = generic_table_field_get;
+		pack_or_unpack = gtable_unpack;
 		memset(hdr, 0, sizeof(*hdr));
 	} else {
-		get_or_set = generic_table_field_set;
+		pack_or_unpack = gtable_pack;
 		memset(buf, 0, size);
 	}
-	get_or_set(buf, &hdr->block_id, 31, 24, size);
-	get_or_set(buf, &hdr->len,      55, 32, size);
-	get_or_set(buf, &hdr->crc,      95, 64, size);
+	pack_or_unpack(buf, &hdr->block_id, 31, 24, size);
+	pack_or_unpack(buf, &hdr->len,      55, 32, size);
+	pack_or_unpack(buf, &hdr->crc,      95, 64, size);
 }
 
 void sja1105_table_header_get(
@@ -81,7 +81,7 @@ void sja1105_table_header_set_with_crc(
 	 * CRC in place */
 	sja1105_table_header_set(buf, hdr);
 	hdr->crc = ether_crc32_le(buf, SIZE_TABLE_HEADER - 4);
-	generic_table_field_set(buf + SIZE_TABLE_HEADER - 4, &hdr->crc, 31, 0, 4);
+	gtable_pack(buf + SIZE_TABLE_HEADER - 4, &hdr->crc, 31, 0, 4);
 }
 
 void sja1105_table_header_show(struct sja1105_table_header *hdr)

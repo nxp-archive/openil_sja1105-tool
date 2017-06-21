@@ -45,43 +45,43 @@ void sja1105_general_status_get_a(void *buf, struct sja1105_general_status *stat
 	/* So that addition translates to 4 bytes */
 	uint32_t *p = (uint32_t*) buf;
 	memset(status, 0, sizeof(*status));
-	generic_table_field_get(p + 0x0, &status->device_id, 31,  0, 4);
-	generic_table_field_get(p + 0x1, &status->configs,   31, 31, 4);
-	generic_table_field_get(p + 0x1, &status->crcchkl,   30, 30, 4);
-	generic_table_field_get(p + 0x1, &status->ids,       29, 29, 4);
-	generic_table_field_get(p + 0x1, &status->crcchkg,   28, 28, 4);
-	generic_table_field_get(p + 0x1, &status->nslot,      3,  0, 4);
-	generic_table_field_get(p + 0x2, &status->vlind,     31, 16, 4);
-	generic_table_field_get(p + 0x2, &status->vlparind,  15,  8, 4);
-	generic_table_field_get(p + 0x2, &status->vlroutes,   1,  1, 4);
-	generic_table_field_get(p + 0x2, &status->vlparts,    0,  0, 4);
-	generic_table_field_get(p + 0x3, &status->macaddl,   31, 16, 4);
-	generic_table_field_get(p + 0x3, &status->portenf,   15,  8, 4);
-	generic_table_field_get(p + 0x3, &status->fwds_03h,   4,  4, 4);
-	generic_table_field_get(p + 0x3, &status->macfds,     3,  3, 4);
-	generic_table_field_get(p + 0x3, &status->enffds,     2,  2, 4);
-	generic_table_field_get(p + 0x3, &status->l2busyfds,  1,  1, 4);
-	generic_table_field_get(p + 0x3, &status->l2busys,    0,  0, 4);
-	generic_table_field_get(p + 0x4, &status->macaddu,   31,  0, 4);
-	generic_table_field_get(p + 0x5, &status->macaddhcl, 31, 16, 4);
-	generic_table_field_get(p + 0x5, &status->vlanidhc,  15,  4, 4);
-	generic_table_field_get(p + 0x5, &status->hashconfs,  0,  0, 4);
-	generic_table_field_get(p + 0x6, &status->macaddhcu, 31,  0, 4);
-	generic_table_field_get(p + 0x7, &status->wpvlanid,  31, 16, 4);
-	generic_table_field_get(p + 0x7, &status->port_07h,  15,  8, 4);
-	generic_table_field_get(p + 0x7, &status->vlanbusys,  4,  4, 4);
-	generic_table_field_get(p + 0x7, &status->wrongports, 3,  3, 4);
-	generic_table_field_get(p + 0x7, &status->vnotfounds, 2,  2, 4);
-	generic_table_field_get(p + 0x8, &status->vlid,      31, 16, 4);
-	generic_table_field_get(p + 0x8, &status->portvl,    15,  8, 4);
-	generic_table_field_get(p + 0x8, &status->vlnotfound, 0,  0, 4);
-	generic_table_field_get(p + 0x9, &status->emptys,    31, 31, 4);
-	generic_table_field_get(p + 0x9, &status->buffers,   30,  0, 4);
-	generic_table_field_get(p + 0xA, &status->port_0ah,  15,  8, 4);
-	generic_table_field_get(p + 0xA, &status->fwds_0ah,   1,  1, 4);
-	generic_table_field_get(p + 0xA, &status->parts,      0,  0, 4);
-	generic_table_field_get(p + 0xB, &status->ramparerrl,20,  0, 4);
-	generic_table_field_get(p + 0xC, &status->ramparerru, 4,  0, 4);
+	gtable_unpack(p + 0x0, &status->device_id, 31,  0, 4);
+	gtable_unpack(p + 0x1, &status->configs,   31, 31, 4);
+	gtable_unpack(p + 0x1, &status->crcchkl,   30, 30, 4);
+	gtable_unpack(p + 0x1, &status->ids,       29, 29, 4);
+	gtable_unpack(p + 0x1, &status->crcchkg,   28, 28, 4);
+	gtable_unpack(p + 0x1, &status->nslot,      3,  0, 4);
+	gtable_unpack(p + 0x2, &status->vlind,     31, 16, 4);
+	gtable_unpack(p + 0x2, &status->vlparind,  15,  8, 4);
+	gtable_unpack(p + 0x2, &status->vlroutes,   1,  1, 4);
+	gtable_unpack(p + 0x2, &status->vlparts,    0,  0, 4);
+	gtable_unpack(p + 0x3, &status->macaddl,   31, 16, 4);
+	gtable_unpack(p + 0x3, &status->portenf,   15,  8, 4);
+	gtable_unpack(p + 0x3, &status->fwds_03h,   4,  4, 4);
+	gtable_unpack(p + 0x3, &status->macfds,     3,  3, 4);
+	gtable_unpack(p + 0x3, &status->enffds,     2,  2, 4);
+	gtable_unpack(p + 0x3, &status->l2busyfds,  1,  1, 4);
+	gtable_unpack(p + 0x3, &status->l2busys,    0,  0, 4);
+	gtable_unpack(p + 0x4, &status->macaddu,   31,  0, 4);
+	gtable_unpack(p + 0x5, &status->macaddhcl, 31, 16, 4);
+	gtable_unpack(p + 0x5, &status->vlanidhc,  15,  4, 4);
+	gtable_unpack(p + 0x5, &status->hashconfs,  0,  0, 4);
+	gtable_unpack(p + 0x6, &status->macaddhcu, 31,  0, 4);
+	gtable_unpack(p + 0x7, &status->wpvlanid,  31, 16, 4);
+	gtable_unpack(p + 0x7, &status->port_07h,  15,  8, 4);
+	gtable_unpack(p + 0x7, &status->vlanbusys,  4,  4, 4);
+	gtable_unpack(p + 0x7, &status->wrongports, 3,  3, 4);
+	gtable_unpack(p + 0x7, &status->vnotfounds, 2,  2, 4);
+	gtable_unpack(p + 0x8, &status->vlid,      31, 16, 4);
+	gtable_unpack(p + 0x8, &status->portvl,    15,  8, 4);
+	gtable_unpack(p + 0x8, &status->vlnotfound, 0,  0, 4);
+	gtable_unpack(p + 0x9, &status->emptys,    31, 31, 4);
+	gtable_unpack(p + 0x9, &status->buffers,   30,  0, 4);
+	gtable_unpack(p + 0xA, &status->port_0ah,  15,  8, 4);
+	gtable_unpack(p + 0xA, &status->fwds_0ah,   1,  1, 4);
+	gtable_unpack(p + 0xA, &status->parts,      0,  0, 4);
+	gtable_unpack(p + 0xB, &status->ramparerrl,20,  0, 4);
+	gtable_unpack(p + 0xC, &status->ramparerru, 4,  0, 4);
 }
 
 void sja1105_general_status_get_b(void *buf, struct sja1105_general_status *status)
@@ -91,8 +91,8 @@ void sja1105_general_status_get_b(void *buf, struct sja1105_general_status *stat
 	int i;
 	/* Assume get_a was called first, thus no memset */
 	for (i = 0; i < 10; i++) {
-		generic_table_field_get(p + i, &status->ptpegr_ts[i], 31, 8, 4);
-		generic_table_field_get(p + i, &status->update[i],     0, 0, 4);
+		gtable_unpack(p + i, &status->ptpegr_ts[i], 31, 8, 4);
+		gtable_unpack(p + i, &status->update[i],     0, 0, 4);
 	}
 }
 

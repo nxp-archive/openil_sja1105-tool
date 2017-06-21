@@ -43,18 +43,18 @@ static void sja1105_schedule_entry_points_params_access(
 		struct sja1105_schedule_entry_points_params *entry,
 		int write)
 {
-	int  (*get_or_set)(void*, uint64_t*, int, int, int);
+	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
 	int    size = SIZE_SCHEDULE_ENTRY_POINTS_PARAMS_ENTRY;
 
 	if (write == 0) {
-		get_or_set = generic_table_field_get;
+		pack_or_unpack = gtable_unpack;
 		memset(entry, 0, sizeof(*entry));
 	} else {
-		get_or_set = generic_table_field_set;
+		pack_or_unpack = gtable_pack;
 		memset(buf, 0, size);
 	}
-	get_or_set(buf, &entry->clksrc,    31, 30, size);
-	get_or_set(buf, &entry->actsubsch, 29, 27, size);
+	pack_or_unpack(buf, &entry->clksrc,    31, 30, size);
+	pack_or_unpack(buf, &entry->actsubsch, 29, 27, size);
 }
 
 void sja1105_schedule_entry_points_params_set(

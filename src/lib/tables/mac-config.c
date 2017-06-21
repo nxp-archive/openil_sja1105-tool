@@ -43,41 +43,41 @@ static void sja1105_mac_config_entry_access(
 		struct sja1105_mac_config_entry *entry,
 		int write)
 {
-	int  (*get_or_set)(void*, uint64_t*, int, int, int);
+	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
 	int    size = SIZE_MAC_CONFIG_ENTRY;
 	int    offset;
 	int    i;
 
 	if (write == 0) {
-		get_or_set = generic_table_field_get;
+		pack_or_unpack = gtable_unpack;
 		memset(entry, 0, sizeof(*entry));
 	} else {
-		get_or_set = generic_table_field_set;
+		pack_or_unpack = gtable_pack;
 		memset(buf, 0, size);
 	}
 	offset = 72;
 	for (i = 0; i < 8; i++) {
-		get_or_set(buf, &entry->enabled[i], offset +  0, offset +  0, size);
-		get_or_set(buf, &entry->base[i],    offset +  9, offset +  1, size);
-		get_or_set(buf, &entry->top[i],     offset + 18, offset + 10, size);
+		pack_or_unpack(buf, &entry->enabled[i], offset +  0, offset +  0, size);
+		pack_or_unpack(buf, &entry->base[i],    offset +  9, offset +  1, size);
+		pack_or_unpack(buf, &entry->top[i],     offset + 18, offset + 10, size);
 		offset += 19;
 	}
-	get_or_set(buf, &entry->ifg,         71, 67, size);
-	get_or_set(buf, &entry->speed,       66, 65, size);
-	get_or_set(buf, &entry->tp_delin,    64, 49, size);
-	get_or_set(buf, &entry->tp_delout,   48, 33, size);
-	get_or_set(buf, &entry->maxage,      32, 25, size);
-	get_or_set(buf, &entry->vlanprio,    24, 22, size);
-	get_or_set(buf, &entry->vlanid,      21, 10, size);
-	get_or_set(buf, &entry->ing_mirr,     9,  9, size);
-	get_or_set(buf, &entry->egr_mirr,     8,  8, size);
-	get_or_set(buf, &entry->drpnona664,   7,  7, size);
-	get_or_set(buf, &entry->drpdtag,      6,  6, size);
-	get_or_set(buf, &entry->drpuntag,     5,  5, size);
-	get_or_set(buf, &entry->retag,        4,  4, size);
-	get_or_set(buf, &entry->dyn_learn,    3,  3, size);
-	get_or_set(buf, &entry->egress,       2,  2, size);
-	get_or_set(buf, &entry->ingress,      1,  1, size);
+	pack_or_unpack(buf, &entry->ifg,         71, 67, size);
+	pack_or_unpack(buf, &entry->speed,       66, 65, size);
+	pack_or_unpack(buf, &entry->tp_delin,    64, 49, size);
+	pack_or_unpack(buf, &entry->tp_delout,   48, 33, size);
+	pack_or_unpack(buf, &entry->maxage,      32, 25, size);
+	pack_or_unpack(buf, &entry->vlanprio,    24, 22, size);
+	pack_or_unpack(buf, &entry->vlanid,      21, 10, size);
+	pack_or_unpack(buf, &entry->ing_mirr,     9,  9, size);
+	pack_or_unpack(buf, &entry->egr_mirr,     8,  8, size);
+	pack_or_unpack(buf, &entry->drpnona664,   7,  7, size);
+	pack_or_unpack(buf, &entry->drpdtag,      6,  6, size);
+	pack_or_unpack(buf, &entry->drpuntag,     5,  5, size);
+	pack_or_unpack(buf, &entry->retag,        4,  4, size);
+	pack_or_unpack(buf, &entry->dyn_learn,    3,  3, size);
+	pack_or_unpack(buf, &entry->egress,       2,  2, size);
+	pack_or_unpack(buf, &entry->ingress,      1,  1, size);
 }
 
 void sja1105_mac_config_entry_set(

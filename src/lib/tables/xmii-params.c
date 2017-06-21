@@ -43,22 +43,22 @@ static void sja1105_xmii_params_table_access(
 		struct sja1105_xmii_params_table *table,
 		int write)
 {
-	int  (*get_or_set)(void*, uint64_t*, int, int, int);
+	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
 	int    size = SIZE_XMII_MODE_PARAMS_TABLE;
 	int    offset;
 	int    i;
 
 	if (write == 0) {
-		get_or_set = generic_table_field_get;
+		pack_or_unpack = gtable_unpack;
 		memset(table, 0, sizeof(*table));
 	} else {
-		get_or_set = generic_table_field_set;
+		pack_or_unpack = gtable_pack;
 		memset(buf, 0, size);
 	}
 	offset = 17;
 	for (i = 0; i < 5; i++) {
-		get_or_set(buf, &table->xmii_mode[i], offset + 1, offset + 0, size);
-		get_or_set(buf, &table->phy_mac[i],   offset + 2, offset + 2, size);
+		pack_or_unpack(buf, &table->xmii_mode[i], offset + 1, offset + 0, size);
+		pack_or_unpack(buf, &table->phy_mac[i],   offset + 2, offset + 2, size);
 		offset += 3;
 	}
 }
