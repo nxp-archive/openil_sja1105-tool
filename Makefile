@@ -29,11 +29,11 @@
 # POSSIBILITY OF SUCH DAMAGE.
 ##############################################################################
 VERSION  = $(or $(shell test -d .git && git describe --tags), "untagged")
-LIB_CFLAGS  += -Wall -Wextra -g -fstack-protector-all -Isrc -fPIC
+LIB_CFLAGS  += -Wall -Wextra -Werror -g -fstack-protector-all -Isrc -fPIC
 LIB_LDFLAGS +=
 
 BIN_CFLAGS  += -DVERSION=\"${VERSION}\"
-BIN_CFLAGS  += -Wall -Wextra -g -fstack-protector-all -Isrc
+BIN_CFLAGS  += -Wall -Wextra -Werror -g -fstack-protector-all -Isrc
 BIN_CFLAGS  += $(shell pkg-config --cflags libxml-2.0)
 BIN_LDFLAGS += $(shell pkg-config --libs libxml-2.0)
 BIN_LDFLAGS += -L. -lsja1105
