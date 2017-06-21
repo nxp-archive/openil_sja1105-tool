@@ -50,6 +50,8 @@ void sja1105_ptp_ctrl_cmd_set(void *buf, struct sja1105_ptp_ctrl_cmd*);
 void sja1105_ptp_ctrl_cmd_show(struct sja1105_ptp_ctrl_cmd*);
 int  sja1105_ptp_ctrl_cmd_cmd(struct sja1105_spi_setup*,
                               struct sja1105_ptp_ctrl_cmd*);
+int sja1105_ptp_ctrl_cmd_send(struct sja1105_spi_setup*,
+                              struct sja1105_ptp_ctrl_cmd*);
 
 int  sja1105_ptp_start_schedule(struct sja1105_spi_setup*);
 int  sja1105_ptp_stop_schedule(struct sja1105_spi_setup*);
