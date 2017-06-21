@@ -30,7 +30,8 @@
  *****************************************************************************/
 #include "internal.h"
 
-int clock_synchronization_parameters_table_write(xmlTextWriterPtr writer, struct sja1105_config *config)
+int clock_synchronization_parameters_table_write(__attribute__((unused)) xmlTextWriterPtr writer,
+                                                 __attribute__((unused)) struct sja1105_config *config)
 {
 	loge("Clock Synchronization Parameters Table not implemented!");
 	return -1;

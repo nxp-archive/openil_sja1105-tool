@@ -336,7 +336,7 @@ static void vl_fw_table_show(struct sja1105_config *config)
 	show_print_bufs(print_bufs, config->vl_forwarding_count);
 }
 
-static void retagging_table_show(struct sja1105_config *config)
+static void retagging_table_show(__attribute__((unused)) struct sja1105_config *config)
 {
 	loge("Retagging Table unimplemented");
 }
@@ -360,7 +360,7 @@ static void avb_params_table_show(struct sja1105_config *config)
 	show_print_bufs(print_bufs, config->avb_params_count);
 }
 
-static void clock_sync_params_table_show(struct sja1105_config *config)
+static void clock_sync_params_table_show(__attribute__((unused)) struct sja1105_config *config)
 {
 	loge("Clock Synchronization Table unimplemented");
 }
