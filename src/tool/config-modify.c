@@ -808,10 +808,10 @@ out:
 }
 
 static int retagging_table_entry_modify(
-		struct sja1105_config *config,
-		int entry,
-		char *field_name,
-		char *field_val)
+		__attribute__((unused)) struct sja1105_config *config,
+		__attribute__((unused)) int entry,
+		__attribute__((unused)) char *field_name,
+		__attribute__((unused)) char *field_val)
 {
 	loge("unimplemented");
 	return -1;
@@ -855,10 +855,10 @@ out:
 }
 
 static int clock_sync_params_table_entry_modify(
-		struct sja1105_config *config,
-		int entry,
-		char *field_name,
-		char *field_val)
+		__attribute__((unused)) struct sja1105_config *config,
+		__attribute__((unused)) int entry,
+		__attribute__((unused)) char *field_name,
+		__attribute__((unused)) char *field_val)
 {
 	loge("unimplemented");
 	return -1;

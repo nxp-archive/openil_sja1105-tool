@@ -45,7 +45,7 @@ static void print_usage()
 	printf(" * sja1105-tool ptp reset\n");
 }
 
-int sja1105_ptp_update(struct sja1105_spi_setup *spi_setup)
+int sja1105_ptp_update(__attribute__((unused)) struct sja1105_spi_setup *spi_setup)
 {
 	/**
 	 * TODO:
