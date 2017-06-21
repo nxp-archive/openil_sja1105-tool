@@ -124,6 +124,7 @@ int sja1105_config_get(void *buf, struct sja1105_config *config);
 void sja1105_config_set(void *buf, struct sja1105_config *config);
 unsigned int sja1105_config_get_length(struct sja1105_config *config);
 
-int sja1105_config_default(struct sja1105_config *config, char *config_name);
+int sja1105_config_default(struct sja1105_config*,
+                           enum sja1105_default_config);
 
 #endif

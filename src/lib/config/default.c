@@ -33,7 +33,8 @@
 #include <lib/include/config.h>
 #include <common.h>
 
-int sja1105_config_default(struct sja1105_config *config, char *config_name)
+int sja1105_config_default(struct sja1105_config *config,
+                           enum sja1105_default_config config_name)
 {
 	uint8_t ls1021atsn_buf[] = {
 		/* L2 Policing Table, length 320 bytes (80 x 32-bit words), CRC 216F256B */
@@ -191,10 +192,10 @@ int sja1105_config_default(struct sja1105_config *config, char *config_name)
 		0x00, 0x00, 0x00, 0x00,
 		0x8C, 0xCA, 0x28, 0x6D,
 	};
-	if (strcmp(config_name, "ls1021atsn") == 0) {
+	if (config_name == LS1021ATSN) {
 		return sja1105_config_get(ls1021atsn_buf, config);
 	} else {
-		loge("Unknown default config name %s", config_name);
+		loge("Unknown default config name %d", config_name);
 		return -1;
 	}
 }
