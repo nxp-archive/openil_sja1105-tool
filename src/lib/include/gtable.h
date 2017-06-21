@@ -31,9 +31,15 @@
 #ifndef _GTABLE_H
 #define _GTABLE_H
 
-int generic_table_field_get(void*, uint64_t*, int, int, int);
-int generic_table_field_set(void*, uint64_t*, int, int, int);
-void generic_table_hexdump(void*, int);
+#define QUIRK_MSB_ON_THE_RIGHT (1 << 0ull)
+#define QUIRK_LITTLE_ENDIAN    (1 << 1ull)
+#define QUIRK_LSW32_IS_FIRST   (1 << 2ull)
+
+int  gtable_configure(int quirks);
+int  gtable_unpack(void*, uint64_t*, int, int, int);
+int  gtable_pack(void*, uint64_t*, int, int, int);
+void gtable_hexdump(void*, int);
+void gtable_bitdump(void*, int);
 uint32_t ether_crc32_le(void*, unsigned int);
 
 #endif

@@ -43,7 +43,7 @@ static void sja1105_table_write_crc(char *table_start, char *crc_ptr)
 
 	len_bytes = (int) (crc_ptr - table_start);
 	computed_crc = ether_crc32_le(table_start, len_bytes);
-	generic_table_field_set(crc_ptr, &computed_crc, 31, 0, 4);
+	gtable_pack(crc_ptr, &computed_crc, 31, 0, 4);
 }
 
 int sja1105_config_add_entry(struct sja1105_table_header *hdr, void *buf, struct sja1105_config *config)
@@ -366,7 +366,7 @@ int sja1105_config_hexdump(void *buf)
 		}
 		sja1105_table_header_show(&hdr);
 		printf("Header:\n");
-		generic_table_hexdump(p, SIZE_TABLE_HEADER);
+		gtable_hexdump(p, SIZE_TABLE_HEADER);
 		p += SIZE_TABLE_HEADER;
 
 		table_end = p + hdr.len * 4;
@@ -376,17 +376,17 @@ int sja1105_config_hexdump(void *buf)
 				goto error;
 			}
 			printf("Entry (%d bytes):\n", bytes);
-			generic_table_hexdump(p, bytes);
+			gtable_hexdump(p, bytes);
 			p += bytes;
 		};
 		if (p != table_end) {
 			loge("WARNING: Incorrect table length specified in header!");
 			printf("Extra:\n");
-			generic_table_hexdump(p, (int) (table_end - p));
+			gtable_hexdump(p, (int) (table_end - p));
 			p = table_end;
 		}
 		printf("Table Data CRC:\n");
-		generic_table_hexdump(p, 4);
+		gtable_hexdump(p, 4);
 		p += 4;
 		printf("\n");
 	}
@@ -544,7 +544,7 @@ int sja1105_config_get(void *buf, struct sja1105_config *config)
 			loge("WARNING: Incorrect table length specified in header!");
 			p = table_end;
 		}
-		generic_table_field_get(p, &read_crc, 31, 0, 4);
+		gtable_unpack(p, &read_crc, 31, 0, 4);
 		p += 4;
 		if (computed_crc != read_crc) {
 			loge("Data CRC is invalid, exiting.");

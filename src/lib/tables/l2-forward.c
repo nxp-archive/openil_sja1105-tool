@@ -43,24 +43,24 @@ static void sja1105_l2_forwarding_entry_access(
 		struct sja1105_l2_forwarding_entry *entry,
 		int write)
 {
-	int  (*get_or_set)(void*, uint64_t*, int, int, int);
+	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
 	int    size = SIZE_L2_FORWARDING_ENTRY;
 	int    offset;
 	int    i;
 
 	if (write == 0) {
-		get_or_set = generic_table_field_get;
+		pack_or_unpack = gtable_unpack;
 		memset(entry, 0, sizeof(*entry));
 	} else {
-		get_or_set = generic_table_field_set;
+		pack_or_unpack = gtable_pack;
 		memset(buf, 0, size);
 	}
-	get_or_set(buf, &entry->bc_domain,  63, 59, size);
-	get_or_set(buf, &entry->reach_port, 58, 54, size);
-	get_or_set(buf, &entry->fl_domain,  53, 49, size);
+	pack_or_unpack(buf, &entry->bc_domain,  63, 59, size);
+	pack_or_unpack(buf, &entry->reach_port, 58, 54, size);
+	pack_or_unpack(buf, &entry->fl_domain,  53, 49, size);
 	offset = 25;
 	for (i = 0; i < 8; i++) {
-		get_or_set(buf, &entry->vlan_pmap[i], offset + 2, offset + 0, size);
+		pack_or_unpack(buf, &entry->vlan_pmap[i], offset + 2, offset + 0, size);
 		offset += 3;
 	}
 }

@@ -41,19 +41,19 @@ static void sja1105_spi_message_access(
 		struct sja1105_spi_message *msg,
 		int write)
 {
-	int (*get_or_set)(void*, uint64_t*, int, int, int);
+	int (*pack_or_unpack)(void*, uint64_t*, int, int, int);
 	int size = SIZE_SPI_MSG_HEADER;
 
 	if (write == 0) {
-		get_or_set = generic_table_field_get;
+		pack_or_unpack = gtable_unpack;
 		memset(msg, 0, sizeof(*msg));
 	} else {
-		get_or_set = generic_table_field_set;
+		pack_or_unpack = gtable_pack;
 		memset(buf, 0, size);
 	}
-	get_or_set(buf, &msg->access,     31, 31, size);
-	get_or_set(buf, &msg->read_count, 30, 25, size);
-	get_or_set(buf, &msg->address,    24,  4, size);
+	pack_or_unpack(buf, &msg->access,     31, 31, size);
+	pack_or_unpack(buf, &msg->read_count, 30, 25, size);
+	pack_or_unpack(buf, &msg->address,    24,  4, size);
 }
 
 void sja1105_spi_message_get(void *buf, struct sja1105_spi_message *msg)

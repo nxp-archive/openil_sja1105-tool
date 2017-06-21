@@ -42,24 +42,24 @@ static void sja1105_ptp_ctrl_cmd_access(
 		struct sja1105_ptp_ctrl_cmd *ptp_control,
 		int write)
 {
-	int  (*get_or_set)(void*, uint64_t*, int, int, int);
+	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
 	int    size = 4;
 
 	if (write == 0) {
-		get_or_set = generic_table_field_get;
+		pack_or_unpack = gtable_unpack;
 		memset(ptp_control, 0, sizeof(*ptp_control));
 	} else {
-		get_or_set = generic_table_field_set;
+		pack_or_unpack = gtable_pack;
 		memset(buf, 0, size);
 	}
-	get_or_set(buf, &ptp_control->valid,              31, 31, 4);
-	get_or_set(buf, &ptp_control->start_schedule,     30, 30, 4);
-	get_or_set(buf, &ptp_control->stop_schedule,      29, 29, 4);
-	get_or_set(buf, &ptp_control->start_pin_toggle,   28, 28, 4);
-	get_or_set(buf, &ptp_control->stop_pin_toggle,    27, 27, 4);
-	get_or_set(buf, &ptp_control->reset,               2,  2, 4);
-	get_or_set(buf, &ptp_control->ts_based_on_ptpclk,  1,  1, 4);
-	get_or_set(buf, &ptp_control->clk_add_mode,        0,  0, 4);
+	pack_or_unpack(buf, &ptp_control->valid,              31, 31, 4);
+	pack_or_unpack(buf, &ptp_control->start_schedule,     30, 30, 4);
+	pack_or_unpack(buf, &ptp_control->stop_schedule,      29, 29, 4);
+	pack_or_unpack(buf, &ptp_control->start_pin_toggle,   28, 28, 4);
+	pack_or_unpack(buf, &ptp_control->stop_pin_toggle,    27, 27, 4);
+	pack_or_unpack(buf, &ptp_control->reset,               2,  2, 4);
+	pack_or_unpack(buf, &ptp_control->ts_based_on_ptpclk,  1,  1, 4);
+	pack_or_unpack(buf, &ptp_control->clk_add_mode,        0,  0, 4);
 }
 
 void sja1105_ptp_ctrl_cmd_set(void *buf, struct sja1105_ptp_ctrl_cmd *ptp_control)

@@ -44,36 +44,36 @@ static void sja1105_general_params_table_access(
 		struct sja1105_general_params_table *table,
 		int write)
 {
-	int  (*get_or_set)(void*, uint64_t*, int, int, int);
+	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
 	int    size = SIZE_GENERAL_PARAMS_TABLE;
 
 	if (write == 0) {
-		get_or_set = generic_table_field_get;
+		pack_or_unpack = gtable_unpack;
 		memset(table, 0, sizeof(*table));
 	} else {
-		get_or_set = generic_table_field_set;
+		pack_or_unpack = gtable_pack;
 		memset(buf, 0, size);
 	}
-	get_or_set(buf, &table->vllupformat, 319, 319, size);
-	get_or_set(buf, &table->mirr_ptacu,  318, 318, size);
-	get_or_set(buf, &table->switchid,    317, 315, size);
-	get_or_set(buf, &table->hostprio,    314, 312, size);
-	get_or_set(buf, &table->mac_fltres1, 311, 264, size);
-	get_or_set(buf, &table->mac_fltres0, 263, 216, size);
-	get_or_set(buf, &table->mac_flt1,    215, 168, size);
-	get_or_set(buf, &table->mac_flt0,    167, 120, size);
-	get_or_set(buf, &table->incl_srcpt1, 119, 119, size);
-	get_or_set(buf, &table->incl_srcpt0, 118, 118, size);
-	get_or_set(buf, &table->send_meta1,  117, 117, size);
-	get_or_set(buf, &table->send_meta0,  116, 116, size);
-	get_or_set(buf, &table->casc_port,   115, 113, size);
-	get_or_set(buf, &table->host_port,   112, 110, size);
-	get_or_set(buf, &table->mirr_port,   109, 107, size);
-	get_or_set(buf, &table->vlmarker,    106, 75,  size);
-	get_or_set(buf, &table->vlmask,      74, 43,   size);
-	get_or_set(buf, &table->tpid,        42, 27,   size);
-	get_or_set(buf, &table->ignore2stf,  26, 26,   size);
-	get_or_set(buf, &table->tpid2,       25, 10,   size);
+	pack_or_unpack(buf, &table->vllupformat, 319, 319, size);
+	pack_or_unpack(buf, &table->mirr_ptacu,  318, 318, size);
+	pack_or_unpack(buf, &table->switchid,    317, 315, size);
+	pack_or_unpack(buf, &table->hostprio,    314, 312, size);
+	pack_or_unpack(buf, &table->mac_fltres1, 311, 264, size);
+	pack_or_unpack(buf, &table->mac_fltres0, 263, 216, size);
+	pack_or_unpack(buf, &table->mac_flt1,    215, 168, size);
+	pack_or_unpack(buf, &table->mac_flt0,    167, 120, size);
+	pack_or_unpack(buf, &table->incl_srcpt1, 119, 119, size);
+	pack_or_unpack(buf, &table->incl_srcpt0, 118, 118, size);
+	pack_or_unpack(buf, &table->send_meta1,  117, 117, size);
+	pack_or_unpack(buf, &table->send_meta0,  116, 116, size);
+	pack_or_unpack(buf, &table->casc_port,   115, 113, size);
+	pack_or_unpack(buf, &table->host_port,   112, 110, size);
+	pack_or_unpack(buf, &table->mirr_port,   109, 107, size);
+	pack_or_unpack(buf, &table->vlmarker,    106, 75,  size);
+	pack_or_unpack(buf, &table->vlmask,      74, 43,   size);
+	pack_or_unpack(buf, &table->tpid,        42, 27,   size);
+	pack_or_unpack(buf, &table->ignore2stf,  26, 26,   size);
+	pack_or_unpack(buf, &table->tpid2,       25, 10,   size);
 }
 
 void sja1105_general_params_table_set(void *buf,

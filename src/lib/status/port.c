@@ -99,51 +99,51 @@ void sja1105_port_status_get_mac(void *buf, struct sja1105_port_status *status)
 {
 	/* So that additions translate to 4 bytes */
 	uint32_t *p = (uint32_t*) buf;
-	generic_table_field_get(p + 0x0, &status->n_runt,       31, 24, 4);
-	generic_table_field_get(p + 0x0, &status->n_soferr,     23, 16, 4);
-	generic_table_field_get(p + 0x0, &status->n_alignerr,   15,  8, 4);
-	generic_table_field_get(p + 0x0, &status->n_miierr,      7,  0, 4);
-	generic_table_field_get(p + 0x1, &status->typeerr,      27, 27, 4);
-	generic_table_field_get(p + 0x1, &status->sizeerr,      26, 26, 4);
-	generic_table_field_get(p + 0x1, &status->priorerr,     24, 24, 4);
-	generic_table_field_get(p + 0x1, &status->nomaster,     23, 23, 4);
-	generic_table_field_get(p + 0x1, &status->memov,        22, 22, 4);
-	generic_table_field_get(p + 0x1, &status->memerr,       21, 21, 4);
-	generic_table_field_get(p + 0x1, &status->invtyp,       19, 19, 4);
-	generic_table_field_get(p + 0x1, &status->intcyov,      18, 18, 4);
-	generic_table_field_get(p + 0x1, &status->domerr,       17, 17, 4);
-	generic_table_field_get(p + 0x1, &status->pcfbagdrop,   16, 16, 4);
-	generic_table_field_get(p + 0x1, &status->spcprior,     15, 12, 4);
-	generic_table_field_get(p + 0x1, &status->ageprior,     11,  8, 4);
-	generic_table_field_get(p + 0x1, &status->portdrop,      6,  6, 4);
-	generic_table_field_get(p + 0x1, &status->lendrop,       5,  5, 4);
-	generic_table_field_get(p + 0x1, &status->bagdrop,       4,  4, 4);
-	generic_table_field_get(p + 0x1, &status->policeerr,     3,  3, 4);
-	generic_table_field_get(p + 0x1, &status->drpnona664err, 2,  2, 4);
-	generic_table_field_get(p + 0x1, &status->spcerr,        1,  1, 4);
-	generic_table_field_get(p + 0x1, &status->agedrp,        0,  0, 4);
+	gtable_unpack(p + 0x0, &status->n_runt,       31, 24, 4);
+	gtable_unpack(p + 0x0, &status->n_soferr,     23, 16, 4);
+	gtable_unpack(p + 0x0, &status->n_alignerr,   15,  8, 4);
+	gtable_unpack(p + 0x0, &status->n_miierr,      7,  0, 4);
+	gtable_unpack(p + 0x1, &status->typeerr,      27, 27, 4);
+	gtable_unpack(p + 0x1, &status->sizeerr,      26, 26, 4);
+	gtable_unpack(p + 0x1, &status->priorerr,     24, 24, 4);
+	gtable_unpack(p + 0x1, &status->nomaster,     23, 23, 4);
+	gtable_unpack(p + 0x1, &status->memov,        22, 22, 4);
+	gtable_unpack(p + 0x1, &status->memerr,       21, 21, 4);
+	gtable_unpack(p + 0x1, &status->invtyp,       19, 19, 4);
+	gtable_unpack(p + 0x1, &status->intcyov,      18, 18, 4);
+	gtable_unpack(p + 0x1, &status->domerr,       17, 17, 4);
+	gtable_unpack(p + 0x1, &status->pcfbagdrop,   16, 16, 4);
+	gtable_unpack(p + 0x1, &status->spcprior,     15, 12, 4);
+	gtable_unpack(p + 0x1, &status->ageprior,     11,  8, 4);
+	gtable_unpack(p + 0x1, &status->portdrop,      6,  6, 4);
+	gtable_unpack(p + 0x1, &status->lendrop,       5,  5, 4);
+	gtable_unpack(p + 0x1, &status->bagdrop,       4,  4, 4);
+	gtable_unpack(p + 0x1, &status->policeerr,     3,  3, 4);
+	gtable_unpack(p + 0x1, &status->drpnona664err, 2,  2, 4);
+	gtable_unpack(p + 0x1, &status->spcerr,        1,  1, 4);
+	gtable_unpack(p + 0x1, &status->agedrp,        0,  0, 4);
 }
 
 void sja1105_port_status_get_hl1(void *buf, struct sja1105_port_status *status)
 {
 	/* So that additions translate to 4 bytes */
 	uint32_t *p = (uint32_t*) buf;
-	generic_table_field_get(p + 0xF, &status->n_n664err,    31,  0, 4);
-	generic_table_field_get(p + 0xE, &status->n_vlanerr,    31,  0, 4);
-	generic_table_field_get(p + 0xD, &status->n_unreleased, 31,  0, 4);
-	generic_table_field_get(p + 0xC, &status->n_sizerr,     31,  0, 4);
-	generic_table_field_get(p + 0xB, &status->n_crcerr,     31,  0, 4);
-	generic_table_field_get(p + 0xA, &status->n_vlnotfound, 31,  0, 4);
-	generic_table_field_get(p + 0x9, &status->n_bepolerr,   31,  0, 4);
-	generic_table_field_get(p + 0x8, &status->n_polerr,     31,  0, 4);
-	generic_table_field_get(p + 0x7, &status->n_rxfrmsh,    31,  0, 4);
-	generic_table_field_get(p + 0x6, &status->n_rxfrm,      31,  0, 4);
-	generic_table_field_get(p + 0x5, &status->n_rxbytesh,   31,  0, 4);
-	generic_table_field_get(p + 0x4, &status->n_rxbyte,     31,  0, 4);
-	generic_table_field_get(p + 0x3, &status->n_txfrmsh,    31,  0, 4);
-	generic_table_field_get(p + 0x2, &status->n_txfrm,      31,  0, 4);
-	generic_table_field_get(p + 0x1, &status->n_txbytesh,   31,  0, 4);
-	generic_table_field_get(p + 0x0, &status->n_txbyte,     31,  0, 4);
+	gtable_unpack(p + 0xF, &status->n_n664err,    31,  0, 4);
+	gtable_unpack(p + 0xE, &status->n_vlanerr,    31,  0, 4);
+	gtable_unpack(p + 0xD, &status->n_unreleased, 31,  0, 4);
+	gtable_unpack(p + 0xC, &status->n_sizerr,     31,  0, 4);
+	gtable_unpack(p + 0xB, &status->n_crcerr,     31,  0, 4);
+	gtable_unpack(p + 0xA, &status->n_vlnotfound, 31,  0, 4);
+	gtable_unpack(p + 0x9, &status->n_bepolerr,   31,  0, 4);
+	gtable_unpack(p + 0x8, &status->n_polerr,     31,  0, 4);
+	gtable_unpack(p + 0x7, &status->n_rxfrmsh,    31,  0, 4);
+	gtable_unpack(p + 0x6, &status->n_rxfrm,      31,  0, 4);
+	gtable_unpack(p + 0x5, &status->n_rxbytesh,   31,  0, 4);
+	gtable_unpack(p + 0x4, &status->n_rxbyte,     31,  0, 4);
+	gtable_unpack(p + 0x3, &status->n_txfrmsh,    31,  0, 4);
+	gtable_unpack(p + 0x2, &status->n_txfrm,      31,  0, 4);
+	gtable_unpack(p + 0x1, &status->n_txbytesh,   31,  0, 4);
+	gtable_unpack(p + 0x0, &status->n_txbyte,     31,  0, 4);
 	status->n_rxfrm  += status->n_rxfrmsh  << 32;
 	status->n_rxbyte += status->n_rxbytesh << 32;
 	status->n_txfrm  += status->n_txfrmsh  << 32;
@@ -154,10 +154,10 @@ void sja1105_port_status_get_hl2(void *buf, struct sja1105_port_status *status)
 {
 	/* So that additions translate to 4 bytes */
 	uint32_t *p = (uint32_t*) buf;
-	generic_table_field_get(p + 0x3, &status->n_qfull,        31,  0, 4);
-	generic_table_field_get(p + 0x2, &status->n_part_drop,    31,  0, 4);
-	generic_table_field_get(p + 0x1, &status->n_egr_disabled, 31,  0, 4);
-	generic_table_field_get(p + 0x0, &status->n_not_reach,    31,  0, 4);
+	gtable_unpack(p + 0x3, &status->n_qfull,        31,  0, 4);
+	gtable_unpack(p + 0x2, &status->n_part_drop,    31,  0, 4);
+	gtable_unpack(p + 0x1, &status->n_egr_disabled, 31,  0, 4);
+	gtable_unpack(p + 0x0, &status->n_not_reach,    31,  0, 4);
 }
 
 int sja1105_port_status_get(

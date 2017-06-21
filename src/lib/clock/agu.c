@@ -43,25 +43,25 @@ static void sja1105_cfg_pad_mii_tx_access(
 		struct sja1105_cfg_pad_mii_tx *pad_mii_tx,
 		int write)
 {
-	int  (*get_or_set)(void*, uint64_t*, int, int, int);
+	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
 	int    size = 4;
 
 	if (write == 0) {
-		get_or_set = generic_table_field_get;
+		pack_or_unpack = gtable_unpack;
 		memset(pad_mii_tx, 0, sizeof(*pad_mii_tx));
 	} else {
-		get_or_set = generic_table_field_set;
+		pack_or_unpack = gtable_pack;
 		memset(buf, 0, size);
 	}
-	get_or_set(buf, &pad_mii_tx->d32_os,   28, 27, 4);
-	get_or_set(buf, &pad_mii_tx->d32_ipud, 25, 24, 4);
-	get_or_set(buf, &pad_mii_tx->d10_os,   20, 19, 4);
-	get_or_set(buf, &pad_mii_tx->d10_ipud, 17, 16, 4);
-	get_or_set(buf, &pad_mii_tx->ctrl_os,  12, 11, 4);
-	get_or_set(buf, &pad_mii_tx->ctrl_ipud, 9,  8, 4);
-	get_or_set(buf, &pad_mii_tx->clk_os,    4,  3, 4);
-	get_or_set(buf, &pad_mii_tx->clk_ih,    2,  2, 4);
-	get_or_set(buf, &pad_mii_tx->clk_ipud,  1,  0, 4);
+	pack_or_unpack(buf, &pad_mii_tx->d32_os,   28, 27, 4);
+	pack_or_unpack(buf, &pad_mii_tx->d32_ipud, 25, 24, 4);
+	pack_or_unpack(buf, &pad_mii_tx->d10_os,   20, 19, 4);
+	pack_or_unpack(buf, &pad_mii_tx->d10_ipud, 17, 16, 4);
+	pack_or_unpack(buf, &pad_mii_tx->ctrl_os,  12, 11, 4);
+	pack_or_unpack(buf, &pad_mii_tx->ctrl_ipud, 9,  8, 4);
+	pack_or_unpack(buf, &pad_mii_tx->clk_os,    4,  3, 4);
+	pack_or_unpack(buf, &pad_mii_tx->clk_ih,    2,  2, 4);
+	pack_or_unpack(buf, &pad_mii_tx->clk_ipud,  1,  0, 4);
 }
 
 void sja1105_cfg_pad_mii_tx_set(void *buf, struct sja1105_cfg_pad_mii_tx *pad_mii_tx)

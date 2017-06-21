@@ -44,18 +44,18 @@ static void sja1105_avb_params_table_access(
 		struct sja1105_avb_params_table *table,
 		int write)
 {
-	int  (*get_or_set)(void*, uint64_t*, int, int, int);
+	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
 	int    size = SIZE_AVB_PARAMS_TABLE;
 
 	if (write == 0) {
-		get_or_set = generic_table_field_get;
+		pack_or_unpack = gtable_unpack;
 		memset(table, 0, sizeof(*table));
 	} else {
-		get_or_set = generic_table_field_set;
+		pack_or_unpack = gtable_pack;
 		memset(buf, 0, size);
 	}
-	get_or_set(buf, &table->destmeta, 95, 48, size);
-	get_or_set(buf, &table->srcmeta,  47,  0, size);
+	pack_or_unpack(buf, &table->destmeta, 95, 48, size);
+	pack_or_unpack(buf, &table->srcmeta,  47,  0, size);
 }
 
 void sja1105_avb_params_table_set(void *buf,

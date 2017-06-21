@@ -44,30 +44,30 @@ static void sja1105_vl_lookup_entry_access(
 		struct sja1105_vl_lookup_entry *entry,
 		int write)
 {
-	int  (*get_or_set)(void*, uint64_t*, int, int, int);
+	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
 	int    size = SIZE_VL_LOOKUP_ENTRY;
 
 	if (write == 0) {
-		get_or_set = generic_table_field_get;
+		pack_or_unpack = gtable_unpack;
 		memset(entry, 0, sizeof(*entry));
 	} else {
-		get_or_set = generic_table_field_set;
+		pack_or_unpack = gtable_pack;
 		memset(buf, 0, size);
 	}
 	if (entry->format == 0) {
 		logv("Interpreting vllupformat as 0");
-		get_or_set(buf, &entry->destports,  95, 91, size);
-		get_or_set(buf, &entry->iscritical, 90, 90, size);
-		get_or_set(buf, &entry->macaddr,    89, 42, size);
-		get_or_set(buf, &entry->vlanid,     41, 30, size);
-		get_or_set(buf, &entry->port,       29, 27, size);
-		get_or_set(buf, &entry->vlanprior,  26, 24, size);
+		pack_or_unpack(buf, &entry->destports,  95, 91, size);
+		pack_or_unpack(buf, &entry->iscritical, 90, 90, size);
+		pack_or_unpack(buf, &entry->macaddr,    89, 42, size);
+		pack_or_unpack(buf, &entry->vlanid,     41, 30, size);
+		pack_or_unpack(buf, &entry->port,       29, 27, size);
+		pack_or_unpack(buf, &entry->vlanprior,  26, 24, size);
 	} else {
 		logv("Interpreting vllupformat as 1");
-		get_or_set(buf, &entry->egrmirr,    95, 91, size);
-		get_or_set(buf, &entry->ingrmirr,   90, 90, size);
-		get_or_set(buf, &entry->vlid,       57, 42, size);
-		get_or_set(buf, &entry->port,       29, 27, size);
+		pack_or_unpack(buf, &entry->egrmirr,    95, 91, size);
+		pack_or_unpack(buf, &entry->ingrmirr,   90, 90, size);
+		pack_or_unpack(buf, &entry->vlid,       57, 42, size);
+		pack_or_unpack(buf, &entry->port,       29, 27, size);
 	}
 }
 

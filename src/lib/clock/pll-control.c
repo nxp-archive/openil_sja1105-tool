@@ -39,24 +39,24 @@
 
 static void sja1105_cgu_pll_control_access(void *buf, struct sja1105_cgu_pll_control *pll_control, int write)
 {
-	int (*get_or_set)(void*, uint64_t*, int, int, int);
+	int (*pack_or_unpack)(void*, uint64_t*, int, int, int);
 	int   size = 4;
 
 	if (write == 0) {
-		get_or_set = generic_table_field_get;
+		pack_or_unpack = gtable_unpack;
 		memset(pll_control, 0, sizeof(*pll_control));
 	} else {
-		get_or_set = generic_table_field_set;
+		pack_or_unpack = gtable_pack;
 		memset(buf, 0, size);
 	}
-	get_or_set(buf, &pll_control->pllclksrc, 28, 24, 4);
-	get_or_set(buf, &pll_control->msel,      23, 16, 4);
-	get_or_set(buf, &pll_control->autoblock, 11, 11, 4);
-	get_or_set(buf, &pll_control->psel,       9,  8, 4);
-	get_or_set(buf, &pll_control->direct,     7,  7, 4);
-	get_or_set(buf, &pll_control->fbsel,      6,  6, 4);
-	get_or_set(buf, &pll_control->bypass,     1,  1, 4);
-	get_or_set(buf, &pll_control->pd,         0,  0, 4);
+	pack_or_unpack(buf, &pll_control->pllclksrc, 28, 24, 4);
+	pack_or_unpack(buf, &pll_control->msel,      23, 16, 4);
+	pack_or_unpack(buf, &pll_control->autoblock, 11, 11, 4);
+	pack_or_unpack(buf, &pll_control->psel,       9,  8, 4);
+	pack_or_unpack(buf, &pll_control->direct,     7,  7, 4);
+	pack_or_unpack(buf, &pll_control->fbsel,      6,  6, 4);
+	pack_or_unpack(buf, &pll_control->bypass,     1,  1, 4);
+	pack_or_unpack(buf, &pll_control->pd,         0,  0, 4);
 }
 
 void sja1105_cgu_pll_control_set(void *buf, struct sja1105_cgu_pll_control *pll_control)

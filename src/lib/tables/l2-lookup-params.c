@@ -43,22 +43,22 @@ static void sja1105_l2_lookup_params_table_access(
 		struct sja1105_l2_lookup_params_table *table,
 		int write)
 {
-	int  (*get_or_set)(void*, uint64_t*, int, int, int);
+	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
 	int    size = SIZE_L2_LOOKUP_PARAMS_TABLE;
 
 	if (write == 0) {
-		get_or_set = generic_table_field_get;
+		pack_or_unpack = gtable_unpack;
 		memset(table, 0, sizeof(*table));
 	} else {
-		get_or_set = generic_table_field_set;
+		pack_or_unpack = gtable_pack;
 		memset(buf, 0, size);
 	}
-	get_or_set(buf, &table->maxage,         31, 17, size);
-	get_or_set(buf, &table->dyn_tbsz,       16, 14, size);
-	get_or_set(buf, &table->poly,           13,  6, size);
-	get_or_set(buf, &table->shared_learn,    5,  5, size);
-	get_or_set(buf, &table->no_enf_hostprt,  4,  4, size);
-	get_or_set(buf, &table->no_mgmt_learn,   3,  3, size);
+	pack_or_unpack(buf, &table->maxage,         31, 17, size);
+	pack_or_unpack(buf, &table->dyn_tbsz,       16, 14, size);
+	pack_or_unpack(buf, &table->poly,           13,  6, size);
+	pack_or_unpack(buf, &table->shared_learn,    5,  5, size);
+	pack_or_unpack(buf, &table->no_enf_hostprt,  4,  4, size);
+	pack_or_unpack(buf, &table->no_mgmt_learn,   3,  3, size);
 }
 
 void sja1105_l2_lookup_params_table_set(

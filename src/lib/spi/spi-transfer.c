@@ -113,7 +113,7 @@ int sja1105_spi_transfer(const struct sja1105_spi_setup *spi_setup,
 
 	if (spi_setup->dry_run) {
 		printf("spi-transfer: size %d bytes\n", size);
-		generic_table_hexdump((void*) tx, size);
+		gtable_hexdump((void*) tx, size);
 		return 0;
 	} else {
 		memset(rx, 0, size);

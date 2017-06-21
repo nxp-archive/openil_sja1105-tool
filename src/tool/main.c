@@ -33,6 +33,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <lib/include/spi.h>
+#include <lib/include/gtable.h>
 #include <common.h>
 #include "internal.h"
 
@@ -113,6 +114,8 @@ int main(int argc, char *argv[])
 
 	/* discard program name */
 	argc--; argv++;
+	/* Adjust gtable for SJA1105 SPI memory layout */
+	gtable_configure(QUIRK_LSW32_IS_FIRST);
 	read_config_file(SJA1105_CONF_FILE, &spi_setup, &general_config);
 	rc = parse_args(&spi_setup, argc, argv);
 	if (rc == 0) {

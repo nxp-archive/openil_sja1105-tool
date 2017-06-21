@@ -43,22 +43,22 @@ static void sja1105_vl_policing_entry_access(
 		struct sja1105_vl_policing_entry *entry,
 		int write)
 {
-	int  (*get_or_set)(void*, uint64_t*, int, int, int);
+	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
 	int    size = SIZE_VL_POLICING_ENTRY;
 
 	if (write == 0) {
-		get_or_set = generic_table_field_get;
+		pack_or_unpack = gtable_unpack;
 		memset(entry, 0, sizeof(*entry));
 	} else {
-		get_or_set = generic_table_field_set;
+		pack_or_unpack = gtable_pack;
 		memset(buf, 0, size);
 	}
-	get_or_set(buf, &entry->type,      63, 63, size);
-	get_or_set(buf, &entry->maxlen,    62, 52, size);
-	get_or_set(buf, &entry->sharindx,  51, 42, size);
+	pack_or_unpack(buf, &entry->type,      63, 63, size);
+	pack_or_unpack(buf, &entry->maxlen,    62, 52, size);
+	pack_or_unpack(buf, &entry->sharindx,  51, 42, size);
 	if (entry->type == 0) {
-		get_or_set(buf, &entry->bag,    41, 28, size);
-		get_or_set(buf, &entry->jitter, 27, 18, size);
+		pack_or_unpack(buf, &entry->bag,    41, 28, size);
+		pack_or_unpack(buf, &entry->jitter, 27, 18, size);
 	}
 }
 

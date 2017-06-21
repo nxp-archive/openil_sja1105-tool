@@ -44,21 +44,21 @@ static void sja1105_l2_lookup_entry_access(
 		struct sja1105_l2_lookup_entry *entry,
 		int write)
 {
-	int  (*get_or_set)(void*, uint64_t*, int, int, int);
+	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
 	int    size = SIZE_L2_LOOKUP_ENTRY;
 
 	if (write == 0) {
-		get_or_set = generic_table_field_get;
+		pack_or_unpack = gtable_unpack;
 		memset(entry, 0, sizeof(*entry));
 	} else {
-		get_or_set = generic_table_field_set;
+		pack_or_unpack = gtable_pack;
 		memset(buf, 0, size);
 	}
-	get_or_set(buf, &entry->vlanid,    95, 84, size);
-	get_or_set(buf, &entry->macaddr,   83, 36, size);
-	get_or_set(buf, &entry->destports, 35, 31, size);
-	get_or_set(buf, &entry->enfport,   30, 30, size);
-	get_or_set(buf, &entry->index,     29, 20, size);
+	pack_or_unpack(buf, &entry->vlanid,    95, 84, size);
+	pack_or_unpack(buf, &entry->macaddr,   83, 36, size);
+	pack_or_unpack(buf, &entry->destports, 35, 31, size);
+	pack_or_unpack(buf, &entry->enfport,   30, 30, size);
+	pack_or_unpack(buf, &entry->index,     29, 20, size);
 }
 
 void sja1105_l2_lookup_entry_set(
