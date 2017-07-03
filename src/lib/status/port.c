@@ -165,67 +165,53 @@ int sja1105_port_status_get(
 		struct sja1105_port_status *status,
 		int port)
 {
-#define SIZE_MAC_AREA 0x02 * 4
-#define SIZE_HL_AREA  0x10 * 4
-#define MSG_LEN_MAC   SIZE_MAC_AREA + SIZE_SPI_MSG_HEADER
-#define MSG_LEN_HL    SIZE_HL_AREA  + SIZE_SPI_MSG_HEADER
+	const int SIZE_MAC_AREA = 0x02 * 4;
+	const int SIZE_HL_AREA  = 0x10 * 4;
+	/* The larger of the 2. Reusing some space. */
+	const int BUF_LEN       = SIZE_HL_AREA;
 	const uint64_t mac_base_addr[]          = {0x200, 0x202, 0x204, 0x206, 0x208};
 	const uint64_t high_level_1_base_addr[] = {0x400, 0x410, 0x420, 0x430, 0x440};
 	const uint64_t high_level_2_base_addr[] = {0x600, 0x610, 0x620, 0x630, 0x640};
-	struct sja1105_spi_message msg;
-	uint8_t tx_buf[MSG_LEN_HL];
-	uint8_t rx_buf[MSG_LEN_HL];
+	uint8_t packed_buf[BUF_LEN];
 	int rc = 0;
 
 	memset(status, 0, sizeof(*status));
 
 	/* MAC area */
-	memset(tx_buf, 0, MSG_LEN_MAC);
-	memset(rx_buf, 0, MSG_LEN_MAC);
-
-	msg.access     = SPI_READ;
-	msg.read_count = SIZE_MAC_AREA / 4;
-	msg.address    = CORE_ADDR + mac_base_addr[port];
-	sja1105_spi_message_set(tx_buf, &msg);
-
-	rc = sja1105_spi_transfer(spi_setup, tx_buf, rx_buf, MSG_LEN_MAC);
+	rc = sja1105_spi_send_packed_buf(spi_setup,
+	                                 SPI_READ,
+	                                 CORE_ADDR + mac_base_addr[port],
+	                                 packed_buf,
+	                                 SIZE_MAC_AREA);
 	if (rc < 0) {
-		loge("sja1105_spi_transfer failed for mac registers");
+		loge("failed to read mac registers");
 		goto out;
 	}
-	sja1105_port_status_get_mac(rx_buf + 4, status);
+	sja1105_port_status_get_mac(packed_buf, status);
 
 	/* High-level 1 */
-	memset(tx_buf, 0, MSG_LEN_HL);
-	memset(rx_buf, 0, MSG_LEN_HL);
-
-	msg.access     = SPI_READ;
-	msg.read_count = SIZE_HL_AREA / 4;
-	msg.address    = CORE_ADDR + high_level_1_base_addr[port];
-	sja1105_spi_message_set(tx_buf, &msg);
-
-	rc = sja1105_spi_transfer(spi_setup, tx_buf, rx_buf, MSG_LEN_HL);
+	rc = sja1105_spi_send_packed_buf(spi_setup,
+	                                 SPI_READ,
+	                                 CORE_ADDR + high_level_1_base_addr[port],
+	                                 packed_buf,
+	                                 SIZE_HL_AREA);
 	if (rc < 0) {
-		loge("sja1105_spi_transfer failed for high-level 1 registers");
+		loge("failed to read high-level 1 registers");
 		goto out;
 	}
-	sja1105_port_status_get_hl1(rx_buf + 4, status);
+	sja1105_port_status_get_hl1(packed_buf, status);
 
 	/* High-level 2 */
-	memset(tx_buf, 0, MSG_LEN_HL);
-	memset(rx_buf, 0, MSG_LEN_HL);
-
-	msg.access     = SPI_READ;
-	msg.read_count = SIZE_HL_AREA / 4;
-	msg.address    = CORE_ADDR + high_level_2_base_addr[port];
-	sja1105_spi_message_set(tx_buf, &msg);
-
-	rc = sja1105_spi_transfer(spi_setup, tx_buf, rx_buf, MSG_LEN_HL);
+	rc = sja1105_spi_send_packed_buf(spi_setup,
+	                                 SPI_READ,
+	                                 CORE_ADDR + high_level_2_base_addr[port],
+	                                 packed_buf,
+	                                 SIZE_HL_AREA);
 	if (rc < 0) {
-		loge("sja1105_spi_transfer failed for high-level 2 registers");
+		loge("failed to read high-level 2 registers");
 		goto out;
 	}
-	sja1105_port_status_get_hl2(rx_buf + 4, status);
+	sja1105_port_status_get_hl2(packed_buf, status);
 out:
 	return rc;
 }
