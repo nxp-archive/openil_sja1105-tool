@@ -62,7 +62,7 @@ build: $(SJA1105_LIB) $(SJA1105_BIN)
 $(SJA1105_LIB): $(LIB_DEPS)
 	$(CC) -shared $(LIB_OBJ) -o $@ $(LIB_LDFLAGS)
 
-$(SJA1105_BIN): $(BIN_DEPS)
+$(SJA1105_BIN): $(BIN_DEPS) $(SJA1105_LIB)
 	$(CC) $(BIN_OBJ) -o $@ $(BIN_LDFLAGS)
 
 src/common.o: src/common.c
