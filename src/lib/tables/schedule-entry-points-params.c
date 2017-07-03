@@ -87,6 +87,6 @@ void sja1105_schedule_entry_points_params_show(struct sja1105_schedule_entry_poi
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
 	sja1105_schedule_entry_points_params_fmt_show(print_buf, fmt, entry);
-	fprintf(stdout, print_buf);
+	puts(print_buf);
 }
 

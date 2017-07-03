@@ -134,6 +134,6 @@ void sja1105_mac_config_entry_show(struct sja1105_mac_config_entry *entry)
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
 	sja1105_mac_config_entry_fmt_show(print_buf, fmt, entry);
-	fprintf(stdout, print_buf);
+	puts(print_buf);
 }
 

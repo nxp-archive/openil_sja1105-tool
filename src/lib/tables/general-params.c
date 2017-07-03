@@ -132,5 +132,5 @@ void sja1105_general_params_table_show(struct sja1105_general_params_table *entr
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
 	sja1105_general_params_table_fmt_show(print_buf, fmt, entry);
-	fprintf(stdout, print_buf);
+	puts(print_buf);
 }

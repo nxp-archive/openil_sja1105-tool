@@ -92,5 +92,5 @@ void sja1105_avb_params_table_show(struct sja1105_avb_params_table *entry)
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
 	sja1105_avb_params_table_fmt_show(print_buf, fmt, entry);
-	fprintf(stdout, print_buf);
+	puts(print_buf);
 }
