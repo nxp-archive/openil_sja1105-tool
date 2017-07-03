@@ -121,11 +121,17 @@ int sja1105_spi_transfer(const struct sja1105_spi_setup *spi_setup,
 	}
 }
 
-int sja1105_spi_cmd_send(struct sja1105_spi_setup *spi_setup,
-                         uint64_t read_or_write,
-                         uint64_t reg_offset,
-                         uint64_t *value,
-                         uint64_t size_bytes)
+/* If read_or_write is:
+ *     * SPI_WRITE: creates and sends an SPI write message at absolute
+ *                  address reg_addr, taking size_bytes from *packed_buf
+ *     * SPI_READ: creates and sends an SPI read message from absolute
+ *                 address reg_addr, writing size_bytes into *packed_buf
+ */
+int sja1105_spi_send_packed_buf(struct sja1105_spi_setup *spi_setup,
+                                uint64_t read_or_write,
+                                uint64_t reg_addr,
+                                void    *packed_buf,
+                                uint64_t size_bytes)
 {
 	const int MSG_LEN = size_bytes + SIZE_SPI_MSG_HEADER;
 	struct sja1105_spi_message msg;
@@ -137,15 +143,15 @@ int sja1105_spi_cmd_send(struct sja1105_spi_setup *spi_setup,
 
 	msg.access     = read_or_write;
 	msg.read_count = (read_or_write == SPI_READ) ? (size_bytes / 4) : 0;
-	msg.address    = CORE_ADDR + reg_offset;
+	msg.address    = reg_addr;
 	sja1105_spi_message_set(tx_buf, &msg);
 
 	if (read_or_write == SPI_READ) {
 		memset(tx_buf + SIZE_SPI_MSG_HEADER, 0, size_bytes);
 	} else if (read_or_write == SPI_WRITE) {
-		gtable_pack(tx_buf + SIZE_SPI_MSG_HEADER,
-		            value, 8 * size_bytes - 1, 0,
-		            size_bytes);
+		memcpy(tx_buf + SIZE_SPI_MSG_HEADER, /* dest */
+		       packed_buf,                   /* src */
+		       size_bytes);                  /* size */
 	} else {
 		loge("read_or_write must be SPI_READ or SPI_WRITE");
 		goto out;
@@ -157,10 +163,50 @@ int sja1105_spi_cmd_send(struct sja1105_spi_setup *spi_setup,
 		goto out;
 	}
 	if (read_or_write == SPI_READ) {
-		gtable_unpack(rx_buf + SIZE_SPI_MSG_HEADER,
-		              value, 8 * size_bytes - 1, 0,
-		              size_bytes);
+		memcpy(packed_buf,                   /* dest */
+		       rx_buf + SIZE_SPI_MSG_HEADER, /* src */
+		       size_bytes);                  /* size */
 	}
 out:
 	return rc;
 }
+
+/* If read_or_write is:
+ *     * SPI_WRITE: creates and sends an SPI write message at absolute
+ *                  address reg_addr, taking size_bytes from *value
+ *     * SPI_READ: creates and sends an SPI read message from absolute
+ *                 address reg_addr, writing size_bytes into *value
+ *
+ * The uint64_t *value is unpacked, meaning that it's stored in the native
+ * CPU endianness and directly usable by software running on the core.
+ *
+ * This is a wrapper around sja1105_spi_send_packed_buf().
+ *
+ */
+int sja1105_spi_send_int(struct sja1105_spi_setup *spi_setup,
+                         uint64_t read_or_write,
+                         uint64_t reg_addr,
+                         uint64_t *value,
+                         uint64_t size_bytes)
+{
+	uint8_t packed_buf[size_bytes];
+	int rc;
+
+	if (read_or_write == SPI_WRITE) {
+		gtable_pack(packed_buf,
+		            value, 8 * size_bytes - 1, 0,
+		            size_bytes);
+	}
+	rc = sja1105_spi_send_packed_buf(spi_setup,
+	                                 read_or_write,
+	                                 reg_addr,
+	                                 packed_buf,
+	                                 size_bytes);
+	if (read_or_write == SPI_READ) {
+		gtable_unpack(packed_buf,
+		              value, 8 * size_bytes - 1, 0,
+		              size_bytes);
+	}
+	return rc;
+}
+

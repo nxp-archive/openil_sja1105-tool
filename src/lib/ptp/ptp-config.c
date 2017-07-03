@@ -37,23 +37,51 @@
 #include <lib/include/spi.h>
 #include <common.h>
 
+/* Wrapper around sja1105_spi_send_int() using SPI_READ
+ * at CORE_ADDR + reg_offset */
+int sja1105_ptp_read_cmd(struct sja1105_spi_setup *spi_setup,
+                         uint64_t reg_offset,
+                         uint64_t *value,
+                         uint64_t size_bytes)
+{
+	return sja1105_spi_send_int(spi_setup,
+	                            SPI_READ,
+	                            CORE_ADDR + reg_offset,
+	                            value,
+	                            size_bytes);
+}
+
+/* Wrapper around sja1105_spi_send_int() using SPI_WRITE
+ * at CORE_ADDR + reg_offset */
+int sja1105_ptp_write_cmd(struct sja1105_spi_setup *spi_setup,
+                          uint64_t reg_offset,
+                          uint64_t *value,
+                          uint64_t size_bytes)
+{
+	return sja1105_spi_send_int(spi_setup,
+	                            SPI_WRITE,
+	                            CORE_ADDR + reg_offset,
+	                            value,
+	                            size_bytes);
+}
+
 int sja1105_ptp_ts_clk_get(struct sja1105_spi_setup *spi_setup, uint64_t *value)
 {
-	return sja1105_spi_cmd_send(spi_setup, SPI_READ,
+	return sja1105_ptp_read_cmd(spi_setup,
 	                            SJA1105_PTPTSCLK_ADDR,
 	                            value, 8);
 }
 
 int sja1105_ptp_clk_get(struct sja1105_spi_setup *spi_setup, uint64_t *value)
 {
-	return sja1105_spi_cmd_send(spi_setup, SPI_READ,
+	return sja1105_ptp_read_cmd(spi_setup,
 	                            SJA1105_PTPCLKVAL_ADDR,
 	                            value, 8);
 }
 
 int sja1105_ptp_clk_write(struct sja1105_spi_setup *spi_setup, uint64_t value)
 {
-	return sja1105_spi_cmd_send(spi_setup, SPI_WRITE,
+	return sja1105_ptp_write_cmd(spi_setup,
 	                            SJA1105_PTPCLKVAL_ADDR,
 	                            &value, 8);
 }
@@ -89,7 +117,7 @@ out:
 int sja1105_ptp_clk_rate_set(struct sja1105_spi_setup *spi_setup,
                              uint64_t value)
 {
-	return sja1105_spi_cmd_send(spi_setup, SPI_WRITE,
+	return sja1105_ptp_write_cmd(spi_setup,
 	                            SJA1105_PTPCLKRATE_ADDR,
 	                            &value, 4);
 }
@@ -100,16 +128,16 @@ int sja1105_ptp_configure(struct sja1105_spi_setup *spi_setup,
 	int rc = 0;
 	struct sja1105_ptp_ctrl_cmd ptp_control;
 
-	rc += sja1105_spi_cmd_send(spi_setup, SPI_WRITE,
+	rc += sja1105_ptp_write_cmd(spi_setup,
 	                           SJA1105_PTPPINDUR_ADDR,
 	                           &ptp_config->pin_duration, 4);
-	rc += sja1105_spi_cmd_send(spi_setup, SPI_WRITE,
+	rc += sja1105_ptp_write_cmd(spi_setup,
 	                           SJA1105_PTPPINST_ADDR,
 	                           &ptp_config->pin_start, 8);
-	rc += sja1105_spi_cmd_send(spi_setup, SPI_WRITE,
+	rc += sja1105_ptp_write_cmd(spi_setup,
 	                           SJA1105_PTPSCHTM_ADDR,
 	                           &ptp_config->schedule_time, 8);
-	rc += sja1105_spi_cmd_send(spi_setup, SPI_WRITE,
+	rc += sja1105_ptp_write_cmd(spi_setup,
 	                           SJA1105_PTPCLKCORP_ADDR,
 	                           &ptp_config->schedule_correction_period, 4);
 	memset(&ptp_control, 0, sizeof(ptp_control));
