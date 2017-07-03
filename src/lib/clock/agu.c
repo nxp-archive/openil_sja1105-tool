@@ -87,15 +87,6 @@ void sja1105_cfg_pad_mii_tx_show(struct sja1105_cfg_pad_mii_tx *pad_mii_tx)
 	printf("CLK_IPUD  %" PRIX64 "\n", pad_mii_tx->clk_ipud);
 }
 
-void test_fn()
-{
-	struct sja1105_cfg_pad_mii_tx pad_mii_tx;
-	uint32_t val = 0x12121212;
-
-	sja1105_cfg_pad_mii_tx_get(&val, &pad_mii_tx);
-	sja1105_cfg_pad_mii_tx_show(&pad_mii_tx);
-}
-
 int sja1105_rgmii_cfg_pad_tx_config(struct sja1105_spi_setup *spi_setup, int port)
 {
 #define MSG_SIZE SIZE_SPI_MSG_HEADER + 4
