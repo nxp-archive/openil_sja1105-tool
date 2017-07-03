@@ -120,3 +120,47 @@ int sja1105_spi_transfer(const struct sja1105_spi_setup *spi_setup,
 		return ioctl(spi_setup->fd, SPI_IOC_MESSAGE(1), &tr);
 	}
 }
+
+int sja1105_spi_cmd_send(struct sja1105_spi_setup *spi_setup,
+                         uint64_t read_or_write,
+                         uint64_t reg_offset,
+                         uint64_t *value,
+                         uint64_t size_bytes)
+{
+	const int MSG_LEN = size_bytes + SIZE_SPI_MSG_HEADER;
+	struct sja1105_spi_message msg;
+	uint8_t tx_buf[MSG_LEN];
+	uint8_t rx_buf[MSG_LEN];
+	int rc;
+
+	memset(rx_buf, 0, MSG_LEN);
+
+	msg.access     = read_or_write;
+	msg.read_count = (read_or_write == SPI_READ) ? (size_bytes / 4) : 0;
+	msg.address    = CORE_ADDR + reg_offset;
+	sja1105_spi_message_set(tx_buf, &msg);
+
+	if (read_or_write == SPI_READ) {
+		memset(tx_buf + SIZE_SPI_MSG_HEADER, 0, size_bytes);
+	} else if (read_or_write == SPI_WRITE) {
+		gtable_pack(tx_buf + SIZE_SPI_MSG_HEADER,
+		            value, 8 * size_bytes - 1, 0,
+		            size_bytes);
+	} else {
+		loge("read_or_write must be SPI_READ or SPI_WRITE");
+		goto out;
+	}
+
+	rc = sja1105_spi_transfer(spi_setup, tx_buf, rx_buf, MSG_LEN);
+	if (rc < 0) {
+		loge("sja1105_spi_transfer failed");
+		goto out;
+	}
+	if (read_or_write == SPI_READ) {
+		gtable_unpack(rx_buf + SIZE_SPI_MSG_HEADER,
+		              value, 8 * size_bytes - 1, 0,
+		              size_bytes);
+	}
+out:
+	return rc;
+}
