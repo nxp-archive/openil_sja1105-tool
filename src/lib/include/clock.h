@@ -36,6 +36,9 @@
 #include "cgu-tables.h"
 #include "config-tables.h"
 
+void sja1105_cgu_pll_control_show(struct sja1105_cgu_pll_control*);
+void sja1105_cgu_pll_control_set(void*, struct sja1105_cgu_pll_control*);
+void sja1105_cgu_pll_control_get(void*, struct sja1105_cgu_pll_control*);
 void sja1105_cgu_mii_control_set(void *buf, struct sja1105_cgu_mii_control *mii_control);
 void sja1105_cgu_mii_control_get(void *buf, struct sja1105_cgu_mii_control *mii_control);
 void sja1105_cgu_mii_control_show(struct sja1105_cgu_mii_control *mii_control);
