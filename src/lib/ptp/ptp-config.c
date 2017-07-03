@@ -37,69 +37,25 @@
 #include <lib/include/spi.h>
 #include <common.h>
 
-static int sja1105_ptp_config_cmd(struct sja1105_spi_setup *spi_setup,
-                                  uint64_t read_or_write,
-                                  uint64_t reg_offset,
-                                  uint64_t *value,
-                                  uint64_t size_bytes)
-{
-	const int MSG_LEN = size_bytes + SIZE_SPI_MSG_HEADER;
-	struct sja1105_spi_message msg;
-	uint8_t tx_buf[MSG_LEN];
-	uint8_t rx_buf[MSG_LEN];
-	int rc;
-
-	memset(rx_buf, 0, MSG_LEN);
-
-	msg.access     = read_or_write;
-	msg.read_count = (read_or_write == SPI_READ) ? (size_bytes / 4) : 0;
-	msg.address    = CORE_ADDR + reg_offset;
-	sja1105_spi_message_set(tx_buf, &msg);
-
-	if (read_or_write == SPI_READ) {
-		memset(tx_buf + SIZE_SPI_MSG_HEADER, 0, size_bytes);
-	} else if (read_or_write == SPI_WRITE) {
-		gtable_pack(tx_buf + SIZE_SPI_MSG_HEADER,
-		            value, 8 * size_bytes - 1, 0,
-		            size_bytes);
-	} else {
-		loge("read_or_write must be SPI_READ or SPI_WRITE");
-		goto out;
-	}
-
-	rc = sja1105_spi_transfer(spi_setup, tx_buf, rx_buf, MSG_LEN);
-	if (rc < 0) {
-		loge("sja1105_spi_transfer failed");
-		goto out;
-	}
-	if (read_or_write == SPI_READ) {
-		gtable_unpack(rx_buf + SIZE_SPI_MSG_HEADER,
-		              value, 8 * size_bytes - 1, 0,
-		              size_bytes);
-	}
-out:
-	return rc;
-}
-
 int sja1105_ptp_ts_clk_get(struct sja1105_spi_setup *spi_setup, uint64_t *value)
 {
-	return sja1105_ptp_config_cmd(spi_setup, SPI_READ,
-	                              SJA1105_PTPTSCLK_ADDR,
-	                              value, 8);
+	return sja1105_spi_cmd_send(spi_setup, SPI_READ,
+	                            SJA1105_PTPTSCLK_ADDR,
+	                            value, 8);
 }
 
 int sja1105_ptp_clk_get(struct sja1105_spi_setup *spi_setup, uint64_t *value)
 {
-	return sja1105_ptp_config_cmd(spi_setup, SPI_READ,
-	                              SJA1105_PTPCLKVAL_ADDR,
-	                              value, 8);
+	return sja1105_spi_cmd_send(spi_setup, SPI_READ,
+	                            SJA1105_PTPCLKVAL_ADDR,
+	                            value, 8);
 }
 
 int sja1105_ptp_clk_write(struct sja1105_spi_setup *spi_setup, uint64_t value)
 {
-	return sja1105_ptp_config_cmd(spi_setup, SPI_WRITE,
-	                             SJA1105_PTPCLKVAL_ADDR,
-	                             &value, 8);
+	return sja1105_spi_cmd_send(spi_setup, SPI_WRITE,
+	                            SJA1105_PTPCLKVAL_ADDR,
+	                            &value, 8);
 }
 
 int sja1105_ptp_clk_set(struct sja1105_spi_setup *spi_setup, uint64_t value)
@@ -133,9 +89,9 @@ out:
 int sja1105_ptp_clk_rate_set(struct sja1105_spi_setup *spi_setup,
                              uint64_t value)
 {
-	return sja1105_ptp_config_cmd(spi_setup, SPI_WRITE,
-	                              SJA1105_PTPCLKRATE_ADDR,
-	                              &value, 4);
+	return sja1105_spi_cmd_send(spi_setup, SPI_WRITE,
+	                            SJA1105_PTPCLKRATE_ADDR,
+	                            &value, 4);
 }
 
 int sja1105_ptp_configure(struct sja1105_spi_setup *spi_setup,
@@ -144,18 +100,18 @@ int sja1105_ptp_configure(struct sja1105_spi_setup *spi_setup,
 	int rc = 0;
 	struct sja1105_ptp_ctrl_cmd ptp_control;
 
-	rc += sja1105_ptp_config_cmd(spi_setup, SPI_WRITE,
-	                             SJA1105_PTPPINDUR_ADDR,
-	                             &ptp_config->pin_duration, 4);
-	rc += sja1105_ptp_config_cmd(spi_setup, SPI_WRITE,
-	                             SJA1105_PTPPINST_ADDR,
-	                             &ptp_config->pin_start, 8);
-	rc += sja1105_ptp_config_cmd(spi_setup, SPI_WRITE,
-	                             SJA1105_PTPSCHTM_ADDR,
-	                             &ptp_config->schedule_time, 8);
-	rc += sja1105_ptp_config_cmd(spi_setup, SPI_WRITE,
-	                             SJA1105_PTPCLKCORP_ADDR,
-	                             &ptp_config->schedule_correction_period, 4);
+	rc += sja1105_spi_cmd_send(spi_setup, SPI_WRITE,
+	                           SJA1105_PTPPINDUR_ADDR,
+	                           &ptp_config->pin_duration, 4);
+	rc += sja1105_spi_cmd_send(spi_setup, SPI_WRITE,
+	                           SJA1105_PTPPINST_ADDR,
+	                           &ptp_config->pin_start, 8);
+	rc += sja1105_spi_cmd_send(spi_setup, SPI_WRITE,
+	                           SJA1105_PTPSCHTM_ADDR,
+	                           &ptp_config->schedule_time, 8);
+	rc += sja1105_spi_cmd_send(spi_setup, SPI_WRITE,
+	                           SJA1105_PTPCLKCORP_ADDR,
+	                           &ptp_config->schedule_correction_period, 4);
 	memset(&ptp_control, 0, sizeof(ptp_control));
 	ptp_control.valid = 1;
 	ptp_control.start_schedule     = ptp_config->schedule_autostart;

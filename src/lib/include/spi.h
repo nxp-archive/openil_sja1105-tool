@@ -66,6 +66,11 @@ void sja1105_spi_message_set(void*, struct sja1105_spi_message*);
 void sja1105_spi_message_show(struct sja1105_spi_message*);
 void spi_get_chunks(char*, int, struct sja1105_spi_chunk*, int*);
 void spi_message_aggregate(char*, struct sja1105_spi_message*, char*, int);
+int sja1105_spi_cmd_send(struct sja1105_spi_setup *spi_setup,
+                         uint64_t read_or_write,
+                         uint64_t reg_offset,
+                         uint64_t *value,
+                         uint64_t size_bytes);
 
 #define SIZE_SJA1105_DEVICE_ID 4
 #define SIZE_SPI_MSG_HEADER    4
