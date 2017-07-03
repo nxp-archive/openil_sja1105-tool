@@ -36,6 +36,9 @@
 /* CGU */
 #define CGU_ADDR    0x100000
 
+/* UM10944 Table 82.
+ * IDIV_0_C to IDIV_4_C control registers
+ * (addr. 10000Bh to 10000Fh) */
 struct sja1105_cgu_idiv {
 	uint64_t clksrc;
 	uint64_t autoblock;
@@ -43,10 +46,16 @@ struct sja1105_cgu_idiv {
 	uint64_t pd;
 };
 
+/* UM10944 Table 80.
+ * PLL_x_S clock status registers 0 and 1
+ * (address 100007h and 100009h) */
 struct sja1105_cgu_pll_status {
 	uint64_t lock;
 };
 
+/* UM10944 Table 81.
+ * PLL_1_C control register
+ * (address 10000Ah) */
 struct sja1105_cgu_pll_control {
 	uint64_t pllclksrc;
 	uint64_t msel;
@@ -76,6 +85,9 @@ struct sja1105_cgu_pll_control {
 #define CLKSRC_IDIV3       0x14
 #define CLKSRC_IDIV4       0x15
 
+/* UM10944 Table 83.
+ * MIIx clock control registers 1 to 30
+ * (addresses 100013h to 100035h) */
 struct sja1105_cgu_mii_control {
 	uint64_t clksrc;
 	uint64_t autoblock;
