@@ -95,6 +95,6 @@ void sja1105_l2_lookup_params_table_show(struct sja1105_l2_lookup_params_table *
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
 	sja1105_l2_lookup_params_table_fmt_show(print_buf, fmt, table);
-	fprintf(stdout, print_buf);
+	puts(print_buf);
 }
 
