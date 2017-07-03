@@ -145,46 +145,35 @@ void sja1105_general_status_show(struct sja1105_general_status *status)
 int sja1105_general_status_get(struct sja1105_spi_setup *spi_setup,
                                struct sja1105_general_status *status)
 {
-#define SIZE_GENERAL_STATUS_A 0x0D * 4 /* 0x00 to 0x0C */
-#define SIZE_GENERAL_STATUS_B 0x0A * 4 /* 0xC0 to 0xC9 */
-#define MSG_LEN_A             SIZE_GENERAL_STATUS_A + SIZE_SPI_MSG_HEADER
-#define MSG_LEN_B             SIZE_GENERAL_STATUS_B + SIZE_SPI_MSG_HEADER
-	struct sja1105_spi_message msg;
-	uint8_t tx_buf[MSG_LEN_A];
-	uint8_t rx_buf[MSG_LEN_A];
+	const int SIZE_GENERAL_STATUS_A = 0x0D * 4; /* 0x00 to 0x0C */
+	const int SIZE_GENERAL_STATUS_B = 0x0A * 4; /* 0xC0 to 0xC9 */
+	uint8_t packed_buf_a[SIZE_GENERAL_STATUS_A];
+	uint8_t packed_buf_b[SIZE_GENERAL_STATUS_B];
 	int rc;
 
 	/* Part A - base address 0x00 */
-	memset(tx_buf, 0, MSG_LEN_A);
-	memset(rx_buf, 0, MSG_LEN_A);
-
-	msg.access     = SPI_READ;
-	msg.read_count = SIZE_GENERAL_STATUS_A / 4;
-	msg.address    = CORE_ADDR;
-	sja1105_spi_message_set(tx_buf, &msg);
-
-	rc = sja1105_spi_transfer(spi_setup, tx_buf, rx_buf, MSG_LEN_A);
+	rc = sja1105_spi_send_packed_buf(spi_setup,
+	                                 SPI_READ,
+	                                 CORE_ADDR + 0x00,
+	                                 packed_buf_a,
+	                                 SIZE_GENERAL_STATUS_A);
 	if (rc < 0) {
-		loge("sja1105_spi_transfer failed for part A");
+		loge("failed to read part A");
 		goto out;
 	}
-	sja1105_general_status_get_a(rx_buf + 4, status);
+	sja1105_general_status_get_a(packed_buf_a, status);
 
 	/* Part B - base address 0xC0 */
-	memset(tx_buf, 0, MSG_LEN_B);
-	memset(rx_buf, 0, MSG_LEN_B);
-
-	msg.access     = SPI_READ;
-	msg.read_count = SIZE_GENERAL_STATUS_B / 4;
-	msg.address    = CORE_ADDR + 0xC0;
-	sja1105_spi_message_set(tx_buf, &msg);
-
-	rc = sja1105_spi_transfer(spi_setup, tx_buf, rx_buf, MSG_LEN_B);
+	rc = sja1105_spi_send_packed_buf(spi_setup,
+	                                 SPI_READ,
+	                                 CORE_ADDR + 0xC0,
+	                                 packed_buf_b,
+	                                 SIZE_GENERAL_STATUS_B);
 	if (rc < 0) {
-		loge("sja1105_spi_transfer failed for part B");
+		loge("failed to read part B");
 		goto out;
 	}
-	sja1105_general_status_get_b(rx_buf + 4, status);
+	sja1105_general_status_get_b(packed_buf_b, status);
 out:
 	return rc;
 }
