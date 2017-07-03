@@ -45,14 +45,12 @@ int sja1105_cgu_rgmii_tx_clk_config(
 		int    port,
 		int    speed_mbps)
 {
-#define MSG_SIZE SIZE_SPI_MSG_HEADER + 4
-	struct  sja1105_cgu_mii_control txc;
-	struct  sja1105_spi_message msg;
-	uint8_t tx_buf[MSG_SIZE];
-	uint8_t rx_buf[MSG_SIZE];
+	int clksrc;
+	const int BUF_LEN = 4;
 	/* UM10944.pdf, Table 78, CGU Register overview */
-	int     txc_offsets[] = {0x16, 0x1D, 0x24, 0x2B, 0x32};
-	int     clksrc;
+	const int txc_offsets[] = {0x16, 0x1D, 0x24, 0x2B, 0x32};
+	uint8_t packed_buf[BUF_LEN];
+	struct  sja1105_cgu_mii_control txc;
 
 	if (speed_mbps == 1000) {
 		clksrc = CLKSRC_PLL0;
@@ -62,57 +60,50 @@ int sja1105_cgu_rgmii_tx_clk_config(
 		clksrc = clk_sources[port];
 	}
 
-	memset(tx_buf, 0, MSG_SIZE);
-	memset(rx_buf, 0, MSG_SIZE);
-
-	/* Header */
-	msg.access     = SPI_WRITE;
-	msg.read_count = 0;
-	msg.address    = CGU_ADDR + txc_offsets[port];
-	sja1105_spi_message_set(tx_buf, &msg);
-
 	/* Payload */
-	txc.clksrc    = clksrc; /* RGMII: 125MHz for 1000, 25MHz for 100, 2.5MHz for 10 */
+	txc.clksrc    = clksrc; /* RGMII: 125MHz for 1000, */
+	                        /*        25MHz for 100, 2.5MHz for 10 */
 	txc.autoblock = 1;      /* Autoblock clk while changing clksrc */
 	txc.pd        = 0;      /* Power Down off => enabled */
-	sja1105_cgu_mii_control_set(tx_buf + SIZE_SPI_MSG_HEADER, &txc);
+	sja1105_cgu_mii_control_set(packed_buf, &txc);
 
-	return sja1105_spi_transfer(spi_setup, tx_buf, rx_buf, MSG_SIZE);
+	return sja1105_spi_send_packed_buf(spi_setup,
+	                                   SPI_WRITE,
+	                                   CGU_ADDR + txc_offsets[port],
+	                                   packed_buf,
+	                                   BUF_LEN);
 }
 
 /* AGU */
 int sja1105_rgmii_cfg_pad_tx_config(struct sja1105_spi_setup *spi_setup, int port)
 {
-#define MSG_SIZE SIZE_SPI_MSG_HEADER + 4
-	struct  sja1105_spi_message msg;
-	struct  sja1105_cfg_pad_mii_tx pad_mii_tx;
-	uint8_t tx_buf[MSG_SIZE];
-	uint8_t rx_buf[MSG_SIZE];
+	const int BUF_LEN = 4;
+	uint8_t packed_buf[BUF_LEN];
 	/* UM10944.pdf, Table 86, AGU Register overview */
 	int     pad_mii_tx_offsets[] = {0x00, 0x02, 0x04, 0x06, 0x08};
-
-	memset(tx_buf, 0, MSG_SIZE);
-	memset(rx_buf, 0, MSG_SIZE);
-
-	/* Header */
-	msg.access     = SPI_WRITE;
-	msg.read_count = 0;
-	msg.address    = AGU_ADDR + pad_mii_tx_offsets[port];
-	sja1105_spi_message_set(tx_buf, &msg);
+	struct  sja1105_cfg_pad_mii_tx pad_mii_tx;
 
 	/* Payload */
-	pad_mii_tx.d32_os    = 3; /* TXD[3:2] output stage: high noise/high speed */
-	pad_mii_tx.d32_ipud  = 2; /* TXD[3:2] input stage: plain input (default) */
-	pad_mii_tx.d10_os    = 3; /* TXD[1:0] output stage: high noise/high speed */
-	pad_mii_tx.d10_ipud  = 2; /* TXD[1:0] input stage: plain input (default) */
+	pad_mii_tx.d32_os    = 3; /* TXD[3:2] output stage: */
+	                          /*          high noise/high speed */
+	pad_mii_tx.d32_ipud  = 2; /* TXD[3:2] input stage: */
+	                          /*          plain input (default) */
+	pad_mii_tx.d10_os    = 3; /* TXD[1:0] output stage: */
+	                          /*          high noise/high speed */
+	pad_mii_tx.d10_ipud  = 2; /* TXD[1:0] input stage: */
+	                          /*          plain input (default) */
 	pad_mii_tx.ctrl_os   = 3; /* TX_CTL / TX_ER output stage */
 	pad_mii_tx.ctrl_ipud = 2; /* TX_CTL / TX_ER input stage (default) */
 	pad_mii_tx.clk_os    = 3; /* TX_CLK output stage */
 	pad_mii_tx.clk_ih    = 0; /* TX_CLK input hysteresis (default) */
 	pad_mii_tx.clk_ipud  = 2; /* TX_CLK input stage (default) */
-	sja1105_cfg_pad_mii_tx_set(tx_buf + SIZE_SPI_MSG_HEADER, &pad_mii_tx);
+	sja1105_cfg_pad_mii_tx_set(packed_buf, &pad_mii_tx);
 
-	return sja1105_spi_transfer(spi_setup, tx_buf, rx_buf, MSG_SIZE);
+	return sja1105_spi_send_packed_buf(spi_setup,
+	                                   SPI_WRITE,
+	                                   AGU_ADDR + pad_mii_tx_offsets[port],
+	                                   packed_buf,
+	                                   BUF_LEN);
 }
 
 int rgmii_clocking_setup(struct sja1105_spi_setup *spi_setup,
