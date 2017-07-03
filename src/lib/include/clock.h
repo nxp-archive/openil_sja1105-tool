@@ -32,6 +32,7 @@
 #define _CGU_EXTERNAL_H
 
 #include "spi.h"
+#include "agu-tables.h"
 #include "cgu-tables.h"
 #include "config-tables.h"
 
@@ -49,5 +50,16 @@ int sja1105_rgmii_cfg_pad_tx_config(struct sja1105_spi_setup *spi_setup, int por
 int sja1105_cgu_idiv_config(struct sja1105_spi_setup*, int, int, int);
 int sja1105_clocking_setup(struct sja1105_spi_setup*, struct sja1105_xmii_params_table*,
                            struct sja1105_mac_config_entry*);
+
+int mii_clocking_setup(struct sja1105_spi_setup *spi_setup, int port,
+                       int mii_mode);
+int rmii_clocking_setup(struct sja1105_spi_setup *spi_setup, int port,
+                        int rmii_mode);
+int rgmii_clocking_setup(struct sja1105_spi_setup *spi_setup,
+                         int port, int speed_mbps);
+
+void sja1105_cfg_pad_mii_tx_set(void*, struct sja1105_cfg_pad_mii_tx*);
+void sja1105_cfg_pad_mii_tx_get(void*, struct sja1105_cfg_pad_mii_tx*);
+void sja1105_cfg_pad_mii_tx_show(struct sja1105_cfg_pad_mii_tx*);
 
 #endif

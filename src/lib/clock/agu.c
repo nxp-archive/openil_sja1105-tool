@@ -87,38 +87,3 @@ void sja1105_cfg_pad_mii_tx_show(struct sja1105_cfg_pad_mii_tx *pad_mii_tx)
 	printf("CLK_IPUD  %" PRIX64 "\n", pad_mii_tx->clk_ipud);
 }
 
-int sja1105_rgmii_cfg_pad_tx_config(struct sja1105_spi_setup *spi_setup, int port)
-{
-#define MSG_SIZE SIZE_SPI_MSG_HEADER + 4
-	struct  sja1105_spi_message msg;
-	struct  sja1105_cfg_pad_mii_tx pad_mii_tx;
-	uint8_t tx_buf[MSG_SIZE];
-	uint8_t rx_buf[MSG_SIZE];
-	/* UM10944.pdf, Table 86, AGU Register overview */
-	int     pad_mii_tx_offsets[] = {0x00, 0x02, 0x04, 0x06, 0x08};
-
-	memset(tx_buf, 0, MSG_SIZE);
-	memset(rx_buf, 0, MSG_SIZE);
-
-	/* Header */
-	msg.access     = SPI_WRITE;
-	msg.read_count = 0;
-	msg.address    = AGU_ADDR + pad_mii_tx_offsets[port];
-	sja1105_spi_message_set(tx_buf, &msg);
-
-	/* Payload */
-	pad_mii_tx.d32_os    = 3; /* TXD[3:2] output stage: high noise/high speed */
-	pad_mii_tx.d32_ipud  = 2; /* TXD[3:2] input stage: plain input (default) */
-	pad_mii_tx.d10_os    = 3; /* TXD[1:0] output stage: high noise/high speed */
-	pad_mii_tx.d10_ipud  = 2; /* TXD[1:0] input stage: plain input (default) */
-	pad_mii_tx.ctrl_os   = 3; /* TX_CTL / TX_ER output stage */
-	pad_mii_tx.ctrl_ipud = 2; /* TX_CTL / TX_ER input stage (default) */
-	pad_mii_tx.clk_os    = 3; /* TX_CLK output stage */
-	pad_mii_tx.clk_ih    = 0; /* TX_CLK input hysteresis (default) */
-	pad_mii_tx.clk_ipud  = 2; /* TX_CLK input stage (default) */
-	sja1105_cfg_pad_mii_tx_set(tx_buf + SIZE_SPI_MSG_HEADER, &pad_mii_tx);
-
-	return sja1105_spi_transfer(spi_setup, tx_buf, rx_buf, MSG_SIZE);
-}
-
-
