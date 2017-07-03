@@ -84,32 +84,20 @@ void sja1105_ptp_ctrl_cmd_show(struct sja1105_ptp_ctrl_cmd *ptp_control)
 	printf("PTPCLKADD  %" PRIX64 "\n", ptp_control->clk_add_mode);
 }
 
+/* Wrapper around sja1105_spi_send_packed_buf() */
 int sja1105_ptp_ctrl_cmd_send(struct sja1105_spi_setup *spi_setup,
                               struct sja1105_ptp_ctrl_cmd *ptp_control)
 {
 	const int PTP_CONTROL_ADDR = 0x17;
-	const int MSG_LEN = SIZE_SPI_MSG_HEADER + 4;
-	struct sja1105_spi_message msg;
-	uint8_t tx_buf[MSG_LEN];
-	uint8_t rx_buf[MSG_LEN];
-	int rc;
+	const int BUF_LEN = 4;
+	uint8_t packed_buf[BUF_LEN];
 
-	memset(rx_buf, 0, MSG_LEN);
-
-	msg.access     = SPI_WRITE;
-	msg.read_count = 0;
-	msg.address    = CORE_ADDR + PTP_CONTROL_ADDR;
-	sja1105_spi_message_set(tx_buf, &msg);
-
-	sja1105_ptp_ctrl_cmd_set(tx_buf + SIZE_SPI_MSG_HEADER, ptp_control);
-
-	rc = sja1105_spi_transfer(spi_setup, tx_buf, rx_buf, MSG_LEN);
-	if (rc < 0) {
-		loge("sja1105_spi_transfer failed");
-		goto out;
-	}
-out:
-	return rc;
+	sja1105_ptp_ctrl_cmd_set(packed_buf, ptp_control);
+	return sja1105_spi_send_packed_buf(spi_setup,
+	                                   SPI_WRITE,
+	                                   CORE_ADDR + PTP_CONTROL_ADDR,
+	                                   packed_buf,
+	                                   BUF_LEN);
 };
 
 int sja1105_ptp_start_schedule(struct sja1105_spi_setup *spi_setup)
