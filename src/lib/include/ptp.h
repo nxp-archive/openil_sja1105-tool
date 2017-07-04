@@ -45,8 +45,8 @@ int  sja1105_ptp_clk_set(struct sja1105_spi_setup*, uint64_t);
 int  sja1105_ptp_clk_add(struct sja1105_spi_setup*, uint64_t);
 int  sja1105_ptp_clk_rate_set(struct sja1105_spi_setup*, uint64_t);
 
-void sja1105_ptp_ctrl_cmd_get(void *buf, struct sja1105_ptp_ctrl_cmd*);
-void sja1105_ptp_ctrl_cmd_set(void *buf, struct sja1105_ptp_ctrl_cmd*);
+void sja1105_ptp_ctrl_cmd_unpack(void *buf, struct sja1105_ptp_ctrl_cmd*);
+void sja1105_ptp_ctrl_cmd_pack(void *buf, struct sja1105_ptp_ctrl_cmd*);
 void sja1105_ptp_ctrl_cmd_show(struct sja1105_ptp_ctrl_cmd*);
 int  sja1105_ptp_ctrl_cmd_cmd(struct sja1105_spi_setup*,
                               struct sja1105_ptp_ctrl_cmd*);
