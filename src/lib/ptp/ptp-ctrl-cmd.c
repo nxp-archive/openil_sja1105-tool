@@ -62,12 +62,14 @@ static void sja1105_ptp_ctrl_cmd_access(
 	pack_or_unpack(buf, &ptp_control->clk_add_mode,        0,  0, 4);
 }
 
-void sja1105_ptp_ctrl_cmd_set(void *buf, struct sja1105_ptp_ctrl_cmd *ptp_control)
+void sja1105_ptp_ctrl_cmd_pack(void *buf,
+                               struct sja1105_ptp_ctrl_cmd *ptp_control)
 {
 	sja1105_ptp_ctrl_cmd_access(buf, ptp_control, 1);
 }
 
-void sja1105_ptp_ctrl_cmd_get(void *buf, struct sja1105_ptp_ctrl_cmd *ptp_control)
+void sja1105_ptp_ctrl_cmd_unpack(void *buf,
+                                 struct sja1105_ptp_ctrl_cmd *ptp_control)
 {
 	sja1105_ptp_ctrl_cmd_access(buf, ptp_control, 0);
 }
@@ -92,7 +94,7 @@ int sja1105_ptp_ctrl_cmd_send(struct sja1105_spi_setup *spi_setup,
 	const int BUF_LEN = 4;
 	uint8_t packed_buf[BUF_LEN];
 
-	sja1105_ptp_ctrl_cmd_set(packed_buf, ptp_control);
+	sja1105_ptp_ctrl_cmd_pack(packed_buf, ptp_control);
 	return sja1105_spi_send_packed_buf(spi_setup,
 	                                   SPI_WRITE,
 	                                   CORE_ADDR + PTP_CONTROL_ADDR,
