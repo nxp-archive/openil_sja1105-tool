@@ -61,8 +61,8 @@ struct sja1105_spi_chunk {
 
 int sja1105_spi_transfer(const struct sja1105_spi_setup*, const void *tx, void *rx, int size);
 int sja1105_spi_configure(struct sja1105_spi_setup*);
-void sja1105_spi_message_get(void*, struct sja1105_spi_message*);
-void sja1105_spi_message_set(void*, struct sja1105_spi_message*);
+void sja1105_spi_message_unpack(void*, struct sja1105_spi_message*);
+void sja1105_spi_message_pack(void*, struct sja1105_spi_message*);
 void sja1105_spi_message_show(struct sja1105_spi_message*);
 void spi_get_chunks(char*, int, struct sja1105_spi_chunk*, int*);
 void spi_message_aggregate(char*, struct sja1105_spi_message*, char*, int);

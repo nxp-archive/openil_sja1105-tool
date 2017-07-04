@@ -57,12 +57,12 @@ static void sja1105_spi_message_access(
 	pack_or_unpack(buf, &msg->address,    24,  4, size);
 }
 
-void sja1105_spi_message_get(void *buf, struct sja1105_spi_message *msg)
+void sja1105_spi_message_unpack(void *buf, struct sja1105_spi_message *msg)
 {
 	sja1105_spi_message_access(buf, msg, 0);
 }
 
-void sja1105_spi_message_set(void *buf, struct sja1105_spi_message *msg)
+void sja1105_spi_message_pack(void *buf, struct sja1105_spi_message *msg)
 {
 	sja1105_spi_message_access(buf, msg, 1);
 }
@@ -84,7 +84,7 @@ void spi_message_aggregate(
 		char  *data,
 		int    data_len)
 {
-	sja1105_spi_message_set(buf, hdr);
+	sja1105_spi_message_pack(buf, hdr);
 	memcpy(buf + SIZE_SPI_MSG_HEADER, data, data_len);
 }
 
@@ -153,7 +153,7 @@ int sja1105_spi_send_packed_buf(struct sja1105_spi_setup *spi_setup,
 	msg.access     = read_or_write;
 	msg.read_count = (read_or_write == SPI_READ) ? (size_bytes / 4) : 0;
 	msg.address    = reg_addr;
-	sja1105_spi_message_set(tx_buf, &msg);
+	sja1105_spi_message_pack(tx_buf, &msg);
 
 	if (read_or_write == SPI_READ) {
 		memset(tx_buf + SIZE_SPI_MSG_HEADER, 0, size_bytes);

@@ -58,7 +58,7 @@ int sja1105_cgu_mii_tx_clk_config(
 	msg.access     = SPI_WRITE;
 	msg.read_count = 0;
 	msg.address    = CGU_ADDR + mii_tx_clk_offsets[port];
-	sja1105_spi_message_set(tx_buf, &msg);
+	sja1105_spi_message_pack(tx_buf, &msg);
 
 	/* Payload */
 	mii_tx_clk.clksrc    = CLKSRC_PLL1; /* XXX This is surely wrong */
@@ -88,7 +88,7 @@ int sja1105_cgu_mii_rx_clk_config(
 	msg.access     = SPI_WRITE;
 	msg.read_count = 0;
 	msg.address    = CGU_ADDR + mii_rx_clk_offsets[port];
-	sja1105_spi_message_set(tx_buf, &msg);
+	sja1105_spi_message_pack(tx_buf, &msg);
 
 	/* Payload */
 	mii_rx_clk.clksrc    = CLKSRC_PLL1;
@@ -125,7 +125,7 @@ int sja1105_cgu_mii_ext_tx_clk_config(
 	msg.access     = SPI_WRITE;
 	msg.read_count = 0;
 	msg.address    = CGU_ADDR + mii_ext_tx_clk_offsets[port];
-	sja1105_spi_message_set(tx_buf, &msg);
+	sja1105_spi_message_pack(tx_buf, &msg);
 
 	/* Payload */
 	mii_ext_tx_clk.clksrc    = clk_sources[port];
@@ -163,7 +163,7 @@ int sja1105_cgu_mii_ext_rx_clk_config(
 	msg.access     = SPI_WRITE;
 	msg.read_count = 0;
 	msg.address    = CGU_ADDR + mii_ext_rx_clk_offsets[port];
-	sja1105_spi_message_set(tx_buf, &msg);
+	sja1105_spi_message_pack(tx_buf, &msg);
 
 	/* Payload */
 	mii_ext_rx_clk.clksrc    = clk_sources[port];

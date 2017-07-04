@@ -45,7 +45,7 @@ int sja1105_reset(const struct sja1105_spi_setup *spi_setup, struct sja1105_rese
 	msg.read_count = 0;
 	msg.address    = RGU_ADDR;
 
-	sja1105_spi_message_set(tx_buf, &msg);
+	sja1105_spi_message_pack(tx_buf, &msg);
 	reset_ctrl_ptr = tx_buf + SIZE_SPI_MSG_HEADER;
 	gtable_pack(reset_ctrl_ptr, &reset->rst_ctrl, 8, 0, 4);
 
