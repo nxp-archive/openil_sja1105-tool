@@ -95,7 +95,8 @@ void sja1105_port_status_show(
 	formatted_append(print_buf, fmt, "");
 }
 
-void sja1105_port_status_get_mac(void *buf, struct sja1105_port_status *status)
+static void sja1105_port_status_mac_unpack(void *buf, struct
+                                           sja1105_port_status *status)
 {
 	/* So that additions translate to 4 bytes */
 	uint32_t *p = (uint32_t*) buf;
@@ -124,7 +125,8 @@ void sja1105_port_status_get_mac(void *buf, struct sja1105_port_status *status)
 	gtable_unpack(p + 0x1, &status->agedrp,        0,  0, 4);
 }
 
-void sja1105_port_status_get_hl1(void *buf, struct sja1105_port_status *status)
+static void sja1105_port_status_hl1_unpack(void *buf, struct
+                                           sja1105_port_status *status)
 {
 	/* So that additions translate to 4 bytes */
 	uint32_t *p = (uint32_t*) buf;
@@ -150,7 +152,8 @@ void sja1105_port_status_get_hl1(void *buf, struct sja1105_port_status *status)
 	status->n_txbyte += status->n_txbytesh << 32;
 }
 
-void sja1105_port_status_get_hl2(void *buf, struct sja1105_port_status *status)
+static void sja1105_port_status_hl2_unpack(void *buf, struct
+                                           sja1105_port_status *status)
 {
 	/* So that additions translate to 4 bytes */
 	uint32_t *p = (uint32_t*) buf;
@@ -187,7 +190,7 @@ int sja1105_port_status_get(
 		loge("failed to read mac registers");
 		goto out;
 	}
-	sja1105_port_status_get_mac(packed_buf, status);
+	sja1105_port_status_mac_unpack(packed_buf, status);
 
 	/* High-level 1 */
 	rc = sja1105_spi_send_packed_buf(spi_setup,
@@ -199,7 +202,7 @@ int sja1105_port_status_get(
 		loge("failed to read high-level 1 registers");
 		goto out;
 	}
-	sja1105_port_status_get_hl1(packed_buf, status);
+	sja1105_port_status_hl1_unpack(packed_buf, status);
 
 	/* High-level 2 */
 	rc = sja1105_spi_send_packed_buf(spi_setup,
@@ -211,7 +214,7 @@ int sja1105_port_status_get(
 		loge("failed to read high-level 2 registers");
 		goto out;
 	}
-	sja1105_port_status_get_hl2(packed_buf, status);
+	sja1105_port_status_hl2_unpack(packed_buf, status);
 out:
 	return rc;
 }
