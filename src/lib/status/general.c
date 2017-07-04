@@ -40,7 +40,8 @@
 #include <lib/include/spi.h>
 #include <common.h>
 
-void sja1105_general_status_get_a(void *buf, struct sja1105_general_status *status)
+static void sja1105_general_status_unpack_a(void *buf, struct
+                                            sja1105_general_status *status)
 {
 	/* So that addition translates to 4 bytes */
 	uint32_t *p = (uint32_t*) buf;
@@ -84,7 +85,8 @@ void sja1105_general_status_get_a(void *buf, struct sja1105_general_status *stat
 	gtable_unpack(p + 0xC, &status->ramparerru, 4,  0, 4);
 }
 
-void sja1105_general_status_get_b(void *buf, struct sja1105_general_status *status)
+static void sja1105_general_status_unpack_b(void *buf, struct
+                                            sja1105_general_status *status)
 {
 	/* So that addition translates to 4 bytes */
 	uint32_t *p = (uint32_t*) buf;
@@ -161,7 +163,7 @@ int sja1105_general_status_get(struct sja1105_spi_setup *spi_setup,
 		loge("failed to read part A");
 		goto out;
 	}
-	sja1105_general_status_get_a(packed_buf_a, status);
+	sja1105_general_status_unpack_a(packed_buf_a, status);
 
 	/* Part B - base address 0xC0 */
 	rc = sja1105_spi_send_packed_buf(spi_setup,
@@ -173,7 +175,7 @@ int sja1105_general_status_get(struct sja1105_spi_setup *spi_setup,
 		loge("failed to read part B");
 		goto out;
 	}
-	sja1105_general_status_get_b(packed_buf_b, status);
+	sja1105_general_status_unpack_b(packed_buf_b, status);
 out:
 	return rc;
 }
