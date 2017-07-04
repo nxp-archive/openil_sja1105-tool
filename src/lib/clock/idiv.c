@@ -39,7 +39,8 @@
 #include <lib/include/spi.h>
 #include <common.h>
 
-static void sja1105_cgu_idiv_access(void *buf, struct sja1105_cgu_idiv *idiv, int write)
+static void sja1105_cgu_idiv_access(void *buf, struct sja1105_cgu_idiv *idiv,
+                                    int write)
 {
 	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
 	int    size = 4;
@@ -57,12 +58,12 @@ static void sja1105_cgu_idiv_access(void *buf, struct sja1105_cgu_idiv *idiv, in
 	pack_or_unpack(buf, &idiv->pd,         0,  0, 4);
 }
 
-void sja1105_cgu_idiv_set(void *buf, struct sja1105_cgu_idiv *idiv)
+void sja1105_cgu_idiv_pack(void *buf, struct sja1105_cgu_idiv *idiv)
 {
 	sja1105_cgu_idiv_access(buf, idiv, 1);
 }
 
-void sja1105_cgu_idiv_get(void *buf, struct sja1105_cgu_idiv *idiv)
+void sja1105_cgu_idiv_unpack(void *buf, struct sja1105_cgu_idiv *idiv)
 {
 	sja1105_cgu_idiv_access(buf, idiv, 0);
 }
@@ -98,7 +99,7 @@ int sja1105_cgu_idiv_config(struct sja1105_spi_setup *spi_setup,
 	idiv.autoblock = 1;               /* Block clk automatically */
 	idiv.idiv      = factor - 1;      /* Divide by 1 or 10 */
 	idiv.pd        = enabled ? 0 : 1; /* Power down? */
-	sja1105_cgu_idiv_set(packed_buf, &idiv);
+	sja1105_cgu_idiv_pack(packed_buf, &idiv);
 
 	return sja1105_spi_send_packed_buf(spi_setup,
 	                                   SPI_WRITE,
