@@ -64,12 +64,14 @@ static void sja1105_cfg_pad_mii_tx_access(
 	pack_or_unpack(buf, &pad_mii_tx->clk_ipud,  1,  0, 4);
 }
 
-void sja1105_cfg_pad_mii_tx_set(void *buf, struct sja1105_cfg_pad_mii_tx *pad_mii_tx)
+void sja1105_cfg_pad_mii_tx_pack(void *buf,
+                                 struct sja1105_cfg_pad_mii_tx *pad_mii_tx)
 {
 	sja1105_cfg_pad_mii_tx_access(buf, pad_mii_tx, 1);
 }
 
-void sja1105_cfg_pad_mii_tx_get(void *buf, struct sja1105_cfg_pad_mii_tx *pad_mii_tx)
+void sja1105_cfg_pad_mii_tx_unpack(void *buf,
+                                   struct sja1105_cfg_pad_mii_tx *pad_mii_tx)
 {
 	sja1105_cfg_pad_mii_tx_access(buf, pad_mii_tx, 0);
 }

@@ -59,12 +59,14 @@ static void sja1105_cgu_pll_control_access(void *buf, struct sja1105_cgu_pll_con
 	pack_or_unpack(buf, &pll_control->pd,         0,  0, 4);
 }
 
-void sja1105_cgu_pll_control_set(void *buf, struct sja1105_cgu_pll_control *pll_control)
+void sja1105_cgu_pll_control_pack(void *buf,
+                                  struct sja1105_cgu_pll_control *pll_control)
 {
 	sja1105_cgu_pll_control_access(buf, pll_control, 1);
 }
 
-void sja1105_cgu_pll_control_get(void *buf, struct sja1105_cgu_pll_control *pll_control)
+void sja1105_cgu_pll_control_unpack(void *buf, struct
+                                    sja1105_cgu_pll_control *pll_control)
 {
 	sja1105_cgu_pll_control_access(buf, pll_control, 0);
 }

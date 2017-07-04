@@ -59,7 +59,7 @@ int sja1105_cgu_rmii_ref_clk_config(struct sja1105_spi_setup *spi_setup,
 	ref_clk.clksrc    = clk_sources[port];
 	ref_clk.autoblock = 1;      /* Autoblock clk while changing clksrc */
 	ref_clk.pd        = 0;      /* Power Down off => enabled */
-	sja1105_cgu_mii_control_set(packed_buf, &ref_clk);
+	sja1105_cgu_mii_control_pack(packed_buf, &ref_clk);
 
 	return sja1105_spi_send_packed_buf(spi_setup,
 	                                   SPI_WRITE,
@@ -81,7 +81,7 @@ int sja1105_cgu_rmii_ext_tx_clk_config(struct sja1105_spi_setup *spi_setup,
 	ext_tx_clk.clksrc    = CLKSRC_PLL1;
 	ext_tx_clk.autoblock = 1;   /* Autoblock clk while changing clksrc */
 	ext_tx_clk.pd        = 0;   /* Power Down off => enabled */
-	sja1105_cgu_mii_control_set(packed_buf, &ext_tx_clk);
+	sja1105_cgu_mii_control_pack(packed_buf, &ext_tx_clk);
 
 	return sja1105_spi_send_packed_buf(spi_setup,
 	                                   SPI_WRITE,
@@ -113,7 +113,7 @@ static int sja1105_cgu_rmii_pll_config(struct sja1105_spi_setup *spi_setup)
 	pll.bypass    = 0x0;
 	pll.pd        = 0x1;
 
-	sja1105_cgu_pll_control_set(packed_buf, &pll);
+	sja1105_cgu_pll_control_pack(packed_buf, &pll);
 	rc = sja1105_spi_send_packed_buf(spi_setup,
 	                                 SPI_WRITE,
 	                                 CGU_ADDR + PLL1_OFFSET,
@@ -127,7 +127,7 @@ static int sja1105_cgu_rmii_pll_config(struct sja1105_spi_setup *spi_setup)
 	/* Step 2: Enable PLL1 */
 	pll.pd        = 0x0;
 
-	sja1105_cgu_pll_control_set(packed_buf, &pll);
+	sja1105_cgu_pll_control_pack(packed_buf, &pll);
 	rc = sja1105_spi_send_packed_buf(spi_setup,
 	                                 SPI_WRITE,
 	                                 CGU_ADDR + PLL1_OFFSET,

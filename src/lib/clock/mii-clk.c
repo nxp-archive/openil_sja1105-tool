@@ -55,12 +55,14 @@ static void sja1105_cgu_mii_control_access(void *buf, struct sja1105_cgu_mii_con
 	pack_or_unpack(buf, &mii_control->pd,         0,  0, 4);
 }
 
-void sja1105_cgu_mii_control_set(void *buf, struct sja1105_cgu_mii_control *mii_control)
+void sja1105_cgu_mii_control_pack(void *buf,
+                                  struct sja1105_cgu_mii_control *mii_control)
 {
 	sja1105_cgu_mii_control_access(buf, mii_control, 1);
 }
 
-void sja1105_cgu_mii_control_get(void *buf, struct sja1105_cgu_mii_control *mii_control)
+void sja1105_cgu_mii_control_unpack(void *buf, struct
+                                    sja1105_cgu_mii_control *mii_control)
 {
 	sja1105_cgu_mii_control_access(buf, mii_control, 0);
 }

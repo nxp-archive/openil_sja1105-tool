@@ -65,7 +65,7 @@ int sja1105_cgu_rgmii_tx_clk_config(
 	                        /*        25MHz for 100, 2.5MHz for 10 */
 	txc.autoblock = 1;      /* Autoblock clk while changing clksrc */
 	txc.pd        = 0;      /* Power Down off => enabled */
-	sja1105_cgu_mii_control_set(packed_buf, &txc);
+	sja1105_cgu_mii_control_pack(packed_buf, &txc);
 
 	return sja1105_spi_send_packed_buf(spi_setup,
 	                                   SPI_WRITE,
@@ -97,7 +97,7 @@ int sja1105_rgmii_cfg_pad_tx_config(struct sja1105_spi_setup *spi_setup, int por
 	pad_mii_tx.clk_os    = 3; /* TX_CLK output stage */
 	pad_mii_tx.clk_ih    = 0; /* TX_CLK input hysteresis (default) */
 	pad_mii_tx.clk_ipud  = 2; /* TX_CLK input stage (default) */
-	sja1105_cfg_pad_mii_tx_set(packed_buf, &pad_mii_tx);
+	sja1105_cfg_pad_mii_tx_pack(packed_buf, &pad_mii_tx);
 
 	return sja1105_spi_send_packed_buf(spi_setup,
 	                                   SPI_WRITE,
