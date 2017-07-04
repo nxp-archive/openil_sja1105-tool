@@ -61,14 +61,14 @@ static void sja1105_vlan_lookup_entry_access(
 	pack_or_unpack(buf, &entry->vlanid,     38, 27, size);
 }
 
-void sja1105_vlan_lookup_entry_set(
+void sja1105_vlan_lookup_entry_pack(
 		void *buf,
 		struct sja1105_vlan_lookup_entry *entry)
 {
 	sja1105_vlan_lookup_entry_access(buf, entry, 1);
 }
 
-void sja1105_vlan_lookup_entry_get(
+void sja1105_vlan_lookup_entry_unpack(
 		void *buf,
 		struct sja1105_vlan_lookup_entry *entry)
 {

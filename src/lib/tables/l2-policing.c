@@ -61,16 +61,14 @@ static void sja1105_l2_policing_entry_access(
 	pack_or_unpack(buf, &table->partition, 14, 12, size);
 }
 
-void sja1105_l2_policing_entry_set(
-		void *buf,
-		struct sja1105_l2_policing_entry *table)
+void sja1105_l2_policing_entry_pack(void *buf, struct
+                                    sja1105_l2_policing_entry *table)
 {
 	sja1105_l2_policing_entry_access(buf, table, 1);
 }
 
-void sja1105_l2_policing_entry_get(
-		void *buf,
-		struct sja1105_l2_policing_entry *table)
+void sja1105_l2_policing_entry_unpack(void *buf, struct
+                                      sja1105_l2_policing_entry *table)
 {
 	sja1105_l2_policing_entry_access(buf, table, 0);
 }

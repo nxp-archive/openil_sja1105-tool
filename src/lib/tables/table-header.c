@@ -58,28 +58,28 @@ void sja1105_table_header_access(
 	pack_or_unpack(buf, &hdr->crc,      95, 64, size);
 }
 
-void sja1105_table_header_get(
+void sja1105_table_header_unpack(
 		void *buf,
 		struct sja1105_table_header *hdr)
 {
 	sja1105_table_header_access(buf, hdr, 0);
 }
 
-void sja1105_table_header_set(
+void sja1105_table_header_pack(
 		void *buf,
 		struct sja1105_table_header *hdr)
 {
 	sja1105_table_header_access(buf, hdr, 1);
 }
 
-void sja1105_table_header_set_with_crc(
+void sja1105_table_header_pack_with_crc(
 		void *buf,
 		struct sja1105_table_header *hdr)
 {
 	/* First copy the table as-is, then get the CRC,
 	 * and finally re-copy the table with the proper
 	 * CRC in place */
-	sja1105_table_header_set(buf, hdr);
+	sja1105_table_header_pack(buf, hdr);
 	hdr->crc = ether_crc32_le(buf, SIZE_TABLE_HEADER - 4);
 	gtable_pack(buf + SIZE_TABLE_HEADER - 4, &hdr->crc, 31, 0, 4);
 }

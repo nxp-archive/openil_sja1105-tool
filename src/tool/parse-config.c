@@ -169,7 +169,7 @@ int config_load(const char *config_file, struct sja1105_config *config)
 	if (rc < 0) {
 		goto out_3;
 	}
-	rc = sja1105_config_get(buf, config);
+	rc = sja1105_config_unpack(buf, config);
 	if (rc < 0) {
 		loge("error while interpreting config");
 		goto out_3;
@@ -197,7 +197,7 @@ int config_save(const char *config_file, struct sja1105_config *config)
 		loge("malloc failed");
 		goto out_1;
 	}
-	sja1105_config_set(buf, config);
+	sja1105_config_pack(buf, config);
 
 	fd = open(config_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (fd < 0) {
@@ -247,17 +247,17 @@ int config_upload(struct sja1105_spi_setup *spi_setup, struct sja1105_config *co
 		goto out_free;
 	}
 	/* Write config tables to config_buf */
-	sja1105_config_set(config_buf + SIZE_SJA1105_DEVICE_ID, config);
+	sja1105_config_pack(config_buf + SIZE_SJA1105_DEVICE_ID, config);
 	/* Recalculate CRC of the last header */
 	/* Don't include the CRC field itself */
 	crc_len = config_buf_len - 4;
 	/* Read the whole table header */
 	final_header_ptr = config_buf + config_buf_len - SIZE_TABLE_HEADER;
-	sja1105_table_header_get(final_header_ptr, &final_header);
+	sja1105_table_header_unpack(final_header_ptr, &final_header);
 	/* Modify */
 	final_header.crc = ether_crc32_le(config_buf, crc_len);
 	/* Rewrite */
-	sja1105_table_header_set(final_header_ptr, &final_header);
+	sja1105_table_header_pack(final_header_ptr, &final_header);
 
 	/* Fill chunks array with chunk_count pointers */
 	spi_get_chunks(config_buf, config_buf_len, chunks, &chunk_count);

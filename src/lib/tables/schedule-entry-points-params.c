@@ -57,14 +57,14 @@ static void sja1105_schedule_entry_points_params_access(
 	pack_or_unpack(buf, &entry->actsubsch, 29, 27, size);
 }
 
-void sja1105_schedule_entry_points_params_set(
+void sja1105_schedule_entry_points_params_pack(
 		void *buf,
 		struct sja1105_schedule_entry_points_params *entry)
 {
 	sja1105_schedule_entry_points_params_access(buf, entry, 1);
 }
 
-void sja1105_schedule_entry_points_params_get(
+void sja1105_schedule_entry_points_params_unpack(
 		void *buf,
 		struct sja1105_schedule_entry_points_params *entry)
 {

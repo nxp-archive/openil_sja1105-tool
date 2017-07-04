@@ -58,13 +58,13 @@ static void sja1105_avb_params_table_access(
 	pack_or_unpack(buf, &table->srcmeta,  47,  0, size);
 }
 
-void sja1105_avb_params_table_set(void *buf,
+void sja1105_avb_params_table_pack(void *buf,
                                   struct sja1105_avb_params_table *table)
 {
 	sja1105_avb_params_table_access(buf, table, 1);
 }
 
-void sja1105_avb_params_table_get(void *buf,
+void sja1105_avb_params_table_unpack(void *buf,
                                   struct sja1105_avb_params_table *table)
 {
 	sja1105_avb_params_table_access(buf, table, 0);

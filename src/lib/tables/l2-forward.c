@@ -65,16 +65,14 @@ static void sja1105_l2_forwarding_entry_access(
 	}
 }
 
-void sja1105_l2_forwarding_entry_set(
-		void *buf,
-		struct sja1105_l2_forwarding_entry *entry)
+void sja1105_l2_forwarding_entry_pack(void *buf, struct
+                                      sja1105_l2_forwarding_entry *entry)
 {
 	sja1105_l2_forwarding_entry_access(buf, entry, 1);
 }
 
-void sja1105_l2_forwarding_entry_get(
-		void *buf,
-		struct sja1105_l2_forwarding_entry *entry)
+void sja1105_l2_forwarding_entry_unpack(void *buf, struct
+                                        sja1105_l2_forwarding_entry *entry)
 {
 	sja1105_l2_forwarding_entry_access(buf, entry, 0);
 }
