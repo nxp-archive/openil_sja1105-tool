@@ -44,7 +44,7 @@ void sja1105_cgu_mii_control_unpack(void*, struct sja1105_cgu_mii_control*);
 void sja1105_cgu_mii_control_show(struct sja1105_cgu_mii_control *mii_control);
 int sja1105_cgu_rmii_ref_clk_config(struct sja1105_spi_setup*, int);
 int sja1105_cgu_rmii_ext_tx_clk_config(struct sja1105_spi_setup*, int);
-int sja1105_cgu_mii_tx_clk_config(struct sja1105_spi_setup*, int);
+int sja1105_cgu_mii_tx_clk_config(struct sja1105_spi_setup*, int, int);
 int sja1105_cgu_mii_rx_clk_config(struct sja1105_spi_setup*, int);
 int sja1105_cgu_mii_ext_tx_clk_config(struct sja1105_spi_setup*, int);
 int sja1105_cgu_mii_ext_rx_clk_config(struct sja1105_spi_setup*, int);

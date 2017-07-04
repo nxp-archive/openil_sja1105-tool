@@ -39,78 +39,88 @@
 #include <lib/include/spi.h>
 #include <common.h>
 
-int sja1105_cgu_mii_tx_clk_config(
-		struct sja1105_spi_setup *spi_setup,
-		int    port)
+int sja1105_cgu_mii_tx_clk_config(struct sja1105_spi_setup *spi_setup,
+                                  int port, int mii_mode)
 {
-#define MSG_SIZE SIZE_SPI_MSG_HEADER + 4
+	const int BUF_LEN = 4;
+	uint8_t packed_buf[BUF_LEN];
 	struct  sja1105_cgu_mii_control mii_tx_clk;
-	struct  sja1105_spi_message msg;
-	uint8_t tx_buf[MSG_SIZE];
-	uint8_t rx_buf[MSG_SIZE];
 	/* UM10944.pdf, Table 78, CGU Register overview */
-	int     mii_tx_clk_offsets[] = {0x13, 0x1A, 0x21, 0x28, 0x2F};
+	const int mii_tx_clk_offsets[] = {0x13, 0x1A, 0x21, 0x28, 0x2F};
+	const int mac_clk_sources[] = {
+		CLKSRC_MII0_TX_CLK,
+		CLKSRC_MII1_TX_CLK,
+		CLKSRC_MII2_TX_CLK,
+		CLKSRC_MII3_TX_CLK,
+		CLKSRC_MII4_TX_CLK,
+	};
+	const int phy_clk_sources[] = {
+		CLKSRC_IDIV0,
+		CLKSRC_IDIV1,
+		CLKSRC_IDIV2,
+		CLKSRC_IDIV3,
+		CLKSRC_IDIV4,
+	};
+	int clksrc;
 
-	memset(tx_buf, 0, MSG_SIZE);
-	memset(rx_buf, 0, MSG_SIZE);
+	if (mii_mode == XMII_MODE_MAC) {
+		clksrc = mac_clk_sources[port];
+	} else {
+		clksrc = phy_clk_sources[port];
+	}
+	/* Payload for packed_buf */
+	mii_tx_clk.clksrc    = clksrc;
+	mii_tx_clk.autoblock = 1;  /* Autoblock clk while changing clksrc */
+	mii_tx_clk.pd        = 0;  /* Power Down off => enabled */
+	sja1105_cgu_mii_control_pack(packed_buf, &mii_tx_clk);
 
-	/* Header */
-	msg.access     = SPI_WRITE;
-	msg.read_count = 0;
-	msg.address    = CGU_ADDR + mii_tx_clk_offsets[port];
-	sja1105_spi_message_pack(tx_buf, &msg);
-
-	/* Payload */
-	mii_tx_clk.clksrc    = CLKSRC_PLL1; /* XXX This is surely wrong */
-	mii_tx_clk.autoblock = 1;           /* Autoblock clk while changing clksrc */
-	mii_tx_clk.pd        = 0;           /* Power Down off => enabled */
-	sja1105_cgu_mii_control_pack(tx_buf + SIZE_SPI_MSG_HEADER, &mii_tx_clk);
-
-	return sja1105_spi_transfer(spi_setup, tx_buf, rx_buf, MSG_SIZE);
+	return sja1105_spi_send_packed_buf(spi_setup,
+	                                   SPI_WRITE,
+	                                   CGU_ADDR + mii_tx_clk_offsets[port],
+	                                   packed_buf,
+	                                   BUF_LEN);
 }
 
 int sja1105_cgu_mii_rx_clk_config(
 		struct sja1105_spi_setup *spi_setup,
 		int    port)
 {
-#define MSG_SIZE SIZE_SPI_MSG_HEADER + 4
+	const int BUF_LEN = 4;
+	uint8_t packed_buf[BUF_LEN];
 	struct  sja1105_cgu_mii_control mii_rx_clk;
-	struct  sja1105_spi_message msg;
-	uint8_t tx_buf[MSG_SIZE];
-	uint8_t rx_buf[MSG_SIZE];
 	/* UM10944.pdf, Table 78, CGU Register overview */
-	int     mii_rx_clk_offsets[] = {0x14, 0x1B, 0x22, 0x29, 0x30};
+	const int mii_rx_clk_offsets[] = {0x14, 0x1B, 0x22, 0x29, 0x30};
+	const int clk_sources[] = {
+		CLKSRC_MII0_RX_CLK,
+		CLKSRC_MII1_RX_CLK,
+		CLKSRC_MII2_RX_CLK,
+		CLKSRC_MII3_RX_CLK,
+		CLKSRC_MII4_RX_CLK,
+	};
 
-	memset(tx_buf, 0, MSG_SIZE);
-	memset(rx_buf, 0, MSG_SIZE);
+	/* Payload for packed_buf */
+	mii_rx_clk.clksrc    = clk_sources[port];
+	mii_rx_clk.autoblock = 1;  /* Autoblock clk while changing clksrc */
+	mii_rx_clk.pd        = 0;  /* Power Down off => enabled */
+	sja1105_cgu_mii_control_pack(packed_buf, &mii_rx_clk);
 
-	/* Header */
-	msg.access     = SPI_WRITE;
-	msg.read_count = 0;
-	msg.address    = CGU_ADDR + mii_rx_clk_offsets[port];
-	sja1105_spi_message_pack(tx_buf, &msg);
-
-	/* Payload */
-	mii_rx_clk.clksrc    = CLKSRC_PLL1;
-	mii_rx_clk.autoblock = 1;           /* Autoblock clk while changing clksrc */
-	mii_rx_clk.pd        = 0;           /* Power Down off => enabled */
-	sja1105_cgu_mii_control_pack(tx_buf + SIZE_SPI_MSG_HEADER, &mii_rx_clk);
-
-	return sja1105_spi_transfer(spi_setup, tx_buf, rx_buf, MSG_SIZE);
+	return sja1105_spi_send_packed_buf(spi_setup,
+	                                   SPI_WRITE,
+	                                   CGU_ADDR + mii_rx_clk_offsets[port],
+	                                   packed_buf,
+	                                   BUF_LEN);
 }
 
 int sja1105_cgu_mii_ext_tx_clk_config(
 		struct sja1105_spi_setup *spi_setup,
 		int    port)
 {
-#define MSG_SIZE SIZE_SPI_MSG_HEADER + 4
+	const int BUF_LEN = 4;
+	uint8_t packed_buf[BUF_LEN];
 	struct  sja1105_cgu_mii_control mii_ext_tx_clk;
-	struct  sja1105_spi_message msg;
-	uint8_t tx_buf[MSG_SIZE];
-	uint8_t rx_buf[MSG_SIZE];
 	/* UM10944.pdf, Table 78, CGU Register overview */
-	int     mii_ext_tx_clk_offsets[] = {0x18, 0x1F, 0x26, 0x2D, 0x34};
-	int     clk_sources[] = {
+	const int mii_ext_tx_clk_offsets[] = {0x18, 0x1F, 0x26, 0x2D, 0x34};
+	const int clk_sources[] = {
 		CLKSRC_IDIV0,
 		CLKSRC_IDIV1,
 		CLKSRC_IDIV2,
@@ -118,37 +128,30 @@ int sja1105_cgu_mii_ext_tx_clk_config(
 		CLKSRC_IDIV4,
 	};
 
-	memset(tx_buf, 0, MSG_SIZE);
-	memset(rx_buf, 0, MSG_SIZE);
-
-	/* Header */
-	msg.access     = SPI_WRITE;
-	msg.read_count = 0;
-	msg.address    = CGU_ADDR + mii_ext_tx_clk_offsets[port];
-	sja1105_spi_message_pack(tx_buf, &msg);
-
-	/* Payload */
+	/* Payload for packed_buf */
 	mii_ext_tx_clk.clksrc    = clk_sources[port];
-	mii_ext_tx_clk.autoblock = 1;           /* Autoblock clk while changing clksrc */
-	mii_ext_tx_clk.pd        = 0;           /* Power Down off => enabled */
-	sja1105_cgu_mii_control_pack(tx_buf + SIZE_SPI_MSG_HEADER,
-	                            &mii_ext_tx_clk);
+	mii_ext_tx_clk.autoblock = 1; /* Autoblock clk while changing clksrc */
+	mii_ext_tx_clk.pd        = 0; /* Power Down off => enabled */
+	sja1105_cgu_mii_control_pack(packed_buf, &mii_ext_tx_clk);
 
-	return sja1105_spi_transfer(spi_setup, tx_buf, rx_buf, MSG_SIZE);
+	return sja1105_spi_send_packed_buf(spi_setup,
+	                                   SPI_WRITE,
+	                                   CGU_ADDR +
+	                                       mii_ext_tx_clk_offsets[port],
+	                                   packed_buf,
+	                                   BUF_LEN);
 }
 
 int sja1105_cgu_mii_ext_rx_clk_config(
 		struct sja1105_spi_setup *spi_setup,
 		int    port)
 {
-#define MSG_SIZE SIZE_SPI_MSG_HEADER + 4
+	const int BUF_LEN = 4;
+	uint8_t packed_buf[BUF_LEN];
 	struct  sja1105_cgu_mii_control mii_ext_rx_clk;
-	struct  sja1105_spi_message msg;
-	uint8_t tx_buf[MSG_SIZE];
-	uint8_t rx_buf[MSG_SIZE];
 	/* UM10944.pdf, Table 78, CGU Register overview */
-	int     mii_ext_rx_clk_offsets[] = {0x19, 0x20, 0x27, 0x2E, 0x35};
-	int     clk_sources[] = {
+	const int mii_ext_rx_clk_offsets[] = {0x19, 0x20, 0x27, 0x2E, 0x35};
+	const int clk_sources[] = {
 		CLKSRC_IDIV0,
 		CLKSRC_IDIV1,
 		CLKSRC_IDIV2,
@@ -156,25 +159,19 @@ int sja1105_cgu_mii_ext_rx_clk_config(
 		CLKSRC_IDIV4,
 	};
 
-	memset(tx_buf, 0, MSG_SIZE);
-	memset(rx_buf, 0, MSG_SIZE);
-
-	/* Header */
-	msg.access     = SPI_WRITE;
-	msg.read_count = 0;
-	msg.address    = CGU_ADDR + mii_ext_rx_clk_offsets[port];
-	sja1105_spi_message_pack(tx_buf, &msg);
-
-	/* Payload */
+	/* Payload for packed_buf */
 	mii_ext_rx_clk.clksrc    = clk_sources[port];
-	mii_ext_rx_clk.autoblock = 1;           /* Autoblock clk while changing clksrc */
-	mii_ext_rx_clk.pd        = 0;           /* Power Down off => enabled */
-	sja1105_cgu_mii_control_pack(tx_buf + SIZE_SPI_MSG_HEADER,
-	                            &mii_ext_rx_clk);
+	mii_ext_rx_clk.autoblock = 1; /* Autoblock clk while changing clksrc */
+	mii_ext_rx_clk.pd        = 0; /* Power Down off => enabled */
+	sja1105_cgu_mii_control_pack(packed_buf, &mii_ext_rx_clk);
 
-	return sja1105_spi_transfer(spi_setup, tx_buf, rx_buf, MSG_SIZE);
+	return sja1105_spi_send_packed_buf(spi_setup,
+	                                   SPI_WRITE,
+	                                   CGU_ADDR +
+	                                       mii_ext_rx_clk_offsets[port],
+	                                   packed_buf,
+	                                   BUF_LEN);
 }
-
 
 int mii_clocking_setup(struct sja1105_spi_setup *spi_setup, int port,
                        int mii_mode)
@@ -186,31 +183,42 @@ int mii_clocking_setup(struct sja1105_spi_setup *spi_setup, int port,
 	}
 	logv("Configuring MII-%s clocking for port %d",
 	    (mii_mode == XMII_MODE_MAC) ? "MAC" : "PHY", port);
-	/* If xmii_mode is MAC, then we have to configure:
-	 *     * MII_TX_CLK
-	 *     * MII_RX_CLK
-	 * If xmii_mode is PHY, we also have to configure:
-	 *     * EXT_TX_CLK
-	 *     * EXT_RX_CLK
+	/*   * If mii_mode is MAC, disable IDIV
+	 *   * If mii_mode is PHY, enable IDIV and configure for 1/1 divider
 	 */
 	rc = sja1105_cgu_idiv_config(spi_setup, port,
 	                            (mii_mode == XMII_MODE_PHY), 1);
 	if (rc < 0) {
 		goto error;
 	}
-	rc = sja1105_cgu_mii_tx_clk_config(spi_setup, port);
+	/* Configure CLKSRC of MII_TX_CLK_n
+	 *   * If mii_mode is MAC, select TX_CLK_n
+	 *   * If mii_mode is PHY, select IDIV_n
+	 */
+	rc = sja1105_cgu_mii_tx_clk_config(spi_setup, port, mii_mode);
 	if (rc < 0) {
 		goto error;
 	}
+	/* Configure CLKSRC of MII_RX_CLK_n
+	 * Select RX_CLK_n
+	 */
 	rc = sja1105_cgu_mii_rx_clk_config(spi_setup, port);
 	if (rc < 0) {
 		goto error;
 	}
 	if (mii_mode == XMII_MODE_PHY) {
+		/* In MII mode the PHY (which is us) drives the TX_CLK pin */
+
+		/* Configure CLKSRC of EXT_TX_CLK_n
+		 * Select IDIV_n
+		 */
 		rc = sja1105_cgu_mii_ext_tx_clk_config(spi_setup, port);
 		if (rc < 0) {
 			goto error;
 		}
+		/* Configure CLKSRC of EXT_RX_CLK_n
+		 * Select IDIV_n
+		 */
 		rc = sja1105_cgu_mii_ext_rx_clk_config(spi_setup, port);
 		if (rc < 0) {
 			goto error;
