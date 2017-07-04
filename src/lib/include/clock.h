@@ -37,10 +37,10 @@
 #include "config-tables.h"
 
 void sja1105_cgu_pll_control_show(struct sja1105_cgu_pll_control*);
-void sja1105_cgu_pll_control_set(void*, struct sja1105_cgu_pll_control*);
-void sja1105_cgu_pll_control_get(void*, struct sja1105_cgu_pll_control*);
-void sja1105_cgu_mii_control_set(void *buf, struct sja1105_cgu_mii_control *mii_control);
-void sja1105_cgu_mii_control_get(void *buf, struct sja1105_cgu_mii_control *mii_control);
+void sja1105_cgu_pll_control_pack(void*, struct sja1105_cgu_pll_control*);
+void sja1105_cgu_pll_control_unpack(void*, struct sja1105_cgu_pll_control*);
+void sja1105_cgu_mii_control_pack(void*, struct sja1105_cgu_mii_control*);
+void sja1105_cgu_mii_control_unpack(void*, struct sja1105_cgu_mii_control*);
 void sja1105_cgu_mii_control_show(struct sja1105_cgu_mii_control *mii_control);
 int sja1105_cgu_rmii_ref_clk_config(struct sja1105_spi_setup*, int);
 int sja1105_cgu_rmii_ext_tx_clk_config(struct sja1105_spi_setup*, int);
@@ -61,8 +61,8 @@ int rmii_clocking_setup(struct sja1105_spi_setup *spi_setup, int port,
 int rgmii_clocking_setup(struct sja1105_spi_setup *spi_setup,
                          int port, int speed_mbps);
 
-void sja1105_cfg_pad_mii_tx_set(void*, struct sja1105_cfg_pad_mii_tx*);
-void sja1105_cfg_pad_mii_tx_get(void*, struct sja1105_cfg_pad_mii_tx*);
+void sja1105_cfg_pad_mii_tx_pack(void*, struct sja1105_cfg_pad_mii_tx*);
+void sja1105_cfg_pad_mii_tx_unpack(void*, struct sja1105_cfg_pad_mii_tx*);
 void sja1105_cfg_pad_mii_tx_show(struct sja1105_cfg_pad_mii_tx*);
 
 #endif
