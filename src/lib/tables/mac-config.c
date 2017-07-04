@@ -80,16 +80,14 @@ static void sja1105_mac_config_entry_access(
 	pack_or_unpack(buf, &entry->ingress,      1,  1, size);
 }
 
-void sja1105_mac_config_entry_set(
-		void *buf,
-		struct sja1105_mac_config_entry *entry)
+void sja1105_mac_config_entry_pack(void *buf, struct
+                                   sja1105_mac_config_entry *entry)
 {
 	sja1105_mac_config_entry_access(buf, entry, 1);
 }
 
-void sja1105_mac_config_entry_get(
-		void *buf,
-		struct sja1105_mac_config_entry *entry)
+void sja1105_mac_config_entry_unpack(void *buf, struct
+                                     sja1105_mac_config_entry *entry)
 {
 	sja1105_mac_config_entry_access(buf, entry, 0);
 }

@@ -76,14 +76,14 @@ static void sja1105_general_params_table_access(
 	pack_or_unpack(buf, &table->tpid2,       25, 10,   size);
 }
 
-void sja1105_general_params_table_set(void *buf,
-                                      struct sja1105_general_params_table *table)
+void sja1105_general_params_table_pack(void *buf, struct
+                                       sja1105_general_params_table *table)
 {
 	sja1105_general_params_table_access(buf, table, 1);
 }
 
-void sja1105_general_params_table_get(void *buf,
-                                      struct sja1105_general_params_table *table)
+void sja1105_general_params_table_unpack(void *buf, struct
+                                         sja1105_general_params_table *table)
 {
 	sja1105_general_params_table_access(buf, table, 0);
 }

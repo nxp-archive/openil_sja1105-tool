@@ -36,7 +36,7 @@
 int sja1105_config_default(struct sja1105_config *config,
                            enum sja1105_default_config config_name)
 {
-	uint8_t ls1021atsn_buf[] = {
+	uint8_t ls1021atsn_packed_buf[] = {
 		/* L2 Policing Table, length 320 bytes (80 x 32-bit words), CRC 216F256B */
 		/* Header: */
 		0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x50, 0x21, 0x6F, 0x25, 0x6B,
@@ -193,7 +193,7 @@ int sja1105_config_default(struct sja1105_config *config,
 		0x8C, 0xCA, 0x28, 0x6D,
 	};
 	if (config_name == LS1021ATSN) {
-		return sja1105_config_get(ls1021atsn_buf, config);
+		return sja1105_config_unpack(ls1021atsn_packed_buf, config);
 	} else {
 		loge("Unknown default config name %d", config_name);
 		return -1;
