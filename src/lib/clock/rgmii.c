@@ -111,7 +111,7 @@ int rgmii_clocking_setup(struct sja1105_spi_setup *spi_setup,
 {
 	int rc = 0;
 
-	logv("configuring rgmii clocking for port %d, speed %dMbps",
+	logv("Configuring RGMII clocking for port %d, speed %dMbps",
 	     port, speed_mbps);
 	if (speed_mbps == 1000) {
 		/* 1000Mbps, IDIV disabled, divide by 1 */
