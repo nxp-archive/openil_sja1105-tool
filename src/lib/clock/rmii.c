@@ -150,7 +150,8 @@ int rmii_clocking_setup(struct sja1105_spi_setup *spi_setup, int port,
 		loge("RMII mode must either be MAC or PHY");
 		goto error;
 	}
-	logv("configuring rmii clocking for port %d...", port);
+	logv("Configuring RMII-%s clocking for port %d",
+	    (rmii_mode == XMII_MODE_MAC) ? "MAC" : "PHY", port);
 	/* AH1601.pdf chapter 2.5.1. Sources */
 	if (rmii_mode == XMII_MODE_MAC) {
 		/* Configure and enable PLL1 for 50Mhz output */

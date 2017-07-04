@@ -184,7 +184,8 @@ int mii_clocking_setup(struct sja1105_spi_setup *spi_setup, int port,
 	if (mii_mode != XMII_MODE_MAC && mii_mode != XMII_MODE_PHY) {
 		goto error;
 	}
-	logv("configuring mii clocking for port %d...", port);
+	logv("Configuring MII-%s clocking for port %d",
+	    (mii_mode == XMII_MODE_MAC) ? "MAC" : "PHY", port);
 	/* If xmii_mode is MAC, then we have to configure:
 	 *     * MII_TX_CLK
 	 *     * MII_RX_CLK
