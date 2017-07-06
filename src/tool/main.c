@@ -38,6 +38,8 @@
 #include <common.h>
 #include "internal.h"
 
+const char *default_sja1105_conf_file = "/etc/sja1105/sja1105.conf";
+
 void print_usage()
 {
 	printf("Usage: sja1105-tool [-c|--config-file] [command] [options] \n"
@@ -60,7 +62,8 @@ void print_version()
 	printf("sja1105-tool version: %s\n", VERSION);
 }
 
-static int parse_special_args(int *argc, char ***argv)
+static int parse_special_args(int *argc, char ***argv,
+                              char **sja1105_conf_file)
 {
 	int more_special_args;
 	char *arg;
@@ -89,8 +92,11 @@ static int parse_special_args(int *argc, char ***argv)
 			rc = -1;
 		} else if (matches(arg, "-c") == 0 ||
 		           matches(arg, "--config-file") == 0) {
-			logi("config-file parsed");
+			/* Parse non-default config file */
+			*sja1105_conf_file = (*argv)[1];
 			more_special_args = 1;
+			/* Consume 2 arguments */
+			(*argc)--; (*argv)++;
 			(*argc)--; (*argv)++;
 			/* Continue to run */
 			rc = 0;
@@ -119,10 +125,6 @@ static int parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 	if (argc < 1) {
 		goto error;
 	}
-	rc = parse_special_args(&argc, &argv);
-	if (rc < 0) {
-		goto out;
-	}
 	rc = get_match(argv[0], options, ARRAY_SIZE(options));
 	if (rc < 0) {
 		goto error;
@@ -150,18 +152,24 @@ void cleanup(struct sja1105_spi_setup *spi_setup)
 
 int main(int argc, char *argv[])
 {
+	char *sja1105_conf_file = (char*) default_sja1105_conf_file;
 	struct sja1105_spi_setup spi_setup;
 	int rc;
 
 	/* discard program name */
 	argc--; argv++;
+	rc = parse_special_args(&argc, &argv, &sja1105_conf_file);
+	if (rc < 0) {
+		goto out;
+	}
+	read_config_file(sja1105_conf_file, &spi_setup, &general_config);
 	/* Adjust gtable for SJA1105 SPI memory layout */
 	gtable_configure(QUIRK_LSW32_IS_FIRST);
-	read_config_file(SJA1105_CONF_FILE, &spi_setup, &general_config);
 	rc = parse_args(&spi_setup, argc, argv);
 	if (rc == 0) {
 		logv("ok");
 	}
 	cleanup(&spi_setup);
+out:
 	return rc;
 }
