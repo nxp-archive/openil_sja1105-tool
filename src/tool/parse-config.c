@@ -292,6 +292,7 @@ int config_flush(struct sja1105_spi_setup *spi_setup, struct sja1105_config *con
 {
 	struct sja1105_reset_ctrl     reset = {.rst_ctrl = RGU_COLD};
 	struct sja1105_general_status status;
+	uint64_t expected_device_id = SJA1105_DEVICE_ID;
 	int rc;
 
 	/* Check that we are talking with the right device over SPI */
@@ -302,9 +303,9 @@ int config_flush(struct sja1105_spi_setup *spi_setup, struct sja1105_config *con
 	if (spi_setup->dry_run == 0) {
 		/* These checks simply cannot pass (and do not even
 		 * make sense to have) if we are in dry run mode */
-		if (status.device_id != SJA1105_DEVICE_ID) {
+		if (status.device_id != expected_device_id) {
 			loge("read device id %" PRIx64 ", expected %" PRIx64,
-			     status.device_id, SJA1105_DEVICE_ID);
+			     status.device_id, expected_device_id);
 			goto out;
 		}
 	}
