@@ -127,4 +127,6 @@ unsigned int sja1105_config_get_length(struct sja1105_config *config);
 int sja1105_config_default(struct sja1105_config*,
                            enum sja1105_default_config);
 
+void sja1105_lib_get_version(char *buf);
+
 #endif
