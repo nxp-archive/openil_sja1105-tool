@@ -133,16 +133,19 @@ static int parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 	return next_parse_args[rc](spi_setup, argc, argv);
 error:
 	print_usage();
-out:
 	return rc;
 }
 
 void cleanup(struct sja1105_spi_setup *spi_setup)
 {
-	if (spi_setup->device) {
+	extern const char *default_device;
+	extern const char *default_staging_area;
+
+	if (spi_setup->device && spi_setup->device != default_device) {
 		free((char*) spi_setup->device);
 	}
-	if (spi_setup->staging_area) {
+	if (spi_setup->staging_area &&
+	    spi_setup->staging_area != default_staging_area) {
 		free((char*) spi_setup->staging_area);
 	}
 	if (spi_setup->fd) {

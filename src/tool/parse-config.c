@@ -107,7 +107,7 @@ int config_hexdump(const char *config_file)
 
 	fd = open(config_file, O_RDONLY);
 	if (fd < 0) {
-		loge("Config file %s does not exist!", config_file);
+		loge("Staging area %s does not exist!", config_file);
 		rc = fd;
 		goto out_1;
 	}
@@ -150,7 +150,7 @@ int config_load(const char *config_file, struct sja1105_config *config)
 
 	fd = open(config_file, O_RDONLY);
 	if (fd < 0) {
-		loge("Config file %s does not exist!", config_file);
+		loge("Staging area %s does not exist!", config_file);
 		rc = fd;
 		goto out_1;
 	}
