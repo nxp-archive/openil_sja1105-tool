@@ -33,6 +33,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <lib/include/spi.h>
+#include <lib/include/config.h>
 #include <lib/include/gtable.h>
 #include <common.h>
 #include "internal.h"
@@ -54,7 +55,10 @@ int print_version(__attribute__((unused)) struct sja1105_spi_setup *spi_setup,
                   __attribute__((unused)) int argc,
                   __attribute__((unused)) char** argv)
 {
-	printf("%s\n", VERSION);
+	char buf[256];
+	sja1105_lib_get_version(buf);
+	printf("libsja1105 version: %s\n", buf);
+	printf("sja1105-tool version: %s\n", VERSION);
 	return 0;
 }
 
