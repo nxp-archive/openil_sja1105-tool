@@ -157,10 +157,14 @@ int main(int argc, char *argv[])
 {
 	char *sja1105_conf_file = (char*) default_sja1105_conf_file;
 	struct sja1105_spi_setup spi_setup;
-	int rc;
+	int rc = 0;
 
 	/* discard program name */
 	argc--; argv++;
+	if (argc == 0) {
+		print_usage();
+		goto out;
+	}
 	rc = parse_special_args(&argc, &argv, &sja1105_conf_file);
 	if (rc < 0) {
 		goto out;
