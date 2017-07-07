@@ -316,15 +316,18 @@ int config_flush(struct sja1105_spi_setup *spi_setup, struct sja1105_config *con
 	}
 	rc = sja1105_reset(spi_setup, &reset);
 	if (rc < 0) {
+		loge("sja1105_reset failed");
 		goto out;
 	}
 	rc = config_upload(spi_setup, config);
 	if (rc < 0) {
+		loge("config_upload failed");
 		goto out;
 	}
 	rc = sja1105_clocking_setup(spi_setup, &config->xmii_params[0],
 	                           &config->mac_config[0]);
 	if (rc < 0) {
+		loge("sja1105_clocking_setup failed");
 		goto out;
 	}
 	/* Check that SJA1105 responded well to the config upload */
@@ -402,6 +405,7 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 			}
 			rc = config_flush(spi_setup, &config);
 			if (rc < 0) {
+				loge("config_flush failed");
 				goto error;
 			}
 		}
