@@ -43,6 +43,7 @@
 #include <lib/include/config.h>
 #include <lib/include/gtable.h>
 #include <lib/include/spi.h>
+#include <lib/include/ptp.h>
 #include <lib/include/status.h>
 #include <lib/include/reset.h>
 #include <lib/include/clock.h>
@@ -288,6 +289,36 @@ void get_flush_mode(struct sja1105_spi_setup *spi_setup, int *argc, char ***argv
 	}
 }
 
+int ptp_init(struct sja1105_spi_setup *spi_setup)
+{
+	struct sja1105_ptp_config ptp_config;
+	int rc;
+
+	printf("ptp_init\n");
+	memset(&ptp_config, 0, sizeof(ptp_config));
+	ptp_config.schedule_time = 1;
+	/*ptp_config.schedule_autostart = 1;*/
+	/*ptp_config.pin_toggle_autostart = 1;*/
+	rc = sja1105_ptp_configure(spi_setup, &ptp_config);
+	if (rc < 0) {
+		loge("sja1105_ptp_configure failed");
+		goto out;
+	}
+	rc = sja1105_ptp_start_schedule(spi_setup);
+	if (rc < 0) {
+		loge("sja1105_ptp_start_schedule failed");
+		goto out;
+	}
+	rc = sja1105_ptp_reset(spi_setup);
+	if (rc < 0) {
+		loge("sja1105_ptp_reset failed");
+		goto out;
+	}
+out:
+	return rc;
+}
+
+
 int config_flush(struct sja1105_spi_setup *spi_setup, struct sja1105_config *config)
 {
 	struct sja1105_reset_ctrl     reset = {.rst_ctrl = RGU_COLD};
@@ -354,6 +385,7 @@ int config_flush(struct sja1105_spi_setup *spi_setup, struct sja1105_config *con
 			loge("configuration is invalid");
 		}
 	}
+	ptp_init(spi_setup);
 out:
 	return rc;
 }
