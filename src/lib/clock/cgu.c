@@ -44,7 +44,7 @@ int sja1105_clocking_setup(struct sja1105_spi_setup *spi_setup,
                            struct sja1105_mac_config_entry  *mac_config)
 {
 	int speed_mbps;
-	int rc;
+	int rc = 0;
 	int i;
 
 	for (i = 0; i < 5; i++) {
