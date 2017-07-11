@@ -297,6 +297,7 @@ int ptp_init(struct sja1105_spi_setup *spi_setup)
 	printf("ptp_init\n");
 	memset(&ptp_config, 0, sizeof(ptp_config));
 	ptp_config.schedule_time = 1;
+	ptp_config.schedule_correction_period = 4000000l;
 	/*ptp_config.schedule_autostart = 1;*/
 	/*ptp_config.pin_toggle_autostart = 1;*/
 	rc = sja1105_ptp_configure(spi_setup, &ptp_config);
