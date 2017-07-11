@@ -31,6 +31,7 @@
 #include <linux/spi/spidev.h>
 #include <linux/types.h>
 #include <sys/ioctl.h>
+#include <sys/file.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
@@ -110,14 +111,27 @@ int sja1105_spi_transfer(const struct sja1105_spi_setup *spi_setup,
 		.bits_per_word = spi_setup->bits,
 		.cs_change     = spi_setup->cs_change,
 	};
+	int rc = 0;
 
 	if (spi_setup->dry_run) {
 		printf("spi-transfer: size %d bytes\n", size);
 		gtable_hexdump((void*) tx, size);
-		return 0;
 	} else {
 		memset(rx, 0, size);
-		return ioctl(spi_setup->fd, SPI_IOC_MESSAGE(1), &tr);
+		if (flock(spi_setup->fd, LOCK_EX) < 0) {
+			loge("locking spi device failed");
+			goto out;
+		}
+		rc = ioctl(spi_setup->fd, SPI_IOC_MESSAGE(1), &tr);
+		if (rc < 0) {
+			loge("ioctl failed");
+			/* Fall-through */
+		}
+		if (flock(spi_setup->fd, LOCK_UN) < 0) {
+			loge("unlocking spi device failed");
+		}
 	}
+out:
+	return rc;
 }
 
