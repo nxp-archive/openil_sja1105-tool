@@ -38,7 +38,7 @@ static void print_usage()
 {
 	printf("Usage:\n");
 	printf(" * sja1105-tool ptp get {clk | ts-clk}\n");
-	printf(" * sja1105-tool ptp set {clk | ts-clk} <value>\n");
+	printf(" * sja1105-tool ptp set {clk | clk-rate} <value>\n");
 	printf(" * sja1105-tool ptp start {schedule | pin-toggle}\n");
 	printf(" * sja1105-tool ptp stop {schedule | pin-toggle}\n");
 	printf(" * sja1105-tool ptp update\n");
@@ -109,6 +109,18 @@ int ptp_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv)
 				goto error;
 			}
 			rc = sja1105_ptp_clk_set(spi_setup, tmp);
+		} else if (matches(argv[1], "clk-rate") == 0) {
+			rc = reliable_uint64_from_string(&tmp, argv[2], NULL);
+			if (rc < 0) {
+				loge("invalid int at \"%s\"", argv[2]);
+				goto parse_error;
+			}
+			rc = sja1105_spi_configure(spi_setup);
+			if (rc < 0) {
+				loge("sja1105_spi_configure failed");
+				goto error;
+			}
+			rc = sja1105_ptp_clk_rate_set(spi_setup, tmp);
 		} else {
 			loge("unknown token \"%s\"", argv[1]);
 		}
