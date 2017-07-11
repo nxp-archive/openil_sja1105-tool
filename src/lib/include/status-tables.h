@@ -124,4 +124,25 @@ struct sja1105_port_status {
 	uint64_t n_not_reach;
 };
 
+struct sja1105_ptp_status {
+	uint64_t syncstate;
+	uint64_t integcy;
+	uint64_t actcorr;
+	uint64_t maxcorr;
+	uint64_t mincorr;
+	uint64_t syncloss;
+	uint64_t locmem;
+	uint64_t minmemvar;
+	uint64_t maxmemvar;
+	uint64_t localsynmem0;
+	uint64_t localsynmem1;
+	uint64_t minasynmem;
+	uint64_t maxasynmem;
+	uint64_t camem;
+	uint64_t synmem;
+	uint64_t moffset[8];
+	uint64_t timer;
+	uint64_t clock;
+};
+
 #endif
