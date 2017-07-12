@@ -113,3 +113,42 @@ pandoc --standalone -t latex sja1105-tool-config.1.md -o ../pdf/sja1105-tool-con
 pandoc --standalone -t latex sja1105-tool.1.md -o ../pdf/sja1105-tool.1.pdf
 pandoc --standalone -t latex sja1105-conf.5.md -o ../pdf/sja1105-conf.5.pdf
 ```
+
+Known issues
+------------
+
+Link speed autonegotiation is not supported.
+
+Default link speed is set to 1000Mbps.
+
+To enable 100Mbps mode on the SJA1105 switch:
+
+```bash
+# Chassis ETH2: Switch port RGMII 1
+# Chassis ETH3: Switch port RGMII 2
+# Chassis ETH4: Switch port RGMII 3
+# Chassis ETH5: Switch port RGMII 0
+# To LS1021:    Switch port RGMII 4
+#
+# Select $i depending on the switch port you want to configure
+sja1105-tool config modify -f mac[$i] speed 0b10
+```
+
+The 5 ports of the SJA1105 switch are not visible to the Linux kernel.
+As such, the PHY chip (BCM5464R) attached to the 4 externally connected ports
+of the LS1021ATSN board (ETH2, ETH3, ETH4, ETH5) is not controlled by the
+Linux kernel either.
+
+The PHY chip is brought out of reset to auto-negotiate 1000Mbps full-duplex.
+There is no way to control this through software.
+
+Because of this issue, a 1000Mbps-capable endpoint connected to the
+SJA1105 will not drop down the link speed to 100Mbps, even if the switch
+is configured for 100Mbps mode. This is because the PHY chip will ignore
+the SJA1105 speed setting and still negotiate for 1000Mbps.
+
+The issue does not appear when connecting a 100Mbps-capable endpoint to
+the SJA1105. This is because, although the PHY chip still advertises
+1000Mbps capability, the autonegotiation will drop to the least common
+denominator, which is correctly 100Mbps.
+
