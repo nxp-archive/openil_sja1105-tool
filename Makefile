@@ -85,4 +85,27 @@ all: build man
 docs/man/%: docs/md/%.md
 	pandoc --standalone --to man $^ -o $@
 
-.PHONY: clean build man
+install: $(SJA1105_LIB) $(SJA1105_BIN)
+	install -m 0755 -D libsja1105.so $(DESTDIR)/usr/lib/libsja1105.so
+	install -m 0755 -D sja1105-tool $(DESTDIR)/usr/bin/sja1105-tool
+	install -m 0644 -D docs/man/sja1105-conf.5 $(DESTDIR)/usr/share/man/man5/sja1105-conf.5
+	install -m 0644 -D docs/man/sja1105-tool-config-format.5 $(DESTDIR)/usr/share/man/man5/sja1105-tool-config-format.5
+	install -m 0644 -D docs/man/sja1105-tool-config.1 $(DESTDIR)/usr/share/man/man1/sja1105-tool-config.1
+	install -m 0644 -D docs/man/sja1105-tool-reset.1 $(DESTDIR)/usr/share/man/man1/sja1105-tool-reset.1
+	install -m 0644 -D docs/man/sja1105-tool-status.1 $(DESTDIR)/usr/share/man/man1/sja1105-tool-status.1
+	install -m 0644 -D docs/man/sja1105-tool.1 $(DESTDIR)/usr/share/man/man1/sja1105-tool.1
+	install -m 0644 -D src/lib/include/agu-tables.h $(DESTDIR)/usr/include/sja1105/agu-tables.h
+	install -m 0644 -D src/lib/include/cgu-tables.h $(DESTDIR)/usr/include/sja1105/cgu-tables.h
+	install -m 0644 -D src/lib/include/clock.h $(DESTDIR)/usr/include/sja1105/clock.h
+	install -m 0644 -D src/lib/include/config-tables.h $(DESTDIR)/usr/include/sja1105/config-tables.h
+	install -m 0644 -D src/lib/include/config.h $(DESTDIR)/usr/include/sja1105/config.h
+	install -m 0644 -D src/lib/include/gtable.h $(DESTDIR)/usr/include/sja1105/gtable.h
+	install -m 0644 -D src/lib/include/ptp-tables.h $(DESTDIR)/usr/include/sja1105/ptp-tables.h
+	install -m 0644 -D src/lib/include/ptp.h $(DESTDIR)/usr/include/sja1105/ptp.h
+	install -m 0644 -D src/lib/include/reset.h $(DESTDIR)/usr/include/sja1105/reset.h
+	install -m 0644 -D src/lib/include/rgu-tables.h $(DESTDIR)/usr/include/sja1105/rgu-tables.h
+	install -m 0644 -D src/lib/include/spi.h $(DESTDIR)/usr/include/sja1105/spi.h
+	install -m 0644 -D src/lib/include/status-tables.h $(DESTDIR)/usr/include/sja1105/status-tables.h
+	install -m 0644 -D src/lib/include/status.h $(DESTDIR)/usr/include/sja1105/status.h
+
+.PHONY: clean build man install
