@@ -152,3 +152,24 @@ the SJA1105. This is because, although the PHY chip still advertises
 1000Mbps capability, the autonegotiation will drop to the least common
 denominator, which is correctly 100Mbps.
 
+
+Reporting issues
+----------------
+
+When creating a new issue in the Github tracker, it may be useful to
+describe the usage scenario, as well as provide an XML configuration and
+an SPI dump of the configuration you are sending to the switch.
+
+To get an XML configuration:
+
+```bash
+sja1105-tool config save bug.xml
+```
+
+To get an SPI dump:
+
+```bash
+# Modify /etc/sja1105/sja1105.conf:
+# dry_run = false
+sja1105-tool config upload > spi_dump.log
+```
