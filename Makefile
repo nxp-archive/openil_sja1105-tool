@@ -49,12 +49,6 @@ LIB_SRC += $(shell find src/lib -name "*.[c|h]")   # All .c and .h files
 LIB_DEPS = $(patsubst %.c, %.o, $(LIB_SRC))        # All .o and .h files
 LIB_OBJ  = $(filter %.o, $(LIB_DEPS))              # Only the .o files
 
-MANPAGES = docs/man/sja1105-tool.1 \
-           docs/man/sja1105-tool-status.1 \
-           docs/man/sja1105-tool-reset.1 \
-           docs/man/sja1105-tool-config.1 \
-           docs/man/sja1105-tool-config-format.5 \
-           docs/man/sja1105-conf.5
 SJA1105_BIN = sja1105-tool
 SJA1105_LIB = libsja1105.so
 
@@ -75,37 +69,56 @@ src/tool/%.o: src/tool/%.c
 src/lib/%.o: src/lib/%.c
 	$(CC) $(LIB_CFLAGS) -c $^ -o $@
 
-clean:
-	rm -f $(SJA1105_BIN) $(BIN_OBJ) $(SJA1105_LIB) $(LIB_OBJ)
+# Manpages
+
+MD_DOCS  = $(wildcard docs/md/*.md)
+PDF_DOCS = $(patsubst docs/md/%.md, docs/pdf/%.pdf, $(MD_DOCS))
+MANPAGES = $(patsubst docs/md/%.md, docs/man/%, $(MD_DOCS))
+
+get_man_section = $(lastword $(subst ., ,$1))
+get_manpage_destination = $(join $(DESTDIR)/usr/share/man/man, \
+                          $(join $(call get_man_section,$1)/, \
+                          $(subst docs/man/,,$1)))
 
 man: $(MANPAGES)
 
-all: build man
+pdf: $(PDF_DOCS)
 
 docs/man/%: docs/md/%.md
 	pandoc --standalone --to man $^ -o $@
 
-install: $(SJA1105_LIB) $(SJA1105_BIN)
-	install -m 0755 -D libsja1105.so $(DESTDIR)/usr/lib/libsja1105.so
-	install -m 0755 -D sja1105-tool $(DESTDIR)/usr/bin/sja1105-tool
-	install -m 0644 -D docs/man/sja1105-conf.5 $(DESTDIR)/usr/share/man/man5/sja1105-conf.5
-	install -m 0644 -D docs/man/sja1105-tool-config-format.5 $(DESTDIR)/usr/share/man/man5/sja1105-tool-config-format.5
-	install -m 0644 -D docs/man/sja1105-tool-config.1 $(DESTDIR)/usr/share/man/man1/sja1105-tool-config.1
-	install -m 0644 -D docs/man/sja1105-tool-reset.1 $(DESTDIR)/usr/share/man/man1/sja1105-tool-reset.1
-	install -m 0644 -D docs/man/sja1105-tool-status.1 $(DESTDIR)/usr/share/man/man1/sja1105-tool-status.1
-	install -m 0644 -D docs/man/sja1105-tool.1 $(DESTDIR)/usr/share/man/man1/sja1105-tool.1
-	install -m 0644 -D src/lib/include/agu-tables.h $(DESTDIR)/usr/include/sja1105/agu-tables.h
-	install -m 0644 -D src/lib/include/cgu-tables.h $(DESTDIR)/usr/include/sja1105/cgu-tables.h
-	install -m 0644 -D src/lib/include/clock.h $(DESTDIR)/usr/include/sja1105/clock.h
-	install -m 0644 -D src/lib/include/config-tables.h $(DESTDIR)/usr/include/sja1105/config-tables.h
-	install -m 0644 -D src/lib/include/config.h $(DESTDIR)/usr/include/sja1105/config.h
-	install -m 0644 -D src/lib/include/gtable.h $(DESTDIR)/usr/include/sja1105/gtable.h
-	install -m 0644 -D src/lib/include/ptp-tables.h $(DESTDIR)/usr/include/sja1105/ptp-tables.h
-	install -m 0644 -D src/lib/include/ptp.h $(DESTDIR)/usr/include/sja1105/ptp.h
-	install -m 0644 -D src/lib/include/reset.h $(DESTDIR)/usr/include/sja1105/reset.h
-	install -m 0644 -D src/lib/include/rgu-tables.h $(DESTDIR)/usr/include/sja1105/rgu-tables.h
-	install -m 0644 -D src/lib/include/spi.h $(DESTDIR)/usr/include/sja1105/spi.h
-	install -m 0644 -D src/lib/include/status-tables.h $(DESTDIR)/usr/include/sja1105/status-tables.h
-	install -m 0644 -D src/lib/include/status.h $(DESTDIR)/usr/include/sja1105/status.h
+docs/pdf/%.pdf: docs/md/%.md
+	pandoc --standalone -t latex $^ -o $@
 
-.PHONY: clean build man install
+# Installation
+
+install: install-binaries install-configs install-manpages install-headers
+
+install-binaries: $(SJA1105_LIB) $(SJA1105_BIN)
+	install -m 0755 -D libsja1105.so $(DESTDIR)/usr/lib/libsja1105.so
+	install -m 0755 -D sja1105-tool  $(DESTDIR)/usr/bin/sja1105-tool
+
+install-configs: etc/sja1105-init etc/sja1105.conf
+	install -m 0755 -D etc/sja1105-init $(DESTDIR)/etc/init.d/S45sja1105
+	install -m 0644 -D etc/sja1105.conf $(DESTDIR)/etc/sja1105/sja1105.conf
+
+install-manpages: $(MANPAGES)
+	$(foreach manpage, $^, install -m 0644 -D $(manpage) \
+		$(call get_manpage_destination,$(manpage));)
+
+# Headers
+
+SRC_HEADERS=$(wildcard src/lib/include/*.h)
+DST_HEADERS=$(patsubst src/lib/%, $(DESTDIR)/usr/%, $(SRC_HEADERS))
+
+install-headers: $(DST_HEADERS)
+
+$(DESTDIR)/usr/include/%.h: src/lib/include/%.h
+	install -m 0644 -D $^ $@
+
+all: install
+
+clean:
+	rm -f $(SJA1105_BIN) $(BIN_OBJ) $(SJA1105_LIB) $(LIB_OBJ)
+
+.PHONY: clean build man install install-binaries install-configs install-headers install-manpages
