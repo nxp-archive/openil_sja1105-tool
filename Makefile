@@ -28,7 +28,10 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 ##############################################################################
-VERSION  = $(or $(shell test -d .git && git describe --tags), "untagged")
+
+# Binaries
+
+VERSION = $(or $(shell test -d .git && git describe --tags), $(shell cat VERSION))
 LIB_CFLAGS  += -Wall -Wextra -Werror -g -fstack-protector-all -Isrc -fPIC
 LIB_CFLAGS  += -DVERSION=\"${VERSION}\"
 LIB_LDFLAGS +=
