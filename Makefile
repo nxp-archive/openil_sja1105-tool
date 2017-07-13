@@ -32,10 +32,14 @@
 # Binaries
 
 VERSION = $(or $(shell test -d .git && git describe --tags), $(shell cat VERSION))
+LIB_CFLAGS   = $(CFLAGS)
+LIB_LDFLAGS  = $(LDFLAGS)
 LIB_CFLAGS  += -Wall -Wextra -Werror -g -fstack-protector-all -Isrc -fPIC
 LIB_CFLAGS  += -DVERSION=\"${VERSION}\"
 LIB_LDFLAGS +=
 
+BIN_CFLAGS   = $(CFLAGS)
+BIN_LDFLAGS  = $(LDFLAGS)
 BIN_CFLAGS  += -DVERSION=\"${VERSION}\"
 BIN_CFLAGS  += -Wall -Wextra -Werror -g -fstack-protector-all -Isrc
 BIN_CFLAGS  += $(shell pkg-config --cflags libxml-2.0)
