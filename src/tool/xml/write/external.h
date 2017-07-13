@@ -34,6 +34,6 @@
 #include <lib/include/config.h>
 #include "internal.h"
 
-int sja1105_config_write_to_xml(char*, struct sja1105_config*);
+int sja1105_static_config_write_to_xml(char*, struct sja1105_static_config*);
 
 #endif

@@ -30,7 +30,9 @@
  *****************************************************************************/
 #include "internal.h"
 
-int vl_lookup_table_write(xmlTextWriterPtr writer, struct sja1105_config *config)
+int
+vl_lookup_table_write(xmlTextWriterPtr writer,
+                      struct sja1105_static_config *config)
 {
 	struct sja1105_vl_lookup_entry *entry;
 	int rc = 0;

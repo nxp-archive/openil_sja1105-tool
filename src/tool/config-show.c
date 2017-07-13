@@ -39,7 +39,7 @@
 #include <lib/include/config.h>
 #include <common.h>
 
-static void schedule_table_show(struct sja1105_config *config)
+static void schedule_table_show(struct sja1105_static_config *config)
 {
 	char  tmp_buf[MAX_SCHEDULE_COUNT][MAX_LINE_SIZE];
 	char *print_bufs[MAX_SCHEDULE_COUNT];
@@ -57,7 +57,7 @@ static void schedule_table_show(struct sja1105_config *config)
 	show_print_bufs(print_bufs, config->schedule_count);
 }
 
-static void schedule_entry_points_table_show(struct sja1105_config *config)
+static void schedule_entry_points_table_show(struct sja1105_static_config *config)
 {
 	char  tmp_buf[MAX_SCHEDULE_ENTRY_POINTS_COUNT][MAX_LINE_SIZE];
 	char *print_bufs[MAX_SCHEDULE_ENTRY_POINTS_COUNT];
@@ -76,7 +76,7 @@ static void schedule_entry_points_table_show(struct sja1105_config *config)
 	show_print_bufs(print_bufs, config->schedule_entry_points_count);
 }
 
-static void l2_lookup_table_show(struct sja1105_config *config)
+static void l2_lookup_table_show(struct sja1105_static_config *config)
 {
 	char  tmp_buf[MAX_L2_LOOKUP_COUNT][MAX_LINE_SIZE];
 	char *print_bufs[MAX_L2_LOOKUP_COUNT];
@@ -94,7 +94,7 @@ static void l2_lookup_table_show(struct sja1105_config *config)
 	show_print_bufs(print_bufs, config->l2_lookup_count);
 }
 
-static void l2_policing_table_show(struct sja1105_config *config)
+static void l2_policing_table_show(struct sja1105_static_config *config)
 {
 	char  tmp_buf[MAX_L2_POLICING_COUNT][MAX_LINE_SIZE];
 	char *print_bufs[MAX_L2_POLICING_COUNT];
@@ -112,7 +112,7 @@ static void l2_policing_table_show(struct sja1105_config *config)
 	show_print_bufs(print_bufs, config->l2_policing_count);
 }
 
-static void vlan_lookup_table_show(struct sja1105_config *config)
+static void vlan_lookup_table_show(struct sja1105_static_config *config)
 {
 	char  tmp_buf[MAX_VLAN_LOOKUP_COUNT][MAX_LINE_SIZE / 4];
 	char *print_bufs[MAX_VLAN_LOOKUP_COUNT];
@@ -130,7 +130,7 @@ static void vlan_lookup_table_show(struct sja1105_config *config)
 	show_print_bufs(print_bufs, config->vlan_lookup_count);
 }
 
-static void l2_fw_table_show(struct sja1105_config *config)
+static void l2_fw_table_show(struct sja1105_static_config *config)
 {
 	char  tmp_buf[MAX_L2_FORWARDING_COUNT][MAX_LINE_SIZE];
 	char *print_bufs[MAX_L2_FORWARDING_COUNT];
@@ -148,7 +148,7 @@ static void l2_fw_table_show(struct sja1105_config *config)
 	show_print_bufs(print_bufs, config->l2_forwarding_count);
 }
 
-static void mac_config_table_show(struct sja1105_config *config)
+static void mac_config_table_show(struct sja1105_static_config *config)
 {
 	char  tmp_buf[MAX_MAC_CONFIG_COUNT][MAX_LINE_SIZE];
 	char *print_bufs[MAX_MAC_CONFIG_COUNT];
@@ -166,7 +166,7 @@ static void mac_config_table_show(struct sja1105_config *config)
 	show_print_bufs(print_bufs, config->mac_config_count);
 }
 
-static void schedule_params_table_show(struct sja1105_config *config)
+static void schedule_params_table_show(struct sja1105_static_config *config)
 {
 	char  tmp_buf[MAX_SCHEDULE_PARAMS_COUNT][MAX_LINE_SIZE];
 	char *print_bufs[MAX_SCHEDULE_PARAMS_COUNT];
@@ -184,7 +184,7 @@ static void schedule_params_table_show(struct sja1105_config *config)
 	show_print_bufs(print_bufs, config->schedule_params_count);
 }
 
-static void schedule_entry_points_params_table_show(struct sja1105_config *config)
+static void schedule_entry_points_params_table_show(struct sja1105_static_config *config)
 {
 	char  tmp_buf[MAX_SCHEDULE_ENTRY_POINTS_PARAMS_COUNT][MAX_LINE_SIZE];
 	char *print_bufs[MAX_SCHEDULE_ENTRY_POINTS_PARAMS_COUNT];
@@ -203,7 +203,7 @@ static void schedule_entry_points_params_table_show(struct sja1105_config *confi
 	show_print_bufs(print_bufs, config->schedule_entry_points_params_count);
 }
 
-static void l2_lookup_params_table_show(struct sja1105_config *config)
+static void l2_lookup_params_table_show(struct sja1105_static_config *config)
 {
 	char  tmp_buf[MAX_L2_LOOKUP_PARAMS_COUNT][MAX_LINE_SIZE];
 	char *print_bufs[MAX_L2_LOOKUP_PARAMS_COUNT];
@@ -222,7 +222,7 @@ static void l2_lookup_params_table_show(struct sja1105_config *config)
 	show_print_bufs(print_bufs, config->l2_lookup_params_count);
 }
 
-static void l2_fw_params_table_show(struct sja1105_config *config)
+static void l2_fw_params_table_show(struct sja1105_static_config *config)
 {
 	char  tmp_buf[MAX_L2_FORWARDING_PARAMS_COUNT][MAX_LINE_SIZE];
 	char *print_bufs[MAX_L2_FORWARDING_PARAMS_COUNT];
@@ -241,7 +241,7 @@ static void l2_fw_params_table_show(struct sja1105_config *config)
 	show_print_bufs(print_bufs, config->l2_forwarding_params_count);
 }
 
-static void general_params_table_show(struct sja1105_config *config)
+static void general_params_table_show(struct sja1105_static_config *config)
 {
 	char  tmp_buf[MAX_GENERAL_PARAMS_COUNT][MAX_LINE_SIZE];
 	char *print_bufs[MAX_GENERAL_PARAMS_COUNT];
@@ -260,7 +260,7 @@ static void general_params_table_show(struct sja1105_config *config)
 	show_print_bufs(print_bufs, config->general_params_count);
 }
 
-static void xmii_table_show(struct sja1105_config *config)
+static void xmii_table_show(struct sja1105_static_config *config)
 {
 	char  tmp_buf[MAX_XMII_PARAMS_COUNT][MAX_LINE_SIZE];
 	char *print_bufs[MAX_XMII_PARAMS_COUNT];
@@ -279,7 +279,7 @@ static void xmii_table_show(struct sja1105_config *config)
 	show_print_bufs(print_bufs, config->xmii_params_count);
 }
 
-static void vl_lookup_table_show(struct sja1105_config *config)
+static void vl_lookup_table_show(struct sja1105_static_config *config)
 {
 	char  tmp_buf[MAX_VL_LOOKUP_COUNT][MAX_LINE_SIZE];
 	char *print_bufs[MAX_VL_LOOKUP_COUNT];
@@ -298,7 +298,7 @@ static void vl_lookup_table_show(struct sja1105_config *config)
 	show_print_bufs(print_bufs, config->vl_lookup_count);
 }
 
-static void vl_policing_table_show(struct sja1105_config *config)
+static void vl_policing_table_show(struct sja1105_static_config *config)
 {
 	char  tmp_buf[MAX_VL_POLICING_COUNT][MAX_LINE_SIZE];
 	char *print_bufs[MAX_VL_POLICING_COUNT];
@@ -317,7 +317,7 @@ static void vl_policing_table_show(struct sja1105_config *config)
 	show_print_bufs(print_bufs, config->vl_policing_count);
 }
 
-static void vl_fw_table_show(struct sja1105_config *config)
+static void vl_fw_table_show(struct sja1105_static_config *config)
 {
 	char  tmp_buf[MAX_VL_FORWARDING_COUNT][MAX_LINE_SIZE];
 	char *print_bufs[MAX_VL_FORWARDING_COUNT];
@@ -336,12 +336,12 @@ static void vl_fw_table_show(struct sja1105_config *config)
 	show_print_bufs(print_bufs, config->vl_forwarding_count);
 }
 
-static void retagging_table_show(__attribute__((unused)) struct sja1105_config *config)
+static void retagging_table_show(__attribute__((unused)) struct sja1105_static_config *config)
 {
 	loge("Retagging Table unimplemented");
 }
 
-static void avb_params_table_show(struct sja1105_config *config)
+static void avb_params_table_show(struct sja1105_static_config *config)
 {
 	char  tmp_buf[MAX_AVB_PARAMS_COUNT][MAX_LINE_SIZE];
 	char *print_bufs[MAX_AVB_PARAMS_COUNT];
@@ -360,12 +360,12 @@ static void avb_params_table_show(struct sja1105_config *config)
 	show_print_bufs(print_bufs, config->avb_params_count);
 }
 
-static void clock_sync_params_table_show(__attribute__((unused)) struct sja1105_config *config)
+static void clock_sync_params_table_show(__attribute__((unused)) struct sja1105_static_config *config)
 {
 	loge("Clock Synchronization Table unimplemented");
 }
 
-static void vl_fw_params_table_show(struct sja1105_config *config)
+static void vl_fw_params_table_show(struct sja1105_static_config *config)
 {
 	char  tmp_buf[MAX_VL_FORWARDING_PARAMS_COUNT][MAX_LINE_SIZE];
 	char *print_bufs[MAX_VL_FORWARDING_PARAMS_COUNT];
@@ -385,7 +385,7 @@ static void vl_fw_params_table_show(struct sja1105_config *config)
 	show_print_bufs(print_bufs, config->vl_forwarding_params_count);
 }
 
-int sja1105_config_show(struct sja1105_config *config, char *table_name)
+int sja1105_static_config_show(struct sja1105_static_config *config, char *table_name)
 {
 	const char *options[] = {
 		"schedule-table",
@@ -409,7 +409,7 @@ int sja1105_config_show(struct sja1105_config *config, char *table_name)
 		"retagging-table",
 		"xmii-mode-parameters-table",
 	};
-	void (*next_config_table_show[])(struct sja1105_config *) = {
+	void (*next_config_table_show[])(struct sja1105_static_config *) = {
 		schedule_table_show,
 		schedule_entry_points_table_show,
 		vl_lookup_table_show,

@@ -41,7 +41,7 @@ static int entry_get(xmlNode *node, struct sja1105_avb_params_table *entry)
 	return rc;
 }
 
-static int parse_entry(xmlNode *node, struct sja1105_config *config)
+static int parse_entry(xmlNode *node, struct sja1105_static_config *config)
 {
 	struct sja1105_avb_params_table entry;
 	int rc;
@@ -59,7 +59,7 @@ out:
 	return rc;
 }
 
-int avb_parameters_table_parse(xmlNode *node, struct sja1105_config *config)
+int avb_parameters_table_parse(xmlNode *node, struct sja1105_static_config *config)
 {
 	xmlNode *c;
 	int rc = 0;

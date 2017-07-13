@@ -127,7 +127,7 @@ int config_hexdump(const char *config_file)
 	if (rc < 0) {
 		goto out_3;
 	}
-	rc = sja1105_config_hexdump(buf);
+	rc = sja1105_static_config_hexdump(buf);
 	if (rc < 0) {
 		loge("error while interpreting config");
 		goto out_3;
@@ -141,7 +141,7 @@ out_1:
 	return rc;
 }
 
-int config_load(const char *config_file, struct sja1105_config *config)
+int config_load(const char *config_file, struct sja1105_static_config *config)
 {
 	struct stat stat;
 	unsigned int len;
@@ -170,7 +170,7 @@ int config_load(const char *config_file, struct sja1105_config *config)
 	if (rc < 0) {
 		goto out_3;
 	}
-	rc = sja1105_config_unpack(buf, config);
+	rc = sja1105_static_config_unpack(buf, config);
 	if (rc < 0) {
 		loge("error while interpreting config");
 		goto out_3;
@@ -184,21 +184,21 @@ out_1:
 	return rc;
 }
 
-int config_save(const char *config_file, struct sja1105_config *config)
+int config_save(const char *config_file, struct sja1105_static_config *config)
 {
 	int   rc = 0;
 	char *buf;
 	int   len;
 	int   fd;
 
-	len = sja1105_config_get_length(config);
+	len = sja1105_static_config_get_length(config);
 
 	buf = (char*) malloc(len * sizeof(char));
 	if (!buf) {
 		loge("malloc failed");
 		goto out_1;
 	}
-	sja1105_config_pack(buf, config);
+	sja1105_static_config_pack(buf, config);
 
 	fd = open(config_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (fd < 0) {
@@ -219,7 +219,7 @@ out_1:
 	return rc;
 }
 
-int config_upload(struct sja1105_spi_setup *spi_setup, struct sja1105_config *config)
+int config_upload(struct sja1105_spi_setup *spi_setup, struct sja1105_static_config *config)
 {
 	struct   sja1105_table_header final_header;
 	char    *final_header_ptr;
@@ -235,7 +235,7 @@ int config_upload(struct sja1105_spi_setup *spi_setup, struct sja1105_config *co
 	int    rc;
 	int    i;
 
-	config_buf_len = sja1105_config_get_length(config) + SIZE_SJA1105_DEVICE_ID;
+	config_buf_len = sja1105_static_config_get_length(config) + SIZE_SJA1105_DEVICE_ID;
 	config_buf = (char*) malloc(config_buf_len * sizeof(char));
 	if (!config_buf) {
 		loge("malloc failed");
@@ -248,7 +248,7 @@ int config_upload(struct sja1105_spi_setup *spi_setup, struct sja1105_config *co
 		goto out_free;
 	}
 	/* Write config tables to config_buf */
-	sja1105_config_pack(config_buf + SIZE_SJA1105_DEVICE_ID, config);
+	sja1105_static_config_pack(config_buf + SIZE_SJA1105_DEVICE_ID, config);
 	/* Recalculate CRC of the last header */
 	/* Don't include the CRC field itself */
 	crc_len = config_buf_len - 4;
@@ -320,7 +320,7 @@ out:
 }
 
 
-int config_flush(struct sja1105_spi_setup *spi_setup, struct sja1105_config *config)
+int config_flush(struct sja1105_spi_setup *spi_setup, struct sja1105_static_config *config)
 {
 	struct sja1105_reset_ctrl     reset = {.rst_ctrl = RGU_COLD};
 	struct sja1105_general_status status;
@@ -341,7 +341,7 @@ int config_flush(struct sja1105_spi_setup *spi_setup, struct sja1105_config *con
 			goto out;
 		}
 	}
-	rc = sja1105_config_check_valid(config);
+	rc = sja1105_static_config_check_valid(config);
 	if (rc < 0) {
 		loge("cannot upload config, because it is not valid");
 		goto out;
@@ -404,7 +404,7 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 		"show",
 		"hexdump",
 	};
-	struct sja1105_config config;
+	struct sja1105_static_config config;
 	int match;
 	int rc;
 
@@ -422,7 +422,7 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 		if (argc != 1) {
 			goto parse_error;
 		}
-		rc = sja1105_config_read_from_xml(argv[0], &config);
+		rc = sja1105_static_config_read_from_xml(argv[0], &config);
 		if (rc < 0) {
 			goto error;
 		}
@@ -450,7 +450,7 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 		if (rc < 0) {
 			goto error;
 		}
-		rc = sja1105_config_write_to_xml(argv[0], &config);
+		rc = sja1105_static_config_write_to_xml(argv[0], &config);
 		if (rc < 0) {
 			goto error;
 		}
@@ -458,7 +458,7 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 		const char *default_config_options[] = {
 			"ls1021atsn",
 		};
-		enum sja1105_default_config default_configs[] = {
+		enum sja1105_default_static_config default_configs[] = {
 			LS1021ATSN,
 		};
 		get_flush_mode(spi_setup, &argc, &argv);
@@ -471,7 +471,7 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 			loge("Unrecognized default config %s", argv[0]);
 			goto error;
 		}
-		rc = sja1105_config_default(&config, default_configs[match]);
+		rc = sja1105_static_config_default(&config, default_configs[match]);
 		if (rc < 0) {
 			goto error;
 		}
@@ -552,7 +552,7 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 		if (rc < 0) {
 			goto error;
 		}
-		rc = sja1105_config_show(&config, argv[0]);
+		rc = sja1105_static_config_show(&config, argv[0]);
 		if (rc < 0) {
 			goto error;
 		}

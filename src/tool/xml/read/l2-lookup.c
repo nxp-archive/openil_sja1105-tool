@@ -44,7 +44,7 @@ static int entry_get(xmlNode *node, struct sja1105_l2_lookup_entry *entry)
 	return rc;
 }
 
-static int parse_entry(xmlNode *node, struct sja1105_config *config)
+static int parse_entry(xmlNode *node, struct sja1105_static_config *config)
 {
 	struct sja1105_l2_lookup_entry entry;
 	int rc;
@@ -62,7 +62,7 @@ out:
 	return rc;
 }
 
-int l2_address_lookup_table_parse(xmlNode *node, struct sja1105_config *config)
+int l2_address_lookup_table_parse(xmlNode *node, struct sja1105_static_config *config)
 {
 	xmlNode *c;
 	int rc = 0;

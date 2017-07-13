@@ -30,8 +30,9 @@
  *****************************************************************************/
 #include "internal.h"
 
-int retagging_table_parse(__attribute__((unused)) xmlNode *node,
-                          __attribute__((unused)) struct sja1105_config *config)
+int
+retagging_table_parse(__attribute__((unused)) xmlNode *node,
+                      __attribute__((unused)) struct sja1105_static_config *config)
 {
 	loge("Retagging Table unimplemented!");
 	return -1;

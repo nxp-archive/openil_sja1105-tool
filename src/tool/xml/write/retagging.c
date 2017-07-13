@@ -30,8 +30,9 @@
  *****************************************************************************/
 #include "internal.h"
 
-int retagging_table_write(__attribute__((unused)) xmlTextWriterPtr writer,
-                          __attribute__((unused)) struct sja1105_config *config)
+int
+retagging_table_write(__attribute__((unused)) xmlTextWriterPtr writer,
+                      __attribute__((unused)) struct sja1105_static_config *config)
 {
 	loge("Retagging Table not implemented!");
 	return -1;

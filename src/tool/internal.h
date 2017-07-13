@@ -54,11 +54,11 @@ int ptp_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv);
 int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv);
 int status_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv);
 int config_table_entry_modify(
-		struct sja1105_config *config,
+		struct sja1105_static_config *config,
 		char *table_name,
 		char *field_name,
 		char *field_val);
-int sja1105_config_show(struct sja1105_config *config, char *table_name);
+int sja1105_static_config_show(struct sja1105_static_config *config, char *table_name);
 
 /* From strings.c, mainly */
 char *trimwhitespace(char *str);

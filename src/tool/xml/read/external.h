@@ -34,6 +34,6 @@
 #include <lib/include/config.h>
 #include "internal.h"
 
-int sja1105_config_read_from_xml(const char *xml_file, struct sja1105_config *config);
+int sja1105_static_config_read_from_xml(const char*, struct sja1105_static_config*);
 
 #endif
