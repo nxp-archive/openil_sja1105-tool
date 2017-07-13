@@ -36,7 +36,7 @@
 
 #if !defined(LIBXML_WRITER_ENABLED) || !defined(LIBXML_OUTPUT_ENABLED)
 
-int sja1105_config_write_to_xml(char *filename, struct sja1105_config *config)
+int sja1105_static_config_write_to_xml(char *filename, struct sja1105_static_config *config)
 {
 	loge("Writer or output support is not compiled in libxml!");
 	return -1;
@@ -64,7 +64,7 @@ int xml_write_array(xmlTextWriterPtr writer, char *field, uint64_t *values, int 
 	return xmlTextWriterWriteElement(writer, BAD_CAST field, BAD_CAST print_buf);
 }
 
-int write_config_tables(xmlTextWriterPtr writer, struct sja1105_config *config)
+int write_config_tables(xmlTextWriterPtr writer, struct sja1105_static_config *config)
 {
 	const char *options[] = {
 		"schedule-table",
@@ -88,7 +88,7 @@ int write_config_tables(xmlTextWriterPtr writer, struct sja1105_config *config)
 		"retagging-table",
 		"xmii-mode-parameters-table",
 	};
-	int (*next_write_config_table[])(xmlTextWriterPtr, struct sja1105_config *) = {
+	int (*next_write_config_table[])(xmlTextWriterPtr, struct sja1105_static_config *) = {
 		schedule_table_write,
 		schedule_entry_points_table_write,
 		vl_lookup_table_write,
@@ -149,7 +149,7 @@ out:
 	return rc;
 }
 
-int sja1105_config_write_to_xml(char *filename, struct sja1105_config *config)
+int sja1105_static_config_write_to_xml(char *filename, struct sja1105_static_config *config)
 {
 	int rc = 0;
 	xmlTextWriterPtr writer;

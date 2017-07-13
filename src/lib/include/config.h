@@ -115,17 +115,17 @@ void sja1105_vl_lookup_entry_show(struct sja1105_vl_lookup_entry*);
 void sja1105_vl_lookup_entry_fmt_show(char*, char*, struct sja1105_vl_lookup_entry*);
 
 /* From tables.c */
-unsigned int sja1105_config_get_length(struct sja1105_config *config);
-int sja1105_config_add_entry(struct sja1105_table_header *hdr, void *buf, struct sja1105_config *config);
-int sja1105_config_hexdump(void *buf);
-int sja1105_config_check_memory_size(struct sja1105_config *config);
-int sja1105_config_check_valid(struct sja1105_config *config);
-void sja1105_config_pack(void*, struct sja1105_config*);
-int sja1105_config_unpack(void*, struct sja1105_config*);
-unsigned int sja1105_config_get_length(struct sja1105_config *config);
+unsigned int sja1105_static_config_get_length(struct sja1105_static_config*);
+int  sja1105_static_config_add_entry(struct sja1105_table_header*, void *, \
+                                     struct sja1105_static_config*);
+int  sja1105_static_config_hexdump(void*);
+int  sja1105_static_config_check_valid(struct sja1105_static_config*);
+void sja1105_static_config_pack(void*, struct sja1105_static_config*);
+int  sja1105_static_config_unpack(void*, struct sja1105_static_config*);
+unsigned int sja1105_static_config_get_length(struct sja1105_static_config*);
 
-int sja1105_config_default(struct sja1105_config*,
-                           enum sja1105_default_config);
+int sja1105_static_config_default(struct sja1105_static_config*,
+                                  enum sja1105_default_static_config);
 
 void sja1105_lib_get_version(char *buf);
 

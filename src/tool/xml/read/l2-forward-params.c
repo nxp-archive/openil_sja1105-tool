@@ -49,7 +49,7 @@ error:
 	return -1;
 }
 
-static int parse_entry(xmlNode *node, struct sja1105_config *config)
+static int parse_entry(xmlNode *node, struct sja1105_static_config *config)
 {
 	struct sja1105_l2_forwarding_params_table entry;
 	int rc;
@@ -67,7 +67,7 @@ out:
 	return rc;
 }
 
-int l2_forwarding_parameters_table_parse(xmlNode *node, struct sja1105_config *config)
+int l2_forwarding_parameters_table_parse(xmlNode *node, struct sja1105_static_config *config)
 {
 	int rc = 0;
 	xmlNode *c;

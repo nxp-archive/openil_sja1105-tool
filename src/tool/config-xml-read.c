@@ -35,7 +35,7 @@
 
 #ifndef LIBXML_TREE_ENABLED
 
-int sja1105_config_read_from_xml(const char *xml_file, struct sja1105_config *config)
+int sja1105_static_config_read_from_xml(const char *xml_file, struct sja1105_static_config *config)
 {
 	loge("Tree support is not compiled in libxml2!");
 	return -1;
@@ -93,7 +93,7 @@ out:
 	return rc;
 }
 
-static int parse_config_table(xmlNode *node, struct sja1105_config *config)
+static int parse_config_table(xmlNode *node, struct sja1105_static_config *config)
 {
 	char *table_name;
 
@@ -119,7 +119,7 @@ static int parse_config_table(xmlNode *node, struct sja1105_config *config)
 		"retagging-table",
 		"xmii-mode-parameters-table",
 	};
-	int (*next_parse_config_table[])(xmlNode *, struct sja1105_config *) = {
+	int (*next_parse_config_table[])(xmlNode *, struct sja1105_static_config *) = {
 		schedule_table_parse,
 		schedule_entry_points_table_parse,
 		vl_lookup_table_parse,
@@ -152,7 +152,7 @@ out:
 	return rc;
 }
 
-static int parse_root(xmlNode *root, struct sja1105_config *config)
+static int parse_root(xmlNode *root, struct sja1105_static_config *config)
 {
 	xmlNode *node;
 	int rc = 0;
@@ -181,7 +181,7 @@ out:
 	return rc;
 }
 
-int sja1105_config_read_from_xml(const char *xml_file, struct sja1105_config *config)
+int sja1105_static_config_read_from_xml(const char *xml_file, struct sja1105_static_config *config)
 {
 	xmlNode *root = NULL;
 	xmlDoc  *doc = NULL;

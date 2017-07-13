@@ -41,27 +41,27 @@
 /* This is the top-level _SJA1105_TOOL_INTERNAL header */
 #include <tool/internal.h>
 
-int schedule_table_parse(xmlNode *node, struct sja1105_config *config);
-int schedule_entry_points_table_parse(xmlNode *node, struct sja1105_config *config);
-int schedule_entry_points_parameters_table_parse(xmlNode *node, struct sja1105_config *config);
-int vl_lookup_table_parse(xmlNode *node, struct sja1105_config *config);
-int vl_policing_table_parse(xmlNode *node, struct sja1105_config *config);
-int vl_forwarding_table_parse(xmlNode *node, struct sja1105_config *config);
-int l2_address_lookup_table_parse(xmlNode *node, struct sja1105_config *config);
-int l2_policing_table_parse(xmlNode *node, struct sja1105_config *config);
-int vlan_lookup_table_parse(xmlNode *node, struct sja1105_config *config);
-int l2_forwarding_table_parse(xmlNode *node, struct sja1105_config *config);
-int mac_configuration_table_parse(xmlNode *node, struct sja1105_config *config);
-int schedule_parameters_table_parse(xmlNode *node, struct sja1105_config *config);
-int schedule_entry_points_parameters_parse(xmlNode *node, struct sja1105_config *config);
-int vl_fw_params_table_parse(xmlNode *node, struct sja1105_config *config);
-int l2_address_lookup_parameters_table_parse(xmlNode *node, struct sja1105_config *config);
-int l2_forwarding_parameters_table_parse(xmlNode *node, struct sja1105_config *config);
-int avb_parameters_table_parse(xmlNode *node, struct sja1105_config *config);
-int clock_synchronization_parameters_table_parse(xmlNode *node, struct sja1105_config *config);
-int general_parameters_table_parse(xmlNode *node, struct sja1105_config *config);
-int retagging_table_parse(xmlNode *node, struct sja1105_config *config);
-int xmii_mode_parameters_table_parse(xmlNode *node, struct sja1105_config *config);
+int schedule_table_parse(xmlNode*, struct sja1105_static_config*);
+int schedule_entry_points_table_parse(xmlNode*, struct sja1105_static_config*);
+int schedule_entry_points_parameters_table_parse(xmlNode*, struct sja1105_static_config*);
+int vl_lookup_table_parse(xmlNode*, struct sja1105_static_config*);
+int vl_policing_table_parse(xmlNode*, struct sja1105_static_config*);
+int vl_forwarding_table_parse(xmlNode*, struct sja1105_static_config*);
+int l2_address_lookup_table_parse(xmlNode*, struct sja1105_static_config*);
+int l2_policing_table_parse(xmlNode*, struct sja1105_static_config*);
+int vlan_lookup_table_parse(xmlNode*, struct sja1105_static_config*);
+int l2_forwarding_table_parse(xmlNode*, struct sja1105_static_config*);
+int mac_configuration_table_parse(xmlNode*, struct sja1105_static_config*);
+int schedule_parameters_table_parse(xmlNode*, struct sja1105_static_config*);
+int schedule_entry_points_parameters_parse(xmlNode*, struct sja1105_static_config*);
+int vl_fw_params_table_parse(xmlNode*, struct sja1105_static_config*);
+int l2_address_lookup_parameters_table_parse(xmlNode*, struct sja1105_static_config*);
+int l2_forwarding_parameters_table_parse(xmlNode*, struct sja1105_static_config*);
+int avb_parameters_table_parse(xmlNode*, struct sja1105_static_config*);
+int clock_synchronization_parameters_table_parse(xmlNode*, struct sja1105_static_config*);
+int general_parameters_table_parse(xmlNode*, struct sja1105_static_config*);
+int retagging_table_parse(xmlNode*, struct sja1105_static_config*);
+int xmii_mode_parameters_table_parse(xmlNode*, struct sja1105_static_config*);
 int xml_read_field(void*, char*, xmlNode*);
 int xml_read_array(void*, int, char*, xmlNode*);
 

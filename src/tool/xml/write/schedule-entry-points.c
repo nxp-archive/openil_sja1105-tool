@@ -30,7 +30,9 @@
  *****************************************************************************/
 #include "internal.h"
 
-int schedule_entry_points_table_write(xmlTextWriterPtr writer, struct sja1105_config *config)
+int
+schedule_entry_points_table_write(xmlTextWriterPtr writer,
+                                  struct sja1105_static_config *config)
 {
 	int rc = 0;
 	int i;

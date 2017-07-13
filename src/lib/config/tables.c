@@ -46,7 +46,8 @@ static void sja1105_table_write_crc(char *table_start, char *crc_ptr)
 	gtable_pack(crc_ptr, &computed_crc, 31, 0, 4);
 }
 
-int sja1105_config_add_entry(struct sja1105_table_header *hdr, void *buf, struct sja1105_config *config)
+int sja1105_static_config_add_entry(struct sja1105_table_header *hdr, void *buf,
+                                    struct sja1105_static_config *config)
 {
 	switch (hdr->block_id) {
 	case BLKID_SCHEDULE_TABLE:
@@ -349,10 +350,10 @@ int sja1105_config_add_entry(struct sja1105_table_header *hdr, void *buf, struct
 	return 0;
 }
 
-int sja1105_config_hexdump(void *buf)
+int sja1105_static_config_hexdump(void *buf)
 {
 	struct sja1105_table_header hdr;
-	struct sja1105_config config;
+	struct sja1105_static_config config;
 	char *p = buf;
 	char *table_end;
 	int bytes;
@@ -371,7 +372,8 @@ int sja1105_config_hexdump(void *buf)
 
 		table_end = p + hdr.len * 4;
 		while (p < table_end) {
-			bytes = sja1105_config_add_entry(&hdr, p, &config);
+			bytes = sja1105_static_config_add_entry(&hdr, p,
+			                                        &config);
 			if (bytes < 0) {
 				goto error;
 			}
@@ -395,7 +397,8 @@ error:
 	return -1;
 }
 
-static void sja1105_config_patch_vllupformat(struct sja1105_config *config)
+static void
+sja1105_static_config_patch_vllupformat(struct sja1105_static_config *config)
 {
 	int i;
 
@@ -404,7 +407,8 @@ static void sja1105_config_patch_vllupformat(struct sja1105_config *config)
 	}
 }
 
-int sja1105_config_check_memory_size(struct sja1105_config *config)
+int
+sja1105_static_config_check_memory_size(struct sja1105_static_config *config)
 {
 	int max_mem;
 	int mem = 0;
@@ -437,7 +441,7 @@ int sja1105_config_check_memory_size(struct sja1105_config *config)
 	return 0;
 }
 
-int sja1105_config_check_valid(struct sja1105_config *config)
+int sja1105_static_config_check_valid(struct sja1105_static_config *config)
 {
 	if (config->schedule_count > 0) {
 		if (config->schedule_entry_points_count == 0) {
@@ -498,10 +502,11 @@ int sja1105_config_check_valid(struct sja1105_config *config)
 		loge("xmii-mode-parameters-table is empty");
 		return -1;
 	}
-	return sja1105_config_check_memory_size(config);
+	return sja1105_static_config_check_memory_size(config);
 }
 
-int sja1105_config_unpack(void *buf, struct sja1105_config *config)
+int
+sja1105_static_config_unpack(void *buf, struct sja1105_static_config *config)
 {
 	struct sja1105_table_header hdr;
 	char *p = buf;
@@ -534,7 +539,8 @@ int sja1105_config_unpack(void *buf, struct sja1105_config *config)
 		table_end = p + hdr.len * 4;
 		computed_crc = ether_crc32_le(p, hdr.len * 4);
 		while (p < table_end) {
-			bytes = sja1105_config_add_entry(&hdr, p, config);
+			bytes = sja1105_static_config_add_entry(&hdr, p,
+			                                        config);
 			if (bytes < 0) {
 				goto error;
 			}
@@ -553,13 +559,14 @@ int sja1105_config_unpack(void *buf, struct sja1105_config *config)
 			goto error;
 		}
 	}
-	sja1105_config_patch_vllupformat(config);
+	sja1105_static_config_patch_vllupformat(config);
 	return 0;
 error:
 	return -1;
 }
 
-void sja1105_config_pack(void *buf, struct sja1105_config *config)
+void
+sja1105_static_config_pack(void *buf, struct sja1105_static_config *config)
 {
 #define PACK_TABLE_IN_BUF_FN(entry_count, entry_size, blk_id, set_fn, array) \
 	if (entry_count) {                                                   \
@@ -679,7 +686,8 @@ void sja1105_config_pack(void *buf, struct sja1105_config *config)
 	sja1105_table_header_pack(p, &header);
 }
 
-unsigned int sja1105_config_get_length(struct sja1105_config *config)
+unsigned int
+sja1105_static_config_get_length(struct sja1105_static_config *config)
 {
 	unsigned int sum = 0;
 	unsigned int header_count = 0;

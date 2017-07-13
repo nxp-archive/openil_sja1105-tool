@@ -71,7 +71,7 @@ out:
 }
 
 static int schedule_table_entry_modify(
-		struct sja1105_config *config,
+		struct sja1105_static_config *config,
 		int    entry_index,
 		char  *field_name,
 		char  *field_val)
@@ -124,7 +124,7 @@ out:
 }
 
 static int schedule_entry_points_table_entry_modify(
-		struct sja1105_config *config,
+		struct sja1105_static_config *config,
 		int    entry_index,
 		char  *field_name,
 		char  *field_val)
@@ -163,7 +163,7 @@ out:
 }
 
 static int l2_lookup_table_entry_modify(
-		struct sja1105_config *config,
+		struct sja1105_static_config *config,
 		int    entry_index,
 		char  *field_name,
 		char  *field_val)
@@ -206,7 +206,7 @@ out:
 }
 
 static int l2_policing_table_entry_modify(
-		struct sja1105_config *config,
+		struct sja1105_static_config *config,
 		int    entry_index,
 		char  *field_name,
 		char  *field_val)
@@ -250,7 +250,7 @@ out:
 }
 
 static int vlan_lookup_table_entry_modify(
-		struct sja1105_config *config,
+		struct sja1105_static_config *config,
 		int    entry_index,
 		char  *field_name,
 		char  *field_val)
@@ -296,7 +296,7 @@ out:
 }
 
 static int l2_fw_table_entry_modify(
-		struct sja1105_config *config,
+		struct sja1105_static_config *config,
 		int    entry_index,
 		char  *field_name,
 		char  *field_val)
@@ -338,7 +338,7 @@ out:
 }
 
 static int mac_config_table_entry_modify(
-		struct sja1105_config *config,
+		struct sja1105_static_config *config,
 		int    entry_index,
 		char  *field_name,
 		char  *field_val)
@@ -409,7 +409,7 @@ out:
 }
 
 static int schedule_params_table_entry_modify(
-		struct sja1105_config *config,
+		struct sja1105_static_config *config,
 		int    entry_index,
 		char  *field_name,
 		char  *field_val)
@@ -444,7 +444,7 @@ out:
 }
 
 static int schedule_entry_points_params_table_entry_modify(
-		struct sja1105_config *config,
+		struct sja1105_static_config *config,
 		int    entry_index,
 		char  *field_name,
 		char  *field_val)
@@ -481,7 +481,7 @@ out:
 }
 
 static int l2_lookup_params_table_entry_modify(
-		struct sja1105_config *config,
+		struct sja1105_static_config *config,
 		int    entry_index,
 		char  *field_name,
 		char  *field_val)
@@ -526,7 +526,7 @@ out:
 }
 
 static int l2_fw_params_table_entry_modify(
-		struct sja1105_config *config,
+		struct sja1105_static_config *config,
 		int    entry_index,
 		char  *field_name,
 		char  *field_val)
@@ -563,7 +563,7 @@ out:
 }
 
 static int general_params_table_entry_modify(
-		struct sja1105_config *config,
+		struct sja1105_static_config *config,
 		int    entry_index,
 		char  *field_name,
 		char  *field_val)
@@ -636,7 +636,7 @@ out:
 }
 
 static int xmii_table_entry_modify(
-		struct sja1105_config *config,
+		struct sja1105_static_config *config,
 		int    entry_index,
 		char  *field_name,
 		char  *field_val)
@@ -673,7 +673,7 @@ out:
 }
 
 static int vl_lookup_table_entry_modify(
-		struct sja1105_config *config,
+		struct sja1105_static_config *config,
 		int    entry_index,
 		char  *field_name,
 		char  *field_val)
@@ -724,7 +724,7 @@ out:
 }
 
 static int vl_policing_table_entry_modify(
-		struct sja1105_config *config,
+		struct sja1105_static_config *config,
 		int    entry_index,
 		char  *field_name,
 		char  *field_val)
@@ -767,7 +767,7 @@ out:
 }
 
 static int vl_fw_table_entry_modify(
-		struct sja1105_config *config,
+		struct sja1105_static_config *config,
 		int    entry_index,
 		char  *field_name,
 		char  *field_val)
@@ -808,7 +808,7 @@ out:
 }
 
 static int retagging_table_entry_modify(
-		__attribute__((unused)) struct sja1105_config *config,
+		__attribute__((unused)) struct sja1105_static_config *config,
 		__attribute__((unused)) int entry,
 		__attribute__((unused)) char *field_name,
 		__attribute__((unused)) char *field_val)
@@ -818,7 +818,7 @@ static int retagging_table_entry_modify(
 }
 
 static int avb_params_table_entry_modify(
-		struct sja1105_config *config,
+		struct sja1105_static_config *config,
 		int    entry_index,
 		char  *field_name,
 		char  *field_val)
@@ -855,7 +855,7 @@ out:
 }
 
 static int clock_sync_params_table_entry_modify(
-		__attribute__((unused)) struct sja1105_config *config,
+		__attribute__((unused)) struct sja1105_static_config *config,
 		__attribute__((unused)) int entry,
 		__attribute__((unused)) char *field_name,
 		__attribute__((unused)) char *field_val)
@@ -865,7 +865,7 @@ static int clock_sync_params_table_entry_modify(
 }
 
 static int vl_fw_params_table_entry_modify(
-		struct sja1105_config *config,
+		struct sja1105_static_config *config,
 		int    entry_index,
 		char  *field_name,
 		char  *field_val)
@@ -902,7 +902,7 @@ out:
 }
 
 int config_table_entry_modify(
-		struct sja1105_config *config,
+		struct sja1105_static_config *config,
 		char *table_name,
 		char *field_name,
 		char *field_val)
@@ -929,7 +929,7 @@ int config_table_entry_modify(
 		"retagging-table",
 		"xmii-mode-parameters-table",
 	};
-	int (*next_table_entry_modify[])(struct sja1105_config*, int, char*, char*) = {
+	int (*next_table_entry_modify[])(struct sja1105_static_config*, int, char*, char*) = {
 		schedule_table_entry_modify,
 		schedule_entry_points_table_entry_modify,
 		vl_lookup_table_entry_modify,

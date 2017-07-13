@@ -31,7 +31,7 @@
 #include "internal.h"
 
 int clock_synchronization_parameters_table_parse(__attribute__((unused)) xmlNode *node,
-                                                 __attribute__((unused)) struct sja1105_config *config)
+                                                 __attribute__((unused)) struct sja1105_static_config *config)
 {
 	loge("Clock Synchronization Parameters Table is unimplemented!");
 	return -1;
