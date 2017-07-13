@@ -93,6 +93,10 @@ docs/man/%: docs/md/%.md
 docs/pdf/%.pdf: docs/md/%.md
 	pandoc --standalone -t latex $^ -o $@
 
+# Headers
+
+HEADERS=$(wildcard src/lib/include/*.h)
+
 # Installation
 
 install: install-binaries install-configs install-manpages install-headers
@@ -109,15 +113,9 @@ install-manpages: $(MANPAGES)
 	$(foreach manpage, $^, install -m 0644 -D $(manpage) \
 		$(call get_manpage_destination,$(manpage));)
 
-# Headers
-
-SRC_HEADERS=$(wildcard src/lib/include/*.h)
-DST_HEADERS=$(patsubst src/lib/%, $(DESTDIR)/usr/%, $(SRC_HEADERS))
-
-install-headers: $(DST_HEADERS)
-
-$(DESTDIR)/usr/include/%.h: src/lib/include/%.h
-	install -m 0644 -D $^ $@
+install-headers: $(HEADERS)
+	$(foreach header, $^, install -m 0644 -D $(header) \
+		$(patsubst src/lib/%, $(DESTDIR)/usr/%, $(header));)
 
 all: install
 
