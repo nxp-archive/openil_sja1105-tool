@@ -1,7 +1,0 @@
-#!/bin/bash
-
-export TOOLCHAIN_PATH=../toolchain
-export TOOLCHAIN_X86_SYSROOT=$TOOLCHAIN_PATH/sysroots/x86_64-fsl-linux
-export TOOLCHAIN_ARM_SYSROOT=$TOOLCHAIN_PATH/sysroots/cortexa7hf-vfp-neon-fsl-linux-gnueabi
-export PATH=$TOOLCHAIN_X86_SYSROOT/bin:$PATH
-source $TOOLCHAIN_PATH/environment-setup-cortexa7hf-vfp-neon-fsl-linux-gnueabi
