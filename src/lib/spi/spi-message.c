@@ -31,6 +31,7 @@
 #include <inttypes.h>
 #include <string.h>
 #include <stdio.h>
+#include <errno.h>
 /* These are our own libraries */
 #include <lib/include/config.h>
 #include <lib/include/gtable.h>
@@ -163,6 +164,7 @@ int sja1105_spi_send_packed_buf(struct sja1105_spi_setup *spi_setup,
 		       size_bytes);                  /* size */
 	} else {
 		loge("read_or_write must be SPI_READ or SPI_WRITE");
+		rc = -EINVAL;
 		goto out;
 	}
 
