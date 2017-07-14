@@ -34,7 +34,7 @@
 #include <inttypes.h>
 #include "internal.h"
 /* From libsja1105 */
-#include <lib/include/config.h>
+#include <lib/include/static-config.h>
 #include <lib/include/spi.h>
 #include <common.h>
 

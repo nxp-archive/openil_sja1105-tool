@@ -32,7 +32,7 @@
 #define _SJA1105_TOOL_INTERNAL
 
 #include <common.h>
-#include <lib/include/config.h>
+#include <lib/include/staging-area.h>
 #include <lib/include/spi.h>
 
 struct general_config {
@@ -49,16 +49,12 @@ extern int SJA1105_VERBOSE_CONDITION;
 extern int SJA1105_DEBUG_CONDITION;
 
 int read_config_file(char*, struct sja1105_spi_setup*, struct general_config*);
-int rgu_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv);
-int ptp_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv);
-int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv);
-int status_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv);
-int config_table_entry_modify(
-		struct sja1105_static_config *config,
-		char *table_name,
-		char *field_name,
-		char *field_val);
-int sja1105_static_config_show(struct sja1105_static_config *config, char *table_name);
+int rgu_parse_args(struct sja1105_spi_setup*, int argc, char **argv);
+int ptp_parse_args(struct sja1105_spi_setup*, int argc, char **argv);
+int config_parse_args(struct sja1105_spi_setup*, int argc, char **argv);
+int status_parse_args(struct sja1105_spi_setup*, int argc, char **argv);
+int staging_area_modify(struct sja1105_staging_area*, char*, char*, char*);
+int sja1105_staging_area_show(struct sja1105_staging_area*, char *table_name);
 
 /* From strings.c, mainly */
 char *trimwhitespace(char *str);

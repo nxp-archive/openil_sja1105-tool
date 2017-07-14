@@ -398,8 +398,4 @@ struct sja1105_static_config {
 	int    xmii_params_count;
 };
 
-enum sja1105_default_static_config {
-	LS1021ATSN = 0,
-};
-
 #endif

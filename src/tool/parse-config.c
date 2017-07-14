@@ -41,7 +41,7 @@
 #include "xml/write/external.h"
 #include "internal.h"
 /* From libsja1105 */
-#include <lib/include/config.h>
+#include <lib/include/staging-area.h>
 #include <lib/include/gtable.h>
 #include <lib/include/spi.h>
 #include <lib/include/ptp.h>
@@ -99,7 +99,8 @@ out:
 	return rc;
 }
 
-int config_hexdump(const char *config_file)
+int
+staging_area_hexdump(const char *staging_area_file)
 {
 	struct stat stat;
 	unsigned int len;
@@ -107,9 +108,9 @@ int config_hexdump(const char *config_file)
 	int fd;
 	int rc;
 
-	fd = open(config_file, O_RDONLY);
+	fd = open(staging_area_file, O_RDONLY);
 	if (fd < 0) {
-		loge("Staging area %s does not exist!", config_file);
+		loge("Staging area %s does not exist!", staging_area_file);
 		rc = fd;
 		goto out_1;
 	}
@@ -133,6 +134,7 @@ int config_hexdump(const char *config_file)
 		loge("error while interpreting config");
 		goto out_3;
 	}
+	/* TODO: hexdump ptp config */
 	rc = 0;
 out_3:
 	free(buf);
@@ -142,7 +144,9 @@ out_1:
 	return rc;
 }
 
-int config_load(const char *config_file, struct sja1105_static_config *config)
+int
+staging_area_load(const char *staging_area_file,
+                  struct sja1105_staging_area *staging_area)
 {
 	struct stat stat;
 	unsigned int len;
@@ -150,9 +154,9 @@ int config_load(const char *config_file, struct sja1105_static_config *config)
 	int fd;
 	int rc;
 
-	fd = open(config_file, O_RDONLY);
+	fd = open(staging_area_file, O_RDONLY);
 	if (fd < 0) {
-		loge("Staging area %s does not exist!", config_file);
+		loge("Staging area %s does not exist!", staging_area_file);
 		rc = fd;
 		goto out_1;
 	}
@@ -171,11 +175,12 @@ int config_load(const char *config_file, struct sja1105_static_config *config)
 	if (rc < 0) {
 		goto out_3;
 	}
-	rc = sja1105_static_config_unpack(buf, config);
+	rc = sja1105_static_config_unpack(buf, &staging_area->static_config);
 	if (rc < 0) {
 		loge("error while interpreting config");
 		goto out_3;
 	}
+	/* TODO read extra PTP config */
 	rc = 0;
 out_3:
 	free(buf);
@@ -185,13 +190,17 @@ out_1:
 	return rc;
 }
 
-int config_save(const char *config_file, struct sja1105_static_config *config)
+int
+staging_area_save(const char *staging_area_file,
+                  struct sja1105_staging_area *staging_area)
 {
+	struct sja1105_static_config *config;
 	int   rc = 0;
 	char *buf;
 	int   len;
 	int   fd;
 
+	config = &staging_area->static_config;
 	len = sja1105_static_config_get_length(config);
 
 	buf = (char*) malloc(len * sizeof(char));
@@ -200,10 +209,11 @@ int config_save(const char *config_file, struct sja1105_static_config *config)
 		goto out_1;
 	}
 	sja1105_static_config_pack(buf, config);
+	/* TODO: write extra PTP config */
 
-	fd = open(config_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	fd = open(staging_area_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (fd < 0) {
-		loge("could not open %s for write", config_file);
+		loge("could not open %s for write", staging_area_file);
 		rc = fd;
 		goto out_2;
 	}
@@ -220,7 +230,9 @@ out_1:
 	return rc;
 }
 
-int config_upload(struct sja1105_spi_setup *spi_setup, struct sja1105_static_config *config)
+int
+static_config_upload(struct sja1105_spi_setup *spi_setup,
+                     struct sja1105_static_config *config)
 {
 	struct   sja1105_table_header final_header;
 	char    *final_header_ptr;
@@ -291,38 +303,8 @@ void get_flush_mode(struct sja1105_spi_setup *spi_setup, int *argc, char ***argv
 	}
 }
 
-int ptp_init(struct sja1105_spi_setup *spi_setup)
-{
-	struct sja1105_ptp_config ptp_config;
-	int rc;
-
-	printf("ptp_init\n");
-	memset(&ptp_config, 0, sizeof(ptp_config));
-	ptp_config.schedule_time = 1;
-	ptp_config.schedule_correction_period = 4000000l;
-	/*ptp_config.schedule_autostart = 1;*/
-	/*ptp_config.pin_toggle_autostart = 1;*/
-	rc = sja1105_ptp_configure(spi_setup, &ptp_config);
-	if (rc < 0) {
-		loge("sja1105_ptp_configure failed");
-		goto out;
-	}
-	rc = sja1105_ptp_start_schedule(spi_setup);
-	if (rc < 0) {
-		loge("sja1105_ptp_start_schedule failed");
-		goto out;
-	}
-	rc = sja1105_ptp_reset(spi_setup);
-	if (rc < 0) {
-		loge("sja1105_ptp_reset failed");
-		goto out;
-	}
-out:
-	return rc;
-}
-
-
-int config_flush(struct sja1105_spi_setup *spi_setup, struct sja1105_static_config *config)
+int static_config_flush(struct sja1105_spi_setup *spi_setup,
+                        struct sja1105_static_config *config)
 {
 	struct sja1105_reset_ctrl     reset = {.rst_ctrl = RGU_COLD};
 	struct sja1105_general_status status;
@@ -353,9 +335,9 @@ int config_flush(struct sja1105_spi_setup *spi_setup, struct sja1105_static_conf
 		loge("sja1105_reset failed");
 		goto out;
 	}
-	rc = config_upload(spi_setup, config);
+	rc = static_config_upload(spi_setup, config);
 	if (rc < 0) {
-		loge("config_upload failed");
+		loge("static_config_upload failed");
 		goto out;
 	}
 	rc = sja1105_clocking_setup(spi_setup, &config->xmii_params[0],
@@ -388,7 +370,28 @@ int config_flush(struct sja1105_spi_setup *spi_setup, struct sja1105_static_conf
 			loge("configuration is invalid");
 		}
 	}
-	ptp_init(spi_setup);
+out:
+	return rc;
+}
+
+int
+staging_area_flush(struct sja1105_spi_setup *spi_setup,
+                   struct sja1105_staging_area *staging_area)
+{
+	int rc;
+
+	rc = static_config_flush(spi_setup, &staging_area->static_config);
+	if (rc < 0) {
+		loge("static_config_flush failed");
+		goto out;
+	}
+	/* TODO: remove this goto */
+	goto out;
+	rc = sja1105_ptp_configure(spi_setup, &staging_area->ptp_config);
+	if (rc < 0) {
+		loge("ptp_init failed");
+		goto out;
+	}
 out:
 	return rc;
 }
@@ -406,7 +409,7 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 		"show",
 		"hexdump",
 	};
-	struct sja1105_static_config config;
+	struct sja1105_staging_area staging_area;
 	int match;
 	int rc;
 
@@ -424,11 +427,11 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 		if (argc != 1) {
 			goto parse_error;
 		}
-		rc = sja1105_static_config_read_from_xml(argv[0], &config);
+		rc = sja1105_staging_area_from_xml(argv[0], &staging_area);
 		if (rc < 0) {
 			goto error;
 		}
-		rc = config_save(spi_setup->staging_area, &config);
+		rc = staging_area_save(spi_setup->staging_area, &staging_area);
 		if (rc < 0) {
 			goto error;
 		}
@@ -438,9 +441,9 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 				loge("sja1105_spi_configure failed");
 				goto error;
 			}
-			rc = config_flush(spi_setup, &config);
+			rc = staging_area_flush(spi_setup, &staging_area);
 			if (rc < 0) {
-				loge("config_flush failed");
+				loge("staging_area_flush failed");
 				goto error;
 			}
 		}
@@ -448,11 +451,11 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 		if (argc != 1) {
 			goto parse_error;
 		}
-		rc = config_load(spi_setup->staging_area, &config);
+		rc = staging_area_load(spi_setup->staging_area, &staging_area);
 		if (rc < 0) {
 			goto error;
 		}
-		rc = sja1105_static_config_write_to_xml(argv[0], &config);
+		rc = sja1105_staging_area_to_xml(argv[0], &staging_area);
 		if (rc < 0) {
 			goto error;
 		}
@@ -460,7 +463,7 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 		const char *default_config_options[] = {
 			"ls1021atsn",
 		};
-		enum sja1105_default_static_config default_configs[] = {
+		enum sja1105_default_staging_area default_configs[] = {
 			LS1021ATSN,
 		};
 		get_flush_mode(spi_setup, &argc, &argv);
@@ -473,11 +476,12 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 			loge("Unrecognized default config %s", argv[0]);
 			goto error;
 		}
-		rc = sja1105_static_config_default(&config, default_configs[match]);
+		rc = sja1105_default_staging_area(&staging_area,
+		                                  default_configs[match]);
 		if (rc < 0) {
 			goto error;
 		}
-		rc = config_save(spi_setup->staging_area, &config);
+		rc = staging_area_save(spi_setup->staging_area, &staging_area);
 		if (rc < 0) {
 			goto error;
 		}
@@ -487,7 +491,7 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 				loge("sja1105_spi_configure failed");
 				goto error;
 			}
-			rc = config_flush(spi_setup, &config);
+			rc = staging_area_flush(spi_setup, &staging_area);
 			if (rc < 0) {
 				goto error;
 			}
@@ -496,7 +500,7 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 		if (argc != 0) {
 			goto parse_error;
 		}
-		rc = config_load(spi_setup->staging_area, &config);
+		rc = staging_area_load(spi_setup->staging_area, &staging_area);
 		if (rc < 0) {
 			goto error;
 		}
@@ -505,7 +509,7 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 			loge("sja1105_spi_configure failed");
 			goto error;
 		}
-		rc = config_flush(spi_setup, &config);
+		rc = staging_area_flush(spi_setup, &staging_area);
 		if (rc < 0) {
 			goto error;
 		}
@@ -514,15 +518,17 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 		/*if (argc != 6) {*/
 			/*goto parse_error;*/
 		/*}*/
-		rc = config_load(spi_setup->staging_area, &config);
+		rc = staging_area_load(spi_setup->staging_area, &staging_area);
 		if (rc < 0) {
 			goto error;
 		}
-		rc = config_table_entry_modify(&config, argv[0], argv[1], argv[2]);
+		/* TODO pass argc and argv and let it do the parsing */
+		rc = staging_area_modify(&staging_area, argv[0],
+		                         argv[1], argv[2]);
 		if (rc < 0) {
 			goto error;
 		}
-		rc = config_save(spi_setup->staging_area, &config);
+		rc = staging_area_save(spi_setup->staging_area, &staging_area);
 		if (rc < 0) {
 			goto error;
 		}
@@ -532,7 +538,7 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 				loge("sja1105_spi_configure failed");
 				goto error;
 			}
-			rc = config_flush(spi_setup, &config);
+			rc = staging_area_flush(spi_setup, &staging_area);
 			if (rc < 0) {
 				goto error;
 			}
@@ -541,8 +547,8 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 		if (argc != 0) {
 			goto parse_error;
 		}
-		memset(&config, 0, sizeof(config));
-		rc = config_save(spi_setup->staging_area, &config);
+		memset(&staging_area, 0, sizeof(staging_area));
+		rc = staging_area_save(spi_setup->staging_area, &staging_area);
 		if (rc < 0) {
 			goto error;
 		}
@@ -550,11 +556,11 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 		if (argc != 0 && argc != 1) {
 			goto parse_error;
 		}
-		rc = config_load(spi_setup->staging_area, &config);
+		rc = staging_area_load(spi_setup->staging_area, &staging_area);
 		if (rc < 0) {
 			goto error;
 		}
-		rc = sja1105_static_config_show(&config, argv[0]);
+		rc = sja1105_staging_area_show(&staging_area, argv[0]);
 		if (rc < 0) {
 			goto error;
 		}
@@ -562,7 +568,7 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 		if (argc != 0) {
 			goto parse_error;
 		}
-		rc = config_hexdump(spi_setup->staging_area);
+		rc = staging_area_hexdump(spi_setup->staging_area);
 		if (rc < 0) {
 			goto error;
 		}

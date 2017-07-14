@@ -33,7 +33,7 @@
 #include <stdio.h>
 #include <errno.h>
 /* These are our own libraries */
-#include <lib/include/config.h>
+#include <lib/include/static-config.h>
 #include <lib/include/gtable.h>
 #include <lib/include/spi.h>
 #include <common.h>

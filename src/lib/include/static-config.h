@@ -35,7 +35,7 @@
 #include "cgu-tables.h"
 #include "rgu-tables.h"
 #include "status-tables.h"
-#include "config-tables.h"
+#include "static-config-tables.h"
 
 void sja1105_l2_forwarding_params_table_show(struct sja1105_l2_forwarding_params_table*);
 void sja1105_l2_forwarding_params_table_fmt_show(char*, char*, struct sja1105_l2_forwarding_params_table*);
@@ -122,10 +122,6 @@ int  sja1105_static_config_hexdump(void*);
 int  sja1105_static_config_check_valid(struct sja1105_static_config*);
 void sja1105_static_config_pack(void*, struct sja1105_static_config*);
 int  sja1105_static_config_unpack(void*, struct sja1105_static_config*);
-unsigned int sja1105_static_config_get_length(struct sja1105_static_config*);
-
-int sja1105_static_config_default(struct sja1105_static_config*,
-                                  enum sja1105_default_static_config);
 
 void sja1105_lib_get_version(char *buf);
 

@@ -30,13 +30,16 @@
  *****************************************************************************/
 #include <string.h>
 /* These are our own include files */
-#include <lib/include/config.h>
+#include <lib/include/static-config.h>
+#include <lib/include/staging-area.h>
 #include <common.h>
 
 int
-sja1105_static_config_default(struct sja1105_static_config *config,
-                              enum sja1105_default_static_config config_name)
+sja1105_default_staging_area(struct sja1105_staging_area *staging_area,
+                             enum sja1105_default_staging_area config_name)
 {
+	struct sja1105_static_config *static_config;
+	struct sja1105_ptp_config    *ptp_config;
 	uint8_t ls1021atsn_packed_buf[] = {
 		/* L2 Policing Table, length 320 bytes (80 x 32-bit words), CRC 216F256B */
 		/* Header: */
@@ -193,9 +196,21 @@ sja1105_static_config_default(struct sja1105_static_config *config,
 		0x00, 0x00, 0x00, 0x00,
 		0x8C, 0xCA, 0x28, 0x6D,
 	};
+	static_config = &staging_area->static_config;
+	ptp_config    = &staging_area->ptp_config;
+
 	if (config_name == LS1021ATSN) {
+		/* PTP config */
+		ptp_config->pin_duration               = 1;
+		ptp_config->pin_start                  = 1;
+		ptp_config->schedule_time              = 1;
+		ptp_config->schedule_correction_period = 1000;
+		ptp_config->ts_based_on_ptpclk         = 0;
+		ptp_config->schedule_autostart         = 1;
+		ptp_config->pin_toggle_autostart       = 1;
+		/* Static config */
 		return sja1105_static_config_unpack(ls1021atsn_packed_buf,
-		                                    config);
+		                                    static_config);
 	} else {
 		loge("Unknown default config name %d", config_name);
 		return -1;

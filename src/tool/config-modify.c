@@ -34,7 +34,7 @@
 #include <stdio.h>
 #include "internal.h"
 /* From libsja1105 */
-#include <lib/include/config.h>
+#include <lib/include/staging-area.h>
 #include <common.h>
 
 static void print_usage(const char *prog)
@@ -864,11 +864,11 @@ static int clock_sync_params_table_entry_modify(
 	return -1;
 }
 
-static int vl_fw_params_table_entry_modify(
-		struct sja1105_static_config *config,
-		int    entry_index,
-		char  *field_name,
-		char  *field_val)
+static int
+vl_fw_params_table_entry_modify(struct sja1105_static_config *config,
+                                int    entry_index,
+                                char  *field_name,
+                                char  *field_val)
 {
 	const char *options[] = {
 		"partspc",
@@ -901,13 +901,13 @@ out:
 	return rc;
 }
 
-int config_table_entry_modify(
-		struct sja1105_static_config *config,
-		char *table_name,
-		char *field_name,
-		char *field_val)
+int
+staging_area_modify(struct sja1105_staging_area *staging_area,
+                    char *table_name,
+                    char *field_name,
+                    char *field_val)
 {
-	const char *options[] = {
+	const char *static_config_options[] = {
 		"schedule-table",
 		"schedule-entry-points-table",
 		"vl-lookup-table",
@@ -929,7 +929,8 @@ int config_table_entry_modify(
 		"retagging-table",
 		"xmii-mode-parameters-table",
 	};
-	int (*next_table_entry_modify[])(struct sja1105_static_config*, int, char*, char*) = {
+	int (*next_static_table_modify[])(struct sja1105_static_config*, \
+	                                  int, char*, char*) = {
 		schedule_table_entry_modify,
 		schedule_entry_points_table_entry_modify,
 		vl_lookup_table_entry_modify,
@@ -973,12 +974,13 @@ int config_table_entry_modify(
 		/* So we only match on the table field_name, but not on the entry index */
 		*index_ptr = '\0';
 	}
-	rc = get_match(table_name, options, ARRAY_SIZE(options));
+	rc = get_match(table_name, static_config_options,
+	               ARRAY_SIZE(static_config_options));
 	if (rc < 0) {
 		goto out;
 	}
 	logv("Table %s, entry %" PRIu64", field %s, value %s",
-	     options[rc], entry_index, field_name, field_val);
+	     static_config_options[rc], entry_index, field_name, field_val);
 	if (field_name == NULL) {
 		rc = -1;
 		print_usage("sja1105-tool");
@@ -988,7 +990,8 @@ int config_table_entry_modify(
 		printf("Please supply a value for field %s!\n", field_name);
 		goto out;
 	}
-	rc = next_table_entry_modify[rc](config, entry_index, field_name, field_val);
+	rc = next_static_table_modify[rc](&staging_area->static_config,
+	                                  entry_index, field_name, field_val);
 	if (rc < 0) {
 		loge("modify failed!");
 		goto out;

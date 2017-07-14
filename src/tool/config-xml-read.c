@@ -29,13 +29,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 #include "xml/read/external.h"
-#include <lib/include/config.h>
+#include <errno.h>
+#include <lib/include/staging-area.h>
 #include <common.h>
 #include "internal.h"
 
 #ifndef LIBXML_TREE_ENABLED
 
-int sja1105_static_config_read_from_xml(const char *xml_file, struct sja1105_static_config *config)
+int
+sja1105_staging_area_from_xml(__attribute__((unused)) const char *xml_file,
+                              __attribute__((unused)) struct
+                              sja1105_staging_area *staging_area)
 {
 	loge("Tree support is not compiled in libxml2!");
 	return -1;
@@ -93,7 +97,8 @@ out:
 	return rc;
 }
 
-static int parse_config_table(xmlNode *node, struct sja1105_static_config *config)
+static int
+parse_config_table(xmlNode *node, struct sja1105_static_config *config)
 {
 	char *table_name;
 
@@ -119,7 +124,8 @@ static int parse_config_table(xmlNode *node, struct sja1105_static_config *confi
 		"retagging-table",
 		"xmii-mode-parameters-table",
 	};
-	int (*next_parse_config_table[])(xmlNode *, struct sja1105_static_config *) = {
+	int (*next_parse_config_table[])(xmlNode *, struct
+	                                 sja1105_static_config *) = {
 		schedule_table_parse,
 		schedule_entry_points_table_parse,
 		vl_lookup_table_parse,
@@ -152,8 +158,37 @@ out:
 	return rc;
 }
 
-static int parse_root(xmlNode *root, struct sja1105_static_config *config)
+static int
+parse_static_config(xmlNode *node, struct sja1105_static_config *config)
 {
+	xmlNode *child;
+	int rc = 0;
+
+	for (child = node->children; child != NULL; child = child->next) {
+		if (child->type != XML_ELEMENT_NODE) {
+			continue;
+		}
+		rc = parse_config_table(child, config);
+		if (rc < 0) {
+			loge("parse_config_table failed");
+			goto out;
+		}
+	}
+out:
+	return rc;
+}
+
+static int
+parse_ptp_config(__attribute__((unused)) xmlNode *node, __attribute__((unused)) struct sja1105_ptp_config *config)
+{
+	int rc = 0;
+	return rc;
+}
+
+static int
+parse_root(xmlNode *root, struct sja1105_staging_area *staging_area)
+{
+	char *config_section;
 	xmlNode *node;
 	int rc = 0;
 
@@ -171,7 +206,17 @@ static int parse_root(xmlNode *root, struct sja1105_static_config *config)
 		if (node->type != XML_ELEMENT_NODE) {
 			continue;
 		}
-		rc = parse_config_table(node, config);
+		config_section = (char*) node->name;
+		if (strcmp(config_section, "static") == 0) {
+			rc = parse_static_config(node,
+			                        &staging_area->static_config);
+		} else if (strcmp(config_section, "ptp") == 0) {
+			rc = parse_ptp_config(node,
+			                     &staging_area->ptp_config);
+		} else {
+			loge("unknown config section %s", config_section);
+			rc = -EINVAL;
+		}
 		if (rc < 0) {
 			loge("Could not parse XML file!");
 			goto out;
@@ -181,7 +226,9 @@ out:
 	return rc;
 }
 
-int sja1105_static_config_read_from_xml(const char *xml_file, struct sja1105_static_config *config)
+int
+sja1105_staging_area_from_xml(const char *xml_file,
+                              struct sja1105_staging_area *staging_area)
 {
 	xmlNode *root = NULL;
 	xmlDoc  *doc = NULL;
@@ -203,8 +250,8 @@ int sja1105_static_config_read_from_xml(const char *xml_file, struct sja1105_sta
 		loge("failed to get root element");
 		goto out;
 	}
-	memset(config, 0, sizeof(*config));
-	rc = parse_root(root, config);
+	memset(staging_area, 0, sizeof(*staging_area));
+	rc = parse_root(root, staging_area);
 out:
 	xmlFreeDoc(doc);
 	xmlCleanupParser();
