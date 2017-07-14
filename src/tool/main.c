@@ -67,7 +67,7 @@ static int parse_special_args(int *argc, char ***argv,
 {
 	int more_special_args;
 	char *arg;
-	int rc;
+	int rc = 0;
 
 	do {
 		more_special_args = 0;

@@ -36,6 +36,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <inttypes.h>
+#include <errno.h>
 #include "xml/read/external.h"
 #include "xml/write/external.h"
 #include "internal.h"
@@ -239,6 +240,7 @@ int config_upload(struct sja1105_spi_setup *spi_setup, struct sja1105_static_con
 	config_buf = (char*) malloc(config_buf_len * sizeof(char));
 	if (!config_buf) {
 		loge("malloc failed");
+		rc = -errno;
 		goto out;
 	}
 	/* Write Device ID to first 4 bytes of config_buf */
