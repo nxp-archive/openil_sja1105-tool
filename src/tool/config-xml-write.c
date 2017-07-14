@@ -30,13 +30,16 @@
  *****************************************************************************/
 #include <string.h>
 #include "xml/write/external.h"
-#include <lib/include/config.h>
+#include <lib/include/staging-area.h>
 #include <common.h>
 #include "internal.h"
 
 #if !defined(LIBXML_WRITER_ENABLED) || !defined(LIBXML_OUTPUT_ENABLED)
 
-int sja1105_static_config_write_to_xml(char *filename, struct sja1105_static_config *config)
+int
+sja1105_staging_area_to_xml(__attribute__((unused)) char *xml_file,
+                            __attribute__((unused)) struct sja1105_staging_area
+                            *staging_area)
 {
 	loge("Writer or output support is not compiled in libxml!");
 	return -1;
@@ -64,7 +67,9 @@ int xml_write_array(xmlTextWriterPtr writer, char *field, uint64_t *values, int 
 	return xmlTextWriterWriteElement(writer, BAD_CAST field, BAD_CAST print_buf);
 }
 
-int write_config_tables(xmlTextWriterPtr writer, struct sja1105_static_config *config)
+static int
+static_config_write(xmlTextWriterPtr writer,
+                    struct sja1105_static_config *config)
 {
 	const char *options[] = {
 		"schedule-table",
@@ -88,7 +93,8 @@ int write_config_tables(xmlTextWriterPtr writer, struct sja1105_static_config *c
 		"retagging-table",
 		"xmii-mode-parameters-table",
 	};
-	int (*next_write_config_table[])(xmlTextWriterPtr, struct sja1105_static_config *) = {
+	int (*next_write_config_table[])(xmlTextWriterPtr,
+	                                 struct sja1105_static_config *) = {
 		schedule_table_write,
 		schedule_entry_points_table_write,
 		vl_lookup_table_write,
@@ -135,6 +141,11 @@ int write_config_tables(xmlTextWriterPtr writer, struct sja1105_static_config *c
 	int rc = 0;
 	unsigned int i;
 
+	rc = xmlTextWriterStartElement(writer, BAD_CAST "static");
+	if (rc < 0) {
+		loge("could not create root element for static config");
+		goto out;
+	}
 	for (i = 0; i < ARRAY_SIZE(options); i++) {
 		if (entry_counts[i]) {
 			rc |= xmlTextWriterStartElement(writer, BAD_CAST options[i]);
@@ -145,23 +156,37 @@ int write_config_tables(xmlTextWriterPtr writer, struct sja1105_static_config *c
 			}
 		}
 	}
+	rc = xmlTextWriterEndElement(writer);
+	if (rc < 0) {
+		loge("could not end root element for static config");
+		goto out;
+	}
 out:
 	return rc;
 }
 
-int sja1105_static_config_write_to_xml(char *filename, struct sja1105_static_config *config)
+static int
+ptp_config_write(__attribute__((unused)) xmlTextWriterPtr writer,
+                 __attribute__((unused)) struct sja1105_ptp_config *ptp_config)
+{
+	return 0;
+}
+
+int
+sja1105_staging_area_to_xml(char *xml_file,
+                            struct sja1105_staging_area *staging_area)
 {
 	int rc = 0;
 	xmlTextWriterPtr writer;
 
 	/*
-	 * this initialize the library and check potential ABI mismatches
+	 * this initializes the library and checks potential ABI mismatches
 	 * between the version it was compiled for and the actual shared
 	 * library used.
 	 */
 	LIBXML_TEST_VERSION
 
-	writer = xmlNewTextWriterFilename(filename, 0);
+	writer = xmlNewTextWriterFilename(xml_file, 0);
 	if (writer == NULL) {
 		loge("cannot create xml writer");
 		rc = -1;
@@ -177,17 +202,25 @@ int sja1105_static_config_write_to_xml(char *filename, struct sja1105_static_con
 	if (rc < 0) {
 		goto out;
 	}
+	/* Root element */
 	rc = xmlTextWriterStartElement(writer, BAD_CAST SJA1105_NETCONF_ROOT);
 	if (rc < 0) {
 		goto out;
 	}
 	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "xmlns",
 	                                 BAD_CAST SJA1105_NETCONF_NS);
-	rc = write_config_tables(writer, config);
+	/* Static config */
+	rc = static_config_write(writer, &staging_area->static_config);
 	if (rc < 0) {
 		loge("could not write config tables");
 		goto out;
 	}
+	/* PTP config */
+	rc = ptp_config_write(writer, &staging_area->ptp_config);
+	if (rc < 0) {
+		goto out;
+	}
+	/* End root element */
 	rc = xmlTextWriterEndElement(writer);
 	if (rc < 0) {
 		goto out;

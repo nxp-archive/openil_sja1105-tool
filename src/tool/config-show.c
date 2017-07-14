@@ -36,7 +36,7 @@
 #include <unistd.h>
 #include "internal.h"
 /* From libsja1105 */
-#include <lib/include/config.h>
+#include <lib/include/static-config.h>
 #include <common.h>
 
 static void schedule_table_show(struct sja1105_static_config *config)
@@ -385,7 +385,9 @@ static void vl_fw_params_table_show(struct sja1105_static_config *config)
 	show_print_bufs(print_bufs, config->vl_forwarding_params_count);
 }
 
-int sja1105_static_config_show(struct sja1105_static_config *config, char *table_name)
+int
+sja1105_staging_area_show(struct sja1105_staging_area *staging_area,
+                          char *table_name)
 {
 	const char *options[] = {
 		"schedule-table",
@@ -431,6 +433,7 @@ int sja1105_static_config_show(struct sja1105_static_config *config, char *table
 		retagging_table_show,
 		xmii_table_show,
 	};
+	struct sja1105_static_config *config = &staging_area->static_config;
 	unsigned int i;
 	int rc = 0;
 
@@ -440,6 +443,8 @@ int sja1105_static_config_show(struct sja1105_static_config *config, char *table
 			next_config_table_show[i](config);
 		}
 	} else {
+		/* TODO: check if user asked for PTP config, else
+		 * query static config */
 		rc = get_match(table_name, options, ARRAY_SIZE(options));
 		if (rc < 0) {
 			goto out;

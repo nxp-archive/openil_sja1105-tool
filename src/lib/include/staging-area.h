@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016, NXP Semiconductors
+ * Copyright (c) 2017, NXP Semiconductors
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,46 +28,22 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
-#include <inttypes.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-/* These are our own includes */
-#include <lib/include/static-config.h>
-#include <lib/include/clock.h>
-#include <lib/include/spi.h>
-#include <common.h>
+#ifndef _STAGING_AREA_H
+#define _STAGING_AREA_H
 
-int sja1105_clocking_setup(struct sja1105_spi_setup *spi_setup,
-                           struct sja1105_xmii_params_table *params,
-                           struct sja1105_mac_config_entry  *mac_config)
-{
-	int speed_mbps;
-	int rc = 0;
-	int i;
+#include "static-config-tables.h"
+#include "ptp-tables.h"
 
-	for (i = 0; i < 5; i++) {
-		switch (mac_config[i].speed) {
-		case 1: speed_mbps = 1000; break;
-		case 2: speed_mbps = 100;  break;
-		case 3: speed_mbps = 10;   break;
-		default: loge("auto speed not yet supported"); return -1;
-		}
-		if (params->xmii_mode[i] == XMII_SPEED_MII) {
-			mii_clocking_setup(spi_setup, i, params->phy_mac[i]);
-		} else if (params->xmii_mode[i] == XMII_SPEED_RMII) {
-			rmii_clocking_setup(spi_setup, i, params->phy_mac[i]);
-		} else if (params->xmii_mode[i] == XMII_SPEED_RGMII) {
-			rgmii_clocking_setup(spi_setup, i, speed_mbps);
-		} else {
-			loge("Invalid xmii_mode for port %d specified: %" PRIu64,
-			     i, params->xmii_mode[i]);
-			rc = -1;
-			goto out;
-		}
-	}
-out:
-	return rc;
-}
+struct sja1105_staging_area {
+	struct sja1105_static_config static_config;
+	struct sja1105_ptp_config    ptp_config;
+};
 
+enum sja1105_default_staging_area {
+	LS1021ATSN = 0,
+};
+
+int sja1105_default_staging_area(struct sja1105_staging_area*,
+                                 enum sja1105_default_staging_area);
+
+#endif

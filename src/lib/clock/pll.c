@@ -34,7 +34,7 @@
 #include <string.h>
 #include <stdio.h>
 /* These are our own includes */
-#include <lib/include/config.h>
+#include <lib/include/static-config.h>
 #include <lib/include/gtable.h>
 
 static void sja1105_cgu_pll_control_access(void *buf, struct sja1105_cgu_pll_control *pll_control, int write)

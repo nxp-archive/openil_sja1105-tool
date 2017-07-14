@@ -34,7 +34,7 @@
 #include <string.h>
 #include <stdio.h>
 /* These are our own include files */
-#include <lib/include/config.h>
+#include <lib/include/static-config.h>
 #include <lib/include/gtable.h>
 #include <common.h>
 

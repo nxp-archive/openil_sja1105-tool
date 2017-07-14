@@ -36,7 +36,7 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 /* These are our include files */
-#include <lib/include/config.h>
+#include <lib/include/static-config.h>
 #include <common.h>
 /* This is the top-level _SJA1105_TOOL_INTERNAL header */
 #include <tool/internal.h>

@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 /* These are our own include files */
-#include <lib/include/config.h>
+#include <lib/include/static-config.h>
 #include <lib/include/gtable.h>
 #include <lib/include/spi.h>
 #include <common.h>
