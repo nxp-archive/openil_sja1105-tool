@@ -38,10 +38,9 @@
 #include <lib/include/spi.h>
 #include <common.h>
 
-static void sja1105_spi_message_access(
-		void *buf,
-		struct sja1105_spi_message *msg,
-		int write)
+static void sja1105_spi_message_access(void  *buf,
+                                       struct sja1105_spi_message *msg,
+                                       int    write)
 {
 	int (*pack_or_unpack)(void*, uint64_t*, int, int, int);
 	int size = SIZE_SPI_MSG_HEADER;
@@ -79,11 +78,10 @@ void sja1105_spi_message_show(struct sja1105_spi_message *msg)
 	}
 }
 
-void spi_message_aggregate(
-		char  *buf,
-		struct sja1105_spi_message *hdr,
-		char  *data,
-		int    data_len)
+void spi_message_aggregate(char  *buf,
+                           struct sja1105_spi_message *hdr,
+                           char  *data,
+                           int    data_len)
 {
 	sja1105_spi_message_pack(buf, hdr);
 	memcpy(buf + SIZE_SPI_MSG_HEADER, data, data_len);
