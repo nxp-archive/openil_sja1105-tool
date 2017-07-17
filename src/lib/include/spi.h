@@ -35,6 +35,7 @@
 #include <stdint.h>
 
 struct sja1105_spi_setup {
+	uint64_t    device_id;
 	const char *device;
 	uint8_t     mode;
 	uint8_t     bits;

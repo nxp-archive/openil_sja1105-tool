@@ -40,6 +40,7 @@
 
 const char *default_staging_area = "/etc/sja1105/.staging";
 const char *default_device = "/dev/spidev0.1";
+const uint64_t default_device_id = SJA1105T_DEVICE_ID;
 
 struct general_config general_config;
 int SJA1105_VERBOSE_CONDITION;
@@ -67,6 +68,12 @@ static inline int parse_spi_setup(struct sja1105_spi_setup *spi_setup, char *key
 
 	if (strcmp(key, "device") == 0) {
 		spi_setup->device = strdup(value);
+	} else if (strcmp(key, "device-id") == 0) {
+		rc = reliable_uint64_from_string(&tmp, value, NULL);
+		if (rc < 0) {
+			goto error;
+		}
+		spi_setup->device_id = tmp;
 	} else if (strcmp(key, "bits") == 0) {
 		rc = reliable_uint64_from_string(&tmp, value, NULL);
 		if (rc < 0) {
@@ -265,6 +272,7 @@ out:
 default_conf:
 	if (rc == -1) {
 		loge("Invalid config file, using defaults.\n");
+		spi_setup->device_id    = default_device_id;
 		spi_setup->device       = default_device;
 		spi_setup->staging_area = default_staging_area;
 		spi_setup->mode         = 0;
