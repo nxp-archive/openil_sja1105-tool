@@ -85,7 +85,7 @@ int ptp_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv)
 				goto error;
 			}
 			rc = sja1105_ptp_ts_clk_get(spi_setup, &tmp);
-			printf("%f\n", (float)((tmp * 8) / 1000000000.0));
+			printf("%lf\n", (double)((tmp * 8) / 1000000000.0));
 		}
 		else if (matches(argv[1], "clk") == 0) {
 			rc = sja1105_spi_configure(spi_setup);
@@ -94,7 +94,7 @@ int ptp_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv)
 				goto error;
 			}
 			rc = sja1105_ptp_clk_get(spi_setup, &tmp);
-			printf("%f\n", (float)((tmp * 8) / 1000000000.0));
+			printf("%lf\n", (double)((tmp * 8) / 1000000000.0));
 		} else {
 			loge("unknown token \"%s\"", argv[1]);
 			goto parse_error;
@@ -147,10 +147,10 @@ int ptp_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv)
 			goto parse_error;
 		}
 		if (matches(argv[1], "clk") == 0) {
-			/* TODO: parse argument as float */
-			rc = reliable_uint64_from_string(&tmp, argv[2], NULL);
+			rc = reliable_double_from_string(&tmp_double, argv[2],
+			                                 NULL);
 			if (rc < 0) {
-				loge("invalid int at \"%s\"", argv[2]);
+				loge("invalid double at \"%s\"", argv[2]);
 				goto parse_error;
 			}
 			rc = sja1105_spi_configure(spi_setup);
@@ -158,6 +158,7 @@ int ptp_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv)
 				loge("sja1105_spi_configure failed");
 				goto error;
 			}
+			tmp = (uint64_t)((tmp_double * 1000000000.0) / 8);
 			rc = sja1105_ptp_clk_add(spi_setup, tmp);
 		} else {
 			loge("unknown token \"%s\"", argv[1]);
