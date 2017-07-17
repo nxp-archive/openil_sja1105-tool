@@ -221,3 +221,38 @@ out:
 	return rc;
 }
 
+int sja1105_port_status_clear(struct sja1105_spi_setup *spi_setup,
+                              int port)
+{
+	const int PORT_STATUS_CTRL_ADDR = 0xf;
+	const int BUF_LEN = 4;
+	uint8_t   packed_buf[BUF_LEN];
+	int       rc = 0;
+	uint64_t  clearport;
+
+	if (port == -1) {
+		logv("clearing mac counters for all ports");
+		clearport = 0x1f;
+	} else if (port < 5) {
+		clearport = 1 << port;
+	} else {
+		loge("invalid port number %d", port);
+		rc = -EINVAL;
+		goto out;
+	}
+	memset(packed_buf, 0, BUF_LEN);
+
+	gtable_pack(packed_buf, &clearport, 4, 0, BUF_LEN);
+	rc = sja1105_spi_send_packed_buf(spi_setup,
+	                                 SPI_READ,
+	                                 CORE_ADDR + PORT_STATUS_CTRL_ADDR,
+	                                 packed_buf,
+	                                 BUF_LEN);
+	if (rc < 0) {
+		loge("failed to clear mac level counters");
+		goto out;
+	}
+out:
+	return rc;
+
+}
