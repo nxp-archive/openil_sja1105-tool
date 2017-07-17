@@ -149,6 +149,7 @@ int sja1105_ptp_reset(struct sja1105_spi_setup *spi_setup)
 	memset(&ptp_control, 0, sizeof(ptp_control));
 	ptp_control.valid = 1;
 	ptp_control.reset = 1;
+	logv("Resetting PTP clock");
 	return sja1105_ptp_ctrl_cmd_send(spi_setup, &ptp_control);
 }
 
