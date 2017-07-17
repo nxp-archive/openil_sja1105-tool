@@ -179,13 +179,6 @@ out:
 }
 
 static int
-parse_ptp_config(__attribute__((unused)) xmlNode *node, __attribute__((unused)) struct sja1105_ptp_config *config)
-{
-	int rc = 0;
-	return rc;
-}
-
-static int
 parse_root(xmlNode *root, struct sja1105_staging_area *staging_area)
 {
 	char *config_section;

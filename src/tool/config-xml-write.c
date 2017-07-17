@@ -165,13 +165,6 @@ out:
 	return rc;
 }
 
-static int
-ptp_config_write(__attribute__((unused)) xmlTextWriterPtr writer,
-                 __attribute__((unused)) struct sja1105_ptp_config *ptp_config)
-{
-	return 0;
-}
-
 int
 sja1105_staging_area_to_xml(char *xml_file,
                             struct sja1105_staging_area *staging_area)
