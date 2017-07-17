@@ -32,6 +32,7 @@
 #include "xml/write/external.h"
 #include "internal.h"
 #include <string.h>
+#include <errno.h>
 
 static void print_usage()
 {
@@ -177,16 +178,11 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 		}
 	} else if (strcmp(options[match], "modify") == 0) {
 		get_flush_mode(spi_setup, &argc, &argv);
-		/*if (argc != 6) {*/
-			/*goto parse_error;*/
-		/*}*/
 		rc = staging_area_load(spi_setup->staging_area, &staging_area);
 		if (rc < 0) {
 			goto error;
 		}
-		/* TODO pass argc and argv and let it do the parsing */
-		rc = staging_area_modify(&staging_area, argv[0],
-		                         argv[1], argv[2]);
+		rc = staging_area_modify_parse(&staging_area, &argc, &argv);
 		if (rc < 0) {
 			goto error;
 		}

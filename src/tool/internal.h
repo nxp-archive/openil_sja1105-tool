@@ -54,6 +54,8 @@ int ptp_parse_args(struct sja1105_spi_setup*, int argc, char **argv);
 int config_parse_args(struct sja1105_spi_setup*, int argc, char **argv);
 int status_parse_args(struct sja1105_spi_setup*, int argc, char **argv);
 int staging_area_modify(struct sja1105_staging_area*, char*, char*, char*);
+int staging_area_modify_parse(struct sja1105_staging_area*,
+                              int *argc, char ***argv);
 int sja1105_staging_area_show(struct sja1105_staging_area*, char *table_name);
 
 int staging_area_load(const char*, struct sja1105_staging_area*);
