@@ -201,6 +201,7 @@ sja1105_default_staging_area(struct sja1105_staging_area *staging_area,
 
 	if (config_name == LS1021ATSN) {
 		/* PTP config */
+		memset(ptp_config, 0, sizeof(*ptp_config));
 		ptp_config->pin_duration               = 1;
 		ptp_config->pin_start                  = 1;
 		ptp_config->schedule_time              = 1;

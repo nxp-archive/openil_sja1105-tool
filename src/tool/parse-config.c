@@ -105,6 +105,7 @@ staging_area_hexdump(const char *staging_area_file)
 	struct stat stat;
 	unsigned int len;
 	char *buf;
+	char *ptp_buf;
 	int fd;
 	int rc;
 
@@ -129,12 +130,18 @@ staging_area_hexdump(const char *staging_area_file)
 	if (rc < 0) {
 		goto out_3;
 	}
+	printf("Static configuration:\n");
+	/* Returns number of bytes dumped */
 	rc = sja1105_static_config_hexdump(buf);
 	if (rc < 0) {
 		loge("error while interpreting config");
 		goto out_3;
 	}
-	/* TODO: hexdump ptp config */
+	logi("static config: dumped %d bytes", rc);
+	/* There is a final table header which is not being dumped */
+	ptp_buf = buf + rc + SIZE_TABLE_HEADER;
+	printf("PTP configuration:\n");
+	gtable_hexdump(ptp_buf, SIZE_PTP_CONFIG);
 	rc = 0;
 out_3:
 	free(buf);
@@ -148,11 +155,17 @@ int
 staging_area_load(const char *staging_area_file,
                   struct sja1105_staging_area *staging_area)
 {
+	struct sja1105_static_config *static_config;
+	struct sja1105_ptp_config    *ptp_config;
 	struct stat stat;
-	unsigned int len;
+	unsigned int staging_area_len;
+	unsigned int static_config_len;
 	char *buf;
 	int fd;
 	int rc;
+
+	static_config = &staging_area->static_config;
+	ptp_config    = &staging_area->ptp_config;
 
 	fd = open(staging_area_file, O_RDONLY);
 	if (fd < 0) {
@@ -165,22 +178,29 @@ staging_area_load(const char *staging_area_file,
 		loge("could not read file size");
 		goto out_2;
 	}
-	len = stat.st_size;
-	buf = (char*) malloc(len * sizeof(char));
+	staging_area_len = stat.st_size;
+	buf = (char*) malloc(staging_area_len * sizeof(char));
 	if (!buf) {
 		loge("malloc failed");
 		goto out_2;
 	}
-	rc = reliable_read(fd, buf, len);
+	rc = reliable_read(fd, buf, staging_area_len);
 	if (rc < 0) {
 		goto out_3;
 	}
-	rc = sja1105_static_config_unpack(buf, &staging_area->static_config);
+	/* Static config */
+	rc = sja1105_static_config_unpack(buf, static_config);
 	if (rc < 0) {
 		loge("error while interpreting config");
 		goto out_3;
 	}
-	/* TODO read extra PTP config */
+	static_config_len = sja1105_static_config_get_length(static_config);
+	/* PTP config */
+	if (staging_area_len - static_config_len < SIZE_PTP_CONFIG) {
+		loge("PTP config not present in staging area!");
+		goto out_3;
+	}
+	sja1105_ptp_config_unpack(buf + static_config_len, ptp_config);
 	rc = 0;
 out_3:
 	free(buf);
@@ -194,23 +214,30 @@ int
 staging_area_save(const char *staging_area_file,
                   struct sja1105_staging_area *staging_area)
 {
-	struct sja1105_static_config *config;
+	struct sja1105_static_config *static_config;
+	struct sja1105_ptp_config    *ptp_config;
 	int   rc = 0;
 	char *buf;
-	int   len;
+	int   static_config_len;
+	int   staging_area_len;
 	int   fd;
 
-	config = &staging_area->static_config;
-	len = sja1105_static_config_get_length(config);
+	static_config     = &staging_area->static_config;
+	ptp_config        = &staging_area->ptp_config;
+	static_config_len = sja1105_static_config_get_length(static_config);
+	staging_area_len  = static_config_len + SIZE_PTP_CONFIG;
 
-	buf = (char*) malloc(len * sizeof(char));
+	buf = (char*) malloc(staging_area_len * sizeof(char));
 	if (!buf) {
 		loge("malloc failed");
 		goto out_1;
 	}
-	sja1105_static_config_pack(buf, config);
-	/* TODO: write extra PTP config */
+	logv("saving static config... %d bytes", static_config_len);
+	sja1105_static_config_pack(buf, static_config);
+	logv("saving ptp config... %d bytes", SIZE_PTP_CONFIG);
+	sja1105_ptp_config_pack(buf + static_config_len, ptp_config);
 
+	logv("total staging area size: %d bytes", staging_area_len);
 	fd = open(staging_area_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (fd < 0) {
 		loge("could not open %s for write", staging_area_file);
@@ -218,10 +245,11 @@ staging_area_save(const char *staging_area_file,
 		goto out_2;
 	}
 
-	rc = reliable_write(fd, buf, len);
+	rc = reliable_write(fd, buf, staging_area_len);
 	if (rc < 0) {
 		goto out_2;
 	}
+	logv("done");
 
 	close(fd);
 out_2:
@@ -247,7 +275,8 @@ static_config_upload(struct sja1105_spi_setup *spi_setup,
 	int    rc;
 	int    i;
 
-	config_buf_len = sja1105_static_config_get_length(config) + SIZE_SJA1105_DEVICE_ID;
+	config_buf_len = sja1105_static_config_get_length(config) +
+	                 SIZE_SJA1105_DEVICE_ID;
 	config_buf = (char*) malloc(config_buf_len * sizeof(char));
 	if (!config_buf) {
 		loge("malloc failed");
@@ -262,7 +291,8 @@ static_config_upload(struct sja1105_spi_setup *spi_setup,
 		goto out_free;
 	}
 	/* Write config tables to config_buf */
-	sja1105_static_config_pack(config_buf + SIZE_SJA1105_DEVICE_ID, config);
+	sja1105_static_config_pack(config_buf + SIZE_SJA1105_DEVICE_ID,
+	                           config);
 	/* Recalculate CRC of the last header */
 	/* Don't include the CRC field itself */
 	crc_len = config_buf_len - 4;
@@ -279,7 +309,8 @@ static_config_upload(struct sja1105_spi_setup *spi_setup,
 
 	for (i = 0; i < chunk_count; i++) {
 		/* Combine chunks[i].msg and chunks[i].buf into tx_buf */
-		spi_message_aggregate(tx_buf, &chunks[i].msg, chunks[i].buf, chunks[i].size);
+		spi_message_aggregate(tx_buf, &chunks[i].msg, chunks[i].buf,
+		                      chunks[i].size);
 		/* Send it out */
 		rc = sja1105_spi_transfer(spi_setup, tx_buf, rx_buf,
 		                          SIZE_SPI_MSG_HEADER + chunks[i].size);
@@ -385,8 +416,6 @@ staging_area_flush(struct sja1105_spi_setup *spi_setup,
 		loge("static_config_flush failed");
 		goto out;
 	}
-	/* TODO: remove this goto */
-	goto out;
 	rc = sja1105_ptp_configure(spi_setup, &staging_area->ptp_config);
 	if (rc < 0) {
 		loge("ptp_init failed");

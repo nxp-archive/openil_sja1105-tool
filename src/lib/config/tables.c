@@ -350,6 +350,8 @@ int sja1105_static_config_add_entry(struct sja1105_table_header *hdr, void *buf,
 	return 0;
 }
 
+/* Returns number of bytes that were dumped
+ * (length of static config) */
 int sja1105_static_config_hexdump(void *buf)
 {
 	struct sja1105_table_header hdr;
@@ -392,7 +394,7 @@ int sja1105_static_config_hexdump(void *buf)
 		p += 4;
 		printf("\n");
 	}
-	return 0;
+	return ((const char*)p - (const char*)buf) * sizeof(*buf);
 error:
 	return -1;
 }

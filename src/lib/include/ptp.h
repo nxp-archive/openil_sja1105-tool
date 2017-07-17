@@ -37,6 +37,10 @@
 /* Static PTP configuration */
 int sja1105_ptp_configure(struct sja1105_spi_setup*,
                           struct sja1105_ptp_config*);
+void sja1105_ptp_config_unpack(void*, struct sja1105_ptp_config*);
+void sja1105_ptp_config_pack(void*, struct sja1105_ptp_config*);
+void sja1105_ptp_config_fmt_show(char*, char*, struct sja1105_ptp_config*);
+void sja1105_ptp_config_show(struct sja1105_ptp_config*);
 
 /* Dynamic PTP commands */
 int  sja1105_ptp_ts_clk_get(struct sja1105_spi_setup*, uint64_t*);

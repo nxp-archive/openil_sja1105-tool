@@ -148,3 +148,82 @@ int sja1105_ptp_configure(struct sja1105_spi_setup *spi_setup,
 	rc += sja1105_ptp_ctrl_cmd_send(spi_setup, &ptp_control);
 	return rc;
 }
+
+static void
+sja1105_ptp_config_access(void *buf,
+                          struct sja1105_ptp_config *config,
+                          int write)
+{
+	int (*pack_or_unpack)(void*, uint64_t*, int, int, int);
+	int size = SIZE_PTP_CONFIG;
+	/* Pointer arithmetic on 8 bytes */
+	uint64_t *p = buf;
+
+	if (write == 0) {
+		pack_or_unpack = gtable_unpack;
+		memset(config, 0, sizeof(*config));
+	} else {
+		pack_or_unpack = gtable_pack;
+		memset(buf, 0, size);
+	}
+	pack_or_unpack(p + 0, &config->pin_duration,  63, 0, 8);
+	pack_or_unpack(p + 1, &config->pin_start,     63, 0, 8);
+	pack_or_unpack(p + 2, &config->schedule_time, 63, 0, 8);
+	pack_or_unpack(p + 3, &config->schedule_correction_period,
+	                                              63, 0, 8);
+	pack_or_unpack(p + 4, &config->ts_based_on_ptpclk,
+	                                              63, 0, 8);
+	pack_or_unpack(p + 5, &config->schedule_autostart,
+	                                              63, 0, 8);
+	pack_or_unpack(p + 6, &config->pin_toggle_autostart,
+	                                              63, 0, 8);
+}
+
+void
+sja1105_ptp_config_unpack(void *buf,
+                          struct sja1105_ptp_config *config)
+{
+	sja1105_ptp_config_access(buf, config, 0);
+}
+
+void
+sja1105_ptp_config_pack(void *buf,
+                        struct sja1105_ptp_config *config)
+{
+	sja1105_ptp_config_access(buf, config, 1);
+}
+
+void
+sja1105_ptp_config_fmt_show(char *print_buf,
+                            char *fmt,
+                            struct sja1105_ptp_config *config)
+{
+	formatted_append(print_buf, fmt, "PTP Configuration:");
+	formatted_append(print_buf, fmt, "PTPPINDUR (Pin Duration): %" PRIx64,
+	                 config->pin_duration);
+	formatted_append(print_buf, fmt, "PTPPINST (Pin Start): %" PRIx64,
+	                 config->pin_start);
+	formatted_append(print_buf, fmt, "PTPSCHTM (Schedule Time): %" PRIx64,
+	                 config->schedule_time);
+	formatted_append(print_buf, fmt, "PTPCLKCORP (Schedule Correction "
+	                 "Period): %" PRIx64,
+	                 config->schedule_correction_period);
+	formatted_append(print_buf, fmt, "CORRCLK4TS (TS based on PTPCLK): %"
+	                 PRIx64, config->ts_based_on_ptpclk);
+	formatted_append(print_buf, fmt, "PTPSTRTSCH (Schedule Autostart): %"
+	                 PRIx64, config->schedule_autostart);
+	formatted_append(print_buf, fmt, "STARTPTPCP (Pin Toggle Autostart): %"
+	                 PRIx64, config->pin_toggle_autostart);
+}
+
+void
+sja1105_ptp_config_show(struct sja1105_ptp_config *config)
+{
+	char print_buf[MAX_LINE_SIZE];
+	char *fmt = "%s\n";
+
+	memset(print_buf, 0, MAX_LINE_SIZE);
+	sja1105_ptp_config_fmt_show(print_buf, fmt, config);
+	puts(print_buf);
+}
+
