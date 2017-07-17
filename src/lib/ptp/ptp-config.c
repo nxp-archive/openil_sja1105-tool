@@ -141,10 +141,16 @@ int sja1105_ptp_configure(struct sja1105_spi_setup *spi_setup,
 	                           SJA1105_PTPCLKCORP_ADDR,
 	                           &ptp_config->schedule_correction_period, 4);
 	memset(&ptp_control, 0, sizeof(ptp_control));
+	/* Compose a single PTP control command */
 	ptp_control.valid = 1;
 	ptp_control.start_schedule     = ptp_config->schedule_autostart;
 	ptp_control.start_pin_toggle   = ptp_config->pin_toggle_autostart;
 	ptp_control.ts_based_on_ptpclk = ptp_config->ts_based_on_ptpclk;
+	if (ptp_config->pin_toggle_autostart ||
+	    ptp_config->schedule_autostart) {
+		logv("Resetting PTP clock");
+		ptp_control.reset = 1;
+	}
 	rc += sja1105_ptp_ctrl_cmd_send(spi_setup, &ptp_control);
 	return rc;
 }
