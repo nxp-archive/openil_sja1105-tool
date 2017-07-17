@@ -134,7 +134,7 @@ man -l ./sja1105-tool-config-format.5  # File format for XML switch configuratio
 Known issues
 ------------
 
-Link speed autonegotiation is not supported.
+1. Link speed autonegotiation is not supported.
 
 Default link speed is set to 1000Mbps.
 
@@ -168,6 +168,8 @@ The issue does not appear when connecting a 100Mbps-capable endpoint to
 the SJA1105. This is because, although the PHY chip still advertises
 1000Mbps capability, the autonegotiation will drop to the least common
 denominator, which is correctly 100Mbps.
+
+2. Clock synchronization via TTEthernet (SAE AS6802) is not supported.
 
 
 Reporting issues
