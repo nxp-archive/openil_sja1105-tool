@@ -56,6 +56,12 @@ int status_parse_args(struct sja1105_spi_setup*, int argc, char **argv);
 int staging_area_modify(struct sja1105_staging_area*, char*, char*, char*);
 int sja1105_staging_area_show(struct sja1105_staging_area*, char *table_name);
 
+int staging_area_load(const char*, struct sja1105_staging_area*);
+int staging_area_save(const char*, struct sja1105_staging_area*);
+int staging_area_flush(struct sja1105_spi_setup*,
+                       struct sja1105_staging_area*);
+int staging_area_hexdump(const char*);
+
 /* From strings.c, mainly */
 char *trimwhitespace(char *str);
 int   matches(const char*, const char*);
