@@ -65,7 +65,9 @@ out:
 
 int ptp_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv)
 {
+	double tmp_double;
 	uint64_t tmp;
+	uint32_t ptpclkrate;
 	int rc;
 
 	if (argc < 1) {
@@ -103,10 +105,10 @@ int ptp_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv)
 			goto parse_error;
 		}
 		if (matches(argv[1], "clk") == 0) {
-			/* TODO: parse argument as float */
-			rc = reliable_uint64_from_string(&tmp, argv[2], NULL);
+			rc = reliable_double_from_string(&tmp_double, argv[2],
+			                                 NULL);
 			if (rc < 0) {
-				loge("invalid int at \"%s\"", argv[2]);
+				loge("invalid double at \"%s\"", argv[2]);
 				goto parse_error;
 			}
 			rc = sja1105_spi_configure(spi_setup);
@@ -114,19 +116,28 @@ int ptp_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv)
 				loge("sja1105_spi_configure failed");
 				goto error;
 			}
+			tmp = (uint64_t)((tmp_double * 1000000000.0) / 8);
 			rc = sja1105_ptp_clk_set(spi_setup, tmp);
 		} else if (matches(argv[1], "clk-rate") == 0) {
-			rc = reliable_uint64_from_string(&tmp, argv[2], NULL);
+			rc = reliable_double_from_string(&tmp_double, argv[2],
+			                                 NULL);
 			if (rc < 0) {
-				loge("invalid int at \"%s\"", argv[2]);
+				loge("invalid double at \"%s\"", argv[2]);
 				goto parse_error;
+			}
+			rc = sja1105_ptpclkrate_from_ratio(tmp_double,
+			                                   &ptpclkrate);
+			if (rc < 0) {
+				loge("ptpclkrate_from_ratio failed");
+				goto error;
 			}
 			rc = sja1105_spi_configure(spi_setup);
 			if (rc < 0) {
 				loge("sja1105_spi_configure failed");
 				goto error;
 			}
-			rc = sja1105_ptp_clk_rate_set(spi_setup, tmp);
+			logv("setting ptpclkrate to 0x%" PRIx32, ptpclkrate);
+			rc = sja1105_ptp_clk_rate_set(spi_setup, ptpclkrate);
 		} else {
 			loge("unknown token \"%s\"", argv[1]);
 		}
