@@ -32,6 +32,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
+#include <errno.h>
 #include "internal.h"
 /* From libsja1105 */
 #include <lib/include/staging-area.h>
@@ -901,6 +902,51 @@ out:
 	return rc;
 }
 
+static int
+ptp_config_modify(struct sja1105_ptp_config *config,
+                  int    entry_index,
+                  char  *field_name,
+                  char  *field_val)
+{
+	const char *options[] = {
+		"pin_duration",
+		"pin_start",
+		"schedule_time",
+		"schedule_correction_period",
+		"ts_based_on_ptpclk",
+		"schedule_autostart",
+		"pin_toggle_autostart",
+	};
+	uint64_t *fields[] = {
+		&config->pin_duration,
+		&config->pin_start,
+		&config->schedule_time,
+		&config->schedule_correction_period,
+		&config->ts_based_on_ptpclk,
+		&config->schedule_autostart,
+		&config->pin_toggle_autostart,
+	};
+	int entry_field_counts[] = {1, 1, 1, 1, 1, 1, 1,};
+	int rc;
+
+	if (entry_index != 0) {
+		loge("Entry index for PTP configuration must be zero!");
+		rc = -EINVAL;
+		goto out;
+	}
+	rc = get_match(field_name, options, ARRAY_SIZE(options));
+	if (rc < 0) {
+		goto out;
+	}
+	rc = generic_table_entry_modify(fields[rc],
+	                                entry_index,
+	                                1,
+	                                entry_field_counts[rc],
+	                                field_val);
+out:
+	return rc;
+}
+
 int
 staging_area_modify(struct sja1105_staging_area *staging_area,
                     char *table_name,
@@ -952,9 +998,14 @@ staging_area_modify(struct sja1105_staging_area *staging_area,
 		retagging_table_entry_modify,
 		xmii_table_entry_modify,
 	};
+	struct   sja1105_static_config *static_config;
+	struct   sja1105_ptp_config    *ptp_config;
 	uint64_t entry_index;
 	char    *index_ptr;
 	int      rc;
+
+	static_config = &staging_area->static_config;
+	ptp_config    = &staging_area->ptp_config;
 
 	if (table_name == NULL) {
 		rc = -1;
@@ -974,6 +1025,13 @@ staging_area_modify(struct sja1105_staging_area *staging_area,
 		/* So we only match on the table field_name, but not on the entry index */
 		*index_ptr = '\0';
 	}
+	/* Treat ptp as special */
+	if (matches(table_name, "ptp") == 0) {
+		rc = ptp_config_modify(ptp_config, entry_index,
+		                       field_name, field_val);
+		goto out;
+	}
+	/* Static config from here thereon */
 	rc = get_match(table_name, static_config_options,
 	               ARRAY_SIZE(static_config_options));
 	if (rc < 0) {
@@ -990,8 +1048,8 @@ staging_area_modify(struct sja1105_staging_area *staging_area,
 		printf("Please supply a value for field %s!\n", field_name);
 		goto out;
 	}
-	rc = next_static_table_modify[rc](&staging_area->static_config,
-	                                  entry_index, field_name, field_val);
+	rc = next_static_table_modify[rc](static_config, entry_index,
+	                                  field_name, field_val);
 	if (rc < 0) {
 		loge("modify failed!");
 		goto out;
