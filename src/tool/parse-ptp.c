@@ -30,6 +30,7 @@
  *****************************************************************************/
 #include <inttypes.h>
 #include <stdio.h>
+#include <lib/include/staging-area.h>
 #include <lib/include/ptp.h>
 #include <common.h>
 #include "internal.h"
@@ -45,16 +46,21 @@ static void print_usage()
 	printf(" * sja1105-tool ptp reset\n");
 }
 
-int sja1105_ptp_update(__attribute__((unused)) struct sja1105_spi_setup *spi_setup)
+int sja1105_ptp_update(struct sja1105_spi_setup *spi_setup)
 {
-	/**
-	 * TODO:
-	 * Open staging area.
-	 * Read the fake "struct sja1105_ptp_config" that's inside.
-	 * Run sja1105_ptp_config_cmd() with that struct.
-	 */
-	loge("unimplemented");
-	return -1;
+	struct sja1105_staging_area staging_area;
+	struct sja1105_ptp_config  *ptp_config;
+	int rc;
+
+	rc = staging_area_load(spi_setup->staging_area, &staging_area);
+	if (rc < 0) {
+		loge("staging_area_load failed");
+		goto out;
+	}
+	ptp_config = &staging_area.ptp_config;
+	rc = sja1105_ptp_configure(spi_setup, ptp_config);
+out:
+	return rc;
 }
 
 int ptp_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv)
