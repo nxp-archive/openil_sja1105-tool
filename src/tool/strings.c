@@ -120,6 +120,33 @@ out:
 	return rc;
 }
 
+int reliable_double_from_string(double *to, char *from, char **endptr)
+{
+	int   errno_saved = errno;
+	int   rc = 0;
+	char *p;
+
+	errno = 0;
+	*to = strtod(from, &p);
+	if (endptr != NULL) {
+		*endptr = p;
+	}
+	if (errno) {
+		loge("Range error occured while reading \"%s\"", from);
+		rc = -errno;
+		goto out;
+	}
+	if (from == p) {
+		/* Read nothing */
+		loge("No double stored at \"%s\"", from);
+		rc = -errno;
+		goto out;
+	}
+out:
+	errno = errno_saved;
+	return rc;
+}
+
 int reliable_uint64_from_string(uint64_t *to, char *from, char **endptr)
 {
 	int   errno_saved = errno;
