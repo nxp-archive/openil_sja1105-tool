@@ -224,7 +224,6 @@ int config_upload(struct sja1105_spi_setup *spi_setup, struct sja1105_static_con
 {
 	struct   sja1105_table_header final_header;
 	char    *final_header_ptr;
-	uint64_t device_id = SJA1105_DEVICE_ID;
 	/* XXX: Maybe 100 is not the best number of chunks here */
 	struct sja1105_spi_chunk chunks[100];
 	int    chunk_count;
@@ -244,7 +243,8 @@ int config_upload(struct sja1105_spi_setup *spi_setup, struct sja1105_static_con
 		goto out;
 	}
 	/* Write Device ID to first 4 bytes of config_buf */
-	rc = gtable_pack(config_buf, &device_id, 31, 0, SIZE_SJA1105_DEVICE_ID);
+	rc = gtable_pack(config_buf, &spi_setup->device_id, 31, 0,
+	                 SIZE_SJA1105_DEVICE_ID);
 	if (rc < 0) {
 		loge("failed to write device id to buffer");
 		goto out_free;
@@ -326,7 +326,7 @@ int config_flush(struct sja1105_spi_setup *spi_setup, struct sja1105_static_conf
 {
 	struct sja1105_reset_ctrl     reset = {.rst_ctrl = RGU_COLD};
 	struct sja1105_general_status status;
-	uint64_t expected_device_id = SJA1105_DEVICE_ID;
+	uint64_t expected_device_id = spi_setup->device_id;
 	int rc;
 
 	/* Check that we are talking with the right device over SPI */
