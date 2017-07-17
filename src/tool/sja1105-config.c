@@ -46,6 +46,50 @@ struct general_config general_config;
 int SJA1105_VERBOSE_CONDITION;
 int SJA1105_DEBUG_CONDITION;
 
+struct fields_set {
+	int device_id;
+	int device;
+	int staging_area;
+	int mode;
+	int bits;
+	int speed;
+	int delay;
+	int cs_change;
+	int dry_run;
+	int flush;
+	int verbose;
+	int debug;
+	int entries_per_line;
+	int screen_width;
+};
+
+static void
+config_set_defaults(struct sja1105_spi_setup *spi_setup,
+                    struct general_config *general_conf,
+                    struct fields_set *fields_set)
+{
+#define SET_DEFAULT_FN(struct_ptr, field, value, fmt) \
+	if (!fields_set->field) { \
+		logi("%s field not defined in config file, setting default " \
+		     "value " fmt, #field, value); \
+		struct_ptr->field = value; \
+	}
+	SET_DEFAULT_FN(spi_setup, device_id, default_device_id, "0x%" PRIx64);
+	SET_DEFAULT_FN(spi_setup, device, default_device, "%s");
+	SET_DEFAULT_FN(spi_setup, staging_area, default_staging_area, "%s");
+	SET_DEFAULT_FN(spi_setup, mode, SPI_CPHA, "0x%x" );
+	SET_DEFAULT_FN(spi_setup, bits, 8, "%d");
+	SET_DEFAULT_FN(spi_setup, speed, 1000000, "%u");
+	SET_DEFAULT_FN(spi_setup, delay, 0, "%u");
+	SET_DEFAULT_FN(spi_setup, cs_change, 0, "%d");
+	SET_DEFAULT_FN(spi_setup, dry_run, 0, "%d");
+	SET_DEFAULT_FN(spi_setup, flush, 0, "%d");
+	SET_DEFAULT_FN(general_conf, verbose, 0, "%d");
+	SET_DEFAULT_FN(general_conf, debug, 0, "%d");
+	SET_DEFAULT_FN(general_conf, entries_per_line, 1, "%d");
+	SET_DEFAULT_FN(general_conf, screen_width, 80, "%d");
+}
+
 static int parse_spi_mode(struct sja1105_spi_setup *spi_setup, char *mode)
 {
 	if (strcmp(mode, "SPI_CPHA") == 0) {
@@ -60,7 +104,9 @@ static int parse_spi_mode(struct sja1105_spi_setup *spi_setup, char *mode)
 	return 0;
 }
 
-static inline int parse_spi_setup(struct sja1105_spi_setup *spi_setup, char *key, char *value)
+static inline int
+parse_spi_setup(struct sja1105_spi_setup *spi_setup, char *key, char *value,
+                struct fields_set *fields_set)
 {
 	char *mode;
 	int rc;
@@ -68,36 +114,42 @@ static inline int parse_spi_setup(struct sja1105_spi_setup *spi_setup, char *key
 
 	if (strcmp(key, "device") == 0) {
 		spi_setup->device = strdup(value);
+		fields_set->device = 1;
 	} else if (strcmp(key, "device-id") == 0) {
 		rc = reliable_uint64_from_string(&tmp, value, NULL);
 		if (rc < 0) {
 			goto error;
 		}
 		spi_setup->device_id = tmp;
+		fields_set->device_id = 1;
 	} else if (strcmp(key, "bits") == 0) {
 		rc = reliable_uint64_from_string(&tmp, value, NULL);
 		if (rc < 0) {
 			goto error;
 		}
 		spi_setup->bits = tmp;
+		fields_set->bits = 1;
 	} else if (strcmp(key, "speed") == 0) {
 		rc = reliable_uint64_from_string(&tmp, value, NULL);
 		if (rc < 0) {
 			goto error;
 		}
 		spi_setup->speed = tmp;
+		fields_set->speed = 1;
 	} else if (strcmp(key, "delay") == 0) {
 		rc = reliable_uint64_from_string(&tmp, value, NULL);
 		if (rc < 0) {
 			goto error;
 		}
 		spi_setup->delay = tmp;
+		fields_set->delay = 1;
 	} else if (strcmp(key, "cs_change") == 0) {
 		rc = reliable_uint64_from_string(&tmp, value, NULL);
 		if (rc < 0) {
 			goto error;
 		}
 		spi_setup->cs_change = tmp;
+		fields_set->cs_change = 1;
 	} else if (strcmp(key, "mode") == 0) {
 		spi_setup->mode = 0;
 		mode = value;
@@ -111,6 +163,7 @@ static inline int parse_spi_setup(struct sja1105_spi_setup *spi_setup, char *key
 			}
 			value = mode;
 		}
+		fields_set->mode = 1;
 	} else if (strcmp(key, "dry_run") == 0) {
 		if (strcmp(value, "false") == 0) {
 			spi_setup->dry_run = 0;
@@ -121,6 +174,7 @@ static inline int parse_spi_setup(struct sja1105_spi_setup *spi_setup, char *key
 			     "Expected true or false.", value);
 			return -1;
 		}
+		fields_set->dry_run = 1;
 	} else if (strcmp(key, "auto_flush") == 0) {
 		if (strcmp(value, "false") == 0) {
 			spi_setup->flush = 0;
@@ -131,8 +185,10 @@ static inline int parse_spi_setup(struct sja1105_spi_setup *spi_setup, char *key
 			     "Expected true or false.", value);
 			return -1;
 		}
+		fields_set->flush = 1;
 	} else if (strcmp(key, "staging-area") == 0) {
 		spi_setup->staging_area = strdup(value);
+		fields_set->staging_area = 1;
 	} else {
 		loge("Invalid key \"%s\"", key);
 		return -1;
@@ -143,8 +199,9 @@ error:
 	return rc;
 }
 
-static inline int parse_general_config(struct general_config *general_conf,
-                                       char *key, char *value)
+static inline int
+parse_general_config(struct general_config *general_conf,
+                     char *key, char *value, struct fields_set *fields_set)
 {
 	uint64_t tmp;
 	int rc;
@@ -159,6 +216,7 @@ static inline int parse_general_config(struct general_config *general_conf,
 			     "Expected true or false.", value);
 			return -1;
 		}
+		fields_set->verbose = 1;
 	} else if (strcmp(key, "debug") == 0) {
 		if (strcmp(value, "false") == 0) {
 			general_conf->debug = 0;
@@ -169,18 +227,21 @@ static inline int parse_general_config(struct general_config *general_conf,
 			     "Expected true or false.", value);
 			return -1;
 		}
+		fields_set->debug = 1;
 	} else if (strcmp(key, "entries-per-line") == 0) {
 		rc = reliable_uint64_from_string(&tmp, value, NULL);
 		if (rc < 0) {
 			goto error;
 		}
 		general_conf->entries_per_line = tmp;
+		fields_set->entries_per_line = 1;
 	} else if (strcmp(key, "screen-width") == 0) {
 		rc = reliable_uint64_from_string(&tmp, value, NULL);
 		if (rc < 0) {
 			goto error;
 		}
 		general_conf->screen_width = tmp;
+		fields_set->screen_width = 1;
 	} else {
 		loge("Invalid key \"%s\"", key);
 		return -1;
@@ -193,12 +254,13 @@ error:
 
 static inline int parse_key_val(struct sja1105_spi_setup *spi_setup,
                                 struct general_config *general_conf,
-                                char *key, char *value, char *section_hdr)
+                                char *key, char *value, char *section_hdr,
+                                struct fields_set *fields_set)
 {
 	if (strcmp(section_hdr, "[spi-setup]") == 0) {
-		parse_spi_setup(spi_setup, key, value);
+		parse_spi_setup(spi_setup, key, value, fields_set);
 	} else if (strcmp(section_hdr, "[general]") == 0) {
-		parse_general_config(general_conf, key, value);
+		parse_general_config(general_conf, key, value, fields_set);
 		SJA1105_VERBOSE_CONDITION = general_conf->verbose;
 		SJA1105_DEBUG_CONDITION   = general_conf->debug;
 	} else {
@@ -211,6 +273,7 @@ static inline int parse_key_val(struct sja1105_spi_setup *spi_setup,
 int read_config_file(char *filename, struct sja1105_spi_setup *spi_setup,
                      struct general_config *general_conf)
 {
+	struct fields_set fields_set;
 	char  line[MAX_LINE_SIZE];
 	int   line_num = 0;
 	int   rc;
@@ -227,6 +290,7 @@ int read_config_file(char *filename, struct sja1105_spi_setup *spi_setup,
 	}
 	memset(spi_setup, 0, sizeof(*spi_setup));
 	memset(general_conf, 0, sizeof(*general_conf));
+	memset(&fields_set, 0, sizeof(fields_set));
 	while (fgets(line, MAX_LINE_SIZE, fd)) {
 		p = trimwhitespace(line);
 		if (strlen(p) == 0 || p == NULL) {
@@ -256,7 +320,7 @@ int read_config_file(char *filename, struct sja1105_spi_setup *spi_setup,
 		key   = trimwhitespace(p);
 		value = trimwhitespace(value);
 		rc = parse_key_val(spi_setup, general_conf,
-		                   key, value, section_hdr);
+		                   key, value, section_hdr, &fields_set);
 		if (rc < 0) {
 			loge("Could not parse line %d: \"%s\"", line_num, line);
 			rc = -1;
@@ -272,22 +336,10 @@ out:
 default_conf:
 	if (rc == -1) {
 		loge("Invalid config file, using defaults.\n");
-		spi_setup->device_id    = default_device_id;
-		spi_setup->device       = default_device;
-		spi_setup->staging_area = default_staging_area;
-		spi_setup->mode         = 0;
-		spi_setup->bits         = 8;
-		spi_setup->speed        = 1000000;
-		spi_setup->delay        = 0;
-		spi_setup->cs_change    = 0;
-		spi_setup->mode         = SPI_CPHA;
-		spi_setup->dry_run      = 0;
-		spi_setup->flush        = 0;
-		general_conf->verbose   = 0;
-		general_conf->debug     = 0;
-		general_conf->entries_per_line = 1;
-		general_conf->screen_width     = 80;
+		/* Fall-through. We're using default values anyway for
+		 * entries not specified in the config file. */
 	}
+	config_set_defaults(spi_setup, general_conf, &fields_set);
 	return rc;
 }
 
