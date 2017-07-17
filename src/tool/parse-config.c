@@ -258,7 +258,7 @@ out_1:
 	return rc;
 }
 
-int
+static int
 static_config_upload(struct sja1105_spi_setup *spi_setup,
                      struct sja1105_static_config *config)
 {
@@ -325,7 +325,8 @@ out:
 	return rc;
 }
 
-void get_flush_mode(struct sja1105_spi_setup *spi_setup, int *argc, char ***argv)
+static void
+get_flush_mode(struct sja1105_spi_setup *spi_setup, int *argc, char ***argv)
 {
 	if ((*argc) && ((strcmp(*argv[0], "-f") == 0 ||
 	                (strcmp(*argv[0], "--flush") == 0)))) {
