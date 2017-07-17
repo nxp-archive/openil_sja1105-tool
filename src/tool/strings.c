@@ -178,8 +178,8 @@ int reliable_uint64_from_string(uint64_t *to, char *from, char **endptr)
 		rc = -1;
 		goto out;
 	}
-	errno = errno_saved;
 out:
+	errno = errno_saved;
 	return rc;
 }
 
