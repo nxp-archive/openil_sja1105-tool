@@ -1007,11 +1007,6 @@ staging_area_modify(struct sja1105_staging_area *staging_area,
 	static_config = &staging_area->static_config;
 	ptp_config    = &staging_area->ptp_config;
 
-	if (table_name == NULL) {
-		rc = -1;
-		print_usage("sja1105-tool");
-		goto out;
-	}
 	index_ptr = strchr(table_name, '[');
 	if (index_ptr == NULL) {
 		entry_index = 0;
@@ -1054,6 +1049,42 @@ staging_area_modify(struct sja1105_staging_area *staging_area,
 		loge("modify failed!");
 		goto out;
 	}
+out:
+	return rc;
+}
+
+int staging_area_modify_parse(struct sja1105_staging_area *staging_area,
+                              int *argc, char ***argv)
+{
+	char *table_name;
+	char *field_name;
+	char *field_val;
+	int rc = 0;
+
+	if ((*argc) == 0) {
+		print_usage("sja1105-tool");
+		rc = -EINVAL;
+		goto out;
+	}
+	table_name = (*argv)[0];
+	(*argc)--; (*argv)++;
+	if ((*argc) != 2) {
+		/* Instead of printing usage again, try to be more helpful.
+		 * At least the guy gave us the table name. Tell him what
+		 * fields are available.
+		 * Do that by simulating a call to staging_area_modify() with
+		 * some dummy arguments (just enough for it to provide a
+		 * clearer usage message
+		 */
+		rc = staging_area_modify(NULL, table_name, "<none>", "<none>");
+		goto out;
+	}
+	field_name = (*argv)[0];
+	field_val  = (*argv)[1];
+	(*argc) -= 2; (*argv) += 2;
+
+	rc = staging_area_modify(staging_area, table_name,
+	                         field_name, field_val);
 out:
 	return rc;
 }
