@@ -64,5 +64,6 @@ int  sja1105_ptp_stop_pin_toggle(struct sja1105_spi_setup*);
 int  sja1105_ptp_reset(struct sja1105_spi_setup*);
 int  sja1105_ptp_set_add_mode(struct sja1105_spi_setup*,
                               enum sja1105_ptp_clk_add_mode);
+int  sja1105_ptpclkrate_from_ratio(double, uint32_t*);
 
 #endif

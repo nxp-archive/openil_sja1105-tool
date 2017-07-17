@@ -30,6 +30,7 @@
  *****************************************************************************/
 #include <string.h>
 #include <inttypes.h>
+#include <errno.h>
 /* These are our own include files */
 #include <lib/include/ptp.h>
 #include <lib/include/gtable.h>
@@ -231,5 +232,37 @@ sja1105_ptp_config_show(struct sja1105_ptp_config *config)
 	memset(print_buf, 0, MAX_LINE_SIZE);
 	sja1105_ptp_config_fmt_show(print_buf, fmt, config);
 	puts(print_buf);
+}
+
+/* IEEE 754 (double precision): fractional part is 52 bits.
+ * Take most significant 31 bits of that.
+ */
+#define DOUBLE_FRACTION_AS_UINT32(double_ptr) \
+	(uint32_t)(((uint64_t) *double_ptr >> (52 - 31)) & 0x7fffffff)
+
+int sja1105_ptpclkrate_from_ratio(double ratio, uint32_t *ptpclkrate)
+{
+	uint64_t *ratio_ptr;
+	int rc = 0;
+
+	if (ratio <= 0 || ratio >= 2) {
+		loge("ratio %lf outside of range", ratio);
+		rc = -ERANGE;
+		goto out;
+	}
+	ratio_ptr = (uint64_t *)(&ratio);
+	if (ratio < 1) {
+		/* Put fractional part of proper ratio (larger than 1)
+		 * into result. Integer part (msb) is zero */
+		ratio += 1;
+		*ptpclkrate = DOUBLE_FRACTION_AS_UINT32(ratio_ptr);
+	} else {
+		/* Put fractional part of ratio into result.
+		 * Make integer part (msb) 1 */
+		*ptpclkrate = DOUBLE_FRACTION_AS_UINT32(ratio_ptr);
+		*ptpclkrate |= 0x80000000;
+	}
+out:
+	return rc;
 }
 
