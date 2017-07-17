@@ -41,6 +41,8 @@
 #define SJA1105_PTPPINST_ADDR   0x14
 #define SJA1105_PTPSCHTM_ADDR   0x12
 
+#define SIZE_PTP_CONFIG         (7*8)
+
 enum sja1105_ptp_clk_add_mode {
 	PTP_SET_MODE = 0,
 	PTP_ADD_MODE,

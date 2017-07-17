@@ -37,6 +37,7 @@
 #include "internal.h"
 /* From libsja1105 */
 #include <lib/include/static-config.h>
+#include <lib/include/ptp.h>
 #include <common.h>
 
 static void schedule_table_show(struct sja1105_static_config *config)
@@ -433,23 +434,33 @@ sja1105_staging_area_show(struct sja1105_staging_area *staging_area,
 		retagging_table_show,
 		xmii_table_show,
 	};
-	struct sja1105_static_config *config = &staging_area->static_config;
+	struct sja1105_static_config *static_config;
+	struct sja1105_ptp_config    *ptp_config;
 	unsigned int i;
 	int rc = 0;
+
+	static_config = &staging_area->static_config;
+	ptp_config    = &staging_area->ptp_config;
 
 	if (table_name == NULL || strlen(table_name) == 0) {
 		logv("Showing all config tables");
 		for (i = 0; i < ARRAY_SIZE(next_config_table_show); i++) {
-			next_config_table_show[i](config);
+			next_config_table_show[i](static_config);
 		}
+		sja1105_ptp_config_show(ptp_config);
 	} else {
-		/* TODO: check if user asked for PTP config, else
+		/* check if user asked for PTP config, else
 		 * query static config */
-		rc = get_match(table_name, options, ARRAY_SIZE(options));
-		if (rc < 0) {
-			goto out;
+		if (matches(table_name, "ptp") == 0) {
+			sja1105_ptp_config_show(ptp_config);
+		} else {
+			rc = get_match(table_name, options,
+			               ARRAY_SIZE(options));
+			if (rc < 0) {
+				goto out;
+			}
+			next_config_table_show[rc](static_config);
 		}
-		next_config_table_show[rc](config);
 	}
 out:
 	return rc;
