@@ -33,16 +33,16 @@
 #include <string.h>
 #include <inttypes.h>
 #include <unistd.h>
+#include <errno.h>
 /* These are our include files */
 #include <lib/include/status-tables.h>
 #include <lib/include/gtable.h>
 #include <lib/include/spi.h>
 #include <common.h>
 
-void sja1105_port_status_show(
-		struct sja1105_port_status *status,
-		int    port,
-		char  *print_buf)
+void sja1105_port_status_show(struct sja1105_port_status *status,
+                              int    port,
+                              char  *print_buf)
 {
 	char *fmt = "%-30s\n";
 	formatted_append(print_buf, fmt, "Port %d",          port);
@@ -95,8 +95,9 @@ void sja1105_port_status_show(
 	formatted_append(print_buf, fmt, "");
 }
 
-static void sja1105_port_status_mac_unpack(void *buf, struct
-                                           sja1105_port_status *status)
+static void
+sja1105_port_status_mac_unpack(void *buf, struct
+                               sja1105_port_status *status)
 {
 	/* So that additions translate to 4 bytes */
 	uint32_t *p = (uint32_t*) buf;
@@ -125,8 +126,9 @@ static void sja1105_port_status_mac_unpack(void *buf, struct
 	gtable_unpack(p + 0x1, &status->agedrp,        0,  0, 4);
 }
 
-static void sja1105_port_status_hl1_unpack(void *buf, struct
-                                           sja1105_port_status *status)
+static void
+sja1105_port_status_hl1_unpack(void *buf, struct
+                               sja1105_port_status *status)
 {
 	/* So that additions translate to 4 bytes */
 	uint32_t *p = (uint32_t*) buf;
@@ -152,8 +154,9 @@ static void sja1105_port_status_hl1_unpack(void *buf, struct
 	status->n_txbyte += status->n_txbytesh << 32;
 }
 
-static void sja1105_port_status_hl2_unpack(void *buf, struct
-                                           sja1105_port_status *status)
+static void
+sja1105_port_status_hl2_unpack(void *buf, struct
+                               sja1105_port_status *status)
 {
 	/* So that additions translate to 4 bytes */
 	uint32_t *p = (uint32_t*) buf;
@@ -163,10 +166,9 @@ static void sja1105_port_status_hl2_unpack(void *buf, struct
 	gtable_unpack(p + 0x0, &status->n_not_reach,    31,  0, 4);
 }
 
-int sja1105_port_status_get(
-		struct sja1105_spi_setup *spi_setup,
-		struct sja1105_port_status *status,
-		int port)
+int sja1105_port_status_get(struct sja1105_spi_setup *spi_setup,
+                            struct sja1105_port_status *status,
+                            int port)
 {
 	const int SIZE_MAC_AREA = 0x02 * 4;
 	const int SIZE_HL_AREA  = 0x10 * 4;
