@@ -131,12 +131,12 @@ int ptp_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv)
 				loge("ptpclkrate_from_ratio failed");
 				goto error;
 			}
+			logv("setting ptpclkrate to 0x%" PRIx32, ptpclkrate);
 			rc = sja1105_spi_configure(spi_setup);
 			if (rc < 0) {
 				loge("sja1105_spi_configure failed");
 				goto error;
 			}
-			logv("setting ptpclkrate to 0x%" PRIx32, ptpclkrate);
 			rc = sja1105_ptp_clk_rate_set(spi_setup, ptpclkrate);
 		} else {
 			loge("unknown token \"%s\"", argv[1]);
