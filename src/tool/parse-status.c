@@ -52,8 +52,8 @@ static void print_usage()
 	/*printf(" * ptp     -> PTP Control Register Values\n");*/
 }
 
-static int sja1105_status_ports(struct sja1105_spi_setup *spi_setup,
-                                int port_no)
+static int status_ports(struct sja1105_spi_setup *spi_setup,
+                        int port_no)
 {
 	struct sja1105_port_status status;
 	char *print_buf[5];
@@ -109,17 +109,21 @@ int status_parse_args(struct sja1105_spi_setup *spi_setup,
 		/*"ptp",*/
 	};
 	/*int partition;*/
+	uint64_t tmp;
+	int clear = 0;
 	int port_no;
 	int match;
-	int rc;
+	int rc = 0;
 
 	if (argc < 1) {
+		rc = -1;
 		goto parse_error;
 	}
 	match = get_match(argv[0], options, ARRAY_SIZE(options));
 	if (match < 0) {
+		rc = -1;
 		goto parse_error;
-	} else if (strcmp(options[match], "general") == 0) {
+	} else if (matches(options[match], "general") == 0) {
 		struct sja1105_general_status status;
 		rc = sja1105_spi_configure(spi_setup);
 		if (rc < 0) {
@@ -153,32 +157,57 @@ int status_parse_args(struct sja1105_spi_setup *spi_setup,
 			/*sscanf(argv[3], "%d", &partition);*/
 		/*}*/
 		/*status_vl_memory(spi_setup, partition);*/
-	} else if (strcmp(options[match], "ports") == 0) {
-		if (argc < 2) {
+	} else if (matches(options[match], "ports") == 0) {
+		/* Consume "ports" */
+		argc--; argv++;
+		/* Clear requested? Set flag, continue parsing,
+		 * run command later. Consume "clear". */
+		if (argc && matches(argv[0], "clear") == 0) {
+			clear = 1;
+			argc--; argv++;
+		}
+		if (argc == 0) {
 			port_no = -1;
-			logv("showing for all ports");
+			logv("all ports");
+		} else if (argc == 1) {
+			rc = reliable_uint64_from_string(&tmp, argv[0], NULL);
+			if (rc < 0) {
+				loge("no int stored at %s", argv[0]);
+				goto error;
+			}
+			port_no = (int) tmp;
 		} else {
-			sscanf(argv[1], "%d", &port_no);
+			rc = -1;
+			goto parse_error;
 		}
 		rc = sja1105_spi_configure(spi_setup);
 		if (rc < 0) {
 			loge("sja1105_spi_configure failed");
 			goto error;
 		}
-		rc = sja1105_status_ports(spi_setup, port_no);
-		if (rc < 0) {
-			loge("failed to get port status");
-			goto error;
+		if (clear) {
+			rc = sja1105_port_status_clear(spi_setup, port_no);
+			if (rc < 0) {
+				loge("failed to clear port status");
+				goto error;
+			}
+		} else {
+			rc = status_ports(spi_setup, port_no);
+			if (rc < 0) {
+				loge("failed to get port status");
+				goto error;
+			}
 		}
 	/*} else if (strcmp(options[match], "ptp") == 0) {*/
 		/*status_ptp(spi_setup);*/
 	} else {
+		rc = -1;
 		goto parse_error;
 	}
 	return 0;
 parse_error:
 	print_usage();
 error:
-	return -1;
+	return rc;
 }
 
