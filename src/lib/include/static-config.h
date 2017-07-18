@@ -114,7 +114,7 @@ void sja1105_vl_lookup_entry_unpack(void*, struct sja1105_vl_lookup_entry*);
 void sja1105_vl_lookup_entry_show(struct sja1105_vl_lookup_entry*);
 void sja1105_vl_lookup_entry_fmt_show(char*, char*, struct sja1105_vl_lookup_entry*);
 
-/* From tables.c */
+/* From static-config.c */
 unsigned int sja1105_static_config_get_length(struct sja1105_static_config*);
 int  sja1105_static_config_add_entry(struct sja1105_table_header*, void *, \
                                      struct sja1105_static_config*);
