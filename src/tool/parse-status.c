@@ -34,22 +34,13 @@
 #include "internal.h"
 #include <lib/include/status.h>
 
-/* TODO: change usage */
 static void print_usage()
 {
 	printf("Usage: sja1105-tool status [ type ] [ options ]\n");
 	printf("[ type ] can be:\n");
 	printf(" * general -> General Status Information Register\n");
-	/*printf(" * sync    -> Synchronization Status Register\n");*/
-	/*printf(" * vl      -> Virtual Link Status\n");*/
-	/*printf(" * memory  -> Memory Partition Information Register\n" \*/
-	       /*"              Give Partition No. as argument [0-7]\n" \*/
-	       /*"              default partition 0\n" \*/
-	/*printf(" * vl-mem  -> VL Memory Partition Information Register\n" \*/
-	       /*"              Provide Partition# as argument [0-7]\n");*/
 	printf(" * port    -> Port status Information Register\n" \
 	       "              Provide Port No. as argument [0-4]\n");
-	/*printf(" * ptp     -> PTP Control Register Values\n");*/
 }
 
 static int status_ports(struct sja1105_spi_setup *spi_setup,
