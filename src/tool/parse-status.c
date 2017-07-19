@@ -92,14 +92,8 @@ int status_parse_args(struct sja1105_spi_setup *spi_setup,
 {
 	const char *options[] = {
 		"general",
-		/*"sync",*/
-		/*"vl",*/
-		/*"memory",*/
-		/*"vl-memory",*/
 		"ports",
-		/*"ptp",*/
 	};
-	/*int partition;*/
 	uint64_t tmp;
 	int clear = 0;
 	int port_no;
@@ -128,26 +122,6 @@ int status_parse_args(struct sja1105_spi_setup *spi_setup,
 		}
 		/* Display the collected general status registers */
 		sja1105_general_status_show(&status);
-	/*} else if (strcmp(options[match], "sync") == 0) {*/
-		/*status_sync(spi_setup);*/
-	/*} else if (strcmp(options[match], "vl") == 0) {*/
-		/*status_vl(spi_setup, argv[2]);*/
-	/*} else if (strcmp(options[match], "memory") == 0) {*/
-		/*if (argc < 4) {*/
-			/*partition = 0;*/
-			/*printf("showing for default partition %d\n");*/
-		/*} else {*/
-			/*sscanf(argv[3], "%d", &partition);*/
-		/*}*/
-		/*status_memory(spi_setup, partition);*/
-	/*} else if (strcmp(options[match], "vl-memory") == 0) {*/
-		/*if (argc < 4) {*/
-			/*partition = 0;*/
-			/*printf("showing for default partition %d\n");*/
-		/*} else {*/
-			/*sscanf(argv[3], "%d", &partition);*/
-		/*}*/
-		/*status_vl_memory(spi_setup, partition);*/
 	} else if (matches(options[match], "ports") == 0) {
 		/* Consume "ports" */
 		argc--; argv++;
@@ -189,8 +163,6 @@ int status_parse_args(struct sja1105_spi_setup *spi_setup,
 				goto error;
 			}
 		}
-	/*} else if (strcmp(options[match], "ptp") == 0) {*/
-		/*status_ptp(spi_setup);*/
 	} else {
 		rc = -1;
 		goto parse_error;
