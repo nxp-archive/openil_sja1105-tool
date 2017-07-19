@@ -123,6 +123,7 @@ static int parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 	int  rc;
 
 	if (argc < 1) {
+		rc = -1;
 		goto error;
 	}
 	rc = get_match(argv[0], options, ARRAY_SIZE(options));
