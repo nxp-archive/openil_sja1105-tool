@@ -101,6 +101,9 @@ docs/pdf/%.pdf: docs/md/%.md
 
 HEADERS=$(wildcard src/lib/include/*.h)
 
+get_header_destination = $(patsubst src/lib/include/%, \
+                                    $(DESTDIR)/usr/include/sja1105/%, $1)
+
 # Installation
 
 install: install-binaries install-configs install-manpages install-headers
@@ -119,11 +122,23 @@ install-manpages: $(MANPAGES)
 
 install-headers: $(HEADERS)
 	$(foreach header, $^, install -m 0644 -D $(header) \
-		$(patsubst src/lib/include/%, $(DESTDIR)/usr/include/sja1105/%, $(header));)
+		$(call get_header_destination,$(header));)
 
 all: install
+
+# Leave the directory structure in place
+uninstall:
+	$(foreach manpage, $(MANPAGES), \
+		rm -rf $(call get_manpage_destination,$(manpage));)
+	$(foreach header, $(HEADERS), \
+		rm -rf $(call get_header_destination,$(header));)
+	rm -rf $(DESTDIR)/usr/lib/libsja1105.so
+	rm -rf $(DESTDIR)/usr/bin/sja1105-tool
+	rm -rf $(DESTDIR)/etc/init.d/S45sja1105
+	rm -rf $(DESTDIR)/etc/sja1105/sja1105.conf
 
 clean:
 	rm -f $(SJA1105_BIN) $(BIN_OBJ) $(SJA1105_LIB) $(LIB_OBJ)
 
-.PHONY: clean build man install install-binaries install-configs install-headers install-manpages
+.PHONY: clean uninstall build man install install-binaries \
+	install-configs install-headers install-manpages
