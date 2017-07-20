@@ -119,7 +119,7 @@ install-manpages: $(MANPAGES)
 
 install-headers: $(HEADERS)
 	$(foreach header, $^, install -m 0644 -D $(header) \
-		$(patsubst src/lib/%, $(DESTDIR)/usr/%, $(header));)
+		$(patsubst src/lib/include/%, $(DESTDIR)/usr/include/sja1105/%, $(header));)
 
 all: install
 
