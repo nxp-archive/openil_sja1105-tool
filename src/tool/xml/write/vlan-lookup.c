@@ -28,38 +28,32 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
-#ifndef _SJA1105_TOOL_COMMON_H
-#define _SJA1105_TOOL_COMMON_H
+#include "internal.h"
 
-#include <stdint.h>
-#include <stdio.h>
+int
+vlan_lookup_table_write(xmlTextWriterPtr writer,
+                        struct sja1105_static_config *config)
+{
+	int rc = 0;
+	int i;
 
-#define MAX_LINE_SIZE 2048
+	logv("writing %d VLAN Lookup entries", config->vlan_lookup_count);
+	for (i = 0; i < config->vlan_lookup_count; i++) {
+		rc |= xmlTextWriterStartElement(writer, BAD_CAST "entry");
+		rc |= xml_write_field(writer, "index",      i);
+		rc |= xml_write_field(writer, "ving_mirr",  config->vlan_lookup[i].ving_mirr);
+		rc |= xml_write_field(writer, "vegr_mirr",  config->vlan_lookup[i].vegr_mirr);
+		rc |= xml_write_field(writer, "vmemb_port", config->vlan_lookup[i].vmemb_port);
+		rc |= xml_write_field(writer, "vlan_bc",    config->vlan_lookup[i].vlan_bc);
+		rc |= xml_write_field(writer, "tag_port",   config->vlan_lookup[i].tag_port);
+		rc |= xml_write_field(writer, "vlanid",     config->vlan_lookup[i].vlanid);
+		rc |= xmlTextWriterEndElement(writer);
+		if (rc < 0) {
+			loge("error while writing vlan_lookup Table element %d", i);
+			goto out;
+		}
+	}
+out:
+	return rc;
+}
 
-/* Macros for conditional, error, verbose and debug logging */
-extern int SJA1105_DEBUG_CONDITION;
-extern int SJA1105_VERBOSE_CONDITION;
-
-#define _log(file, fmt, ...) do { \
-	if (SJA1105_DEBUG_CONDITION) { \
-		fprintf(file, "%s@%d: " fmt "\n", \
-		__func__, __LINE__, ##__VA_ARGS__); \
-	} else { \
-		fprintf(file, fmt "\n", ##__VA_ARGS__); \
-	} \
-} while(0);
-
-#define logc(file, condition, ...) do { \
-	if (condition) { \
-		_log(file, __VA_ARGS__); \
-	} \
-} while(0);
-
-#define loge(...) _log(stderr, __VA_ARGS__)
-#define logi(...) _log(stdout, __VA_ARGS__)
-#define logv(...) logc(stdout, SJA1105_VERBOSE_CONDITION, __VA_ARGS__);
-
-void formatted_append(char *buffer, char *width_fmt, char *fmt, ...);
-void print_array(char *print_buf, uint64_t *array, int count);
-
-#endif

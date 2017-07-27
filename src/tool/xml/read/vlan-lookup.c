@@ -28,38 +28,62 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
-#ifndef _SJA1105_TOOL_COMMON_H
-#define _SJA1105_TOOL_COMMON_H
+#include "internal.h"
 
-#include <stdint.h>
-#include <stdio.h>
+static int entry_get(xmlNode *node, struct sja1105_vlan_lookup_entry *entry)
+{
+	int rc = 0;
+	rc |= xml_read_field(&entry->ving_mirr, "ving_mirr", node);
+	rc |= xml_read_field(&entry->vegr_mirr, "vegr_mirr", node);
+	rc |= xml_read_field(&entry->vmemb_port, "vmemb_port", node);
+	rc |= xml_read_field(&entry->vlan_bc, "vlan_bc", node);
+	rc |= xml_read_field(&entry->tag_port, "tag_port", node);
+	rc |= xml_read_field(&entry->vlanid, "vlanid", node);
+	if (rc) {
+		loge("VLAN Lookup entry is incomplete!");
+	}
+	return rc;
+}
 
-#define MAX_LINE_SIZE 2048
+static int parse_entry(xmlNode *node, struct sja1105_static_config *config)
+{
+	struct sja1105_vlan_lookup_entry entry;
+	int rc;
 
-/* Macros for conditional, error, verbose and debug logging */
-extern int SJA1105_DEBUG_CONDITION;
-extern int SJA1105_VERBOSE_CONDITION;
+	if (config->vlan_lookup_count >= MAX_VLAN_LOOKUP_COUNT) {
+		loge("Cannot have more than %d L2 Forwarding "
+		     "Table entries!", MAX_VLAN_LOOKUP_COUNT);
+		rc = -1;
+		goto out;
+	}
+	memset(&entry, 0, sizeof(entry));
+	rc = entry_get(node, &entry);
+	config->vlan_lookup[config->vlan_lookup_count++] = entry;
+out:
+	return rc;
+}
 
-#define _log(file, fmt, ...) do { \
-	if (SJA1105_DEBUG_CONDITION) { \
-		fprintf(file, "%s@%d: " fmt "\n", \
-		__func__, __LINE__, ##__VA_ARGS__); \
-	} else { \
-		fprintf(file, fmt "\n", ##__VA_ARGS__); \
-	} \
-} while(0);
+int vlan_lookup_table_parse(xmlNode *node, struct sja1105_static_config *config)
+{
+	xmlNode *c;
+	int rc = 0;
 
-#define logc(file, condition, ...) do { \
-	if (condition) { \
-		_log(file, __VA_ARGS__); \
-	} \
-} while(0);
+	if (node->type != XML_ELEMENT_NODE) {
+		loge("VLAN Lookup Table node must be of element type!");
+		rc = -1;
+		goto out;
+	}
+	for (c = node->children; c != NULL; c = c->next) {
+		if (c->type != XML_ELEMENT_NODE) {
+			continue;
+		}
+		rc = parse_entry(c, config);
+		if (rc < 0) {
+			goto out;
+		}
+	}
+	logv("read %d VLAN Lookup entries", config->vlan_lookup_count);
+out:
+	return rc;
+}
 
-#define loge(...) _log(stderr, __VA_ARGS__)
-#define logi(...) _log(stdout, __VA_ARGS__)
-#define logv(...) logc(stdout, SJA1105_VERBOSE_CONDITION, __VA_ARGS__);
-
-void formatted_append(char *buffer, char *width_fmt, char *fmt, ...);
-void print_array(char *print_buf, uint64_t *array, int count);
-
-#endif

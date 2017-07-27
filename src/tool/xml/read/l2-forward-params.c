@@ -28,38 +28,68 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
-#ifndef _SJA1105_TOOL_COMMON_H
-#define _SJA1105_TOOL_COMMON_H
+#include "internal.h"
 
-#include <stdint.h>
-#include <stdio.h>
+static int entry_get(xmlNode *node, struct sja1105_l2_forwarding_params_table *entry)
+{
+	int rc;
 
-#define MAX_LINE_SIZE 2048
+	rc = xml_read_field(&entry->max_dynp, "max_dynp", node);
+	if (rc < 0) {
+		goto error;
+	}
+	rc = xml_read_array(&entry->part_spc, 8, "part_spc", node);
+	if (rc != 8) {
+		loge("Must have exactly 8 PART_SPC entries!");
+		goto error;
+	}
+	return 0;
+error:
+	loge("L2 Forwarding Parameters Table is incomplete");
+	return -1;
+}
 
-/* Macros for conditional, error, verbose and debug logging */
-extern int SJA1105_DEBUG_CONDITION;
-extern int SJA1105_VERBOSE_CONDITION;
+static int parse_entry(xmlNode *node, struct sja1105_static_config *config)
+{
+	struct sja1105_l2_forwarding_params_table entry;
+	int rc;
 
-#define _log(file, fmt, ...) do { \
-	if (SJA1105_DEBUG_CONDITION) { \
-		fprintf(file, "%s@%d: " fmt "\n", \
-		__func__, __LINE__, ##__VA_ARGS__); \
-	} else { \
-		fprintf(file, fmt "\n", ##__VA_ARGS__); \
-	} \
-} while(0);
+	if (config->l2_forwarding_params_count >= MAX_L2_FORWARDING_PARAMS_COUNT) {
+		loge("Cannot have more than %d L2 Forwarding Parameters "
+		     "Table entries!", MAX_L2_FORWARDING_PARAMS_COUNT);
+		rc = -1;
+		goto out;
+	}
+	memset(&entry, 0, sizeof(entry));
+	rc = entry_get(node, &entry);
+	config->l2_forwarding_params[config->l2_forwarding_params_count++] = entry;
+out:
+	return rc;
+}
 
-#define logc(file, condition, ...) do { \
-	if (condition) { \
-		_log(file, __VA_ARGS__); \
-	} \
-} while(0);
+int l2_forwarding_parameters_table_parse(xmlNode *node, struct sja1105_static_config *config)
+{
+	int rc = 0;
+	xmlNode *c;
 
-#define loge(...) _log(stderr, __VA_ARGS__)
-#define logi(...) _log(stdout, __VA_ARGS__)
-#define logv(...) logc(stdout, SJA1105_VERBOSE_CONDITION, __VA_ARGS__);
+	if (node->type != XML_ELEMENT_NODE) {
+		loge("L2 Forwarding Parameters Table node must be "
+		     "of element type!");
+		rc = -1;
+		goto out;
+	}
+	for (c = node->children; c != NULL; c = c->next) {
+		if (c->type != XML_ELEMENT_NODE) {
+			continue;
+		}
+		rc = parse_entry(c, config);
+		if (rc < 0) {
+			goto out;
+		}
+	}
+	logv("read %d L2 Forwarding Parameters entries",
+	     config->l2_forwarding_params_count);
+out:
+	return rc;
+}
 
-void formatted_append(char *buffer, char *width_fmt, char *fmt, ...);
-void print_array(char *print_buf, uint64_t *array, int count);
-
-#endif

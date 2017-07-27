@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016, NXP Semiconductors
+ * Copyright (c) 2017, NXP Semiconductors
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,38 +28,64 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
-#ifndef _SJA1105_TOOL_COMMON_H
-#define _SJA1105_TOOL_COMMON_H
+#include "internal.h"
 
-#include <stdint.h>
-#include <stdio.h>
+static int entry_get(xmlNode *node, struct sja1105_vl_forwarding_params_table *table)
+{
+	int rc = 0;
+	rc = xml_read_array(&table->partspc, 8, "partspc", node);
+	if (rc != 8) {
+		loge("Must have exactly 8 PARTSPC entries!");
+		rc = -1;
+		goto out;
+	}
+	rc = xml_read_field(&table->debugen, "debugen", node);
+	if (rc) {
+		loge("VL Forwarding Params Table: failed to read DEBUGEN field!");
+	}
+out:
+	return rc;
+}
 
-#define MAX_LINE_SIZE 2048
+static int parse_entry(xmlNode *node, struct sja1105_static_config *config)
+{
+	struct sja1105_vl_forwarding_params_table table;
+	int rc;
 
-/* Macros for conditional, error, verbose and debug logging */
-extern int SJA1105_DEBUG_CONDITION;
-extern int SJA1105_VERBOSE_CONDITION;
+	if (config->vl_forwarding_params_count >= MAX_VL_FORWARDING_PARAMS_COUNT) {
+		loge("Cannot have more than %d VL Forwarding Params entries!",
+		     MAX_VL_FORWARDING_PARAMS_COUNT);
+		rc = -1;
+		goto out;
+	}
+	memset(&table, 0, sizeof(table));
+	rc = entry_get(node, &table);
+	config->vl_forwarding_params_table[config->vl_forwarding_params_count++] = table;
+out:
+	return rc;
+}
 
-#define _log(file, fmt, ...) do { \
-	if (SJA1105_DEBUG_CONDITION) { \
-		fprintf(file, "%s@%d: " fmt "\n", \
-		__func__, __LINE__, ##__VA_ARGS__); \
-	} else { \
-		fprintf(file, fmt "\n", ##__VA_ARGS__); \
-	} \
-} while(0);
+int vl_fw_params_table_parse(xmlNode *node, struct sja1105_static_config *config)
+{
+	xmlNode *c;
+	int rc = 0;
 
-#define logc(file, condition, ...) do { \
-	if (condition) { \
-		_log(file, __VA_ARGS__); \
-	} \
-} while(0);
+	if (node->type != XML_ELEMENT_NODE) {
+		loge("VL Forwarding Params table node must be of element type!");
+		rc = -1;
+		goto out;
+	}
+	for (c = node->children; c != NULL; c = c->next) {
+		if (c->type != XML_ELEMENT_NODE) {
+			continue;
+		}
+		rc = parse_entry(c, config);
+		if (rc < 0) {
+			goto out;
+		}
+	}
+	logv("read %d VL Forwarding Params entries", config->vl_forwarding_params_count);
+out:
+	return rc;
+}
 
-#define loge(...) _log(stderr, __VA_ARGS__)
-#define logi(...) _log(stdout, __VA_ARGS__)
-#define logv(...) logc(stdout, SJA1105_VERBOSE_CONDITION, __VA_ARGS__);
-
-void formatted_append(char *buffer, char *width_fmt, char *fmt, ...);
-void print_array(char *print_buf, uint64_t *array, int count);
-
-#endif

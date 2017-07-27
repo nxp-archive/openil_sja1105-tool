@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016, NXP Semiconductors
+ * Copyright (c) 2017, NXP Semiconductors
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,38 +28,41 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
-#ifndef _SJA1105_TOOL_COMMON_H
-#define _SJA1105_TOOL_COMMON_H
+#include "internal.h"
 
-#include <stdint.h>
-#include <stdio.h>
+int
+vl_lookup_table_write(xmlTextWriterPtr writer,
+                      struct sja1105_static_config *config)
+{
+	struct sja1105_vl_lookup_entry *entry;
+	int rc = 0;
+	int i;
 
-#define MAX_LINE_SIZE 2048
+	logv("writing %d VL Lookup entries", config->vl_lookup_count);
+	for (i = 0; i < config->vl_lookup_count; i++) {
+		rc |= xmlTextWriterStartElement(writer, BAD_CAST "entry");
+		rc |= xml_write_field(writer, "index", i);
+		entry = &config->vl_lookup[i];
+		if (entry->format == 0) {
+			rc |= xml_write_field(writer, "destports",  entry->destports);
+			rc |= xml_write_field(writer, "iscritical", entry->iscritical);
+			rc |= xml_write_field(writer, "macaddr",    entry->macaddr);
+			rc |= xml_write_field(writer, "vlanid",     entry->vlanid);
+			rc |= xml_write_field(writer, "port",       entry->port);
+			rc |= xml_write_field(writer, "vlanprior",  entry->vlanprior);
+		} else {
+			rc |= xml_write_field(writer, "egrmirr",    entry->egrmirr);
+			rc |= xml_write_field(writer, "ingrmirr",   entry->ingrmirr);
+			rc |= xml_write_field(writer, "vlid",       entry->vlid);
+			rc |= xml_write_field(writer, "port",       entry->port);
+		}
+		rc |= xmlTextWriterEndElement(writer);
+		if (rc < 0) {
+			loge("error while writing VL Lookup Table element %d", i);
+			goto out;
+		}
+	}
+out:
+	return rc;
+}
 
-/* Macros for conditional, error, verbose and debug logging */
-extern int SJA1105_DEBUG_CONDITION;
-extern int SJA1105_VERBOSE_CONDITION;
-
-#define _log(file, fmt, ...) do { \
-	if (SJA1105_DEBUG_CONDITION) { \
-		fprintf(file, "%s@%d: " fmt "\n", \
-		__func__, __LINE__, ##__VA_ARGS__); \
-	} else { \
-		fprintf(file, fmt "\n", ##__VA_ARGS__); \
-	} \
-} while(0);
-
-#define logc(file, condition, ...) do { \
-	if (condition) { \
-		_log(file, __VA_ARGS__); \
-	} \
-} while(0);
-
-#define loge(...) _log(stderr, __VA_ARGS__)
-#define logi(...) _log(stdout, __VA_ARGS__)
-#define logv(...) logc(stdout, SJA1105_VERBOSE_CONDITION, __VA_ARGS__);
-
-void formatted_append(char *buffer, char *width_fmt, char *fmt, ...);
-void print_array(char *print_buf, uint64_t *array, int count);
-
-#endif

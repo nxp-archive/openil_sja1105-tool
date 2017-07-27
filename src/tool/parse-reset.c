@@ -28,38 +28,40 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
-#ifndef _SJA1105_TOOL_COMMON_H
-#define _SJA1105_TOOL_COMMON_H
-
-#include <stdint.h>
 #include <stdio.h>
+#include <lib/include/reset.h>
+#include <common.h>
+#include "internal.h"
 
-#define MAX_LINE_SIZE 2048
+static void print_usage()
+{
+	printf("Usage: sja1105-tool reset [ cold | warm ] \n");
+}
 
-/* Macros for conditional, error, verbose and debug logging */
-extern int SJA1105_DEBUG_CONDITION;
-extern int SJA1105_VERBOSE_CONDITION;
+int rgu_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv)
+{
+	struct sja1105_reset_ctrl reset;
+	int rc;
 
-#define _log(file, fmt, ...) do { \
-	if (SJA1105_DEBUG_CONDITION) { \
-		fprintf(file, "%s@%d: " fmt "\n", \
-		__func__, __LINE__, ##__VA_ARGS__); \
-	} else { \
-		fprintf(file, fmt "\n", ##__VA_ARGS__); \
-	} \
-} while(0);
+	if (argc < 1) {
+		goto parse_error;
+	}
+	if (matches(argv[0], "warm") == 0) {
+		reset.rst_ctrl = RGU_WARM;
+	} else if (matches(argv[0], "cold") == 0) {
+		reset.rst_ctrl = RGU_COLD;
+	} else {
+		goto parse_error;
+	}
+	rc = sja1105_spi_configure(spi_setup);
+	if (rc < 0) {
+		loge("failed to open spi device");
+		goto out;
+	}
+	return sja1105_reset(spi_setup, &reset);
+parse_error:
+	print_usage();
+out:
+	return -1;
+}
 
-#define logc(file, condition, ...) do { \
-	if (condition) { \
-		_log(file, __VA_ARGS__); \
-	} \
-} while(0);
-
-#define loge(...) _log(stderr, __VA_ARGS__)
-#define logi(...) _log(stdout, __VA_ARGS__)
-#define logv(...) logc(stdout, SJA1105_VERBOSE_CONDITION, __VA_ARGS__);
-
-void formatted_append(char *buffer, char *width_fmt, char *fmt, ...);
-void print_array(char *print_buf, uint64_t *array, int count);
-
-#endif

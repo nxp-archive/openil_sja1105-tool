@@ -28,38 +28,46 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
-#ifndef _SJA1105_TOOL_COMMON_H
-#define _SJA1105_TOOL_COMMON_H
-
+#include <inttypes.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
+/* These are our own includes */
+#include <lib/include/static-config.h>
+#include <lib/include/clock.h>
+#include <lib/include/spi.h>
+#include <common.h>
 
-#define MAX_LINE_SIZE 2048
+int sja1105_clocking_setup(struct sja1105_spi_setup *spi_setup,
+                           struct sja1105_xmii_params_table *params,
+                           struct sja1105_mac_config_entry  *mac_config)
+{
+	int speed_mbps;
+	int rc = 0;
+	int i;
 
-/* Macros for conditional, error, verbose and debug logging */
-extern int SJA1105_DEBUG_CONDITION;
-extern int SJA1105_VERBOSE_CONDITION;
+	for (i = 0; i < 5; i++) {
+		switch (mac_config[i].speed) {
+		case 1: speed_mbps = 1000; break;
+		case 2: speed_mbps = 100;  break;
+		case 3: speed_mbps = 10;   break;
+		default: loge("auto speed not yet supported"); return -1;
+		}
+		if (params->xmii_mode[i] == XMII_SPEED_MII) {
+			mii_clocking_setup(spi_setup, i, params->phy_mac[i]);
+		} else if (params->xmii_mode[i] == XMII_SPEED_RMII) {
+			rmii_clocking_setup(spi_setup, i, params->phy_mac[i]);
+		} else if (params->xmii_mode[i] == XMII_SPEED_RGMII) {
+			rgmii_clocking_setup(spi_setup, i, speed_mbps);
+		} else {
+			loge("Invalid xmii_mode for port %d specified: %" PRIu64,
+			     i, params->xmii_mode[i]);
+			rc = -1;
+			goto out;
+		}
+	}
+out:
+	return rc;
+}
 
-#define _log(file, fmt, ...) do { \
-	if (SJA1105_DEBUG_CONDITION) { \
-		fprintf(file, "%s@%d: " fmt "\n", \
-		__func__, __LINE__, ##__VA_ARGS__); \
-	} else { \
-		fprintf(file, fmt "\n", ##__VA_ARGS__); \
-	} \
-} while(0);
-
-#define logc(file, condition, ...) do { \
-	if (condition) { \
-		_log(file, __VA_ARGS__); \
-	} \
-} while(0);
-
-#define loge(...) _log(stderr, __VA_ARGS__)
-#define logi(...) _log(stdout, __VA_ARGS__)
-#define logv(...) logc(stdout, SJA1105_VERBOSE_CONDITION, __VA_ARGS__);
-
-void formatted_append(char *buffer, char *width_fmt, char *fmt, ...);
-void print_array(char *print_buf, uint64_t *array, int count);
-
-#endif

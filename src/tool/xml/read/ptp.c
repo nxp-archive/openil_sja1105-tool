@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016, NXP Semiconductors
+ * Copyright (c) 2017, NXP Semiconductors
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,38 +28,36 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
-#ifndef _SJA1105_TOOL_COMMON_H
-#define _SJA1105_TOOL_COMMON_H
+#include "internal.h"
 
-#include <stdint.h>
-#include <stdio.h>
+int
+parse_ptp_config(xmlNode *node, struct sja1105_ptp_config *config)
+{
+	int rc = 0;
 
-#define MAX_LINE_SIZE 2048
+	if (node->type != XML_ELEMENT_NODE) {
+		loge("PTP Configuration node must be of element type!");
+		rc = -1;
+		goto out;
+	}
+	memset(config, 0, sizeof(*config));
+	rc |= xml_read_field(&config->pin_duration, "pin_duration", node);
+	rc |= xml_read_field(&config->pin_start, "pin_start", node);
+	rc |= xml_read_field(&config->schedule_time, "schedule_time", node);
+	rc |= xml_read_field(&config->schedule_correction_period,
+	                     "schedule_correction_period", node);
+	rc |= xml_read_field(&config->ts_based_on_ptpclk,
+	                     "ts_based_on_ptpclk", node);
+	rc |= xml_read_field(&config->schedule_autostart,
+	                     "schedule_autostart", node);
+	rc |= xml_read_field(&config->pin_toggle_autostart,
+	                     "pin_toggle_autostart", node);
+	if (rc) {
+		loge("PTP Configuration is incomplete!");
+		goto out;
+	}
+	logv("read PTP Configuration");
+out:
+	return rc;
+}
 
-/* Macros for conditional, error, verbose and debug logging */
-extern int SJA1105_DEBUG_CONDITION;
-extern int SJA1105_VERBOSE_CONDITION;
-
-#define _log(file, fmt, ...) do { \
-	if (SJA1105_DEBUG_CONDITION) { \
-		fprintf(file, "%s@%d: " fmt "\n", \
-		__func__, __LINE__, ##__VA_ARGS__); \
-	} else { \
-		fprintf(file, fmt "\n", ##__VA_ARGS__); \
-	} \
-} while(0);
-
-#define logc(file, condition, ...) do { \
-	if (condition) { \
-		_log(file, __VA_ARGS__); \
-	} \
-} while(0);
-
-#define loge(...) _log(stderr, __VA_ARGS__)
-#define logi(...) _log(stdout, __VA_ARGS__)
-#define logv(...) logc(stdout, SJA1105_VERBOSE_CONDITION, __VA_ARGS__);
-
-void formatted_append(char *buffer, char *width_fmt, char *fmt, ...);
-void print_array(char *print_buf, uint64_t *array, int count);
-
-#endif

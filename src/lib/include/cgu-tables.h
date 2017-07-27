@@ -28,38 +28,76 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
-#ifndef _SJA1105_TOOL_COMMON_H
-#define _SJA1105_TOOL_COMMON_H
+#ifndef _CGU_TABLES_H
+#define _CGU_TABLES_H
 
 #include <stdint.h>
-#include <stdio.h>
 
-#define MAX_LINE_SIZE 2048
+/* CGU */
+#define CGU_ADDR    0x100000
 
-/* Macros for conditional, error, verbose and debug logging */
-extern int SJA1105_DEBUG_CONDITION;
-extern int SJA1105_VERBOSE_CONDITION;
+/* UM10944 Table 82.
+ * IDIV_0_C to IDIV_4_C control registers
+ * (addr. 10000Bh to 10000Fh) */
+struct sja1105_cgu_idiv {
+	uint64_t clksrc;
+	uint64_t autoblock;
+	uint64_t idiv;
+	uint64_t pd;
+};
 
-#define _log(file, fmt, ...) do { \
-	if (SJA1105_DEBUG_CONDITION) { \
-		fprintf(file, "%s@%d: " fmt "\n", \
-		__func__, __LINE__, ##__VA_ARGS__); \
-	} else { \
-		fprintf(file, fmt "\n", ##__VA_ARGS__); \
-	} \
-} while(0);
+/* UM10944 Table 80.
+ * PLL_x_S clock status registers 0 and 1
+ * (address 100007h and 100009h) */
+struct sja1105_cgu_pll_status {
+	uint64_t lock;
+};
 
-#define logc(file, condition, ...) do { \
-	if (condition) { \
-		_log(file, __VA_ARGS__); \
-	} \
-} while(0);
+/* UM10944 Table 81.
+ * PLL_1_C control register
+ * (address 10000Ah) */
+struct sja1105_cgu_pll_control {
+	uint64_t pllclksrc;
+	uint64_t msel;
+	uint64_t autoblock;
+	uint64_t psel;
+	uint64_t direct;
+	uint64_t fbsel;
+	uint64_t bypass;
+	uint64_t pd;
+};
 
-#define loge(...) _log(stderr, __VA_ARGS__)
-#define logi(...) _log(stdout, __VA_ARGS__)
-#define logv(...) logc(stdout, SJA1105_VERBOSE_CONDITION, __VA_ARGS__);
+#define CLKSRC_MII0_TX_CLK 0x00
+#define CLKSRC_MII0_RX_CLK 0x01
+#define CLKSRC_MII1_TX_CLK 0x02
+#define CLKSRC_MII1_RX_CLK 0x03
+#define CLKSRC_MII2_TX_CLK 0x04
+#define CLKSRC_MII2_RX_CLK 0x05
+#define CLKSRC_MII3_TX_CLK 0x06
+#define CLKSRC_MII3_RX_CLK 0x07
+#define CLKSRC_MII4_TX_CLK 0x08
+#define CLKSRC_MII4_RX_CLK 0x09
+#define CLKSRC_PLL0        0x0B
+#define CLKSRC_PLL1        0x0E
+#define CLKSRC_IDIV0       0x11
+#define CLKSRC_IDIV1       0x12
+#define CLKSRC_IDIV2       0x13
+#define CLKSRC_IDIV3       0x14
+#define CLKSRC_IDIV4       0x15
 
-void formatted_append(char *buffer, char *width_fmt, char *fmt, ...);
-void print_array(char *print_buf, uint64_t *array, int count);
+/* UM10944 Table 83.
+ * MIIx clock control registers 1 to 30
+ * (addresses 100013h to 100035h) */
+struct sja1105_cgu_mii_control {
+	uint64_t clksrc;
+	uint64_t autoblock;
+	uint64_t pd;
+};
+
+#define XMII_MODE_MAC    0ull
+#define XMII_MODE_PHY    1ull
+#define XMII_SPEED_MII   0ull
+#define XMII_SPEED_RMII  1ull
+#define XMII_SPEED_RGMII 2ull
 
 #endif
