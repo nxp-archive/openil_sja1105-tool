@@ -115,7 +115,7 @@ parse_spi_setup(struct sja1105_spi_setup *spi_setup, char *key, char *value,
 	if (strcmp(key, "device") == 0) {
 		spi_setup->device = strdup(value);
 		fields_set->device = 1;
-	} else if (strcmp(key, "device-id") == 0) {
+	} else if (strcmp(key, "device_id") == 0) {
 		rc = reliable_uint64_from_string(&tmp, value, NULL);
 		if (rc < 0) {
 			goto error;
@@ -186,7 +186,7 @@ parse_spi_setup(struct sja1105_spi_setup *spi_setup, char *key, char *value,
 			return -1;
 		}
 		fields_set->flush = 1;
-	} else if (strcmp(key, "staging-area") == 0) {
+	} else if (strcmp(key, "staging_area") == 0) {
 		spi_setup->staging_area = strdup(value);
 		fields_set->staging_area = 1;
 	} else {
@@ -228,14 +228,14 @@ parse_general_config(struct general_config *general_conf,
 			return -1;
 		}
 		fields_set->debug = 1;
-	} else if (strcmp(key, "entries-per-line") == 0) {
+	} else if (strcmp(key, "entries_per_line") == 0) {
 		rc = reliable_uint64_from_string(&tmp, value, NULL);
 		if (rc < 0) {
 			goto error;
 		}
 		general_conf->entries_per_line = tmp;
 		fields_set->entries_per_line = 1;
-	} else if (strcmp(key, "screen-width") == 0) {
+	} else if (strcmp(key, "screen_width") == 0) {
 		rc = reliable_uint64_from_string(&tmp, value, NULL);
 		if (rc < 0) {
 			goto error;
@@ -257,7 +257,7 @@ static inline int parse_key_val(struct sja1105_spi_setup *spi_setup,
                                 char *key, char *value, char *section_hdr,
                                 struct fields_set *fields_set)
 {
-	if (strcmp(section_hdr, "[spi-setup]") == 0) {
+	if (strcmp(section_hdr, "[spi_setup]") == 0) {
 		parse_spi_setup(spi_setup, key, value, fields_set);
 	} else if (strcmp(section_hdr, "[general]") == 0) {
 		parse_general_config(general_conf, key, value, fields_set);
