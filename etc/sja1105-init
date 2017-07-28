@@ -8,7 +8,7 @@
 
 start() {
 	printf "Starting SJA1105 TSN switch: "
-	staging_area=`cat /etc/sja1105/sja1105.conf | awk '/staging-area/ {print $3;}'`
+	staging_area=`cat /etc/sja1105/sja1105.conf | awk '/staging_area/ {print $3;}'`
 	if ! [[ -e $staging_area ]]; then
 		echo "Warning, no config present at \"$staging_area\", creating default"
 		mkdir -p "$(dirname $staging_area)"

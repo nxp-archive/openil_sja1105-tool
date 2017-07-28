@@ -205,7 +205,7 @@ sja1105_default_staging_area(struct sja1105_staging_area *staging_area,
 		ptp_config->pin_duration               = 1;
 		ptp_config->pin_start                  = 1;
 		ptp_config->schedule_time              = 1;
-		ptp_config->schedule_correction_period = 1000;
+		ptp_config->schedule_correction_period = 100;
 		ptp_config->ts_based_on_ptpclk         = 0;
 		ptp_config->schedule_autostart         = 1;
 		ptp_config->pin_toggle_autostart       = 1;
