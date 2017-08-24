@@ -146,7 +146,12 @@ static int gtable_field_access(
 		return -ERANGE;
 	}
 
-	if ((write == 1) && (*value >= (1ull << value_width))) {
+	/* Check if "value" fits in "value_width" bits.
+	 * If value_width is 64, the check will fail, but any
+	 * 64-bit value will surely fit. */
+	if ((write == 1) &&
+	    (value_width < 64) &&
+	    (*value >= (1ull << value_width))) {
 		loge("gtable_access: Warning, cannot store %" PRIX64
 		     " inside %" PRIu64 " bits!", *value, value_width);
 		*value &= (1ull << value_width) - 1;
