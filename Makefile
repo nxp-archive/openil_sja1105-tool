@@ -37,6 +37,7 @@ includedir ?= ${prefix}/include
 datarootdir ?= ${prefix}/share
 mandir ?= ${datarootdir}/man
 sysconfdir ?= /etc
+PKG_CONFIG ?= pkg-config
 
 # Binaries
 
@@ -53,8 +54,8 @@ BIN_CFLAGS   = $(CFLAGS)
 BIN_LDFLAGS  = $(LDFLAGS)
 BIN_CFLAGS  += -DVERSION=\"${VERSION}\"
 BIN_CFLAGS  += -Wall -Wextra -Werror -g -fstack-protector-all -Isrc
-BIN_CFLAGS  += $(shell pkg-config --cflags libxml-2.0)
-BIN_LDFLAGS += $(shell pkg-config --libs libxml-2.0)
+BIN_CFLAGS  += $(shell ${PKG_CONFIG} --cflags libxml-2.0)
+BIN_LDFLAGS += $(shell ${PKG_CONFIG} --libs libxml-2.0)
 BIN_LDFLAGS += -L. -lsja1105
 
 BIN_SRC  = src/common.c src/common.h
