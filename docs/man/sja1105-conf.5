@@ -26,13 +26,13 @@ If the file does not exist or syntax errors are present, the
 \f[B]sja1105\-tool\f[] throws an error and loads default values.
 .SS THE SPI SETUP SECTION
 .PP
-This section begins when a line contains the string "[spi\-setup]" and
+This section begins when a line contains the string "[spi_setup]" and
 ends at the beginning of a different section or at the end of file.
 Values should conform to UM10944.pdf "Chapter 3.
 SPI interface".
 The following keys are allowed in this section:
 .TP
-.B staging\-area
+.B staging_area
 This is the filename used to store the staging, binary configuration
 employed by the command family \f[B]sja1105\-tool config\f[].
 If not specified, it defaults to "\f[I]/etc/sja1105/.staging\f[]".
@@ -119,7 +119,7 @@ For a list of the checks performed on the configuration by the
 sja1105\-tool see sja1105\-tool\-config\-format(5).
 .SS THE GENERAL SECTION
 .PP
-This section begins when a line contains the string "[general\-setup]"
+This section begins when a line contains the string "[general]"
 and ends at the beginning of a different section or at the end of file.
 The following keys are allowed in this section:
 .TP
@@ -136,7 +136,7 @@ printed to stderr.
 .RS
 .RE
 .TP
-.B screen\-width
+.B screen_width
 Used for the following commands:
 .RS
 .RE
@@ -149,26 +149,26 @@ Used for the following commands:
 The idea is to make better use of screen space by fitting more entries
 on separate vertical columns.
 The total width of the vertical columns does not exceed the
-"screen\-width" value.
-Set "screen\-width" to a value greater or equal to 80, and less than the
+"screen_width" value.
+Set "screen_width" to a value greater or equal to 80, and less than the
 output of \f[C]tput\ cols\f[].
 .RE
 .TP
-.B entries\-per\-line
-See "screen\-width" above.
-Additionally, no more than "entries\-per\-line" vertical columns are
+.B entries_per_line
+See "screen_width" above.
+Additionally, no more than "entries_per_line" vertical columns are
 allowed to be concatenated.
 The result is that each line will contain the minimum of
-"entries\-per\-line" and how many columns physically fit in
-"screen\-width" characters.
+"entries_per_line" and how many columns physically fit in
+"screen_width" characters.
 .RS
 .RE
 .SH EXAMPLE
 .IP
 .nf
 \f[C]
-[spi\-setup]
-\ \ \ \ staging\-area\ =\ FILE
+[spi_setup]
+\ \ \ \ staging_area\ =\ FILE
 \ \ \ \ device\ \ \ \ \ \ \ =\ FILE
 \ \ \ \ bits\ \ \ \ \ \ \ \ \ =\ 8
 \ \ \ \ speed\ \ \ \ \ \ \ \ =\ 1000000
@@ -179,15 +179,15 @@ The result is that each line will contain the minimum of
 \ \ \ \ auto_flush\ \ \ =\ false
 
 [general]
-\ \ \ \ screen\-width\ \ \ \ \ =\ 120
-\ \ \ \ entries\-per\-line\ =\ 10
+\ \ \ \ screen_width\ \ \ \ \ =\ 120
+\ \ \ \ entries_per_line\ =\ 10
 \ \ \ \ verbose\ \ \ \ \ \ \ \ \ \ =\ false
 \f[]
 .fi
 .SH BUGS
 .PP
 \f[B]sja1105\-tool status ports\f[] currently ignores the values
-"entries\-per\-line" and "screen\-width".
+"entries_per_line" and "screen_width".
 .SH AUTHOR
 .PP
 sja1105\-tool was written by Vladimir Oltean <vladimir.oltean@nxp.com>
