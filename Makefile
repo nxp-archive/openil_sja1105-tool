@@ -29,8 +29,20 @@
 # POSSIBILITY OF SUCH DAMAGE.
 ##############################################################################
 
+prefix ?= /usr
+exec_prefix ?= ${prefix}
+bindir ?= ${exec_prefix}/bin
+libdir ?= ${exec_prefix}/lib
+includedir ?= ${prefix}/include
+datarootdir ?= ${prefix}/share
+mandir ?= ${datarootdir}/man
+sysconfdir ?= /etc
+PKG_CONFIG ?= pkg-config
+
 # Binaries
 
+# If taken from git, report the version relative to the latest tag
+# If not, default to the VERSION file
 VERSION = $(or $(shell test -d .git && git describe --tags), $(shell cat VERSION))
 LIB_CFLAGS   = $(CFLAGS)
 LIB_LDFLAGS  = $(LDFLAGS)
@@ -42,8 +54,8 @@ BIN_CFLAGS   = $(CFLAGS)
 BIN_LDFLAGS  = $(LDFLAGS)
 BIN_CFLAGS  += -DVERSION=\"${VERSION}\"
 BIN_CFLAGS  += -Wall -Wextra -Werror -g -fstack-protector-all -Isrc
-BIN_CFLAGS  += $(shell pkg-config --cflags libxml-2.0)
-BIN_LDFLAGS += $(shell pkg-config --libs libxml-2.0)
+BIN_CFLAGS  += $(shell ${PKG_CONFIG} --cflags libxml-2.0)
+BIN_LDFLAGS += $(shell ${PKG_CONFIG} --libs libxml-2.0)
 BIN_LDFLAGS += -L. -lsja1105
 
 BIN_SRC  = src/common.c src/common.h
@@ -82,8 +94,10 @@ MD_DOCS  = $(wildcard docs/md/*.md)
 PDF_DOCS = $(patsubst docs/md/%.md, docs/pdf/%.pdf, $(MD_DOCS))
 MANPAGES = $(patsubst docs/md/%.md, docs/man/%, $(MD_DOCS))
 
+# Input: path to manpage file from sources
+# Output: DESTDIR-prefixed install location
 get_man_section = $(lastword $(subst ., ,$1))
-get_manpage_destination = $(join $(DESTDIR)/usr/share/man/man, \
+get_manpage_destination = $(join $(DESTDIR)${mandir}/man, \
                           $(join $(call get_man_section,$1)/, \
                           $(subst docs/man/,,$1)))
 
@@ -101,20 +115,22 @@ docs/pdf/%.pdf: docs/md/%.md
 
 HEADERS=$(wildcard src/lib/include/*.h)
 
+# Input: path to header file from sources
+# Output: DESTDIR-prefixed install location
 get_header_destination = $(patsubst src/lib/include/%, \
-                                    $(DESTDIR)/usr/include/sja1105/%, $1)
+                                    $(DESTDIR)${includedir}/sja1105/%, $1)
 
 # Installation
 
 install: install-binaries install-configs install-manpages install-headers
 
 install-binaries: $(SJA1105_LIB) $(SJA1105_BIN)
-	install -m 0755 -D libsja1105.so $(DESTDIR)/usr/lib/libsja1105.so
-	install -m 0755 -D sja1105-tool  $(DESTDIR)/usr/bin/sja1105-tool
+	install -m 0755 -D libsja1105.so $(DESTDIR)${libdir}/libsja1105.so
+	install -m 0755 -D sja1105-tool  $(DESTDIR)${bindir}/sja1105-tool
 
 install-configs: etc/sja1105-init etc/sja1105.conf
-	install -m 0755 -D etc/sja1105-init $(DESTDIR)/etc/init.d/S45sja1105
-	install -m 0644 -D etc/sja1105.conf $(DESTDIR)/etc/sja1105/sja1105.conf
+	install -m 0755 -D etc/sja1105-init $(DESTDIR)${sysconfdir}/init.d/S45sja1105
+	install -m 0644 -D etc/sja1105.conf $(DESTDIR)${sysconfdir}/sja1105/sja1105.conf
 
 install-manpages: $(MANPAGES)
 	$(foreach manpage, $^, install -m 0644 -D $(manpage) \
@@ -132,10 +148,10 @@ uninstall:
 		rm -rf $(call get_manpage_destination,$(manpage));)
 	$(foreach header, $(HEADERS), \
 		rm -rf $(call get_header_destination,$(header));)
-	rm -rf $(DESTDIR)/usr/lib/libsja1105.so
-	rm -rf $(DESTDIR)/usr/bin/sja1105-tool
-	rm -rf $(DESTDIR)/etc/init.d/S45sja1105
-	rm -rf $(DESTDIR)/etc/sja1105/sja1105.conf
+	rm -rf $(DESTDIR)${libdir}/libsja1105.so
+	rm -rf $(DESTDIR)${bindir}/sja1105-tool
+	rm -rf $(DESTDIR)${sysconfdir}/init.d/S45sja1105
+	rm -rf $(DESTDIR)${sysconfdir}/sja1105/sja1105.conf
 
 clean:
 	rm -f $(SJA1105_BIN) $(BIN_OBJ) $(SJA1105_LIB) $(LIB_OBJ)

@@ -30,6 +30,7 @@
  *****************************************************************************/
 #include <linux/spi/spidev.h>
 #include <linux/types.h>
+#include <linux/ioctl.h>
 #include <sys/ioctl.h>
 #include <sys/file.h>
 #include <unistd.h>
@@ -120,6 +121,7 @@ int sja1105_spi_transfer(const struct sja1105_spi_setup *spi_setup,
 		memset(rx, 0, size);
 		if (flock(spi_setup->fd, LOCK_EX) < 0) {
 			loge("locking spi device failed");
+			rc = -1;
 			goto out;
 		}
 		rc = ioctl(spi_setup->fd, SPI_IOC_MESSAGE(1), &tr);
@@ -129,9 +131,14 @@ int sja1105_spi_transfer(const struct sja1105_spi_setup *spi_setup,
 		}
 		if (flock(spi_setup->fd, LOCK_UN) < 0) {
 			loge("unlocking spi device failed");
+			rc = -1;
 		}
 	}
 out:
-	return rc;
+	/* The SPI_IOC_MESSAGE ioctl does not return 0 on success, but
+	 * the number of transferred bytes instead.
+	 * https://github.com/openil/sja1105-tool/issues/8
+	 */
+	return (rc == size) ? 0 : -1;
 }
 
