@@ -393,7 +393,8 @@ staging_area_flush(struct sja1105_spi_setup *spi_setup,
 	}
 	rc = sja1105_ptp_configure(spi_setup, &staging_area->ptp_config);
 	if (rc < 0) {
-		loge("ptp_init failed");
+		loge("ptp_init failed... not exiting");
+		rc = 0;
 		goto out;
 	}
 out:

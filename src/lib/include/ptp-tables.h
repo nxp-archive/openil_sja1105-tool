@@ -42,21 +42,22 @@
 #define SJA1105_PTPSCHTM_ADDR   0x12
 
 #define SIZE_PTP_CONFIG         (7*8)
+#define PTP_ADDR                0x0   /* Offset into CORE_ADDR */
 
 enum sja1105_ptp_clk_add_mode {
 	PTP_SET_MODE = 0,
 	PTP_ADD_MODE,
 };
 
-struct sja1105_ptp_ctrl_cmd {
-	uint64_t valid;
-	uint64_t start_schedule;     /* PTPSTRTSCH */
-	uint64_t stop_schedule;      /* PTPSTOPSCH */
-	uint64_t start_pin_toggle;   /* STARTPTPCP */
-	uint64_t stop_pin_toggle;    /* STOPPTPCP */
-	uint64_t reset;              /* RESPTP */
-	uint64_t ts_based_on_ptpclk; /* CORRCLK4TS */
-	uint64_t clk_add_mode;       /* PTPCLKADD */
+struct sja1105_ptp_cmd {
+	uint64_t ptpstrtsch;   /* start schedule */
+	uint64_t ptpstopsch;   /* stop schedule */
+	uint64_t startptpcp;   /* start pin toggle  */
+	uint64_t stopptpcp;    /* stop pin toggle */
+	uint64_t resptp;       /* reset */
+	uint64_t corrclk4ts;   /* if (1) timestamps are based on ptpclk,
+	                          if (0) timestamps are based on ptptsclk */
+	uint64_t ptpclkadd;    /* enum sja1105_ptp_clk_add_mode */
 };
 
 /* PTP static config */

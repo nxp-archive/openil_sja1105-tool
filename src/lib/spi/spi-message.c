@@ -135,11 +135,12 @@ void spi_get_chunks(char *config_buf, int config_buf_len,
  *     * SPI_READ: creates and sends an SPI read message from absolute
  *                 address reg_addr, writing size_bytes into *packed_buf
  */
-int sja1105_spi_send_packed_buf(struct sja1105_spi_setup *spi_setup,
-                                uint64_t read_or_write,
-                                uint64_t reg_addr,
-                                void    *packed_buf,
-                                uint64_t size_bytes)
+inline int
+sja1105_spi_send_packed_buf(struct sja1105_spi_setup *spi_setup,
+                            uint64_t read_or_write,
+                            uint64_t reg_addr,
+                            void    *packed_buf,
+                            uint64_t size_bytes)
 {
 	const int MSG_LEN = size_bytes + SIZE_SPI_MSG_HEADER;
 	struct sja1105_spi_message msg;
@@ -192,11 +193,12 @@ out:
  * This is a wrapper around sja1105_spi_send_packed_buf().
  *
  */
-int sja1105_spi_send_int(struct sja1105_spi_setup *spi_setup,
-                         uint64_t read_or_write,
-                         uint64_t reg_addr,
-                         uint64_t *value,
-                         uint64_t size_bytes)
+inline int
+sja1105_spi_send_int(struct sja1105_spi_setup *spi_setup,
+                     uint64_t read_or_write,
+                     uint64_t reg_addr,
+                     uint64_t *value,
+                     uint64_t size_bytes)
 {
 	uint8_t packed_buf[size_bytes];
 	int rc;
