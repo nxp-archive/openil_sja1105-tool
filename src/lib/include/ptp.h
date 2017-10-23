@@ -73,5 +73,6 @@ int  sja1105_ptp_qbv_start_time_set(struct sja1105_spi_setup *spi_setup,
                                     const struct timespec *ts);
 int  sja1105_ptp_qbv_start(struct sja1105_spi_setup*);
 int  sja1105_ptp_qbv_stop(struct sja1105_spi_setup*);
+int  sja1105_ptp_qbv_running(struct sja1105_spi_setup*);
 
 #endif

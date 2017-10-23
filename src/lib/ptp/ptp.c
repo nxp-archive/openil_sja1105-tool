@@ -106,6 +106,39 @@ int sja1105_ptp_cmd_commit(struct sja1105_spi_setup *spi_setup,
 	                                   BUF_LEN);
 };
 
+int sja1105_ptp_qbv_running(struct sja1105_spi_setup *spi_setup)
+{
+	const int PTP_CONTROL_ADDR = 0x17;
+	const int BUF_LEN = 4;
+	uint8_t packed_buf[BUF_LEN];
+	struct  sja1105_ptp_cmd ptp_cmd;
+	int rc;
+
+	rc = sja1105_spi_send_packed_buf(spi_setup,
+	                                 SPI_READ,
+	                                 CORE_ADDR + PTP_CONTROL_ADDR,
+	                                 packed_buf,
+	                                 BUF_LEN);
+	if (rc < 0) {
+		loge("failed to read from spi");
+		goto out;
+	}
+	sja1105_ptp_cmd_unpack(packed_buf, &ptp_cmd);
+
+	if (ptp_cmd.ptpstrtsch == 1) {
+		/* Qbv successfully started */
+		rc = 0;
+	} else if (ptp_cmd.ptpstopsch == 1) {
+		/* Qbv is stopped */
+		rc = 1;
+	} else {
+		/* Qbv is probably not configured with PTP clock source */
+		rc = -1;
+	}
+out:
+	return rc;
+}
+
 int sja1105_ptp_qbv_start(struct sja1105_spi_setup *spi_setup)
 {
 	struct sja1105_ptp_cmd ptp_cmd;
