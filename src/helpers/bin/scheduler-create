@@ -1,0 +1,141 @@
+#!/bin/bash
+
+set -e -u -o pipefail
+
+usage() {
+	echo "Usage:"
+	echo "$0: read from stdin"
+	echo "$0 -h|--help: show usage"
+	echo "$0 -f|--file <filename>: read from .json file"
+	exit
+}
+
+[ -z "${TOPDIR+x}" ] && { echo "Please source envsetup before running this script."; exit 1; }
+
+O=`getopt -l help,file: -- hf: "$@"` || exit 1
+eval set -- "$O"
+while true; do
+	case "$1" in
+	-h|--help)
+		usage; exit 0;;
+	-f|--file)
+		file="$2"; shift 2;;
+	--)
+		shift; break;;
+	*)
+		echo "unrecognized argument $1"; exit 1;;
+	esac
+done
+
+if [[ -z "${file+x}" ]]; then file="/dev/stdin"; fi
+if ! [[ -f ${file} ]]; then
+	echo "${file}: No such file or directory"
+	exit 1
+fi
+
+num_cycles=$(jq ".cycles|length" ${file})
+total_num_timeslots=$(jq "[.cycles|map(.timeslots)[]|length]|add" ${file})
+
+# Schedule Table and Schedule Entry Points Table
+# will be filled as we go along
+sja1105-tool config modify schedule-table entry-count ${total_num_timeslots}
+sja1105-tool config modify schedule-entry-points-table \
+	entry-count ${num_cycles}
+
+clksrc=$(jq -r ".clksrc" ${file})
+case "${clksrc}" in
+disabled)
+	clksrc="0b00"
+	;;
+standalone)
+	clksrc="0b01"
+	;;
+as6802)
+	clksrc="0b10"
+	;;
+ptp)
+	clksrc="0b11"
+	;;
+*)
+	echo "unknown clksrc value ${clksrc}"
+	exit
+esac
+
+# Schedule Entry Points Parameters
+sja1105-tool config modify schedule-entry-points-parameters-table \
+	entry-count 1
+sja1105-tool config modify schedule-entry-points-parameters-table \
+	clksrc ${clksrc}
+# XXX This is disputable, because documentation is unclear
+sja1105-tool config modify schedule-entry-points-parameters-table \
+	actsubsch $((${num_cycles}-1))
+
+subscheind=('')
+ports=('')
+gates_open=('')
+k=0
+
+for i in `seq 0 $((${num_cycles}-1))`; do
+	cycle=$(jq ".cycles[$i]" ${file})
+	num_timeslots=$(echo ${cycle} | jq ".timeslots|length")
+	schedule_start_idx=${k}
+	schedule_end_idx=$((${k}+${num_timeslots}-1))
+	start_time_ms=$(echo ${cycle} | jq -r '.["start-time-ms"]')
+
+	entry_point_delta=$(echo "(${start_time_ms}*5000)/1" | bc)
+	# Sanity check
+	[[ ${entry_point_delta} != 0 ]] ||
+		{ echo "start-time-ms of 0 not allowed"; exit; }
+
+	sja1105-tool config modify schedule-entry-points-table[$i] \
+		subschindx ${i}
+	sja1105-tool config modify schedule-entry-points-table[$i] \
+		delta ${entry_point_delta}
+	sja1105-tool config modify schedule-entry-points-table[$i] \
+		address ${schedule_start_idx}
+
+	for idx in $(seq $i 7); do
+		subscheind[$idx]=${schedule_end_idx}
+	done
+
+	for j in `seq 0 $((${num_timeslots}-1))`; do
+		timeslot=`echo ${cycle} | jq ".timeslots[$j]"`
+		ports=(`echo ${timeslot} | jq -r -c ".ports[]"`)
+		duration_ms=`echo ${timeslot} | jq -r '.["duration-ms"]'`
+		gates_open=(`echo ${timeslot} | jq -r -c '.["gates-open"][]'`)
+
+		port_mask=$((0x0))
+		# Do not fail if ${port[@]} is empty and we have "set -u"
+		# https://stackoverflow.com/questions/7577052/bash-empty-array-expansion-with-set-u
+		for port in ${ports[@]+"${ports[@]}"}; do
+			port_mask=$((${port_mask} | (1<<${port})))
+		done
+
+		gate_mask=$((0xff))
+		# Do not fail if ${gates_open[@]} is empty and we have "set -u"
+		for gate in ${gates_open[@]+"${gates_open[@]}"}; do
+			gate_mask=$((${gate_mask} & ~(1<<${gate})))
+		done
+
+		delta=$(echo "(${duration_ms}*5000)/1" | bc)
+
+		sja1105-tool config modify schedule-table[$k] \
+			destports ${port_mask}
+		sja1105-tool config modify schedule-table[$k] \
+			resmedia_en 1
+		sja1105-tool config modify schedule-table[$k] \
+			resmedia ${gate_mask}
+		sja1105-tool config modify schedule-table[$k] \
+			delta ${delta}
+
+		k=$((k+1))
+	done
+done
+
+# Fill the Schedule Parameters Table with schedule_end_idx values
+# gathered from each schedule
+subscheind=$(echo "[${subscheind[@]}]")
+sja1105-tool config modify schedule-parameters-table entry-count 1
+sja1105-tool config modify schedule-parameters-table[0] subscheind \
+	"${subscheind}"
+
