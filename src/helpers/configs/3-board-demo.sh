@@ -36,9 +36,9 @@ done
 [ -z "${board+x}" ] && { echo "please provide an argument to --board"; exit 1; }
 
 case ${board} in
-1)	ports="[1]"; start_time="0.1";;
-2)	ports="[1]"; start_time="0.2";;
-3)	ports="[4]"; start_time="0.3";;
+1)	fw_ports="[1]"; bw_ports="[4]"; start_time="0.1";;
+2)	fw_ports="[1]"; bw_ports="[2]"; start_time="0.5";;
+3)	fw_ports="[4]"; bw_ports="[2]"; start_time="0.9";;
 *)	echo "invalid board index ${board}."
 	exit 1
 esac
@@ -65,9 +65,19 @@ scheduler-create << EOF
 		{
 			"start-time-ms": "${start_time}",
 			"timeslots": [
-				{ "duration-ms": "0.01",   "ports": ${ports}, "gates-open": [], "comment": "empty" },
-				{ "duration-ms": "0.0001", "ports": ${ports}, "gates-open": [7], "comment": "ping" },
-				{ "duration-ms": "43",     "ports": ${ports}, "gates-open": [0, 1, 2, 3, 4, 5, 6], "comment": "everything else" }
+				{ "duration-ms": "0.01",   "ports": ${fw_ports}, "gates-open": [], "comment": "empty" },
+				{ "duration-ms": "0.0001", "ports": ${fw_ports}, "gates-open": [7], "comment": "ping" },
+				{ "duration-ms": "3",      "ports": ${fw_ports}, "gates-open": [0, 1, 2, 3, 4, 5, 6], "comment": "everything else" },
+				{ "duration-ms": "7",      "ports": ${fw_ports}, "gates-open": [], "comment": "empty" }
+			]
+		},
+		{
+			"start-time-ms": "$(echo ${start_time}+1 | bc -l)",
+			"timeslots": [
+				{ "duration-ms": "3",      "ports": ${bw_ports}, "gates-open": [0, 1, 2, 3, 4, 5, 6], "comment": "everything else" },
+				{ "duration-ms": "0.01",   "ports": ${bw_ports}, "gates-open": [], "comment": "empty" },
+				{ "duration-ms": "0.0001", "ports": ${bw_ports}, "gates-open": [7], "comment": "ping" },
+				{ "duration-ms": "7",      "ports": ${bw_ports}, "gates-open": [], "comment": "empty" }
 			]
 		}
 	]
