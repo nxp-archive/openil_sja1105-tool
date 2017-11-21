@@ -39,10 +39,9 @@
 #include <lib/helpers.h>
 #include <common.h>
 
-static void sja1105_l2_lookup_entry_access(
-		void *buf,
-		struct sja1105_l2_lookup_entry *entry,
-		int write)
+void sja1105_l2_lookup_entry_access(void *buf,
+                                    struct sja1105_l2_lookup_entry *entry,
+                                    int write)
 {
 	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
 	int    size = SIZE_L2_LOOKUP_ENTRY;
