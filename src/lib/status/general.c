@@ -40,8 +40,8 @@
 #include <lib/include/spi.h>
 #include <common.h>
 
-static void sja1105_general_status_unpack_a(void *buf, struct
-                                            sja1105_general_status *status)
+static void sja1105_general_status_unpack(void *buf, struct
+                                          sja1105_general_status *status)
 {
 	/* So that addition translates to 4 bytes */
 	uint32_t *p = (uint32_t*) buf;
@@ -85,22 +85,8 @@ static void sja1105_general_status_unpack_a(void *buf, struct
 	gtable_unpack(p + 0xC, &status->ramparerru, 4,  0, 4);
 }
 
-static void sja1105_general_status_unpack_b(void *buf, struct
-                                            sja1105_general_status *status)
-{
-	/* So that addition translates to 4 bytes */
-	uint32_t *p = (uint32_t*) buf;
-	int i;
-	/* Assume get_a was called first, thus no memset */
-	for (i = 0; i < 10; i++) {
-		gtable_unpack(p + i, &status->ptpegr_ts[i], 31, 8, 4);
-		gtable_unpack(p + i, &status->update[i],     0, 0, 4);
-	}
-}
-
 void sja1105_general_status_show(struct sja1105_general_status *status)
 {
-	int i;
 	printf("DEVICE_ID  %" PRIX64 "\n", status->device_id);
 	printf("CONFIGS    %" PRIX64 "\n", status->configs);
 	printf("CRCCHKL    %" PRIX64 "\n", status->crcchkl);
@@ -138,44 +124,25 @@ void sja1105_general_status_show(struct sja1105_general_status *status)
 	printf("PARTS      %" PRIX64 "\n", status->parts);
 	printf("RAMPARERRL %" PRIX64 "\n", status->ramparerrl);
 	printf("RAMPARERRU %" PRIX64 "\n", status->ramparerru);
-	for (i = 0; i < 10; i++) {
-		printf("PTPEGR_TS%d %" PRIX64 "\n", i, status->ptpegr_ts[i]);
-		printf("UPDATE%d    %" PRIX64 "\n", i, status->update[i]);
-	}
 }
 
 int sja1105_general_status_get(struct sja1105_spi_setup *spi_setup,
                                struct sja1105_general_status *status)
 {
-	const int SIZE_GENERAL_STATUS_A = 0x0D * 4; /* 0x00 to 0x0C */
-	const int SIZE_GENERAL_STATUS_B = 0x0A * 4; /* 0xC0 to 0xC9 */
-	uint8_t packed_buf_a[SIZE_GENERAL_STATUS_A];
-	uint8_t packed_buf_b[SIZE_GENERAL_STATUS_B];
+	const int SIZE_GENERAL_STATUS = 0x0D * 4; /* 0x00 to 0x0C */
+	uint8_t packed_buf[SIZE_GENERAL_STATUS];
 	int rc;
 
-	/* Part A - base address 0x00 */
 	rc = sja1105_spi_send_packed_buf(spi_setup,
 	                                 SPI_READ,
 	                                 CORE_ADDR + 0x00,
-	                                 packed_buf_a,
-	                                 SIZE_GENERAL_STATUS_A);
+	                                 packed_buf,
+	                                 SIZE_GENERAL_STATUS);
 	if (rc < 0) {
-		loge("failed to read part A");
+		loge("spi read failed");
 		goto out;
 	}
-	sja1105_general_status_unpack_a(packed_buf_a, status);
-
-	/* Part B - base address 0xC0 */
-	rc = sja1105_spi_send_packed_buf(spi_setup,
-	                                 SPI_READ,
-	                                 CORE_ADDR + 0xC0,
-	                                 packed_buf_b,
-	                                 SIZE_GENERAL_STATUS_B);
-	if (rc < 0) {
-		loge("failed to read part B");
-		goto out;
-	}
-	sja1105_general_status_unpack_b(packed_buf_b, status);
+	sja1105_general_status_unpack(packed_buf, status);
 out:
 	return rc;
 }

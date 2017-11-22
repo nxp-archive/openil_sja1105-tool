@@ -433,6 +433,62 @@ int sja1105_ptp_qbv_start_time_set(struct sja1105_spi_setup *spi_setup,
 	                             &ptpschtm, 8);
 }
 
+int sja1105_ptpegr_ts_poll(struct sja1105_spi_setup *spi_setup,
+                           int port, int ts_regid,
+                           struct timespec *ts)
+{
+	const int ts_reg_index = 2 * port + ts_regid;
+	const int SIZE_PTPEGR_TS = 4;
+	uint8_t   packed_buf[SIZE_PTPEGR_TS];
+	uint64_t  ptpegr_ts_reconstructed;
+	uint64_t  ptpegr_ts_partial;
+	uint64_t  ptpegr_ts_mask;
+	uint64_t  ptptsclk;
+	uint64_t  update;
+	int       rc;
+
+	rc = sja1105_spi_send_packed_buf(spi_setup,
+	                                 SPI_READ,
+	                                 CORE_ADDR + 0xC0 + ts_reg_index,
+	                                 packed_buf,
+	                                 SIZE_PTPEGR_TS);
+	if (rc < 0) {
+		loge("failed to read ptp egress timestamp register %d",
+		     ts_reg_index);
+		goto out;
+	}
+	gtable_unpack(packed_buf, &ptpegr_ts_partial, 31, 8, SIZE_PTPEGR_TS);
+	gtable_unpack(packed_buf, &update,             0, 0, SIZE_PTPEGR_TS);
+
+	if (!update) {
+		/* No update. Keep trying, you'll make it someday. */
+		rc = -1;
+		goto out;
+	}
+	rc = sja1105_ptp_read_reg(spi_setup,
+	                          SJA1105_PTPTSCLK_ADDR,
+	                          &ptptsclk, 8);
+	if (rc < 0) {
+		loge("failed to read ptptsclk");
+		goto out;
+	}
+	ptpegr_ts_mask = (1ull << 24ull) - 1;
+	ptpegr_ts_reconstructed = (ptptsclk & ~ptpegr_ts_mask) | ptpegr_ts_partial;
+	/* Check if wraparound occurred between moment when the partial
+	 * ptpegr timestamp was generated, and the moment when that
+	 * timestamp is being read out (now, ptptsclk).
+	 * If last 24 bits of current ptptsclk time are lower than the
+	 * partial timestamp, then wraparound surely occurred.
+	 * Otherwise, we'll never know...
+	 **/
+	if ((ptptsclk & ptpegr_ts_mask) < ptpegr_ts_partial) {
+		ptpegr_ts_reconstructed += (1ull << 24ull);
+	}
+	sja1105_ptp_time_to_timespec(ts, ptpegr_ts_reconstructed);
+out:
+	return rc;
+}
+
 int sja1105_ptp_configure(__attribute__((unused)) struct sja1105_spi_setup* spi_setup,
                           __attribute__((unused)) struct sja1105_ptp_config* ptp_config) { return -1; }
 
