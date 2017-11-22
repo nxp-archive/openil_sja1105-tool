@@ -73,8 +73,6 @@ struct sja1105_general_status {
 	uint64_t parts;
 	uint64_t ramparerrl;
 	uint64_t ramparerru;
-	uint64_t ptpegr_ts[10];
-	uint64_t update[10];
 };
 
 struct sja1105_port_status {
