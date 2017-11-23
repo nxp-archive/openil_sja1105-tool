@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -e -u -o pipefail
+
+# Wrapper around sja1105-tool-x86_64 and libsja1105.so,
+# both compiled for use on host.
+
+[ -z "${TOPDIR+x}" ] && { echo "Please source envsetup before running this script."; exit 1; }
+
+LD_LIBRARY_PATH=${TOPDIR}/_build/usr/lib \
+exec ${TOPDIR}/_build/usr/bin/sja1105-tool \
+	--config-file "${TOPDIR}/_build/etc/sja1105/sja1105.conf" \
+	"$@"

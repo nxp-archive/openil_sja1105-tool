@@ -65,6 +65,4 @@ int general_parameters_table_write(xmlTextWriterPtr, struct sja1105_static_confi
 int retagging_table_write(xmlTextWriterPtr, struct sja1105_static_config *config);
 int xmii_mode_parameters_table_write(xmlTextWriterPtr, struct sja1105_static_config *config);
 
-int ptp_config_write(xmlTextWriterPtr, struct sja1105_ptp_config*);
-
 #endif

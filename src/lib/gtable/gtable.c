@@ -50,7 +50,13 @@
 
 int g_quirks = QUIRK_LSW32_IS_FIRST;
 
-static int get_le_offset(int offset)
+enum gtable_operation {
+	GTABLE_PACK,
+	GTABLE_UNPACK,
+};
+
+static inline int
+get_le_offset(int offset)
 {
 	int closest_multiple_of_4;
 
@@ -59,7 +65,8 @@ static int get_le_offset(int offset)
 	return closest_multiple_of_4 + (3 - offset);
 }
 
-static int get_reverse_lsw32_offset(int offset, int len)
+static inline int
+get_reverse_lsw32_offset(int offset, int len)
 {
 	int closest_multiple_of_4;
 	int word_index;
@@ -71,7 +78,8 @@ static int get_reverse_lsw32_offset(int offset, int len)
 	return word_index * 4 + offset;
 }
 
-static uint64_t bit_reverse(uint64_t val, unsigned int width)
+static inline uint64_t
+bit_reverse(uint64_t val, unsigned int width)
 {
 	uint64_t new_val = 0;
 	unsigned int bit;
@@ -84,7 +92,8 @@ static uint64_t bit_reverse(uint64_t val, unsigned int width)
 	return new_val;
 }
 
-static void correct_for_msb_right_quirk(
+static inline void
+correct_for_msb_right_quirk(
 		uint64_t *to_write,
 		int      *box_bit_start,
 		int      *box_bit_end,
@@ -101,13 +110,14 @@ static void correct_for_msb_right_quirk(
 			 ONES_TO_LEFT_OF(*box_bit_end);
 }
 
-static int gtable_field_access(
+static inline int
+gtable_field_access(
 		void     *table,
 		uint64_t *value,
 		int       tbl_bit_start,
 		int       tbl_bit_end,
 		int       tbl_len_bytes,
-		int       write,
+		enum      gtable_operation op,
 		uint64_t  quirks)
 {
 	/* Number of bits for storing "value"
@@ -149,7 +159,7 @@ static int gtable_field_access(
 	/* Check if "value" fits in "value_width" bits.
 	 * If value_width is 64, the check will fail, but any
 	 * 64-bit value will surely fit. */
-	if ((write == 1) &&
+	if ((op == GTABLE_PACK) &&
 	    (value_width < 64) &&
 	    (*value >= (1ull << value_width))) {
 		loge("gtable_access: Warning, cannot store %" PRIX64
@@ -157,6 +167,10 @@ static int gtable_field_access(
 		*value &= (1ull << value_width) - 1;
 		loge("Truncated value to %" PRIX64 ", this may not be "
 		     "what you want.", *value);
+	}
+	/* Initialize parameter */
+	if (op == GTABLE_UNPACK) {
+		*value = 0;
 	}
 
 	for (box = tbl_byte_start; box >= tbl_byte_end; box--) {
@@ -184,7 +198,7 @@ static int gtable_field_access(
 		if (quirks & QUIRK_LSW32_IS_FIRST) {
 			box_addr = get_reverse_lsw32_offset(box_addr, tbl_len_bytes);
 		}
-		if (write == 0) {
+		if (op == GTABLE_UNPACK) {
 			/* Read from table, write to output argument "value" */
 			value_to_write = ((uint8_t*) table)[box_addr] & box_bit_mask;
 			if (quirks & QUIRK_MSB_ON_THE_RIGHT) {
@@ -217,18 +231,20 @@ static int gtable_field_access(
 	return 0;
 }
 
-int gtable_unpack(void *buf, uint64_t *value, int start, int end,
-                  int len_bytes)
+inline int
+gtable_unpack(void *buf, uint64_t *value, int start, int end,
+              int len_bytes)
 {
 	return gtable_field_access(buf, value, start, end,
-	                           len_bytes, 0, g_quirks);
+	                           len_bytes, GTABLE_UNPACK, g_quirks);
 }
 
-int gtable_pack(void *buf, uint64_t *value, int start, int end,
-                int len_bytes)
+inline int
+gtable_pack(void *buf, uint64_t *value, int start, int end,
+            int len_bytes)
 {
 	return gtable_field_access(buf, value, start, end,
-	                           len_bytes, 1, g_quirks);
+	                           len_bytes, GTABLE_PACK, g_quirks);
 }
 
 void gtable_hexdump(void *table, int len)

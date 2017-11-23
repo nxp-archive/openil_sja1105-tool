@@ -1,0 +1,5 @@
+#!/bin/bash
+
+export TOPDIR=$(cd "$(dirname "${BASH_SOURCE[0]}" )" && pwd)
+export PATH="${TOPDIR}/bin:${PATH}"
+

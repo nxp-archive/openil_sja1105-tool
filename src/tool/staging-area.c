@@ -43,7 +43,6 @@
 #include <lib/include/staging-area.h>
 #include <lib/include/gtable.h>
 #include <lib/include/spi.h>
-#include <lib/include/ptp.h>
 #include <lib/include/status.h>
 #include <lib/include/reset.h>
 #include <lib/include/clock.h>
@@ -89,7 +88,6 @@ staging_area_hexdump(const char *staging_area_file)
 	struct stat stat;
 	unsigned int len;
 	char *buf;
-	char *ptp_buf;
 	int fd;
 	int rc;
 
@@ -122,11 +120,6 @@ staging_area_hexdump(const char *staging_area_file)
 		goto out_3;
 	}
 	logi("static config: dumped %d bytes", rc);
-	/* There is a final table header which is not being dumped */
-	ptp_buf = buf + rc + SIZE_TABLE_HEADER;
-	printf("PTP configuration:\n");
-	gtable_hexdump(ptp_buf, SIZE_PTP_CONFIG);
-	rc = 0;
 out_3:
 	free(buf);
 out_2:
@@ -140,16 +133,13 @@ staging_area_load(const char *staging_area_file,
                   struct sja1105_staging_area *staging_area)
 {
 	struct sja1105_static_config *static_config;
-	struct sja1105_ptp_config    *ptp_config;
 	struct stat stat;
 	unsigned int staging_area_len;
-	unsigned int static_config_len;
 	char *buf;
 	int fd;
 	int rc;
 
 	static_config = &staging_area->static_config;
-	ptp_config    = &staging_area->ptp_config;
 
 	fd = open(staging_area_file, O_RDONLY);
 	if (fd < 0) {
@@ -178,13 +168,6 @@ staging_area_load(const char *staging_area_file,
 		loge("error while interpreting config");
 		goto out_3;
 	}
-	static_config_len = sja1105_static_config_get_length(static_config);
-	/* PTP config */
-	if (staging_area_len - static_config_len < SIZE_PTP_CONFIG) {
-		loge("PTP config not present in staging area!");
-		goto out_3;
-	}
-	sja1105_ptp_config_unpack(buf + static_config_len, ptp_config);
 	rc = 0;
 out_3:
 	free(buf);
@@ -199,7 +182,6 @@ staging_area_save(const char *staging_area_file,
                   struct sja1105_staging_area *staging_area)
 {
 	struct sja1105_static_config *static_config;
-	struct sja1105_ptp_config    *ptp_config;
 	int   rc = 0;
 	char *buf;
 	int   static_config_len;
@@ -207,9 +189,8 @@ staging_area_save(const char *staging_area_file,
 	int   fd;
 
 	static_config     = &staging_area->static_config;
-	ptp_config        = &staging_area->ptp_config;
 	static_config_len = sja1105_static_config_get_length(static_config);
-	staging_area_len  = static_config_len + SIZE_PTP_CONFIG;
+	staging_area_len  = static_config_len;
 
 	buf = (char*) malloc(staging_area_len * sizeof(char));
 	if (!buf) {
@@ -218,8 +199,6 @@ staging_area_save(const char *staging_area_file,
 	}
 	logv("saving static config... %d bytes", static_config_len);
 	sja1105_static_config_pack(buf, static_config);
-	logv("saving ptp config... %d bytes", SIZE_PTP_CONFIG);
-	sja1105_ptp_config_pack(buf + static_config_len, ptp_config);
 
 	logv("total staging area size: %d bytes", staging_area_len);
 	fd = open(staging_area_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
@@ -389,11 +368,6 @@ staging_area_flush(struct sja1105_spi_setup *spi_setup,
 	rc = static_config_flush(spi_setup, &staging_area->static_config);
 	if (rc < 0) {
 		loge("static_config_flush failed");
-		goto out;
-	}
-	rc = sja1105_ptp_configure(spi_setup, &staging_area->ptp_config);
-	if (rc < 0) {
-		loge("ptp_init failed");
 		goto out;
 	}
 out:

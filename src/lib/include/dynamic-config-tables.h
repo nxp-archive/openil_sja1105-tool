@@ -28,28 +28,35 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
-#include "internal.h"
+#ifndef _DYN_CFG_TABLES_H
+#define _DYN_CFG_TABLES_H
 
-int
-ptp_config_write(xmlTextWriterPtr writer,
-                 struct sja1105_ptp_config *config)
-{
-	int rc = 0;
+#define SJA1105_MGMT_ROUTE_COUNT 4
 
-	logv("writing PTP configuration");
-	rc |= xmlTextWriterStartElement(writer, BAD_CAST "ptp");
-	rc |= xml_write_field(writer, "pin_duration", config->pin_duration);
-	rc |= xml_write_field(writer, "pin_start", config->pin_start);
-	rc |= xml_write_field(writer, "schedule_time", config->schedule_time);
-	rc |= xml_write_field(writer, "schedule_correction_period",
-	                      config->schedule_correction_period);
-	rc |= xml_write_field(writer, "ts_based_on_ptpclk",
-	                      config->ts_based_on_ptpclk);
-	rc |= xml_write_field(writer, "schedule_autostart",
-	                      config->schedule_autostart);
-	rc |= xml_write_field(writer, "pin_toggle_autostart",
-	                      config->pin_toggle_autostart);
-	rc |= xmlTextWriterEndElement(writer);
-	return rc;
-}
+#include "static-config-tables.h"
 
+struct sja1105_mgmt_entry {
+	uint64_t ts_regid;
+	uint64_t egr_ts;
+	uint64_t macaddr;
+	uint64_t destports;
+	uint64_t enfport;
+	uint64_t index;
+};
+
+union sja1105_dyn_l2_lookup_entry {
+	struct sja1105_l2_lookup_entry l2;
+	struct sja1105_mgmt_entry mgmt;
+};
+
+struct sja1105_dyn_l2_lookup_cmd {
+	uint64_t valid;
+	uint64_t rdwrset;
+	uint64_t errors;
+	uint64_t lockeds;
+	uint64_t valident;
+	uint64_t mgmtroute;
+	union sja1105_dyn_l2_lookup_entry entry;
+};
+
+#endif

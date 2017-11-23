@@ -33,37 +33,43 @@
 
 #include "ptp-tables.h"
 #include "spi.h"
+#include <time.h>
 
-/* Static PTP configuration */
-int sja1105_ptp_configure(struct sja1105_spi_setup*,
-                          struct sja1105_ptp_config*);
-void sja1105_ptp_config_unpack(void*, struct sja1105_ptp_config*);
-void sja1105_ptp_config_pack(void*, struct sja1105_ptp_config*);
-void sja1105_ptp_config_fmt_show(char*, char*, struct sja1105_ptp_config*);
-void sja1105_ptp_config_show(struct sja1105_ptp_config*);
+void sja1105_timespec_to_ptp_time(const struct timespec *ts, uint64_t *ptp_time);
+void sja1105_ptp_time_to_timespec(struct timespec *ts, uint64_t ptp_time);
 
-/* Dynamic PTP commands */
-int  sja1105_ptp_ts_clk_get(struct sja1105_spi_setup*, uint64_t*);
-int  sja1105_ptp_clk_get(struct sja1105_spi_setup*, uint64_t*);
-int  sja1105_ptp_clk_set(struct sja1105_spi_setup*, uint64_t);
-int  sja1105_ptp_clk_add(struct sja1105_spi_setup*, uint64_t);
-int  sja1105_ptp_clk_rate_set(struct sja1105_spi_setup*, uint64_t);
+int  sja1105_ptp_ts_clk_get(struct sja1105_spi_setup*, struct timespec *ts);
+int  sja1105_ptp_clk_get(struct sja1105_spi_setup*, struct timespec *ts);
+int  sja1105_ptp_clk_set(struct sja1105_spi_setup*, const struct timespec *ts);
+int  sja1105_ptp_clk_add(struct sja1105_spi_setup*, const struct timespec *ts);
+int  sja1105_ptp_clk_rate_set(struct sja1105_spi_setup*, double ratio);
 
-void sja1105_ptp_ctrl_cmd_unpack(void *buf, struct sja1105_ptp_ctrl_cmd*);
-void sja1105_ptp_ctrl_cmd_pack(void *buf, struct sja1105_ptp_ctrl_cmd*);
-void sja1105_ptp_ctrl_cmd_show(struct sja1105_ptp_ctrl_cmd*);
-int  sja1105_ptp_ctrl_cmd_cmd(struct sja1105_spi_setup*,
-                              struct sja1105_ptp_ctrl_cmd*);
-int sja1105_ptp_ctrl_cmd_send(struct sja1105_spi_setup*,
-                              struct sja1105_ptp_ctrl_cmd*);
+void sja1105_ptp_cmd_unpack(void *buf, struct sja1105_ptp_cmd*);
+void sja1105_ptp_cmd_pack(void *buf, struct sja1105_ptp_cmd*);
+void sja1105_ptp_cmd_show(struct sja1105_ptp_cmd*);
+int  sja1105_ptp_cmd_commit(struct sja1105_spi_setup*,
+                            struct sja1105_ptp_cmd*);
 
-int  sja1105_ptp_start_schedule(struct sja1105_spi_setup*);
-int  sja1105_ptp_stop_schedule(struct sja1105_spi_setup*);
-int  sja1105_ptp_start_pin_toggle(struct sja1105_spi_setup*);
-int  sja1105_ptp_stop_pin_toggle(struct sja1105_spi_setup*);
+int  sja1105_ptp_pin_toggle_start(struct sja1105_spi_setup*);
+int  sja1105_ptp_pin_toggle_stop(struct sja1105_spi_setup*);
 int  sja1105_ptp_reset(struct sja1105_spi_setup*);
-int  sja1105_ptp_set_add_mode(struct sja1105_spi_setup*,
-                              enum sja1105_ptp_clk_add_mode);
-int  sja1105_ptpclkrate_from_ratio(double, uint32_t*);
+
+int  sja1105_ptp_pin_duration_set(struct sja1105_spi_setup *spi_setup,
+                                  const struct timespec *ts);
+int  sja1105_ptp_pin_start_time_set(struct sja1105_spi_setup *spi_setup,
+                                    const struct timespec *ts);
+int  sja1105_ptp_qbv_correction_period_set(struct sja1105_spi_setup *spi_setup,
+                                           const struct timespec *ts);
+int  sja1105_ptp_qbv_start_time_set(struct sja1105_spi_setup *spi_setup,
+                                    const struct timespec *ts);
+int  sja1105_ptp_qbv_start(struct sja1105_spi_setup*);
+int  sja1105_ptp_qbv_stop(struct sja1105_spi_setup*);
+int  sja1105_ptp_qbv_running(struct sja1105_spi_setup*);
+int  sja1105_ptp_corrclk4ts_set(struct sja1105_spi_setup *,
+                                enum sja1105_ptpegr_ts_source);
+int  sja1105_ptpegr_ts_poll(struct sja1105_spi_setup *spi_setup,
+                            enum sja1105_ptpegr_ts_source source,
+                            int port, int ts_regid,
+                            struct timespec *ts);
 
 #endif

@@ -28,36 +28,18 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
-#include "internal.h"
+#ifndef _DYN_CFG_H
+#define _DYN_CFG_H
 
-int
-parse_ptp_config(xmlNode *node, struct sja1105_ptp_config *config)
-{
-	int rc = 0;
+#include "dynamic-config-tables.h"
+#include "spi.h"
 
-	if (node->type != XML_ELEMENT_NODE) {
-		loge("PTP Configuration node must be of element type!");
-		rc = -1;
-		goto out;
-	}
-	memset(config, 0, sizeof(*config));
-	rc |= xml_read_field(&config->pin_duration, "pin_duration", node);
-	rc |= xml_read_field(&config->pin_start, "pin_start", node);
-	rc |= xml_read_field(&config->schedule_time, "schedule_time", node);
-	rc |= xml_read_field(&config->schedule_correction_period,
-	                     "schedule_correction_period", node);
-	rc |= xml_read_field(&config->ts_based_on_ptpclk,
-	                     "ts_based_on_ptpclk", node);
-	rc |= xml_read_field(&config->schedule_autostart,
-	                     "schedule_autostart", node);
-	rc |= xml_read_field(&config->pin_toggle_autostart,
-	                     "pin_toggle_autostart", node);
-	if (rc) {
-		loge("PTP Configuration is incomplete!");
-		goto out;
-	}
-	logv("read PTP Configuration");
-out:
-	return rc;
-}
+void sja1105_dyn_l2_lookup_cmd_pack(void *buf, struct
+                                    sja1105_dyn_l2_lookup_cmd *cmd);
+void sja1105_dyn_l2_lookup_cmd_unpack(void *buf, struct
+                                      sja1105_dyn_l2_lookup_cmd *cmd);
+int sja1105_mgmt_route_get(struct sja1105_spi_setup*, struct sja1105_mgmt_entry*, int index);
+int sja1105_mgmt_route_set(struct sja1105_spi_setup*, struct sja1105_mgmt_entry*, int index);
+void sja1105_mgmt_entry_show(struct sja1105_mgmt_entry *entry);
 
+#endif
