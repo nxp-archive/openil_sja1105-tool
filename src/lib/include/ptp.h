@@ -68,6 +68,7 @@ int  sja1105_ptp_qbv_running(struct sja1105_spi_setup*);
 int  sja1105_ptp_corrclk4ts_set(struct sja1105_spi_setup *,
                                 enum sja1105_ptpegr_ts_source);
 int  sja1105_ptpegr_ts_poll(struct sja1105_spi_setup *spi_setup,
+                            enum sja1105_ptpegr_ts_source source,
                             int port, int ts_regid,
                             struct timespec *ts);
 
