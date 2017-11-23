@@ -208,11 +208,6 @@ sja1105_staging_area_to_xml(char *xml_file,
 		loge("could not write config tables");
 		goto out;
 	}
-	/* PTP config */
-	rc = ptp_config_write(writer, &staging_area->ptp_config);
-	if (rc < 0) {
-		goto out;
-	}
 	/* End root element */
 	rc = xmlTextWriterEndElement(writer);
 	if (rc < 0) {
