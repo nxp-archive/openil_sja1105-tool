@@ -444,6 +444,7 @@ int sja1105_ptp_corrclk4ts_set(struct sja1105_spi_setup *spi_setup,
 }
 
 int sja1105_ptpegr_ts_poll(struct sja1105_spi_setup *spi_setup,
+                           enum sja1105_ptpegr_ts_source source,
                            int port, int ts_regid,
                            struct timespec *ts)
 {
@@ -453,10 +454,20 @@ int sja1105_ptpegr_ts_poll(struct sja1105_spi_setup *spi_setup,
 	uint64_t  ptpegr_ts_reconstructed;
 	uint64_t  ptpegr_ts_partial;
 	uint64_t  ptpegr_ts_mask;
-	uint64_t  ptptsclk;
+	uint64_t  ptp_full_current_ts;
+	uint64_t  ptpclk_addr;
 	uint64_t  update;
 	int       rc;
 
+	if (source == TS_PTPCLK) {
+		ptpclk_addr = SJA1105_PTPCLKVAL_ADDR;
+	} else if (source == TS_PTPTSCLK) {
+		ptpclk_addr = SJA1105_PTPTSCLK_ADDR;
+	} else {
+		loge("%s: invalid source selection: %d", __func__, source);
+		rc = -1;
+		goto out;
+	}
 	rc = sja1105_spi_send_packed_buf(spi_setup,
 	                                 SPI_READ,
 	                                 CORE_ADDR + 0xC0 + ts_reg_index,
@@ -475,23 +486,23 @@ int sja1105_ptpegr_ts_poll(struct sja1105_spi_setup *spi_setup,
 		rc = -1;
 		goto out;
 	}
-	rc = sja1105_ptp_read_reg(spi_setup,
-	                          SJA1105_PTPTSCLK_ADDR,
-	                          &ptptsclk, 8);
+	rc = sja1105_ptp_read_reg(spi_setup, ptpclk_addr,
+	                          &ptp_full_current_ts, 8);
 	if (rc < 0) {
-		loge("failed to read ptptsclk");
+		loge("failed to read ptpclkval/ptptsclk");
 		goto out;
 	}
 	ptpegr_ts_mask = (1ull << 24ull) - 1;
-	ptpegr_ts_reconstructed = (ptptsclk & ~ptpegr_ts_mask) | ptpegr_ts_partial;
+	ptpegr_ts_reconstructed = (ptp_full_current_ts & ~ptpegr_ts_mask) |
+	                           ptpegr_ts_partial;
 	/* Check if wraparound occurred between moment when the partial
 	 * ptpegr timestamp was generated, and the moment when that
-	 * timestamp is being read out (now, ptptsclk).
-	 * If last 24 bits of current ptptsclk time are lower than the
-	 * partial timestamp, then wraparound surely occurred.
+	 * timestamp is being read out (now, ptpclkval/ptptsclk).
+	 * If last 24 bits of current ptpclkval/ptptsclk time are lower
+	 * than the partial timestamp, then wraparound surely occurred.
 	 * Otherwise, we'll never know...
 	 **/
-	if ((ptptsclk & ptpegr_ts_mask) < ptpegr_ts_partial) {
+	if ((ptp_full_current_ts & ptpegr_ts_mask) < ptpegr_ts_partial) {
 		ptpegr_ts_reconstructed += (1ull << 24ull);
 	}
 	sja1105_ptp_time_to_timespec(ts, ptpegr_ts_reconstructed);
