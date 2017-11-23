@@ -112,13 +112,11 @@ static int parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 		"configure",
 		"status",
 		"reset",
-		"ptp",
 	};
 	int (*next_parse_args[])(struct sja1105_spi_setup*, int, char**) = {
 		config_parse_args,
 		status_parse_args,
 		rgu_parse_args,
-		ptp_parse_args,
 	};
 	int  rc;
 

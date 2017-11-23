@@ -203,9 +203,6 @@ parse_root(xmlNode *root, struct sja1105_staging_area *staging_area)
 		if (strcmp(config_section, "static") == 0) {
 			rc = parse_static_config(node,
 			                        &staging_area->static_config);
-		} else if (strcmp(config_section, "ptp") == 0) {
-			rc = parse_ptp_config(node,
-			                     &staging_area->ptp_config);
 		} else {
 			loge("unknown config section %s", config_section);
 			rc = -EINVAL;
