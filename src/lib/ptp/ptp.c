@@ -433,6 +433,16 @@ int sja1105_ptp_qbv_start_time_set(struct sja1105_spi_setup *spi_setup,
 	                             &ptpschtm, 8);
 }
 
+int sja1105_ptp_corrclk4ts_set(struct sja1105_spi_setup *spi_setup,
+                               enum sja1105_ptpegr_ts_source source)
+{
+	struct sja1105_ptp_cmd ptp_cmd;
+
+	memset(&ptp_cmd, 0, sizeof(ptp_cmd));
+	ptp_cmd.corrclk4ts = source;
+	return sja1105_ptp_cmd_commit(spi_setup, &ptp_cmd);
+}
+
 int sja1105_ptpegr_ts_poll(struct sja1105_spi_setup *spi_setup,
                            int port, int ts_regid,
                            struct timespec *ts)
@@ -489,11 +499,3 @@ out:
 	return rc;
 }
 
-int sja1105_ptp_configure(__attribute__((unused)) struct sja1105_spi_setup* spi_setup,
-                          __attribute__((unused)) struct sja1105_ptp_config* ptp_config) { return -1; }
-
-void sja1105_ptp_config_unpack(__attribute__((unused)) void *buf, __attribute__((unused)) struct sja1105_ptp_config *ptp_config) {}
-
-void sja1105_ptp_config_pack(__attribute__((unused)) void *buf, __attribute__((unused)) struct sja1105_ptp_config *ptp_config) {}
-void sja1105_ptp_config_fmt_show(__attribute__((unused)) char *print_buf, __attribute__((unused)) char *fmt, __attribute__((unused)) struct sja1105_ptp_config *ptp_config) {}
-void sja1105_ptp_config_show(__attribute__((unused)) struct sja1105_ptp_config *ptp_config) {}

@@ -49,6 +49,11 @@ enum sja1105_ptp_clk_add_mode {
 	PTP_ADD_MODE,
 };
 
+enum sja1105_ptpegr_ts_source {
+	TS_PTPTSCLK = 0,
+	TS_PTPCLK = 1
+};
+
 struct sja1105_ptp_cmd {
 	uint64_t ptpstrtsch;   /* start schedule */
 	uint64_t ptpstopsch;   /* stop schedule */
