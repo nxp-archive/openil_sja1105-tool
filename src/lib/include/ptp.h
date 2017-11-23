@@ -35,15 +35,6 @@
 #include "spi.h"
 #include <time.h>
 
-/* Static PTP configuration */
-/* Not used, but kept for legacy */
-int sja1105_ptp_configure(struct sja1105_spi_setup*,
-                          struct sja1105_ptp_config*);
-void sja1105_ptp_config_unpack(void*, struct sja1105_ptp_config*);
-void sja1105_ptp_config_pack(void*, struct sja1105_ptp_config*);
-void sja1105_ptp_config_fmt_show(char*, char*, struct sja1105_ptp_config*);
-void sja1105_ptp_config_show(struct sja1105_ptp_config*);
-
 void sja1105_timespec_to_ptp_time(const struct timespec *ts, uint64_t *ptp_time);
 void sja1105_ptp_time_to_timespec(struct timespec *ts, uint64_t ptp_time);
 
