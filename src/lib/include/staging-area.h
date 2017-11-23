@@ -32,11 +32,10 @@
 #define _STAGING_AREA_H
 
 #include "static-config-tables.h"
-#include "ptp-tables.h"
 
 struct sja1105_staging_area {
 	struct sja1105_static_config static_config;
-	struct sja1105_ptp_config    ptp_config;
+	/* More configuration tables? TBD */
 };
 
 enum sja1105_default_staging_area {

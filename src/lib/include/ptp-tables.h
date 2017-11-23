@@ -65,16 +65,4 @@ struct sja1105_ptp_cmd {
 	uint64_t ptpclkadd;    /* enum sja1105_ptp_clk_add_mode */
 };
 
-/* PTP static config */
-struct sja1105_ptp_config {
-	uint64_t pin_duration;               /* PTPPINDUR */
-	uint64_t pin_start;                  /* PTPPINST */
-	uint64_t schedule_time;              /* PTPSCHTM */
-	uint64_t schedule_correction_period; /* PTPCLKCORP */
-	uint64_t ts_based_on_ptpclk;         /* CORRCLK4TS */
-	uint64_t schedule_autostart;         /* PTPSTRTSCH */
-	uint64_t pin_toggle_autostart;       /* STARTPTPCP */
-};
-/* PTP dynamic registers: PTPTSCLK, PTPCLKVAL, PTPCLKRATE */
-
 #endif
