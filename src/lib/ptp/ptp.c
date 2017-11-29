@@ -502,8 +502,8 @@ int sja1105_ptpegr_ts_poll(struct sja1105_spi_setup *spi_setup,
 	 * than the partial timestamp, then wraparound surely occurred.
 	 * Otherwise, we'll never know...
 	 **/
-	if ((ptp_full_current_ts & ptpegr_ts_mask) < ptpegr_ts_partial) {
-		ptpegr_ts_reconstructed += (1ull << 24ull);
+	if ((ptp_full_current_ts & ptpegr_ts_mask) <= ptpegr_ts_partial) {
+		ptpegr_ts_reconstructed -= (1ull << 24ull);
 	}
 	sja1105_ptp_time_to_timespec(ts, ptpegr_ts_reconstructed);
 out:
