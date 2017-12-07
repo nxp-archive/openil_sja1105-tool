@@ -49,7 +49,7 @@ esac
 # Extend ingress policer MTU to include VLAN tag
 for port in $(seq 0 4); do
 	for prio in $(seq 0 7); do
-		policer-limit --port ${port} --prio ${prio} --mtu 1522 --rate-mbps 700
+		policer-limit --port ${port} --prio ${prio} --mtu 1522 --rate-mbps 1000
 	done
 done
 
