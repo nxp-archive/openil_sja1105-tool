@@ -36,9 +36,9 @@ done
 [ -z "${board+x}" ] && { echo "please provide an argument to --board"; exit 1; }
 
 case ${board} in
-1)	fw_port="1"; rev_port="4"; start_time="1";;
-2)	fw_port="1"; rev_port="2"; start_time="1";;
-3)	fw_port="4"; rev_port="2"; start_time="1";;
+1)	fw_port="1"; rev_port="4";;
+2)	fw_port="1"; rev_port="2";;
+3)	fw_port="4"; rev_port="2";;
 *)	echo "invalid board index ${board}."
 	exit 1
 esac
@@ -64,7 +64,7 @@ scheduler-create << EOF
 	"clksrc": "ptp",
 	"cycles": [
 		{
-			"start-time-ms": "${start_time}",
+			"start-time-ms": "1",
 			"timeslots": [
 				{
 					"duration-ms": "4",
