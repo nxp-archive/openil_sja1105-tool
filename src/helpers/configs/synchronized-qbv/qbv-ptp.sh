@@ -35,14 +35,16 @@ done
 [ "$#" -gt 0 ] && { echo "error: trailing arguments: $@"; exit 1; }
 [ -z "${board+x}" ] && { echo "please provide an argument to --board"; exit 1; }
 
+# Each TSN switch has an Ethernet egress port through which
+# it forwards ICMP echo requests (echo_port) and an egress port
+# through which it forwards ICMP echo replies (reply_port).
 case ${board} in
-1)	fw_port="1"; rev_port="4";;
-2)	fw_port="1"; rev_port="2";;
-3)	fw_port="4"; rev_port="2";;
+1)	echo_port="1"; reply_port="4";;
+2)	echo_port="1"; reply_port="2";;
+3)	echo_port="4"; reply_port="2";;
 *)	echo "invalid board index ${board}."
 	exit 1
 esac
-echo "fw_port ${fw_port} rev_port ${rev_port} start_time ${start_time}"
 
 # Extend ingress policer MTU to include VLAN tag
 for port in $(seq 0 4); do
@@ -68,37 +70,37 @@ scheduler-create << EOF
 			"timeslots": [
 				{
 					"duration-ms": "4",
-					"ports": [${fw_port}, ${rev_port}],
+					"ports": [${echo_port}, ${reply_port}],
 					"gates-open": [0, 1, 2, 3, 4, 5, 6],
 					"comment": "regular traffic 1"
 				},
 				{
 					"duration-ms": "10",
-					"ports": [${fw_port}, ${rev_port}],
+					"ports": [${echo_port}, ${reply_port}],
 					"gates-open": [],
 					"comment": "guard band 1"
 				},
 				{
 					"duration-ms": "1",
-					"ports": [${fw_port}],
+					"ports": [${echo_port}],
 					"gates-open": [7],
 					"comment": "icmp echo request"
 				},
 				{
 					"duration-ms": "4",
-					"ports": [${fw_port}, ${rev_port}],
+					"ports": [${echo_port}, ${reply_port}],
 					"gates-open": [0, 1, 2, 3, 4, 5, 6],
 					"comment": "regular traffic 2"
 				},
 				{
 					"duration-ms": "10",
-					"ports": [${fw_port}, ${rev_port}],
+					"ports": [${echo_port}, ${reply_port}],
 					"gates-open": [],
 					"comment": "guard band 2"
 				},
 				{
 					"duration-ms": "1",
-					"ports": [${rev_port}],
+					"ports": [${reply_port}],
 					"gates-open": [7],
 					"comment": "icmp echo response"
 				}
