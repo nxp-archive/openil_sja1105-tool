@@ -35,10 +35,13 @@ done
 [ "$#" -gt 0 ] && { echo "error: trailing arguments: $@"; exit 1; }
 [ -z "${board+x}" ] && { echo "please provide an argument to --board"; exit 1; }
 
+# Each TSN switch has an Ethernet egress port through which
+# it forwards ICMP echo requests (echo_port) and an egress port
+# through which it forwards ICMP echo replies (reply_port).
 case ${board} in
-1)	ports="[1]"; start_time="0.1";;
-2)	ports="[1]"; start_time="0.2";;
-3)	ports="[4]"; start_time="0.3";;
+1)	echo_port="1"; reply_port="4";;
+2)	echo_port="1"; reply_port="2";;
+3)	echo_port="4"; reply_port="2";;
 *)	echo "invalid board index ${board}."
 	exit 1
 esac
@@ -46,7 +49,7 @@ esac
 # Extend ingress policer MTU to include VLAN tag
 for port in $(seq 0 4); do
 	for prio in $(seq 0 7); do
-		policer-limit --port ${port} --prio ${prio} --mtu 1522
+		policer-limit --port ${port} --prio ${prio} --mtu 1522 --rate-mbps 1000
 	done
 done
 
@@ -63,11 +66,44 @@ scheduler-create << EOF
 	"clksrc": "ptp",
 	"cycles": [
 		{
-			"start-time-ms": "${start_time}",
+			"start-time-ms": "1",
 			"timeslots": [
-				{ "duration-ms": "0.01",   "ports": ${ports}, "gates-open": [], "comment": "empty" },
-				{ "duration-ms": "0.0001", "ports": ${ports}, "gates-open": [7], "comment": "ping" },
-				{ "duration-ms": "43",     "ports": ${ports}, "gates-open": [0, 1, 2, 3, 4, 5, 6], "comment": "everything else" }
+				{
+					"duration-ms": "4",
+					"ports": [${echo_port}, ${reply_port}],
+					"gates-open": [0, 1, 2, 3, 4, 5, 6],
+					"comment": "regular traffic 1"
+				},
+				{
+					"duration-ms": "10",
+					"ports": [${echo_port}, ${reply_port}],
+					"gates-open": [],
+					"comment": "guard band 1"
+				},
+				{
+					"duration-ms": "1",
+					"ports": [${echo_port}],
+					"gates-open": [7],
+					"comment": "icmp echo request"
+				},
+				{
+					"duration-ms": "4",
+					"ports": [${echo_port}, ${reply_port}],
+					"gates-open": [0, 1, 2, 3, 4, 5, 6],
+					"comment": "regular traffic 2"
+				},
+				{
+					"duration-ms": "10",
+					"ports": [${echo_port}, ${reply_port}],
+					"gates-open": [],
+					"comment": "guard band 2"
+				},
+				{
+					"duration-ms": "1",
+					"ports": [${reply_port}],
+					"gates-open": [7],
+					"comment": "icmp echo response"
+				}
 			]
 		}
 	]

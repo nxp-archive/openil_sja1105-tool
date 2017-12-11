@@ -11,7 +11,7 @@ usage() {
 
 [ -z "${TOPDIR+x}" ] && { echo "Please source envsetup before running this script."; exit 1; }
 
-O=`getopt -l port:,prio:,mtu:,help -- p:P:m:h "$@"` || exit 1
+O=`getopt -l port:,prio:,mtu:,rate-mbps:,help -- p:P:m:r:h "$@"` || exit 1
 eval set -- "$O"
 while true; do
 	case "$1" in
@@ -23,6 +23,8 @@ while true; do
 		prio="$2"; shift 2;;
 	-m|--mtu)
 		mtu="$2"; shift 2;;
+	-r|--rate-mbps)
+		rate_mbps="$2"; shift 2;;
 	--)
 		shift; break;;
 	*)
@@ -33,7 +35,12 @@ done
 [ -z "${port+x}" ] && { echo "please provide an argument to --port"; exit 1; }
 [ -z "${prio+x}" ] && { echo "please provide an argument to --prio"; exit 1; }
 [ -z "${mtu+x}" ]  && { echo "please provide an argument to --mtu"; exit 1; }
+[ -z "${rate_mbps+x}" ]  && { echo "please provide an argument to --rate-mbps"; exit 1; }
 
+rate=$(echo "(${rate_mbps}*64000/1000)/1" | bc)
+
+sja1105-tool config modify l2-policing-table[$((${port}*8 + ${prio}))] \
+                    rate ${rate}
 sja1105-tool config modify l2-policing-table[$((${port}*8 + ${prio}))] \
                     maxlen ${mtu}
 
