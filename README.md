@@ -131,43 +131,35 @@ man -l ./sja1105-conf.5                # File format for sja1105-tool configurat
 man -l ./sja1105-tool-config-format.5  # File format for XML switch configuration tables
 ```
 
+Port numbering on the NXP LS1021ATSN board
+------------------------------------------
+
+| Chassis port label | Switch port number | PHY ID |
+|--------------------|--------------------|--------|
+|        ETH2        |       RGMII 1      |    3   |
+|        ETH3        |       RGMII 2      |    4   |
+|        ETH4        |       RGMII 3      |    5   |
+|        ETH5        |       RGMII 0      |    6   |
+|      Internal      |       RGMII 4      |    -   |
+
 Known issues
 ------------
 
 1. Link speed autonegotiation is not supported.
 
-Default link speed is set to 1000Mbps.
+In the default LS1021ATSN configuration, link speed on all ports is set to 1000Mbps.
 
-To enable 100Mbps mode on the SJA1105 switch:
-
-```bash
-# Chassis ETH2: Switch port RGMII 1
-# Chassis ETH3: Switch port RGMII 2
-# Chassis ETH4: Switch port RGMII 3
-# Chassis ETH5: Switch port RGMII 0
-# To LS1021:    Switch port RGMII 4
-#
-# Select $i depending on the switch port you want to configure
-sja1105-tool config modify -f mac[$i] speed 0b10
-```
-
-The 5 ports of the SJA1105 switch are not visible to the Linux kernel.
+The 5 ports of the SJA1105 switch do not have a Linux kernel driver.
 As such, the PHY chip (BCM5464R) attached to the 4 externally connected ports
 of the LS1021ATSN board (ETH2, ETH3, ETH4, ETH5) is not controlled by the
 Linux kernel either.
 
-The PHY chip is brought out of reset to auto-negotiate 1000Mbps full-duplex.
-There is no way to control this through software.
+There is a workaround for this issue, that is to disable auto-negotiation on the
+PHY and keep the link speeds manually in sync between the PHY and the switch
+ports. The init script that does this is `etc/sja1105-link-speed-fixup`,
+and is deployed in OpenIL at `/etc/init.d/S46sja1105-link-speed-fixup`.
+Link speeds should be set at their desired values in this init script.
 
-Because of this issue, a 1000Mbps-capable endpoint connected to the
-SJA1105 will not drop down the link speed to 100Mbps, even if the switch
-is configured for 100Mbps mode. This is because the PHY chip will ignore
-the SJA1105 speed setting and still negotiate for 1000Mbps.
-
-The issue does not appear when connecting a 100Mbps-capable endpoint to
-the SJA1105. This is because, although the PHY chip still advertises
-1000Mbps capability, the autonegotiation will drop to the least common
-denominator, which is correctly 100Mbps.
 
 2. Clock synchronization via TTEthernet (SAE AS6802) is not supported.
 
