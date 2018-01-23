@@ -1,0 +1,109 @@
+#!/bin/sh
+#
+# sja1105        Works around known issue of link speed auto-negotiation
+#                not working on the NXP LS1021A-TSN board.
+#
+
+ETH2_SPEED_MBPS=1000
+ETH3_SPEED_MBPS=1000
+ETH4_SPEED_MBPS=1000
+ETH5_SPEED_MBPS=1000
+
+# Make sure the necessary programs exists
+[ -f /usr/bin/sja1105-tool ] || exit 0
+[ -f /usr/sbin/iomem ] || exit 0
+
+mbps_to_clause_22_speed() {
+	# Clause 22, register 0 (MII Control register), Speed Selection bits
+	# are bit 13 (LSB) and bit 6 (MSB).
+	case "$1" in
+	10)   echo "0"                  ;; # 0b00 => 10Mbps
+	100)  echo "$((0<<6 | 1<<13))"  ;; # 0b01 => 100Mbps
+	1000) echo "$((1<<6 | 0<<13))"  ;; # 0b10 => 1000Mbps
+	*)    echo "invalid link speed" ;;
+	esac
+}
+
+mbps_to_sja1105_speed() {
+	case "$1" in
+	10)   echo "0b11"               ;;
+	100)  echo "0b10"               ;;
+	1000) echo "0b01"               ;;
+	*)    echo "invalid link speed" ;;
+	esac
+}
+
+fixup_mac_link_speeds() {
+	# Patch the current staging area. Operations are idempotent
+	# (multiple applications have the same effect as a single one).
+	sja1105-tool config modify mac[1] speed $(mbps_to_sja1105_speed ${ETH2_SPEED_MBPS})
+	sja1105-tool config modify mac[2] speed $(mbps_to_sja1105_speed ${ETH3_SPEED_MBPS})
+	sja1105-tool config modify mac[3] speed $(mbps_to_sja1105_speed ${ETH4_SPEED_MBPS})
+	sja1105-tool config modify mac[0] speed $(mbps_to_sja1105_speed ${ETH5_SPEED_MBPS})
+	# Update the configuration in the switch
+	sja1105-tool config upload
+}
+
+etsec_mdio_miimadd="0x2d24528"
+etsec_mdio_miimcom="0x2d24524"
+etsec_mdio_miimcon="0x2d2452c"
+
+mdio_read() {
+	phy_addr="$1"
+	reg_addr="$2"
+	iomem w32be ${etsec_mdio_miimcom} "0x00000001" >/dev/null # read_cycle = 1
+	iomem w32be ${etsec_mdio_miimadd} "$((${phy_addr}<<8 | ${reg_addr}))" >/dev/null
+	value=$(iomem r32be ${etsec_mdio_miimcon} | awk '{ print $3; }')
+	echo ${value}
+}
+
+mdio_write() {
+	phy_addr="$1"
+	reg_addr="$2"
+	value="$3"
+	iomem w32be ${etsec_mdio_miimcom} "0x00000000" >/dev/null # read_cycle = 0
+	iomem w32be ${etsec_mdio_miimadd} "$((${phy_addr}<<8 | ${reg_addr}))" >/dev/null
+	iomem w32be ${etsec_mdio_miimcon} "${value}" >/dev/null
+}
+
+do_mdio_write() {
+	phy_addr="$1"
+	reg_addr="$2"
+	value="$3"
+	while true; do
+		echo "phy ${phy_addr} register ${reg_addr}: writing $(printf 0x%x ${value})"
+		mdio_write ${phy_addr} ${reg_addr} ${value}
+		read_back_value=$(mdio_read ${phy_addr} ${reg_addr})
+		if [ $((read_back_value)) -eq $((value)) ]; then
+			break
+		fi
+		sleep 1
+	done
+}
+
+fixup_phy_link_speeds() {
+	# Clause 22, register address 0 (MII control):
+	# Bit 15: RESET
+	# Bit 14: LOOPBACK
+	# Bit 13: SPEED_SELECT (LSB)
+	# Bit 12: AUTONEG_ENABLE
+	# Bit 11: POWER_DOWN
+	# Bit  9: RE_AUTONEG
+	# Bit  8: DUPLEX_MODE
+	# Bit  6: SPEED_SELECT (MSB)
+	do_mdio_write 3 0 $((1<<8 | $(mbps_to_clause_22_speed ${ETH2_SPEED_MBPS})))
+	do_mdio_write 4 0 $((1<<8 | $(mbps_to_clause_22_speed ${ETH3_SPEED_MBPS})))
+	do_mdio_write 5 0 $((1<<8 | $(mbps_to_clause_22_speed ${ETH4_SPEED_MBPS})))
+	do_mdio_write 6 0 $((1<<8 | $(mbps_to_clause_22_speed ${ETH5_SPEED_MBPS})))
+}
+
+info() {
+	echo "Setting ETH2 link speed to ${ETH2_SPEED_MBPS}"
+	echo "Setting ETH3 link speed to ${ETH3_SPEED_MBPS}"
+	echo "Setting ETH4 link speed to ${ETH4_SPEED_MBPS}"
+	echo "Setting ETH5 link speed to ${ETH5_SPEED_MBPS}"
+}
+
+info
+fixup_mac_link_speeds
+fixup_phy_link_speeds
