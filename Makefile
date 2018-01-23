@@ -129,6 +129,7 @@ install-binaries: $(SJA1105_LIB) $(SJA1105_BIN)
 	install -m 0755 -D sja1105-tool  $(DESTDIR)${bindir}/sja1105-tool
 
 install-configs: etc/sja1105-init etc/sja1105.conf
+	install -m 0755 -D etc/sja1105-link-speed-fixup $(DESTDIR)${sysconfdir}/init.d/S46sja1105-link-speed-fixup
 	install -m 0755 -D etc/sja1105-init $(DESTDIR)${sysconfdir}/init.d/S45sja1105
 	install -m 0644 -D etc/sja1105.conf $(DESTDIR)${sysconfdir}/sja1105/sja1105.conf
 
@@ -150,6 +151,7 @@ uninstall:
 		rm -rf $(call get_header_destination,$(header));)
 	rm -rf $(DESTDIR)${libdir}/libsja1105.so
 	rm -rf $(DESTDIR)${bindir}/sja1105-tool
+	rm -rf $(DESTDIR)${sysconfdir}/init.d/S46sja1105-link-speed-fixup
 	rm -rf $(DESTDIR)${sysconfdir}/init.d/S45sja1105
 	rm -rf $(DESTDIR)${sysconfdir}/sja1105/sja1105.conf
 
