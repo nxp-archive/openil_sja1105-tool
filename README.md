@@ -164,6 +164,11 @@ Link speeds should be set at their desired values in this init script.
 2. Clock synchronization via TTEthernet (SAE AS6802) is not supported.
 
 
+3. Dry run mode does not work when run on x86, in host mode. It
+   currently (unnecessarily) requests access to the /dev/spidev0.1 char
+   device, which does not exist when run in this mode.
+
+
 Reporting issues
 ----------------
 
