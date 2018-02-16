@@ -27,14 +27,18 @@ while true; do
 	esac
 done
 
-if [[ -z "${file+x}" ]]; then file="/dev/stdin"; fi
-if ! [[ -f ${file} ]]; then
+if [[ -z "${file+x}" ]]; then
+	# Read from stdin
+	json=$(jq "." <&0)
+elif ! [[ -f ${file} ]]; then
 	echo "${file}: No such file or directory"
 	exit 1
+else
+	json=$(jq "." ${file})
 fi
 
-num_cycles=$(jq ".cycles|length" ${file})
-total_num_timeslots=$(jq "[.cycles|map(.timeslots)[]|length]|add" ${file})
+num_cycles=$(jq ".cycles|length" <<< "${json}")
+total_num_timeslots=$(jq "[.cycles|map(.timeslots)[]|length]|add" <<< "${json}")
 
 # Schedule Table and Schedule Entry Points Table
 # will be filled as we go along
@@ -42,7 +46,7 @@ sja1105-tool config modify schedule-table entry-count ${total_num_timeslots}
 sja1105-tool config modify schedule-entry-points-table \
 	entry-count ${num_cycles}
 
-clksrc=$(jq -r ".clksrc" ${file})
+clksrc=$(jq -r ".clksrc" <<< "${json}")
 case "${clksrc}" in
 disabled)
 	clksrc="0b00"
@@ -76,7 +80,7 @@ gates_open=('')
 k=0
 
 for i in `seq 0 $((${num_cycles}-1))`; do
-	cycle=$(jq ".cycles[$i]" ${file})
+	cycle=$(jq ".cycles[$i]" <<< "${json}")
 	num_timeslots=$(echo ${cycle} | jq ".timeslots|length")
 	schedule_start_idx=${k}
 	schedule_end_idx=$((${k}+${num_timeslots}-1))
