@@ -91,10 +91,10 @@ fixup_phy_link_speeds() {
 	# Bit  9: RE_AUTONEG
 	# Bit  8: DUPLEX_MODE
 	# Bit  6: SPEED_SELECT (MSB)
-	do_mdio_write 3 0 $((1<<8 | $(mbps_to_clause_22_speed ${ETH2_SPEED_MBPS})))
-	do_mdio_write 4 0 $((1<<8 | $(mbps_to_clause_22_speed ${ETH3_SPEED_MBPS})))
-	do_mdio_write 5 0 $((1<<8 | $(mbps_to_clause_22_speed ${ETH4_SPEED_MBPS})))
-	do_mdio_write 6 0 $((1<<8 | $(mbps_to_clause_22_speed ${ETH5_SPEED_MBPS})))
+	do_mdio_write 3 0 $((1<<15 | 1<<8 | $(mbps_to_clause_22_speed ${ETH2_SPEED_MBPS})))
+	do_mdio_write 4 0 $((1<<15 | 1<<8 | $(mbps_to_clause_22_speed ${ETH3_SPEED_MBPS})))
+	do_mdio_write 5 0 $((1<<15 | 1<<8 | $(mbps_to_clause_22_speed ${ETH4_SPEED_MBPS})))
+	do_mdio_write 6 0 $((1<<15 | 1<<8 | $(mbps_to_clause_22_speed ${ETH5_SPEED_MBPS})))
 }
 
 info() {
