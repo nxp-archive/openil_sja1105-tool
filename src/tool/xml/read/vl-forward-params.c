@@ -60,7 +60,7 @@ static int parse_entry(xmlNode *node, struct sja1105_static_config *config)
 	}
 	memset(&table, 0, sizeof(table));
 	rc = entry_get(node, &table);
-	config->vl_forwarding_params_table[config->vl_forwarding_params_count++] = table;
+	config->vl_forwarding_params[config->vl_forwarding_params_count++] = table;
 out:
 	return rc;
 }

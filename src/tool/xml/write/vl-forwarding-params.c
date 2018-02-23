@@ -39,8 +39,8 @@ int vl_forwarding_parameters_table_write(xmlTextWriterPtr writer, struct sja1105
 	for (i = 0; i < config->vl_forwarding_params_count; i++) {
 		rc |= xmlTextWriterStartElement(writer, BAD_CAST "entry");
 		rc |= xml_write_field(writer, "index",   i);
-		rc |= xml_write_array(writer, "partspc", config->vl_forwarding_params_table[i].partspc, 8);
-		rc |= xml_write_field(writer, "debugen", config->vl_forwarding_params_table[i].debugen);
+		rc |= xml_write_array(writer, "partspc", config->vl_forwarding_params[i].partspc, 8);
+		rc |= xml_write_field(writer, "debugen", config->vl_forwarding_params[i].debugen);
 		rc |= xmlTextWriterEndElement(writer);
 		if (rc < 0) {
 			loge("error while writing VL Forwarding Params Table");
