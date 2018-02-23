@@ -876,8 +876,8 @@ vl_fw_params_table_entry_modify(struct sja1105_static_config *config,
 		"debugen",
 	};
 	uint64_t *fields[] = {
-		config->vl_forwarding_params_table[entry_index].partspc,
-		&config->vl_forwarding_params_table[entry_index].debugen,
+		config->vl_forwarding_params[entry_index].partspc,
+		&config->vl_forwarding_params[entry_index].debugen,
 	};
 	int entry_field_counts[] = {8, 1,};
 	uint64_t tmp;

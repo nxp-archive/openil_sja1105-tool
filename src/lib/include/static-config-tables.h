@@ -361,7 +361,7 @@ struct sja1105_static_config {
 	struct sja1105_schedule_entry_points_params \
 	       schedule_entry_points_params[MAX_SCHEDULE_ENTRY_POINTS_PARAMS_COUNT];
 	struct sja1105_vl_forwarding_params_table \
-	       vl_forwarding_params_table[MAX_VL_FORWARDING_PARAMS_COUNT];
+	       vl_forwarding_params[MAX_VL_FORWARDING_PARAMS_COUNT];
 	struct sja1105_l2_lookup_params_table \
 	       l2_lookup_params[MAX_L2_LOOKUP_PARAMS_COUNT];
 	struct sja1105_l2_forwarding_params_table \

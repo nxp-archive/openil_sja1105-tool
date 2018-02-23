@@ -71,7 +71,7 @@ void sja1105_schedule_entry_points_params_unpack(
 	sja1105_schedule_entry_points_params_access(buf, entry, 0);
 }
 
-void sja1105_schedule_entry_points_params_fmt_show(
+void sja1105_schedule_entry_points_params_table_fmt_show(
 		char *print_buf,
 		char *fmt,
 		struct sja1105_schedule_entry_points_params *entry)
@@ -80,13 +80,13 @@ void sja1105_schedule_entry_points_params_fmt_show(
 	formatted_append(print_buf, fmt, "ACTSUBSCH 0x%" PRIX64, entry->actsubsch);
 }
 
-void sja1105_schedule_entry_points_params_show(struct sja1105_schedule_entry_points_params *entry)
+void sja1105_schedule_entry_points_params_table_show(struct sja1105_schedule_entry_points_params *entry)
 {
 	char print_buf[MAX_LINE_SIZE];
 	char *fmt = "%s\n";
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_schedule_entry_points_params_fmt_show(print_buf, fmt, entry);
+	sja1105_schedule_entry_points_params_table_fmt_show(print_buf, fmt, entry);
 	puts(print_buf);
 }
 

@@ -39,350 +39,56 @@
 #include <lib/include/static-config.h>
 #include <common.h>
 
-static void schedule_table_show(struct sja1105_static_config *config)
-{
-	char  tmp_buf[MAX_SCHEDULE_COUNT][MAX_LINE_SIZE];
-	char *print_bufs[MAX_SCHEDULE_COUNT];
-	char *fmt = "%-30s\n";
-	int   i;
-
-	printf("Schedule Table: %d entries\n", config->schedule_count);
-	for (i = 0; i < config->schedule_count; i++) {
-		memset(tmp_buf[i], 0, MAX_LINE_SIZE);
-		formatted_append(tmp_buf[i], fmt, "Entry %d:", i);
-		sja1105_schedule_entry_fmt_show(tmp_buf[i], fmt, &config->schedule[i]);
-		formatted_append(tmp_buf[i], fmt, "");
-		print_bufs[i] = tmp_buf[i];
+#define DECLARE_TABLE_SHOW_FN(TABLE_NAME, TABLE_OR_ENTRY, MAX_TABLE_SIZE, STRING_NAME, FMT) \
+	static void TABLE_NAME ## _table_show(struct sja1105_static_config *config, int index) { \
+		char  tmp_buf[MAX_TABLE_SIZE][MAX_LINE_SIZE]; \
+		char *print_bufs[MAX_TABLE_SIZE]; \
+		int   start = (index == -1) ? 0 : index; \
+		int   end   = (index == -1) ? config-> TABLE_NAME ## _count : index + 1; \
+		int   i; \
+		 \
+		printf(STRING_NAME ": %d entries\n", config-> TABLE_NAME ## _count); \
+		for (i = start; i < end; i++) { \
+			memset(tmp_buf[i], 0, MAX_LINE_SIZE); \
+			formatted_append(tmp_buf[i], FMT, "Entry %d:", i); \
+			sja1105_ ## TABLE_NAME ## _ ## TABLE_OR_ENTRY ## _fmt_show(tmp_buf[i], FMT, &config-> TABLE_NAME [i]); \
+			formatted_append(tmp_buf[i], FMT, ""); \
+			print_bufs[i] = tmp_buf[i]; \
+		} \
+		show_print_bufs(print_bufs + start, end - start); \
 	}
-	show_print_bufs(print_bufs, config->schedule_count);
-}
 
-static void schedule_entry_points_table_show(struct sja1105_static_config *config)
-{
-	char  tmp_buf[MAX_SCHEDULE_ENTRY_POINTS_COUNT][MAX_LINE_SIZE];
-	char *print_bufs[MAX_SCHEDULE_ENTRY_POINTS_COUNT];
-	char *fmt = "%-30s\n";
-	int   i;
+DECLARE_TABLE_SHOW_FN(schedule, entry, MAX_SCHEDULE_COUNT, "Schedule Table", "%-30s\n")
+DECLARE_TABLE_SHOW_FN(schedule_entry_points, entry, MAX_SCHEDULE_ENTRY_POINTS_COUNT, "Schedule Entry Points Table", "%-30s\n")
+DECLARE_TABLE_SHOW_FN(l2_lookup, entry, MAX_L2_LOOKUP_COUNT, "L2 Address Lookup Table", "%-30s\n")
+DECLARE_TABLE_SHOW_FN(l2_policing, entry, MAX_L2_POLICING_COUNT, "L2 Policing Table", "%-20s\n")
+DECLARE_TABLE_SHOW_FN(vlan_lookup, entry, MAX_VLAN_LOOKUP_COUNT, "VLAN Lookup Table", "%-20s\n")
+DECLARE_TABLE_SHOW_FN(l2_forwarding, entry, MAX_L2_FORWARDING_COUNT, "L2 Forwarding Table", "%-45s\n")
+DECLARE_TABLE_SHOW_FN(mac_config, entry, MAX_MAC_CONFIG_COUNT, "MAC Configuration Table", "%-60s\n")
+DECLARE_TABLE_SHOW_FN(schedule_params, entry, MAX_SCHEDULE_PARAMS_COUNT, "Schedule Parameters Table", "%-50s\n")
+DECLARE_TABLE_SHOW_FN(schedule_entry_points_params, table, MAX_SCHEDULE_ENTRY_POINTS_PARAMS_COUNT, "Schedule Entry Points Parameters Table", "%-30s\n")
+DECLARE_TABLE_SHOW_FN(l2_lookup_params, table, MAX_L2_LOOKUP_PARAMS_COUNT, "L2 Address Lookup Parameters Table", "%-30s\n")
+DECLARE_TABLE_SHOW_FN(l2_forwarding_params, table, MAX_L2_FORWARDING_PARAMS_COUNT, "L2 Forwarding Parameters Table", "%-50s\n")
+DECLARE_TABLE_SHOW_FN(general_params, table, MAX_GENERAL_PARAMS_COUNT, "General Parameters Table", "%-30s\n")
+DECLARE_TABLE_SHOW_FN(xmii_params, table, MAX_XMII_PARAMS_COUNT, "xMII Mode Parameters Table", "%-35s\n")
+DECLARE_TABLE_SHOW_FN(vl_lookup, entry, MAX_VL_LOOKUP_COUNT, "Virtual Link Address Lookup Table:", "%-35s\n")
+DECLARE_TABLE_SHOW_FN(vl_policing, entry, MAX_VL_POLICING_COUNT, "Virtual Link Policing Table:", "%-35s\n")
+DECLARE_TABLE_SHOW_FN(vl_forwarding, entry, MAX_VL_FORWARDING_COUNT, "Virtual Link Forwarding Table", "%-35s\n")
+DECLARE_TABLE_SHOW_FN(avb_params, table, MAX_AVB_PARAMS_COUNT, "Audio/Video Bridging Parameters Table", "%-35s\n")
+DECLARE_TABLE_SHOW_FN(vl_forwarding_params, table, MAX_VL_FORWARDING_PARAMS_COUNT, "Virtual Link Forwarding Parameters Table", "%-35s\n")
 
-	printf("Schedule Entry Points Table: %d entries\n", config->schedule_entry_points_count);
-	for (i = 0; i < config->schedule_entry_points_count; i++) {
-		memset(tmp_buf[i], 0, MAX_LINE_SIZE);
-		formatted_append(tmp_buf[i], fmt, "Entry %d:", i);
-		sja1105_schedule_entry_points_entry_fmt_show(
-				tmp_buf[i], fmt, &config->schedule_entry_points[i]);
-		formatted_append(tmp_buf[i], fmt, "");
-		print_bufs[i] = tmp_buf[i];
-	}
-	show_print_bufs(print_bufs, config->schedule_entry_points_count);
-}
-
-static void l2_lookup_table_show(struct sja1105_static_config *config)
-{
-	char  tmp_buf[MAX_L2_LOOKUP_COUNT][MAX_LINE_SIZE];
-	char *print_bufs[MAX_L2_LOOKUP_COUNT];
-	char *fmt = "%-30s\n";
-	int   i;
-
-	printf("L2 Address Lookup Table: %d entries\n", config->l2_lookup_count);
-	for (i = 0; i < config->l2_lookup_count; i++) {
-		memset(tmp_buf[i], 0, MAX_LINE_SIZE);
-		formatted_append(tmp_buf[i], fmt, "Entry %d:", i);
-		sja1105_l2_lookup_entry_fmt_show(tmp_buf[i], fmt, &config->l2_lookup[i]);
-		formatted_append(tmp_buf[i], fmt, "");
-		print_bufs[i] = tmp_buf[i];
-	}
-	show_print_bufs(print_bufs, config->l2_lookup_count);
-}
-
-static void l2_policing_table_show(struct sja1105_static_config *config)
-{
-	char  tmp_buf[MAX_L2_POLICING_COUNT][MAX_LINE_SIZE];
-	char *print_bufs[MAX_L2_POLICING_COUNT];
-	char *fmt = "%-20s\n";
-	int   i;
-
-	printf("L2 Policing Table: %d entries\n", config->l2_policing_count);
-	for (i = 0; i < config->l2_policing_count; i++) {
-		memset(tmp_buf[i], 0, MAX_LINE_SIZE);
-		formatted_append(tmp_buf[i], fmt, "Entry %d:", i);
-		sja1105_l2_policing_entry_fmt_show(tmp_buf[i], fmt, &config->l2_policing[i]);
-		formatted_append(tmp_buf[i], fmt, "");
-		print_bufs[i] = tmp_buf[i];
-	}
-	show_print_bufs(print_bufs, config->l2_policing_count);
-}
-
-static void vlan_lookup_table_show(struct sja1105_static_config *config)
-{
-	char  tmp_buf[MAX_VLAN_LOOKUP_COUNT][MAX_LINE_SIZE / 4];
-	char *print_bufs[MAX_VLAN_LOOKUP_COUNT];
-	char *fmt = "%-30s\n";
-	int   i;
-
-	printf("VLAN Lookup Table: %d entries\n", config->vlan_lookup_count);
-	for (i = 0; i < config->vlan_lookup_count; i++) {
-		memset(tmp_buf[i], 0, MAX_LINE_SIZE / 4);
-		formatted_append(tmp_buf[i], fmt, "Entry %d", i);
-		sja1105_vlan_lookup_entry_fmt_show(tmp_buf[i], fmt, &config->vlan_lookup[i]);
-		formatted_append(tmp_buf[i], fmt, "");
-		print_bufs[i] = tmp_buf[i];
-	}
-	show_print_bufs(print_bufs, config->vlan_lookup_count);
-}
-
-static void l2_fw_table_show(struct sja1105_static_config *config)
-{
-	char  tmp_buf[MAX_L2_FORWARDING_COUNT][MAX_LINE_SIZE];
-	char *print_bufs[MAX_L2_FORWARDING_COUNT];
-	char *fmt = "%-45s\n";
-	int   i;
-
-	printf("L2 Forwarding Table: %d entries\n", config->l2_forwarding_count);
-	for (i = 0; i < config->l2_forwarding_count; i++) {
-		memset(tmp_buf[i], 0, MAX_LINE_SIZE);
-		formatted_append(tmp_buf[i], fmt, "Entry %d:", i);
-		sja1105_l2_forwarding_entry_fmt_show(tmp_buf[i], fmt, &config->l2_forwarding[i]);
-		formatted_append(tmp_buf[i], fmt, "");
-		print_bufs[i] = tmp_buf[i];
-	}
-	show_print_bufs(print_bufs, config->l2_forwarding_count);
-}
-
-static void mac_config_table_show(struct sja1105_static_config *config)
-{
-	char  tmp_buf[MAX_MAC_CONFIG_COUNT][MAX_LINE_SIZE];
-	char *print_bufs[MAX_MAC_CONFIG_COUNT];
-	char *fmt = "%-60s\n";
-	int   i;
-
-	printf("MAC Configuration Table: %d entries\n", config->mac_config_count);
-	for (i = 0; i < config->mac_config_count; i++) {
-		memset(tmp_buf[i], 0, MAX_LINE_SIZE);
-		formatted_append(tmp_buf[i], fmt, "Entry %d:", i);
-		sja1105_mac_config_entry_fmt_show(tmp_buf[i], fmt, &config->mac_config[i]);
-		formatted_append(tmp_buf[i], fmt, "");
-		print_bufs[i] = tmp_buf[i];
-	}
-	show_print_bufs(print_bufs, config->mac_config_count);
-}
-
-static void schedule_params_table_show(struct sja1105_static_config *config)
-{
-	char  tmp_buf[MAX_SCHEDULE_PARAMS_COUNT][MAX_LINE_SIZE];
-	char *print_bufs[MAX_SCHEDULE_PARAMS_COUNT];
-	char *fmt = "%-50s\n";
-	int   i;
-
-	printf("Schedule Parameters Table: %d entries\n", config->schedule_params_count);
-	for (i = 0; i < config->schedule_params_count; i++) {
-		memset(tmp_buf[i], 0, MAX_LINE_SIZE);
-		formatted_append(tmp_buf[i], fmt, "Entry %d:", i);
-		sja1105_schedule_params_entry_fmt_show(tmp_buf[i], fmt, &config->schedule_params[i]);
-		formatted_append(tmp_buf[i], fmt, "");
-		print_bufs[i] = tmp_buf[i];
-	}
-	show_print_bufs(print_bufs, config->schedule_params_count);
-}
-
-static void schedule_entry_points_params_table_show(struct sja1105_static_config *config)
-{
-	char  tmp_buf[MAX_SCHEDULE_ENTRY_POINTS_PARAMS_COUNT][MAX_LINE_SIZE];
-	char *print_bufs[MAX_SCHEDULE_ENTRY_POINTS_PARAMS_COUNT];
-	char *fmt = "%-30s\n";
-	int   i;
-
-	printf("Schedule Entry Points Parameters Table: %d entries\n", config->schedule_entry_points_params_count);
-	for (i = 0; i < config->schedule_entry_points_params_count; i++) {
-		memset(tmp_buf[i], 0, MAX_LINE_SIZE);
-		formatted_append(tmp_buf[i], fmt, "Entry %d:", i);
-		sja1105_schedule_entry_points_params_fmt_show(
-				tmp_buf[i], fmt, &config->schedule_entry_points_params[i]);
-		formatted_append(tmp_buf[i], fmt, "");
-		print_bufs[i] = tmp_buf[i];
-	}
-	show_print_bufs(print_bufs, config->schedule_entry_points_params_count);
-}
-
-static void l2_lookup_params_table_show(struct sja1105_static_config *config)
-{
-	char  tmp_buf[MAX_L2_LOOKUP_PARAMS_COUNT][MAX_LINE_SIZE];
-	char *print_bufs[MAX_L2_LOOKUP_PARAMS_COUNT];
-	char *fmt = "%-30s\n";
-	int   i;
-
-	printf("L2 Address Lookup Parameters Table: %d entries\n", config->l2_lookup_params_count);
-	for (i = 0; i < config->l2_lookup_params_count; i++) {
-		memset(tmp_buf[i], 0, MAX_LINE_SIZE);
-		formatted_append(tmp_buf[i], fmt, "Entry %d:", i);
-		sja1105_l2_lookup_params_table_fmt_show(
-				tmp_buf[i], fmt, &config->l2_lookup_params[i]);
-		formatted_append(tmp_buf[i], fmt, "");
-		print_bufs[i] = tmp_buf[i];
-	}
-	show_print_bufs(print_bufs, config->l2_lookup_params_count);
-}
-
-static void l2_fw_params_table_show(struct sja1105_static_config *config)
-{
-	char  tmp_buf[MAX_L2_FORWARDING_PARAMS_COUNT][MAX_LINE_SIZE];
-	char *print_bufs[MAX_L2_FORWARDING_PARAMS_COUNT];
-	char *fmt = "%-50s\n";
-	int   i;
-
-	printf("L2 Forwarding Parameters Table: %d entries\n", config->l2_forwarding_params_count);
-	for (i = 0; i < config->l2_forwarding_params_count; i++) {
-		memset(tmp_buf[i], 0, MAX_LINE_SIZE);
-		formatted_append(tmp_buf[i], fmt, "Entry %d:", i);
-		sja1105_l2_forwarding_params_table_fmt_show(
-				tmp_buf[i], fmt, &config->l2_forwarding_params[i]);
-		formatted_append(tmp_buf[i], fmt, "");
-		print_bufs[i] = tmp_buf[i];
-	}
-	show_print_bufs(print_bufs, config->l2_forwarding_params_count);
-}
-
-static void general_params_table_show(struct sja1105_static_config *config)
-{
-	char  tmp_buf[MAX_GENERAL_PARAMS_COUNT][MAX_LINE_SIZE];
-	char *print_bufs[MAX_GENERAL_PARAMS_COUNT];
-	char *fmt = "%-30s\n";
-	int   i;
-
-	printf("General Parameters Table: %d entries\n", config->general_params_count);
-	for (i = 0; i < config->general_params_count; i++) {
-		memset(tmp_buf[i], 0, MAX_LINE_SIZE);
-		formatted_append(tmp_buf[i], fmt, "Entry %d:", i);
-		sja1105_general_params_table_fmt_show(
-				tmp_buf[i], fmt, &config->general_params[i]);
-		formatted_append(tmp_buf[i], fmt, "");
-		print_bufs[i] = tmp_buf[i];
-	}
-	show_print_bufs(print_bufs, config->general_params_count);
-}
-
-static void xmii_table_show(struct sja1105_static_config *config)
-{
-	char  tmp_buf[MAX_XMII_PARAMS_COUNT][MAX_LINE_SIZE];
-	char *print_bufs[MAX_XMII_PARAMS_COUNT];
-	char *fmt = "%-35s\n";
-	int   i;
-
-	printf("xMII Mode Parameters Table: %d entries\n", config->xmii_params_count);
-	for (i = 0; i < config->xmii_params_count; i++) {
-		memset(tmp_buf[i], 0, MAX_LINE_SIZE);
-		formatted_append(tmp_buf[i], fmt, "Entry %d:", i);
-		sja1105_xmii_params_table_fmt_show(
-				tmp_buf[i], fmt, &config->xmii_params[i]);
-		formatted_append(tmp_buf[i], fmt, "");
-		print_bufs[i] = tmp_buf[i];
-	}
-	show_print_bufs(print_bufs, config->xmii_params_count);
-}
-
-static void vl_lookup_table_show(struct sja1105_static_config *config)
-{
-	char  tmp_buf[MAX_VL_LOOKUP_COUNT][MAX_LINE_SIZE];
-	char *print_bufs[MAX_VL_LOOKUP_COUNT];
-	char *fmt = "%-35s\n";
-	int   i;
-
-	printf("VL Lookup Table: %d entries\n", config->vl_lookup_count);
-	for (i = 0; i < config->vl_lookup_count; i++) {
-		memset(tmp_buf[i], 0, MAX_LINE_SIZE);
-		formatted_append(tmp_buf[i], fmt, "Entry %d:", i);
-		sja1105_vl_lookup_entry_fmt_show(
-				tmp_buf[i], fmt, &config->vl_lookup[i]);
-		formatted_append(tmp_buf[i], fmt, "");
-		print_bufs[i] = tmp_buf[i];
-	}
-	show_print_bufs(print_bufs, config->vl_lookup_count);
-}
-
-static void vl_policing_table_show(struct sja1105_static_config *config)
-{
-	char  tmp_buf[MAX_VL_POLICING_COUNT][MAX_LINE_SIZE];
-	char *print_bufs[MAX_VL_POLICING_COUNT];
-	char *fmt = "%-35s\n";
-	int   i;
-
-	printf("VL Policing Table: %d entries\n", config->vl_policing_count);
-	for (i = 0; i < config->vl_policing_count; i++) {
-		memset(tmp_buf[i], 0, MAX_LINE_SIZE);
-		formatted_append(tmp_buf[i], fmt, "Entry %d:", i);
-		sja1105_vl_policing_entry_fmt_show(
-				tmp_buf[i], fmt, &config->vl_policing[i]);
-		formatted_append(tmp_buf[i], fmt, "");
-		print_bufs[i] = tmp_buf[i];
-	}
-	show_print_bufs(print_bufs, config->vl_policing_count);
-}
-
-static void vl_fw_table_show(struct sja1105_static_config *config)
-{
-	char  tmp_buf[MAX_VL_FORWARDING_COUNT][MAX_LINE_SIZE];
-	char *print_bufs[MAX_VL_FORWARDING_COUNT];
-	char *fmt = "%-35s\n";
-	int   i;
-
-	printf("VL Forwarding Table: %d entries\n", config->vl_forwarding_count);
-	for (i = 0; i < config->vl_forwarding_count; i++) {
-		memset(tmp_buf[i], 0, MAX_LINE_SIZE);
-		formatted_append(tmp_buf[i], fmt, "Entry %d:", i);
-		sja1105_vl_forwarding_entry_fmt_show(
-				tmp_buf[i], fmt, &config->vl_forwarding[i]);
-		formatted_append(tmp_buf[i], fmt, "");
-		print_bufs[i] = tmp_buf[i];
-	}
-	show_print_bufs(print_bufs, config->vl_forwarding_count);
-}
-
-static void retagging_table_show(__attribute__((unused)) struct sja1105_static_config *config)
+static void
+retagging_table_show(__attribute__((unused)) struct sja1105_static_config *config,
+                     __attribute__((unused)) int index)
 {
 	loge("Retagging Table unimplemented");
 }
 
-static void avb_params_table_show(struct sja1105_static_config *config)
-{
-	char  tmp_buf[MAX_AVB_PARAMS_COUNT][MAX_LINE_SIZE];
-	char *print_bufs[MAX_AVB_PARAMS_COUNT];
-	char *fmt = "%-35s\n";
-	int   i;
-
-	printf("AVB Parameters Table: %d entries\n", config->avb_params_count);
-	for (i = 0; i < config->avb_params_count; i++) {
-		memset(tmp_buf[i], 0, MAX_LINE_SIZE);
-		formatted_append(tmp_buf[i], fmt, "Entry %d:", i);
-		sja1105_avb_params_table_fmt_show(
-				tmp_buf[i], fmt, &config->avb_params[i]);
-		formatted_append(tmp_buf[i], fmt, "");
-		print_bufs[i] = tmp_buf[i];
-	}
-	show_print_bufs(print_bufs, config->avb_params_count);
-}
-
-static void clock_sync_params_table_show(__attribute__((unused)) struct sja1105_static_config *config)
+static void
+clock_sync_params_table_show(__attribute__((unused)) struct sja1105_static_config *config,
+                             __attribute__((unused)) int index)
 {
 	loge("Clock Synchronization Table unimplemented");
-}
-
-static void vl_fw_params_table_show(struct sja1105_static_config *config)
-{
-	char  tmp_buf[MAX_VL_FORWARDING_PARAMS_COUNT][MAX_LINE_SIZE];
-	char *print_bufs[MAX_VL_FORWARDING_PARAMS_COUNT];
-	char *fmt = "%-35s\n";
-	int   i;
-
-	printf("VL Forwarding Parameters Table: %d entries\n", config->vl_forwarding_params_count);
-	for (i = 0; i < config->vl_forwarding_params_count; i++) {
-		memset(tmp_buf[i], 0, MAX_LINE_SIZE);
-		formatted_append(tmp_buf[i], fmt, "Entry %d:", i);
-		sja1105_vl_forwarding_params_table_fmt_show(
-				tmp_buf[i], fmt,
-				&config->vl_forwarding_params_table[i]);
-		formatted_append(tmp_buf[i], fmt, "");
-		print_bufs[i] = tmp_buf[i];
-	}
-	show_print_bufs(print_bufs, config->vl_forwarding_params_count);
 }
 
 int
@@ -411,29 +117,32 @@ sja1105_staging_area_show(struct sja1105_staging_area *staging_area,
 		"retagging-table",
 		"xmii-mode-parameters-table",
 	};
-	void (*next_config_table_show[])(struct sja1105_static_config *) = {
+	void (*next_config_table_show[])(struct sja1105_static_config *, int) = {
 		schedule_table_show,
 		schedule_entry_points_table_show,
 		vl_lookup_table_show,
 		vl_policing_table_show,
-		vl_fw_table_show,
+		vl_forwarding_table_show,
 		l2_lookup_table_show,
 		l2_policing_table_show,
 		vlan_lookup_table_show,
-		l2_fw_table_show,
+		l2_forwarding_table_show,
 		mac_config_table_show,
 		schedule_params_table_show,
 		schedule_entry_points_params_table_show,
-		vl_fw_params_table_show,
+		vl_forwarding_params_table_show,
 		l2_lookup_params_table_show,
-		l2_fw_params_table_show,
+		l2_forwarding_params_table_show,
 		clock_sync_params_table_show,
 		avb_params_table_show,
 		general_params_table_show,
 		retagging_table_show,
-		xmii_table_show,
+		xmii_params_table_show,
 	};
 	struct sja1105_static_config *static_config;
+	char *index_ptr;
+	uint64_t entry_index_u64;
+	int entry_index;
 	unsigned int i;
 	int rc = 0;
 
@@ -442,15 +151,31 @@ sja1105_staging_area_show(struct sja1105_staging_area *staging_area,
 	if (table_name == NULL || strlen(table_name) == 0) {
 		logv("Showing all config tables");
 		for (i = 0; i < ARRAY_SIZE(next_config_table_show); i++) {
-			next_config_table_show[i](static_config);
+			next_config_table_show[i](static_config, -1);
 		}
 	} else {
+		index_ptr = strchr(table_name, '[');
+		if (index_ptr == NULL) {
+			/* No index specified => show all */
+			entry_index = -1;
+		} else {
+			/* Little trick to reuse the code, since the index
+			 * is surrounded by [ ], same as an array would be */
+			rc = read_array(index_ptr, &entry_index_u64, 1);
+			if (rc < 0) {
+				goto out;
+			}
+			entry_index = (int) entry_index_u64;
+			/* Execute string comparison only on the table_name,
+			 * but not on the entry index */
+			*index_ptr = '\0';
+		}
 		rc = get_match(table_name, options,
 		               ARRAY_SIZE(options));
 		if (rc < 0) {
 			goto out;
 		}
-		next_config_table_show[rc](static_config);
+		next_config_table_show[rc](static_config, entry_index);
 	}
 out:
 	return rc;

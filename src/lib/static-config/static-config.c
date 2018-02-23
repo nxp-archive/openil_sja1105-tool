@@ -253,7 +253,7 @@ int sja1105_static_config_add_entry(struct sja1105_table_header *hdr, void *buf,
 			return -1;
 		}
 		sja1105_vl_forwarding_params_table_unpack(buf, &table);
-		config->vl_forwarding_params_table[count++] = table;
+		config->vl_forwarding_params[count++] = table;
 		config->vl_forwarding_params_count = count;
 		return SIZE_VL_FORWARDING_PARAMS_ENTRY;
 	}
@@ -421,7 +421,7 @@ sja1105_static_config_check_memory_size(struct sja1105_static_config *config)
 	}
 	if (config->vl_forwarding_params_count) {
 		for (i = 0; i < 8; i++) {
-			mem += config->vl_forwarding_params_table[0].partspc[i];
+			mem += config->vl_forwarding_params[0].partspc[i];
 		}
 	}
 	if (config->retagging_count > 0) {
@@ -655,7 +655,7 @@ sja1105_static_config_pack(void *buf, struct sja1105_static_config *config)
 	                     SIZE_VL_FORWARDING_PARAMS_ENTRY,
 	                     BLKID_VL_FORWARDING_PARAMS_TABLE,
 	                     sja1105_vl_forwarding_params_table_pack,
-	                     config->vl_forwarding_params_table);
+	                     config->vl_forwarding_params);
 	PACK_TABLE_IN_BUF_FN(config->l2_lookup_params_count,
 	                     SIZE_L2_LOOKUP_PARAMS_TABLE,
 	                     BLKID_L2_LOOKUP_PARAMS_TABLE,
