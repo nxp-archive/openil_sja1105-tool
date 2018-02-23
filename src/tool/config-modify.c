@@ -53,7 +53,7 @@ static int generic_table_entry_modify(
 {
 	int rc;
 
-	if (entry_index >= entry_count) {
+	if (entry_index < 0 || entry_index >= entry_count) {
 		loge("Index out of bounds!");
 		loge("Please adjust the entry count of the table:");
 		loge("* config modify <table> entry-count <value>)");
