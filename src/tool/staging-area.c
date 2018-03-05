@@ -46,6 +46,7 @@
 #include <lib/include/status.h>
 #include <lib/include/reset.h>
 #include <lib/include/clock.h>
+#include <lib/include/port.h>
 #include <common.h>
 
 static int reliable_write(int fd, char *buf, int len)
@@ -294,7 +295,8 @@ int static_config_flush(struct sja1105_spi_setup *spi_setup,
 	struct sja1105_reset_ctrl     reset = {.rst_ctrl = RGU_COLD};
 	struct sja1105_general_status status;
 	uint64_t expected_device_id = spi_setup->device_id;
-	int rc;
+	struct sja1105_egress_port_mask port_mask;
+	int i, rc;
 
 	/* Check that we are talking with the right device over SPI */
 	rc = sja1105_general_status_get(spi_setup, &status);
@@ -315,6 +317,22 @@ int static_config_flush(struct sja1105_spi_setup *spi_setup,
 		loge("cannot upload config, because it is not valid");
 		goto out;
 	}
+	/* Workaround for PHY jabbering during switch reset */
+	memset(&port_mask, 0, sizeof(port_mask));
+	for (i = 0; i < SJA1105T_NUM_PORTS; i++) {
+		port_mask.inhibit_tx[i] = 1;
+	}
+	rc = sja1105_inhibit_tx(spi_setup, &port_mask);
+	if (rc < 0) {
+		loge("sja1105_set_egress_port_mask failed");
+		goto out;
+	}
+	/* Wait for an eventual egress packet to finish transmission
+	 * (reach IFG). It is guaranteed that a second one will not
+	 * follow, and that switch cold reset is thus safe
+	 */
+	usleep(1000);
+	/* Put the SJA1105 in programming mode */
 	rc = sja1105_reset(spi_setup, &reset);
 	if (rc < 0) {
 		loge("sja1105_reset failed");
@@ -325,6 +343,7 @@ int static_config_flush(struct sja1105_spi_setup *spi_setup,
 		loge("static_config_upload failed");
 		goto out;
 	}
+	/* Configure the CGU (PHY link modes and speeds) */
 	rc = sja1105_clocking_setup(spi_setup, &config->xmii_params[0],
 	                           &config->mac_config[0]);
 	if (rc < 0) {
