@@ -31,7 +31,7 @@
 #ifndef _STAGING_AREA_H
 #define _STAGING_AREA_H
 
-#include "static-config-tables.h"
+#include "static-config.h"
 
 struct sja1105_staging_area {
 	struct sja1105_static_config static_config;

@@ -34,7 +34,7 @@
 #include "spi.h"
 #include "agu-tables.h"
 #include "cgu-tables.h"
-#include "static-config-tables.h"
+#include "static-config.h"
 
 void sja1105_cgu_pll_control_show(struct sja1105_cgu_pll_control*);
 void sja1105_cgu_pll_control_pack(void*, struct sja1105_cgu_pll_control*);
