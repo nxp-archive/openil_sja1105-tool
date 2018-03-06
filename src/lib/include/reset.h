@@ -32,7 +32,16 @@
 #define _RESET_PARSE_ARGS_H
 
 #include "spi.h"
-#include "rgu-tables.h"
+
+/* RGU */
+#define RGU_ADDR    0x100440
+#define RGU_MSG_LEN 8
+#define RGU_WARM    0x04
+#define RGU_COLD    0x08
+
+struct sja1105_reset_ctrl {
+	uint64_t rst_ctrl;
+};
 
 int sja1105_reset(const struct sja1105_spi_setup*, struct sja1105_reset_ctrl*);
 
