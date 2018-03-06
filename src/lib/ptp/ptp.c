@@ -34,7 +34,7 @@
 /* These are our own include files */
 #include <lib/include/ptp.h>
 #include <lib/include/gtable.h>
-#include <lib/include/status-tables.h>
+#include <lib/include/status.h>
 #include <lib/include/spi.h>
 #include <common.h>
 

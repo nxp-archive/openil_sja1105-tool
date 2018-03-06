@@ -32,8 +32,8 @@
 #include <inttypes.h>
 /* These are our own include files */
 #include <lib/include/gtable.h>
-#include <lib/include/status-tables.h>
 #include <lib/include/port-control.h>
+#include <lib/include/status.h>
 #include <lib/include/spi.h>
 #include <common.h>
 
