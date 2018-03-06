@@ -39,34 +39,39 @@
 #include <lib/include/static-config.h>
 #include <common.h>
 
-#define DECLARE_TABLE_SHOW_FN(TABLE_NAME, TABLE_OR_ENTRY, MAX_TABLE_SIZE, STRING_NAME, FMT) \
-	static int TABLE_NAME ## _table_show(struct sja1105_static_config *config, int index) { \
-		const int entry_count = config-> TABLE_NAME ## _count; \
-		char  tmp_buf[MAX_TABLE_SIZE][MAX_LINE_SIZE]; \
-		char *print_bufs[MAX_TABLE_SIZE]; \
-		int   start = (index == -1) ? 0 : index; \
-		int   end   = (index == -1) ? entry_count : index + 1; \
-		int   i; \
-		 \
-		if (index < -1 || index >= entry_count) { \
-			loge("Index out of bounds!"); \
+#define DECLARE_TABLE_SHOW_FN(TABLE_NAME, TABLE_OR_ENTRY, MAX_TABLE_SIZE,    \
+                              STRING_NAME, FMT)                              \
+	static int                                                           \
+	TABLE_NAME##_table_show(struct sja1105_static_config *config,        \
+	                        int index)                                   \
+	{                                                                    \
+		const int entry_count = config->TABLE_NAME##_count;          \
+		char  tmp_buf[MAX_TABLE_SIZE][MAX_LINE_SIZE];                \
+		char *print_bufs[MAX_TABLE_SIZE];                            \
+		int   start = (index == -1) ? 0 : index;                     \
+		int   end   = (index == -1) ? entry_count : index + 1;       \
+		int   i;                                                     \
+		                                                             \
+		if (index < -1 || index >= entry_count) {                    \
+			loge("Index out of bounds!");                        \
 			loge("Please adjust the entry count of the table:"); \
-			loge("* config show <table>[%d to %d]", 0, entry_count - 1); \
-			return -1; \
-		} \
-		printf(STRING_NAME ": %d entries\n", entry_count); \
-		for (i = start; i < end; i++) { \
-			memset(tmp_buf[i], 0, MAX_LINE_SIZE); \
-			formatted_append(tmp_buf[i], FMT, "Entry %d:", i); \
-			sja1105_ ## TABLE_NAME ## _ ## TABLE_OR_ENTRY ## _fmt_show( \
-					tmp_buf[i], \
-					FMT, \
-					&config-> TABLE_NAME [i]); \
-			formatted_append(tmp_buf[i], FMT, ""); \
-			print_bufs[i] = tmp_buf[i]; \
-		} \
-		show_print_bufs(print_bufs + start, end - start); \
-		return 0; \
+			loge("* config show <table>[%d to %d]", 0,           \
+			     entry_count - 1);                               \
+			return -1;                                           \
+		}                                                            \
+		printf(STRING_NAME ": %d entries\n", entry_count);           \
+		for (i = start; i < end; i++) {                              \
+			memset(tmp_buf[i], 0, MAX_LINE_SIZE);                \
+			formatted_append(tmp_buf[i], FMT, "Entry %d:", i);   \
+			sja1105_##TABLE_NAME##_##TABLE_OR_ENTRY##_fmt_show(  \
+					tmp_buf[i],                          \
+					FMT,                                 \
+					&config-> TABLE_NAME [i]);           \
+			formatted_append(tmp_buf[i], FMT, "");               \
+			print_bufs[i] = tmp_buf[i];                          \
+		}                                                            \
+		show_print_bufs(print_bufs + start, end - start);            \
+		return 0;                                                    \
 	}
 
 DECLARE_TABLE_SHOW_FN(schedule, entry, MAX_SCHEDULE_COUNT, "Schedule Table", "%-30s\n")
