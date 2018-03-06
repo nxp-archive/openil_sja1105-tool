@@ -34,7 +34,6 @@
 #include <string.h>
 #include <stdio.h>
 /* These are our own includes */
-#include <lib/include/agu-tables.h>
 #include <lib/include/gtable.h>
 #include <lib/include/clock.h>
 #include <lib/include/spi.h>
