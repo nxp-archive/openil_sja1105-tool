@@ -400,7 +400,7 @@ struct sja1105_static_config {
 
 #include "agu-tables.h"
 #include "cgu-tables.h"
-#include "rgu-tables.h"
+#include "reset.h"
 #include "status.h"
 
 void sja1105_l2_forwarding_params_table_show(struct sja1105_l2_forwarding_params_table*);
