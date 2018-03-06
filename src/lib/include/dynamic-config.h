@@ -31,8 +31,34 @@
 #ifndef _DYN_CFG_H
 #define _DYN_CFG_H
 
-#include "dynamic-config-tables.h"
 #include "spi.h"
+#include "static-config.h"
+
+#define SJA1105_MGMT_ROUTE_COUNT 4
+
+struct sja1105_mgmt_entry {
+	uint64_t ts_regid;
+	uint64_t egr_ts;
+	uint64_t macaddr;
+	uint64_t destports;
+	uint64_t enfport;
+	uint64_t index;
+};
+
+union sja1105_dyn_l2_lookup_entry {
+	struct sja1105_l2_lookup_entry l2;
+	struct sja1105_mgmt_entry mgmt;
+};
+
+struct sja1105_dyn_l2_lookup_cmd {
+	uint64_t valid;
+	uint64_t rdwrset;
+	uint64_t errors;
+	uint64_t lockeds;
+	uint64_t valident;
+	uint64_t mgmtroute;
+	union sja1105_dyn_l2_lookup_entry entry;
+};
 
 void sja1105_dyn_l2_lookup_cmd_pack(void *buf, struct
                                     sja1105_dyn_l2_lookup_cmd *cmd);
