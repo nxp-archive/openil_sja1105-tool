@@ -31,9 +31,41 @@
 #ifndef _PTP_H
 #define _PTP_H
 
-#include "ptp-tables.h"
 #include "spi.h"
 #include <time.h>
+#include <stdint.h>
+
+#define SJA1105_PTPCLKCORP_ADDR 0x1D
+#define SJA1105_PTPTSCLK_ADDR   0x1B
+#define SJA1105_PTPCLKRATE_ADDR 0x1A
+#define SJA1105_PTPCLKVAL_ADDR  0x18
+#define SJA1105_PTPPINDUR_ADDR  0x16
+#define SJA1105_PTPPINST_ADDR   0x14
+#define SJA1105_PTPSCHTM_ADDR   0x12
+
+#define SIZE_PTP_CONFIG         (7*8)
+#define PTP_ADDR                0x0   /* Offset into CORE_ADDR */
+
+enum sja1105_ptp_clk_add_mode {
+	PTP_SET_MODE = 0,
+	PTP_ADD_MODE,
+};
+
+enum sja1105_ptpegr_ts_source {
+	TS_PTPTSCLK = 0,
+	TS_PTPCLK = 1
+};
+
+struct sja1105_ptp_cmd {
+	uint64_t ptpstrtsch;   /* start schedule */
+	uint64_t ptpstopsch;   /* stop schedule */
+	uint64_t startptpcp;   /* start pin toggle  */
+	uint64_t stopptpcp;    /* stop pin toggle */
+	uint64_t resptp;       /* reset */
+	uint64_t corrclk4ts;   /* if (1) timestamps are based on ptpclk,
+	                          if (0) timestamps are based on ptptsclk */
+	uint64_t ptpclkadd;    /* enum sja1105_ptp_clk_add_mode */
+};
 
 void sja1105_timespec_to_ptp_time(const struct timespec *ts, uint64_t *ptp_time);
 void sja1105_ptp_time_to_timespec(struct timespec *ts, uint64_t ptp_time);
