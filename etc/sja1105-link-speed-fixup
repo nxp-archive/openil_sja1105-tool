@@ -104,6 +104,13 @@ info() {
 	echo "Setting ETH5 link speed to ${ETH5_SPEED_MBPS}"
 }
 
-info
-fixup_mac_link_speeds
-fixup_phy_link_speeds
+case "$1" in
+start)
+	info
+	fixup_mac_link_speeds
+	fixup_phy_link_speeds
+	;;
+*)
+	echo "Usage: $0 start"
+esac
+
