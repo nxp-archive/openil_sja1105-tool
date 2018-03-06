@@ -398,8 +398,7 @@ struct sja1105_static_config {
 	int    xmii_params_count;
 };
 
-#include "agu-tables.h"
-#include "cgu-tables.h"
+#include "clock.h"
 #include "reset.h"
 #include "status.h"
 
