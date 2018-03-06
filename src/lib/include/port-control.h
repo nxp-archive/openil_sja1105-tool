@@ -35,6 +35,22 @@
 
 #define SJA1105T_NUM_PORTS 5
 
+struct sja1105_cbs {
+	/* UM10944.pdf Table 62. Credit-based shaping block
+	 * register 1 (address 30h).
+	 * Used as identification */
+	uint64_t index;
+	uint64_t port;
+	uint64_t prio;
+	/* UM10944.pdf Table 63. Credit-based shaping block
+	 * registers 2 to 5 (address 2Fh to 2Ch).
+	 * Used for actual configuration. */
+	uint64_t credit_lo;
+	uint64_t credit_hi;
+	uint64_t send_slope;
+	uint64_t idle_slope;
+};
+
 struct sja1105_egress_port_mask {
 	uint64_t inhibit_tx[SJA1105T_NUM_PORTS];
 };
