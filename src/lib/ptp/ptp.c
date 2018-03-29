@@ -259,6 +259,12 @@ int sja1105_ptp_clk_get(struct sja1105_spi_setup *spi_setup,
 		loge("%s: failed to read ptpclkval", __func__);
 		goto out;
 	}
+	if (ptpclkval == 0) {
+		/* XXX: Find out why this is happening */
+		loge("%s: returned zero", __func__);
+		rc = -EAGAIN;
+		goto out;
+	}
 	sja1105_ptp_time_to_timespec(ts, ptpclkval);
 out:
 	return rc;
