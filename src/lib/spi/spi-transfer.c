@@ -112,11 +112,13 @@ int sja1105_spi_transfer(const struct sja1105_spi_setup *spi_setup,
 		.bits_per_word = spi_setup->bits,
 		.cs_change     = spi_setup->cs_change,
 	};
-	int rc = 0;
+	int rc;
 
 	if (spi_setup->dry_run) {
 		printf("spi-transfer: size %d bytes\n", size);
 		gtable_hexdump((void*) tx, size);
+		/* Do not fail */
+		rc = size;
 	} else {
 		memset(rx, 0, size);
 		if (flock(spi_setup->fd, LOCK_EX) < 0) {
