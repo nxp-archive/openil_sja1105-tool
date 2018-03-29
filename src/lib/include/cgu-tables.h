@@ -53,6 +53,23 @@ struct sja1105_cgu_pll_status {
 	uint64_t lock;
 };
 
+#ifdef SJA1105PQRS
+/* UM11040 Table 116
+ * PLL_1_C control register
+ * (address 10000Ah) */
+struct sja1105_cgu_pll_control {
+	uint64_t pllclksrc;
+	uint64_t msel;
+	uint64_t nsel;
+	uint64_t autoblock;
+	uint64_t psel;
+	uint64_t direct;
+	uint64_t fbsel;
+	uint64_t p23en;
+	uint64_t bypass;
+	uint64_t pd;
+};
+#else
 /* UM10944 Table 81.
  * PLL_1_C control register
  * (address 10000Ah) */
@@ -66,6 +83,7 @@ struct sja1105_cgu_pll_control {
 	uint64_t bypass;
 	uint64_t pd;
 };
+#endif
 
 #define CLKSRC_MII0_TX_CLK 0x00
 #define CLKSRC_MII0_RX_CLK 0x01

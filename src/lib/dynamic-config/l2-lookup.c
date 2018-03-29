@@ -137,6 +137,9 @@ sja1105_mgmt_route_commit(struct sja1105_spi_setup *spi_setup,
                           int read_or_write,
                           int index)
 {
+#ifdef SJA1105PQRS
+	// TODO: Update this for SJA1105PQRS compatibility
+#endif
 	/* Access to CMD_ADDR = 0x23 is implicit and done
 	 * through the same SPI transaction */
 	const int ENTRY_ADDR = 0x20;

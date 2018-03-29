@@ -78,11 +78,20 @@ static void sja1105_general_status_unpack(void *buf, struct
 	gtable_unpack(p + 0x8, &status->vlnotfound, 0,  0, 4);
 	gtable_unpack(p + 0x9, &status->emptys,    31, 31, 4);
 	gtable_unpack(p + 0x9, &status->buffers,   30,  0, 4);
+#ifdef SJA1105PQRS
+	// TODO: HLWMARK, 0x0A, bits 30:0
+	gtable_unpack(p + 0xB, &status->port_0ah,  15,  8, 4);
+	gtable_unpack(p + 0xB, &status->fwds_0ah,   1,  1, 4);
+	gtable_unpack(p + 0xB, &status->parts,      0,  0, 4);
+	gtable_unpack(p + 0xC, &status->ramparerrl,22,  0, 4);
+	gtable_unpack(p + 0xD, &status->ramparerru, 4,  0, 4);
+#else
 	gtable_unpack(p + 0xA, &status->port_0ah,  15,  8, 4);
 	gtable_unpack(p + 0xA, &status->fwds_0ah,   1,  1, 4);
 	gtable_unpack(p + 0xA, &status->parts,      0,  0, 4);
 	gtable_unpack(p + 0xB, &status->ramparerrl,20,  0, 4);
 	gtable_unpack(p + 0xC, &status->ramparerru, 4,  0, 4);
+#endif
 }
 
 void sja1105_general_status_show(struct sja1105_general_status *status)
@@ -129,7 +138,11 @@ void sja1105_general_status_show(struct sja1105_general_status *status)
 int sja1105_general_status_get(struct sja1105_spi_setup *spi_setup,
                                struct sja1105_general_status *status)
 {
+#ifdef SJA1105PQRS
+	const int SIZE_GENERAL_STATUS = 0x0E * 4; /* 0x00 to 0x0D */
+#else
 	const int SIZE_GENERAL_STATUS = 0x0D * 4; /* 0x00 to 0x0C */
+#endif
 	uint8_t packed_buf[SIZE_GENERAL_STATUS];
 	int rc;
 

@@ -95,6 +95,10 @@ void sja1105_cbs_show(struct sja1105_cbs *cbs)
 int sja1105_cbs_commit(struct sja1105_spi_setup *spi_setup,
                        struct sja1105_cbs *cbs)
 {
+#ifdef SJA1105PQRS
+	// TODO: Update with SJA1105PQRS compatibility
+#endif
+
 	const int CBS_CONTROL_ADDR = 0x30;
 	const int CBS_DATA_ADDR    = 0x2C;
 	/* packed_buf will accomodate 2 transfers, one of

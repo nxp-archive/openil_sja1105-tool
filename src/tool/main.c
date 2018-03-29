@@ -47,6 +47,7 @@ void print_usage()
 	       "   * config\n"
 	       "   * status\n"
 	       "   * reset\n"
+		   "   * reg\n"
 	       "   * help | -h | --help\n"
 	       "   * version | -V | --version\n");
 	printf("\n");
@@ -60,6 +61,7 @@ void print_version()
 	sja1105_lib_get_version(buf);
 	printf("libsja1105 version: %s\n", buf);
 	printf("sja1105-tool version: %s\n", VERSION);
+	printf("build date: %s build time: %s\n", __DATE__,__TIME__);
 }
 
 static int parse_special_args(int *argc, char ***argv,
@@ -112,11 +114,13 @@ static int parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 		"configure",
 		"status",
 		"reset",
+		"reg",
 	};
 	int (*next_parse_args[])(struct sja1105_spi_setup*, int, char**) = {
 		config_parse_args,
 		status_parse_args,
 		rgu_parse_args,
+		reg_parse_args,
 	};
 	int  rc;
 

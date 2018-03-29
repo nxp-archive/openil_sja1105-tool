@@ -107,6 +107,9 @@ sja1105_port_status_mac_unpack(void *buf, struct
 	gtable_unpack(p + 0x0, &status->n_miierr,      7,  0, 4);
 	gtable_unpack(p + 0x1, &status->typeerr,      27, 27, 4);
 	gtable_unpack(p + 0x1, &status->sizeerr,      26, 26, 4);
+#ifdef SJA1105PQRS
+	// TODO: TCTIMEOUT
+#endif
 	gtable_unpack(p + 0x1, &status->priorerr,     24, 24, 4);
 	gtable_unpack(p + 0x1, &status->nomaster,     23, 23, 4);
 	gtable_unpack(p + 0x1, &status->memov,        22, 22, 4);
@@ -160,6 +163,9 @@ sja1105_port_status_hl2_unpack(void *buf, struct
 {
 	/* So that additions translate to 4 bytes */
 	uint32_t *p = (uint32_t*) buf;
+#ifdef SJA1105PQRS
+	// TODO: QLEVEL_0..QLEVEL_7
+#endif
 	gtable_unpack(p + 0x3, &status->n_qfull,        31,  0, 4);
 	gtable_unpack(p + 0x2, &status->n_part_drop,    31,  0, 4);
 	gtable_unpack(p + 0x1, &status->n_egr_disabled, 31,  0, 4);
@@ -224,7 +230,11 @@ out:
 int sja1105_port_status_clear(struct sja1105_spi_setup *spi_setup,
                               int port)
 {
+#ifdef SJA1105PQRS
+	const int PORT_STATUS_CTRL_ADDR = 0x10;
+#else
 	const int PORT_STATUS_CTRL_ADDR = 0xf;
+#endif
 	const int BUF_LEN = 4;
 	uint8_t   packed_buf[BUF_LEN];
 	int       rc = 0;

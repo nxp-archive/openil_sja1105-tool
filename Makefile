@@ -48,6 +48,7 @@ LIB_CFLAGS   = $(CFLAGS)
 LIB_LDFLAGS  = $(LDFLAGS)
 LIB_CFLAGS  += -Wall -Wextra -Werror -g -fstack-protector-all -Isrc -fPIC
 LIB_CFLAGS  += -DVERSION=\"${VERSION}\"
+LIB_CFLAGS  += -DSJA1105PQRS
 LIB_LDFLAGS +=
 
 BIN_CFLAGS   = $(CFLAGS)
