@@ -38,66 +38,93 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <inttypes.h>
 /* These are our own libraries */
 #include <lib/include/static-config.h>
 #include <lib/include/gtable.h>
 #include <lib/include/spi.h>
 #include <common.h>
 
+/* struct sja1105_spi_setup *setup is bi-directional.
+ * On input, the function looks at fields:
+ *   ->device (path to spidev char device)
+ *   ->mode (clock phase, clock polarity)
+ *   ->bits (per word, must be 8)
+ *   ->speed (SPI clock in Hz)
+ * On output, the function:
+ *   - sets field ->fd to a ioctl-able file descriptor
+ *     to the SPI device (responsibility goes to the
+ *     caller to close it)
+ */
 int sja1105_spi_configure(struct sja1105_spi_setup *spi_setup)
 {
-	int ret = 0;
-	int fd;
+	struct ioctl_cmd {
+		int      read_ioctl;
+		int      write_ioctl;
+		char    *description;
+		uint64_t value;
+	} cmds[] = {
+		{
+			.read_ioctl  = SPI_IOC_RD_MODE,
+			.write_ioctl = SPI_IOC_WR_MODE,
+			.description = "SPI mode (clock phase, polarity)",
+			.value       = spi_setup->mode,
+		}, {
+			.read_ioctl  = SPI_IOC_RD_BITS_PER_WORD,
+			.write_ioctl = SPI_IOC_WR_BITS_PER_WORD,
+			.description = "bits per word",
+			.value       = spi_setup->bits,
+		}, {
+			.read_ioctl  = SPI_IOC_RD_MAX_SPEED_HZ,
+			.write_ioctl = SPI_IOC_WR_MAX_SPEED_HZ,
+			.description = "max SPI clock speed (Hz)",
+			.value       = spi_setup->speed,
+		}
+	};
+	/* Must be initialized with zero, because the read-back
+	 * ioctl will not access it in 64-bit mode, so part of
+	 * tmp would be junk otherwise.
+	 */
+	uint64_t tmp = 0;
+	unsigned int i;
+	int fd, rc;
 
 	logv("configuring device %s", spi_setup->device);
 	fd = open(spi_setup->device, O_RDWR);
 	if (fd < 0) {
 		loge("can't open device");
-		ret = fd;
-		goto out_1;
+		rc = fd;
+		goto out_open_failed;
 	}
-	/* spi mode */
-	ret = ioctl(fd, SPI_IOC_WR_MODE, &spi_setup->mode);
-	if (ret == -1) {
-		loge("can't set spi mode");
-		goto out_2;
-	}
-	ret = ioctl(fd, SPI_IOC_RD_MODE, &spi_setup->mode);
-	if (ret == -1) {
-		loge("can't get spi mode");
-		goto out_2;
-	}
-	/* bits per word */
-	ret = ioctl(fd, SPI_IOC_WR_BITS_PER_WORD, &spi_setup->bits);
-	if (ret == -1) {
-		loge("can't set bits per word");
-		goto out_2;
-	}
-	ret = ioctl(fd, SPI_IOC_RD_BITS_PER_WORD, &spi_setup->bits);
-	if (ret == -1) {
-		loge("can't get bits per word");
-		goto out_2;
-	}
-	/* max speed hz */
-	ret = ioctl(fd, SPI_IOC_WR_MAX_SPEED_HZ, &spi_setup->speed);
-	if (ret == -1) {
-		loge("can't set max speed hz");
-		goto out_2;
-	}
-	ret = ioctl(fd, SPI_IOC_RD_MAX_SPEED_HZ, &spi_setup->speed);
-	if (ret == -1) {
-		loge("can't get max speed hz");
-		goto out_2;
+	for (i = 0; i < ARRAY_SIZE(cmds); i++) {
+		rc = ioctl(fd, cmds[i].write_ioctl, &cmds[i].value);
+		if (rc < 0) {
+			loge("cannot write %s %" PRIu64, cmds[i].description,
+			     cmds[i].value);
+			goto out_ioctl_failed;
+		}
+		rc = ioctl(fd, cmds[i].read_ioctl, &tmp);
+		if (rc < 0) {
+			loge("cannot read back %s", cmds[i].description);
+			goto out_ioctl_failed;
+		}
+		if (cmds[i].value != tmp) {
+			loge("%s: written %" PRIu64 ", read back %" PRIu64,
+			     cmds[i].description, cmds[i].value, tmp);
+			goto out_mismatched_read_write;
+		}
 	}
 	spi_setup->fd = fd;
 	logv("spi mode: %d",      spi_setup->mode);
 	logv("bits per word: %d", spi_setup->bits);
 	logv("max speed: %d KHz", spi_setup->speed / 1000);
-	return fd;
-out_2:
+	goto out_ok;
+out_mismatched_read_write:
+out_ioctl_failed:
 	close(fd);
-out_1:
-	return fd;
+out_open_failed:
+out_ok:
+	return rc;
 }
 
 int sja1105_spi_transfer(const struct sja1105_spi_setup *spi_setup,
