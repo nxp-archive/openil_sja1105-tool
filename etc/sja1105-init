@@ -2,24 +2,45 @@
 #
 # sja1105        Configures the NXP SJA1105 TSN Switch
 #
+set -e -u -o pipefail
+
+SJA1105_TOOL=/usr/bin/sja1105-tool
+SJA1105_CONF=/etc/sja1105/sja1105.conf
+SJA1105_DEFAULT_STAGING_AREA=ls1021atsn
 
 # Make sure the sja1105-tool program exists
-[ -f /usr/bin/sja1105-tool ] || exit 0
+for file in ${SJA1105_TOOL} ${SJA1105_CONF}; do
+	[ -f ${file} ] || {
+		echo "The ${file} file does not exist, exiting."
+		exit 1
+	}
+done
 
 start() {
 	printf "Starting SJA1105 TSN switch: "
-	staging_area=`cat /etc/sja1105/sja1105.conf | awk '/staging_area/ {print $3;}'`
-	if ! [[ -e $staging_area ]]; then
-		echo "Warning, no config present at \"$staging_area\", creating default"
-		mkdir -p "$(dirname $staging_area)"
-		sja1105-tool config default ls1021atsn
+	staging_area=`cat ${SJA1105_CONF} | awk '/staging_area/ {print $3;}'`
+	create_new=false
+	if [ -f ${staging_area} ]; then
+		# Staging area present, is it valid?
+		if ! ${SJA1105_TOOL} config hexdump > /dev/null 2&>1; then
+			echo "Warning: ${staging_area} invalid!"
+			create_new=true
+		fi
+	else
+		echo "Warning, ${staging_area} file not present!"
+		create_new=true
 	fi
-	sja1105-tool config upload
+	if [ "${create_new}" = true ]; then
+		echo "Creating new switch configuration at ${staging_area}."
+		mkdir -p "$(dirname $staging_area)"
+		${SJA1105_TOOL} config default ${SJA1105_DEFAULT_STAGING_AREA}
+	fi
+	${SJA1105_TOOL} config upload
 	[[ $? ]] && echo "OK" || echo "FAIL"
 }
 stop() {
 	printf "Stopping SJA1105 TSN switch: "
-	sja1105-tool reset cold
+	${SJA1105_TOOL} reset cold
 	[[ $? ]] && echo "OK" || echo "FAIL"
 }
 restart() {
@@ -27,9 +48,9 @@ restart() {
 }
 status() {
 	echo "General status:"
-	sja1105-tool status general
+	${SJA1105_TOOL} status general
 	echo "Port status:"
-	sja1105-tool status port
+	${SJA1105_TOOL} status port
 }
 
 case "$1" in
