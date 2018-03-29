@@ -76,9 +76,6 @@ int   read_array(char *array_str, uint64_t *array_val, int max_count);
 int   reliable_uint64_from_string(uint64_t *to, char *from, char**);
 int   reliable_double_from_string(double *to, char *from, char**);
 
-#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
-#define min(x, y) (((x) < (y)) ? (x) : (y))
-
 #define SJA1105_NETCONF_ROOT "sja1105"
 #define SJA1105_NETCONF_NS   "http://nxp.com/ns/yang/tsn/sja1105"
 
