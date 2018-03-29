@@ -51,7 +51,9 @@
  *   ->mode (clock phase, clock polarity)
  *   ->bits (per word, must be 8)
  *   ->speed (SPI clock in Hz)
+ *   ->dry_run (see below)
  * On output, the function:
+ *   - is a no-op, if dry_run is true
  *   - sets field ->fd to a ioctl-able file descriptor
  *     to the SPI device (responsibility goes to the
  *     caller to close it)
@@ -89,6 +91,19 @@ int sja1105_spi_configure(struct sja1105_spi_setup *spi_setup)
 	unsigned int i;
 	int fd, rc;
 
+	if (spi_setup->dry_run) {
+		/* Pass an invalid fd, but also do not fail.
+		 * As long as the caller just passes the spi_setup
+		 * along to the sja1105_spi_transfer function below,
+		 * and doesn't do anything crazy with it,
+		 * this should be a non-issue.
+		 */
+		logv("%s: spi_setup is in dry run mode, no-op", __func__);
+		spi_setup->fd = -1;
+		rc = 0;
+		goto out_dry_run;
+	}
+
 	logv("configuring device %s", spi_setup->device);
 	fd = open(spi_setup->device, O_RDWR);
 	if (fd < 0) {
@@ -123,6 +138,7 @@ out_mismatched_read_write:
 out_ioctl_failed:
 	close(fd);
 out_open_failed:
+out_dry_run:
 out_ok:
 	return rc;
 }
