@@ -62,4 +62,7 @@ extern int SJA1105_VERBOSE_CONDITION;
 void formatted_append(char *buffer, char *width_fmt, char *fmt, ...);
 void print_array(char *print_buf, uint64_t *array, int count);
 
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+#define min(x, y) (((x) < (y)) ? (x) : (y))
+
 #endif
