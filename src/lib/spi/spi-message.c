@@ -137,7 +137,7 @@ void spi_get_chunks(char *config_buf, int config_buf_len,
  */
 inline int
 sja1105_spi_send_packed_buf(struct sja1105_spi_setup *spi_setup,
-                            uint64_t read_or_write,
+                            enum sja1105_spi_access_mode read_or_write,
                             uint64_t reg_addr,
                             void    *packed_buf,
                             uint64_t size_bytes)
@@ -195,7 +195,7 @@ out:
  */
 inline int
 sja1105_spi_send_int(struct sja1105_spi_setup *spi_setup,
-                     uint64_t read_or_write,
+                     enum sja1105_spi_access_mode read_or_write,
                      uint64_t reg_addr,
                      uint64_t *value,
                      uint64_t size_bytes)
