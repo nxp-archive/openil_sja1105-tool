@@ -228,16 +228,10 @@ static_config_upload(struct sja1105_spi_setup *spi_setup,
 {
 	struct   sja1105_table_header final_header;
 	char    *final_header_ptr;
-	/* XXX: Maybe 100 is not the best number of chunks here */
-	struct sja1105_spi_chunk chunks[100];
-	int    chunk_count;
-	char   tx_buf[SIZE_SPI_MSG_HEADER + SIZE_SPI_MSG_MAXLEN];
-	char   rx_buf[SIZE_SPI_MSG_MAXLEN + SIZE_SPI_MSG_HEADER];
 	char  *config_buf;
 	int    config_buf_len;
 	int    crc_len;
 	int    rc;
-	int    i;
 
 	config_buf_len = sja1105_static_config_get_length(config) +
 	                 SIZE_SJA1105_DEVICE_ID;
@@ -268,21 +262,11 @@ static_config_upload(struct sja1105_spi_setup *spi_setup,
 	/* Rewrite */
 	sja1105_table_header_pack(final_header_ptr, &final_header);
 
-	/* Fill chunks array with chunk_count pointers */
-	spi_get_chunks(config_buf, config_buf_len, chunks, &chunk_count);
-
-	for (i = 0; i < chunk_count; i++) {
-		/* Combine chunks[i].msg and chunks[i].buf into tx_buf */
-		spi_message_aggregate(tx_buf, &chunks[i].msg, chunks[i].buf,
-		                      chunks[i].size);
-		/* Send it out */
-		rc = sja1105_spi_transfer(spi_setup, tx_buf, rx_buf,
-		                          SIZE_SPI_MSG_HEADER + chunks[i].size);
-		if (rc < 0) {
-			loge("sja1105_spi_transfer failed");
-			goto out_free;
-		}
-	}
+	rc = sja1105_spi_send_long_packed_buf(spi_setup,
+	                                      SPI_WRITE,
+	                                      CONFIG_ADDR,
+	                                      config_buf,
+	                                      config_buf_len);
 out_free:
 	free(config_buf);
 out:

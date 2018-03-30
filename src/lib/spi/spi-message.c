@@ -87,53 +87,15 @@ void spi_message_aggregate(char  *buf,
 	memcpy(buf + SIZE_SPI_MSG_HEADER, data, data_len);
 }
 
-static int spi_get_next_packet_len(char *buf, char *current, int buf_len)
-{
-	int distance_to_end = (int)((buf + buf_len) - current);
-	if (distance_to_end > SIZE_SPI_MSG_MAXLEN) {
-		return SIZE_SPI_MSG_MAXLEN;
-	} else {
-		return distance_to_end;
-	}
-}
-
-/* Input:  config_buf and config_buf_len
- *         These represent the binary dump of all the SJA1105 configuration
- *         headers and tables, plus global CRC and device ID.
- *         See UM10944.pdf, Fig. 8, Generic loader format.
- * Output: an array of spi chunks, each telling what buffer to write,
- *         how much of it, and at what SPI address
- */
-void spi_get_chunks(char *config_buf, int config_buf_len,
-                    struct sja1105_spi_chunk *chunks, int *chunk_count)
-{
-	struct sja1105_spi_message msg;
-	int    packet_len;
-	char  *p;
-
-	msg.access     = SPI_WRITE;
-	msg.read_count = 0;
-	msg.address    = CONFIG_ADDR;
-
-	p = config_buf;
-	packet_len = spi_get_next_packet_len(config_buf, p, config_buf_len);
-	*chunk_count = 0;
-	while (packet_len) {
-		chunks[*chunk_count].buf  = p;
-		chunks[*chunk_count].size = packet_len;
-		chunks[*chunk_count].msg  = msg;
-		(*chunk_count)++;
-		p           += packet_len;
-		msg.address += packet_len / 4;
-		packet_len = spi_get_next_packet_len(config_buf, p, config_buf_len);
-	}
-}
-
 /* If read_or_write is:
  *     * SPI_WRITE: creates and sends an SPI write message at absolute
  *                  address reg_addr, taking size_bytes from *packed_buf
  *     * SPI_READ: creates and sends an SPI read message from absolute
  *                 address reg_addr, writing size_bytes into *packed_buf
+ *
+ * This function should only be called if it is priorly known that
+ * size_bytes is smaller than SIZE_SPI_MSG_MAXLEN. Larger packed buffers
+ * are chunked in smaller pieces by sja1105_spi_send_long_packed_buf below.
  */
 inline int
 sja1105_spi_send_packed_buf(struct sja1105_spi_setup *spi_setup,
@@ -218,6 +180,50 @@ sja1105_spi_send_int(struct sja1105_spi_setup *spi_setup,
 		              value, 8 * size_bytes - 1, 0,
 		              size_bytes);
 	}
+	return rc;
+}
+
+/*
+ * Should be used if a packed_buf larger than SIZE_SPI_MSG_MAXLEN must be
+ * sent/received. Splitting the buffer into chunks and assembling those
+ * into SPI messages is done automatically by this function.
+ */
+int sja1105_spi_send_long_packed_buf(struct sja1105_spi_setup *spi_setup,
+                                     enum sja1105_spi_access_mode read_or_write,
+                                     uint64_t base_addr,
+                                     char    *packed_buf,
+                                     uint64_t buf_len)
+{
+	struct chunk {
+		char    *buf_ptr;
+		int      len;
+		uint64_t spi_address;
+	} chunk;
+	int distance_to_end;
+	int rc = 0;
+
+	/* Initialize chunk */
+	chunk.buf_ptr = packed_buf;
+	chunk.spi_address = base_addr;
+	chunk.len = min(buf_len, SIZE_SPI_MSG_MAXLEN);
+
+	while (chunk.len) {
+		rc = sja1105_spi_send_packed_buf(spi_setup,
+		                                 read_or_write,
+		                                 chunk.spi_address,
+		                                 chunk.buf_ptr,
+		                                 chunk.len);
+		if (rc < 0) {
+			loge("spi_send_packed_buf returned %d", rc);
+			goto out_send_failed;
+		}
+		chunk.buf_ptr += chunk.len;
+		chunk.spi_address += chunk.len / 4;
+		distance_to_end = (int) ((packed_buf + buf_len) -
+		                          chunk.buf_ptr);
+		chunk.len = min(distance_to_end, SIZE_SPI_MSG_MAXLEN);
+	}
+out_send_failed:
 	return rc;
 }
 

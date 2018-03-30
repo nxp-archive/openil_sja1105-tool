@@ -57,12 +57,6 @@ struct sja1105_spi_message {
 enum sja1105_spi_access_mode {
 	SPI_READ = 0,
 	SPI_WRITE = 1,
- };
-
-struct sja1105_spi_chunk {
-	struct sja1105_spi_message msg;
-	char *buf;
-	int   size;
 };
 
 int sja1105_spi_transfer(const struct sja1105_spi_setup*, const void *tx, void *rx, int size);
@@ -70,7 +64,6 @@ int sja1105_spi_configure(struct sja1105_spi_setup*);
 void sja1105_spi_message_unpack(void*, struct sja1105_spi_message*);
 void sja1105_spi_message_pack(void*, struct sja1105_spi_message*);
 void sja1105_spi_message_show(struct sja1105_spi_message*);
-void spi_get_chunks(char*, int, struct sja1105_spi_chunk*, int*);
 void spi_message_aggregate(char*, struct sja1105_spi_message*, char*, int);
 int sja1105_spi_send_packed_buf(struct sja1105_spi_setup *spi_setup,
                                 enum sja1105_spi_access_mode read_or_write,
@@ -82,6 +75,11 @@ int sja1105_spi_send_int(struct sja1105_spi_setup *spi_setup,
                          uint64_t reg_offset,
                          uint64_t *value,
                          uint64_t size_bytes);
+int sja1105_spi_send_long_packed_buf(struct sja1105_spi_setup *spi_setup,
+                                     enum sja1105_spi_access_mode read_or_write,
+                                     uint64_t base_addr,
+                                     char    *packed_buf,
+                                     uint64_t size_bytes);
 
 #define SIZE_SJA1105_DEVICE_ID 4
 #define SIZE_SPI_MSG_HEADER    4
