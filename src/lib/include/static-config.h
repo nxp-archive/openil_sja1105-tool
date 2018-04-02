@@ -103,7 +103,13 @@
 #define MAX_FRAME_MEMORY                         929
 #define MAX_FRAME_MEMORY_RETAGGING               910
 
-#define SJA1105T_DEVICE_ID                       0x9E00030Eull
+#define SJA1105E_DEVICE_ID         0x9C00000Cull
+#define SJA1105T_DEVICE_ID         0x9E00030Eull
+#define SJA1105P_DEVICE_ID         0xAF00030Eull
+#define SJA1105Q_DEVICE_ID         0xAE00030Eull
+#define SJA1105R_DEVICE_ID         0xAF00030Eull
+#define SJA1105S_DEVICE_ID         0xAE00030Eull
+#define SJA1105_DEVICE_ID_INVALID  0xFFFFFFFFull
 
 struct sja1105_schedule_entry {
 	uint64_t winstindex;

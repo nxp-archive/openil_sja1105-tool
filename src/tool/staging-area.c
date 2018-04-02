@@ -278,24 +278,9 @@ int static_config_flush(struct sja1105_spi_setup *spi_setup,
 {
 	struct sja1105_reset_ctrl     reset = {.rst_ctrl = RGU_COLD};
 	struct sja1105_general_status status;
-	uint64_t expected_device_id = spi_setup->device_id;
 	struct sja1105_egress_port_mask port_mask;
 	int i, rc;
 
-	/* Check that we are talking with the right device over SPI */
-	rc = sja1105_general_status_get(spi_setup, &status);
-	if (rc < 0) {
-		goto out;
-	}
-	if (spi_setup->dry_run == 0) {
-		/* These checks simply cannot pass (and do not even
-		 * make sense to have) if we are in dry run mode */
-		if (status.device_id != expected_device_id) {
-			loge("read device id %" PRIx64 ", expected %" PRIx64,
-			     status.device_id, expected_device_id);
-			goto out;
-		}
-	}
 	rc = sja1105_static_config_check_valid(config);
 	if (rc < 0) {
 		loge("cannot upload config, because it is not valid");
@@ -343,7 +328,9 @@ int static_config_flush(struct sja1105_spi_setup *spi_setup,
 			goto out;
 		}
 		if (status.ids == 1) {
-			loge("not responding to configured device id");
+			loge("Not responding to configured device id");
+			loge("Wrote 0x%" PRIx64 ", wants 0x%" PRIx64,
+			     spi_setup->device_id, status.device_id);
 			goto out;
 		}
 		if (status.crcchkl == 1) {

@@ -40,7 +40,13 @@
 
 const char *default_staging_area = "/etc/sja1105/.staging";
 const char *default_device = "/dev/spidev0.1";
-const uint64_t default_device_id = SJA1105T_DEVICE_ID;
+const uint64_t default_device_id = SJA1105_DEVICE_ID_INVALID;
+/* default_device_id of SJA1105_DEVICE_ID_INVALID signals
+ * to sja1105_spi_configure that it should attempt to read
+ * the real Device ID over SPI. Its absence from sja1105.conf
+ * is not an error - its presence is merely an override of the
+ * auto-detection behavior.
+ */
 
 struct general_config general_config;
 int SJA1105_VERBOSE_CONDITION;
@@ -68,26 +74,26 @@ config_set_defaults(struct sja1105_spi_setup *spi_setup,
                     struct general_config *general_conf,
                     struct fields_set *fields_set)
 {
-#define SET_DEFAULT_FN(struct_ptr, field, value, fmt) \
+#define SET_DEFAULT_VAL(struct_ptr, field, value, log, fmt) \
 	if (!fields_set->field) { \
-		logi("%s field not defined in config file, setting default " \
-		     "value " fmt, #field, value); \
+		log("%s field not defined in config file, setting default " \
+		    "value " fmt, #field, value); \
 		struct_ptr->field = value; \
 	}
-	SET_DEFAULT_FN(spi_setup, device_id, default_device_id, "0x%" PRIx64);
-	SET_DEFAULT_FN(spi_setup, device, default_device, "%s");
-	SET_DEFAULT_FN(spi_setup, staging_area, default_staging_area, "%s");
-	SET_DEFAULT_FN(spi_setup, mode, SPI_CPHA, "0x%x" );
-	SET_DEFAULT_FN(spi_setup, bits, 8, "%d");
-	SET_DEFAULT_FN(spi_setup, speed, 1000000, "%u");
-	SET_DEFAULT_FN(spi_setup, delay, 0, "%u");
-	SET_DEFAULT_FN(spi_setup, cs_change, 0, "%d");
-	SET_DEFAULT_FN(spi_setup, dry_run, 0, "%d");
-	SET_DEFAULT_FN(spi_setup, flush, 0, "%d");
-	SET_DEFAULT_FN(general_conf, verbose, 0, "%d");
-	SET_DEFAULT_FN(general_conf, debug, 0, "%d");
-	SET_DEFAULT_FN(general_conf, entries_per_line, 1, "%d");
-	SET_DEFAULT_FN(general_conf, screen_width, 80, "%d");
+	SET_DEFAULT_VAL(spi_setup, device_id, default_device_id, logv, "0x%" PRIx64);
+	SET_DEFAULT_VAL(spi_setup, device, default_device, logi, "%s");
+	SET_DEFAULT_VAL(spi_setup, staging_area, default_staging_area, logi, "%s");
+	SET_DEFAULT_VAL(spi_setup, mode, SPI_CPHA, logi, "0x%x" );
+	SET_DEFAULT_VAL(spi_setup, bits, 8, logi, "%d");
+	SET_DEFAULT_VAL(spi_setup, speed, 1000000, logi, "%u");
+	SET_DEFAULT_VAL(spi_setup, delay, 0, logi, "%u");
+	SET_DEFAULT_VAL(spi_setup, cs_change, 0, logi, "%d");
+	SET_DEFAULT_VAL(spi_setup, dry_run, 0, logi, "%d");
+	SET_DEFAULT_VAL(spi_setup, flush, 0, logi, "%d");
+	SET_DEFAULT_VAL(general_conf, verbose, 0, logi, "%d");
+	SET_DEFAULT_VAL(general_conf, debug, 0, logi, "%d");
+	SET_DEFAULT_VAL(general_conf, entries_per_line, 1, logi, "%d");
+	SET_DEFAULT_VAL(general_conf, screen_width, 80, logi, "%d");
 }
 
 static int parse_spi_mode(struct sja1105_spi_setup *spi_setup, char *mode)
