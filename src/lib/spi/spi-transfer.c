@@ -39,11 +39,54 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <inttypes.h>
+#include <errno.h>
 /* These are our own libraries */
 #include <lib/include/static-config.h>
 #include <lib/include/gtable.h>
 #include <lib/include/spi.h>
 #include <common.h>
+
+static int sja1105_get_device_id(struct sja1105_spi_setup *spi_setup)
+{
+	struct sja1105_general_status status;
+	uint64_t compatible_device_ids[] = {
+		SJA1105E_DEVICE_ID,
+		SJA1105T_DEVICE_ID,
+		SJA1105P_DEVICE_ID,
+		SJA1105Q_DEVICE_ID,
+		SJA1105R_DEVICE_ID,
+		SJA1105S_DEVICE_ID,
+	};
+	unsigned int i;
+	int rc;
+
+	if (spi_setup->dry_run) {
+		/* These checks simply cannot pass (and do not even
+		 * make sense to have) if we are in dry run mode */
+		rc = 0;
+		goto out_found;
+	}
+	rc = sja1105_general_status_get(spi_setup, &status);
+	if (rc < 0) {
+		loge("sja1105_general_status_get failed");
+		goto out_error;
+	}
+	spi_setup->device_id = SJA1105_DEVICE_ID_INVALID;
+	for (i = 0; i < ARRAY_SIZE(compatible_device_ids); i++) {
+		if (status.device_id == compatible_device_ids[i]) {
+			spi_setup->device_id = compatible_device_ids[i];
+			break;
+		}
+	}
+	if (spi_setup->device_id == SJA1105_DEVICE_ID_INVALID) {
+		loge("Unrecognized Device ID %" PRIx64, status.device_id);
+		rc = -EINVAL;
+		goto out_error;
+	}
+out_error:
+out_found:
+	return rc;
+}
 
 /* struct sja1105_spi_setup *setup is bi-directional.
  * On input, the function looks at fields:
@@ -57,6 +100,8 @@
  *   - sets field ->fd to a ioctl-able file descriptor
  *     to the SPI device (responsibility goes to the
  *     caller to close it)
+ *   - sets field ->device_id to the identified Device ID
+ *     of the chip (read over SPI).
  */
 int sja1105_spi_configure(struct sja1105_spi_setup *spi_setup)
 {
@@ -133,8 +178,19 @@ int sja1105_spi_configure(struct sja1105_spi_setup *spi_setup)
 	logv("spi mode: %d",      spi_setup->mode);
 	logv("bits per word: %d", spi_setup->bits);
 	logv("max speed: %d KHz", spi_setup->speed / 1000);
+
+	if (spi_setup->device_id == SJA1105_DEVICE_ID_INVALID) {
+		/* Device ID was not overridden from sja1105.conf.
+		 * Check that we are talking with a compatible
+		 * device over SPI. */
+		rc = sja1105_get_device_id(spi_setup);
+		if (rc < 0) {
+			goto out_unknown_device_id;
+		}
+	}
 	goto out_ok;
 out_mismatched_read_write:
+out_unknown_device_id:
 out_ioctl_failed:
 	close(fd);
 out_open_failed:
