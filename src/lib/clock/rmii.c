@@ -45,8 +45,12 @@ int sja1105_cgu_rmii_ref_clk_config(struct sja1105_spi_setup *spi_setup,
 	const int BUF_LEN = 4;
 	struct  sja1105_cgu_mii_control ref_clk;
 	uint8_t packed_buf[BUF_LEN];
+#ifdef SJA1105PQRS
+	const int ref_clk_offsets[] = {0x15, 0x1B, 0x21, 0x27, 0x2D}; // Table 114, UM11040
+#else
 	/* UM10944.pdf, Table 78, CGU Register overview */
 	const int ref_clk_offsets[] = {0x15, 0x1C, 0x23, 0x2A, 0x31};
+#endif
 	const int clk_sources[] = {
 		CLKSRC_MII0_TX_CLK,
 		CLKSRC_MII1_TX_CLK,
@@ -74,8 +78,12 @@ int sja1105_cgu_rmii_ext_tx_clk_config(struct sja1105_spi_setup *spi_setup,
 	const int BUF_LEN = 4;
 	struct  sja1105_cgu_mii_control ext_tx_clk;
 	uint8_t packed_buf[BUF_LEN];
+#ifdef SJA1105PQRS
+	const int ext_tx_clk_offsets[] = {0x17, 0x1D, 0x23, 0x29, 0x2F}; // Table 114, UM11040
+#else
 	/* UM10944.pdf, Table 78, CGU Register overview */
 	const int ext_tx_clk_offsets[] = {0x18, 0x1F, 0x26, 0x2D, 0x34};
+#endif
 
 	/* Payload for packed_buf */
 	ext_tx_clk.clksrc    = CLKSRC_PLL1;
@@ -93,8 +101,12 @@ int sja1105_cgu_rmii_ext_tx_clk_config(struct sja1105_spi_setup *spi_setup,
 static int sja1105_cgu_rmii_pll_config(struct sja1105_spi_setup *spi_setup)
 {
 	const int BUF_LEN = 4;
-	const int PLL1_OFFSET = 0x04;
-	struct  sja1105_cgu_pll_control pll;
+#ifdef SJA1105PQRS
+	const int PLL1_OFFSET = 0x0A; // Table 116: UM11040
+#else
+	const int PLL1_OFFSET = 0x04; // TODO: Shouldn't this be 0x0A?  See table 81 of UM10944.
+#endif
+	struct  sja1105_cgu_pll_control pll = {0};
 	uint8_t packed_buf[BUF_LEN];
 	int     rc;
 

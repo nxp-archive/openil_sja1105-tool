@@ -34,9 +34,14 @@
 /* RGU */
 #define RGU_ADDR    0x100440
 #define RGU_MSG_LEN 8
+#ifdef SJA1105PQRS
+// TODO: Define other reset types
+#define RGU_WARM    0x08
+#define RGU_COLD    0x04
+#else
 #define RGU_WARM    0x04
 #define RGU_COLD    0x08
-
+#endif
 struct sja1105_reset_ctrl {
 	uint64_t rst_ctrl;
 };

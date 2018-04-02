@@ -53,11 +53,20 @@ void sja1105_l2_lookup_entry_access(void *buf,
 		pack_or_unpack = gtable_pack;
 		memset(buf, 0, size);
 	}
+#ifdef SJA1105PQRS
+	// TODO: Update to match Table 16/17.  LOCKEDS plays a role.
+	pack_or_unpack(buf, &entry->vlanid,    81, 70, size);
+	pack_or_unpack(buf, &entry->macaddr,   69, 22, size);
+	pack_or_unpack(buf, &entry->destports, 21, 17, size);
+	pack_or_unpack(buf, &entry->enfport,   16, 16, size);
+	pack_or_unpack(buf, &entry->index,     15,  6, size);
+#else
 	pack_or_unpack(buf, &entry->vlanid,    95, 84, size);
 	pack_or_unpack(buf, &entry->macaddr,   83, 36, size);
 	pack_or_unpack(buf, &entry->destports, 35, 31, size);
 	pack_or_unpack(buf, &entry->enfport,   30, 30, size);
 	pack_or_unpack(buf, &entry->index,     29, 20, size);
+#endif
 }
 
 void sja1105_l2_lookup_entry_pack(void *buf, struct

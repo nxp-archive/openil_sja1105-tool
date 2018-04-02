@@ -54,7 +54,11 @@ static void sja1105_cgu_idiv_access(void *buf, struct sja1105_cgu_idiv *idiv,
 	}
 	pack_or_unpack(buf, &idiv->clksrc,    28, 24, 4);
 	pack_or_unpack(buf, &idiv->autoblock, 11, 11, 4);
+#ifdef SJA1105PQRS
+	pack_or_unpack(buf, &idiv->idiv,       9,  2, 4);
+#else
 	pack_or_unpack(buf, &idiv->idiv,       5,  2, 4);
+#endif
 	pack_or_unpack(buf, &idiv->pd,         0,  0, 4);
 }
 

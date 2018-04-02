@@ -55,13 +55,42 @@ static void sja1105_mac_config_entry_access(
 		pack_or_unpack = gtable_pack;
 		memset(buf, 0, size);
 	}
+#ifdef SJA1105PQRS
+	offset = 104;
+#else
 	offset = 72;
+#endif
 	for (i = 0; i < 8; i++) {
 		pack_or_unpack(buf, &entry->enabled[i], offset +  0, offset +  0, size);
 		pack_or_unpack(buf, &entry->base[i],    offset +  9, offset +  1, size);
 		pack_or_unpack(buf, &entry->top[i],     offset + 18, offset + 10, size);
 		offset += 19;
 	}
+#ifdef SJA1105PQRS
+	pack_or_unpack(buf, &entry->ifg,        103, 99, size);
+	pack_or_unpack(buf, &entry->speed,       98, 97, size);
+	pack_or_unpack(buf, &entry->tp_delin,    96, 81, size);
+	pack_or_unpack(buf, &entry->tp_delout,   80, 65, size);
+	pack_or_unpack(buf, &entry->maxage,      64, 57, size);
+	pack_or_unpack(buf, &entry->vlanprio,    56, 54, size);
+	pack_or_unpack(buf, &entry->vlanid,      53, 42, size);
+	pack_or_unpack(buf, &entry->ing_mirr,    41, 41, size);
+	pack_or_unpack(buf, &entry->egr_mirr,    40, 40, size);
+	pack_or_unpack(buf, &entry->drpnona664,  39, 39, size);
+	pack_or_unpack(buf, &entry->drpdtag,     38, 38, size);
+//	pack_or_unpack(buf, &entry->drpsotag,    37, 37, size);
+//	pack_or_unpack(buf, &entry->drpsitag,    36, 36, size);
+	pack_or_unpack(buf, &entry->drpuntag,    35, 35, size);
+	pack_or_unpack(buf, &entry->retag,       34, 34, size);
+	pack_or_unpack(buf, &entry->dyn_learn,   33, 33, size);
+	pack_or_unpack(buf, &entry->egress,      32, 32, size);
+	pack_or_unpack(buf, &entry->ingress,     31, 31, size);
+//	pack_or_unpack(buf, &entry->mirrcie,     30, 30, size);
+//	pack_or_unpack(buf, &entry->mirrcetag,   29, 29, size);
+//	pack_or_unpack(buf, &entry->ingmirrvid,  28, 17, size);
+//	pack_or_unpack(buf, &entry->ingmirrpcp,  16, 14, size);
+//	pack_or_unpack(buf, &entry->ingmirrdei,  13, 13, size);
+#else
 	pack_or_unpack(buf, &entry->ifg,         71, 67, size);
 	pack_or_unpack(buf, &entry->speed,       66, 65, size);
 	pack_or_unpack(buf, &entry->tp_delin,    64, 49, size);
@@ -78,6 +107,7 @@ static void sja1105_mac_config_entry_access(
 	pack_or_unpack(buf, &entry->dyn_learn,    3,  3, size);
 	pack_or_unpack(buf, &entry->egress,       2,  2, size);
 	pack_or_unpack(buf, &entry->ingress,      1,  1, size);
+#endif
 }
 
 void sja1105_mac_config_entry_pack(void *buf, struct

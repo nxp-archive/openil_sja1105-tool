@@ -195,7 +195,7 @@ int sja1105_static_config_add_entry(struct sja1105_table_header *hdr, void *buf,
 	}
 	case BLKID_MAC_CONFIG_TABLE:
 	{
-		struct sja1105_mac_config_entry entry;
+		struct sja1105_mac_config_entry entry = {0};
 		int count;
 
 		count = config->mac_config_count;

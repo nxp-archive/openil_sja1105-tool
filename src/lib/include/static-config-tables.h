@@ -45,7 +45,11 @@
 #define SIZE_L2_POLICING_ENTRY                  8
 #define SIZE_VLAN_LOOKUP_ENTRY                  8
 #define SIZE_L2_FORWARDING_ENTRY                8
+#ifdef SJA1105PQRS
+#define SIZE_MAC_CONFIG_ENTRY                   32
+#else
 #define SIZE_MAC_CONFIG_ENTRY                   28
+#endif
 #define SIZE_SCHEDULE_PARAMS_ENTRY              12
 #define SIZE_SCHEDULE_ENTRY_POINTS_PARAMS_ENTRY 4
 #define SIZE_VL_FORWARDING_PARAMS_ENTRY         12
@@ -223,11 +227,22 @@ struct sja1105_mac_config_entry {
 	uint64_t egr_mirr;
 	uint64_t drpnona664;
 	uint64_t drpdtag;
+#ifdef SJA1105PQRS
+//	uint64_t drpsotag;
+//	uint64_t drpsitag;
+#endif
 	uint64_t drpuntag;
 	uint64_t retag;
 	uint64_t dyn_learn;
 	uint64_t egress;
 	uint64_t ingress;
+#ifdef SJA1105PQRS
+//	uint64_t mirrcie;
+//	uint64_t mirrcetag;
+//	uint64_t ingmirrvid;
+//	uint64_t ingmirrpcp;
+//	uint64_t ingmirrdei;
+#endif
 };
 
 struct sja1105_xmii_params_table {

@@ -51,10 +51,16 @@ static void sja1105_cgu_pll_control_access(void *buf, struct sja1105_cgu_pll_con
 	}
 	pack_or_unpack(buf, &pll_control->pllclksrc, 28, 24, 4);
 	pack_or_unpack(buf, &pll_control->msel,      23, 16, 4);
+#ifdef SJA1105PQRS
+	pack_or_unpack(buf, &pll_control->nsel,      13, 12, 4);
+#endif
 	pack_or_unpack(buf, &pll_control->autoblock, 11, 11, 4);
 	pack_or_unpack(buf, &pll_control->psel,       9,  8, 4);
 	pack_or_unpack(buf, &pll_control->direct,     7,  7, 4);
 	pack_or_unpack(buf, &pll_control->fbsel,      6,  6, 4);
+#ifdef SJA1105PQRS
+	pack_or_unpack(buf, &pll_control->p23en,      2,  2, 4);
+#endif
 	pack_or_unpack(buf, &pll_control->bypass,     1,  1, 4);
 	pack_or_unpack(buf, &pll_control->pd,         0,  0, 4);
 }

@@ -62,6 +62,10 @@ static void sja1105_ptp_cmd_access(
 	pack_or_unpack(buf, &ptp_cmd->ptpstopsch, 29, 29, 4);
 	pack_or_unpack(buf, &ptp_cmd->startptpcp, 28, 28, 4);
 	pack_or_unpack(buf, &ptp_cmd->stopptpcp,  27, 27, 4);
+#ifdef SJA1105PQRS
+	// TODO: CASSYNC for bit 26
+	// TODO: RESPTP for bit 3
+#endif
 	pack_or_unpack(buf, &ptp_cmd->resptp,      2,  2, 4);
 	pack_or_unpack(buf, &ptp_cmd->corrclk4ts,  1,  1, 4);
 	pack_or_unpack(buf, &ptp_cmd->ptpclkadd,   0,  0, 4);
@@ -94,7 +98,11 @@ void sja1105_ptp_cmd_show(struct sja1105_ptp_cmd *ptp_cmd)
 int sja1105_ptp_cmd_commit(struct sja1105_spi_setup *spi_setup,
                            struct sja1105_ptp_cmd *ptp_cmd)
 {
+#ifdef SJA1105PQRS
+	const int PTP_CONTROL_ADDR = 0x18; // Table 87: UM11040
+#else
 	const int PTP_CONTROL_ADDR = 0x17;
+#endif
 	const int BUF_LEN = 4;
 	uint8_t packed_buf[BUF_LEN];
 
@@ -108,7 +116,11 @@ int sja1105_ptp_cmd_commit(struct sja1105_spi_setup *spi_setup,
 
 int sja1105_ptp_qbv_running(struct sja1105_spi_setup *spi_setup)
 {
+#ifdef SJA1105PQRS
+	const int PTP_CONTROL_ADDR = 0x18; // Table 87: UM11040
+#else
 	const int PTP_CONTROL_ADDR = 0x17;
+#endif
 	const int BUF_LEN = 4;
 	uint8_t packed_buf[BUF_LEN];
 	struct  sja1105_ptp_cmd ptp_cmd;
@@ -468,6 +480,31 @@ int sja1105_ptpegr_ts_poll(struct sja1105_spi_setup *spi_setup,
 		rc = -1;
 		goto out;
 	}
+#ifdef SJA1105PQRS
+	rc = sja1105_spi_send_packed_buf(spi_setup,
+	                                 SPI_READ,
+	                                 CORE_ADDR + 0xC0 + 2 * ts_reg_index + 1,
+	                                 packed_buf,
+	                                 SIZE_PTPEGR_TS);
+	if (rc < 0) {
+		loge("failed to read ptp egress timestamp register %d",
+		     ts_reg_index);
+		goto out;
+	}
+	gtable_unpack(packed_buf, &ptpegr_ts_partial, 31, 0, SIZE_PTPEGR_TS);
+
+	rc = sja1105_spi_send_packed_buf(spi_setup,
+	                                 SPI_READ,
+	                                 CORE_ADDR + 0xC0 + 2 * ts_reg_index,
+	                                 packed_buf,
+	                                 SIZE_PTPEGR_TS);
+	if (rc < 0) {
+		loge("failed to read ptp egress timestamp register %d",
+		     ts_reg_index);
+		goto out;
+	}
+	gtable_unpack(packed_buf, &update,             0, 0, SIZE_PTPEGR_TS);
+#else
 	rc = sja1105_spi_send_packed_buf(spi_setup,
 	                                 SPI_READ,
 	                                 CORE_ADDR + 0xC0 + ts_reg_index,
@@ -480,7 +517,7 @@ int sja1105_ptpegr_ts_poll(struct sja1105_spi_setup *spi_setup,
 	}
 	gtable_unpack(packed_buf, &ptpegr_ts_partial, 31, 8, SIZE_PTPEGR_TS);
 	gtable_unpack(packed_buf, &update,             0, 0, SIZE_PTPEGR_TS);
-
+#endif
 	if (!update) {
 		/* No update. Keep trying, you'll make it someday. */
 		rc = -1;
