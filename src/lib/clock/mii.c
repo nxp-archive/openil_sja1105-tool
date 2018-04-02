@@ -46,7 +46,10 @@ int sja1105_cgu_mii_tx_clk_config(struct sja1105_spi_setup *spi_setup,
 	uint8_t packed_buf[BUF_LEN];
 	struct  sja1105_cgu_mii_control mii_tx_clk;
 	/* UM10944.pdf, Table 78, CGU Register overview */
-	const int mii_tx_clk_offsets[] = {0x13, 0x1A, 0x21, 0x28, 0x2F};
+	const int  mii_tx_clk_offsets_et[]   = {0x13, 0x1A, 0x21, 0x28, 0x2F};
+	/* UM11040.pdf, Table 114 */
+	const int  mii_tx_clk_offsets_pqrs[] = {0x13, 0x19, 0x1F, 0x25, 0x2B};
+	const int *mii_tx_clk_offsets;
 	const int mac_clk_sources[] = {
 		CLKSRC_MII0_TX_CLK,
 		CLKSRC_MII1_TX_CLK,
@@ -62,6 +65,11 @@ int sja1105_cgu_mii_tx_clk_config(struct sja1105_spi_setup *spi_setup,
 		CLKSRC_IDIV4,
 	};
 	int clksrc;
+
+	/* E/T and P/Q/R/S compatibility */
+	mii_tx_clk_offsets = IS_ET(spi_setup->device_id) ?
+	                     mii_tx_clk_offsets_et :
+	                     mii_tx_clk_offsets_pqrs;
 
 	if (mii_mode == XMII_MODE_MAC) {
 		clksrc = mac_clk_sources[port];
@@ -89,7 +97,10 @@ int sja1105_cgu_mii_rx_clk_config(
 	uint8_t packed_buf[BUF_LEN];
 	struct  sja1105_cgu_mii_control mii_rx_clk;
 	/* UM10944.pdf, Table 78, CGU Register overview */
-	const int mii_rx_clk_offsets[] = {0x14, 0x1B, 0x22, 0x29, 0x30};
+	const int  mii_rx_clk_offsets_et[]   = {0x14, 0x1B, 0x22, 0x29, 0x30};
+	/* UM11040.pdf, Table 114 */
+	const int  mii_rx_clk_offsets_pqrs[] = {0x14, 0x1A, 0x20, 0x26, 0x2C};
+	const int *mii_rx_clk_offsets;
 	const int clk_sources[] = {
 		CLKSRC_MII0_RX_CLK,
 		CLKSRC_MII1_RX_CLK,
@@ -97,6 +108,11 @@ int sja1105_cgu_mii_rx_clk_config(
 		CLKSRC_MII3_RX_CLK,
 		CLKSRC_MII4_RX_CLK,
 	};
+
+	/* E/T and P/Q/R/S compatibility */
+	mii_rx_clk_offsets = IS_ET(spi_setup->device_id) ?
+	                     mii_rx_clk_offsets_et :
+	                     mii_rx_clk_offsets_pqrs;
 
 	/* Payload for packed_buf */
 	mii_rx_clk.clksrc    = clk_sources[port];
@@ -119,7 +135,10 @@ int sja1105_cgu_mii_ext_tx_clk_config(
 	uint8_t packed_buf[BUF_LEN];
 	struct  sja1105_cgu_mii_control mii_ext_tx_clk;
 	/* UM10944.pdf, Table 78, CGU Register overview */
-	const int mii_ext_tx_clk_offsets[] = {0x18, 0x1F, 0x26, 0x2D, 0x34};
+	const int  mii_ext_tx_clk_offsets_et[]   = {0x18, 0x1F, 0x26, 0x2D, 0x34};
+	/* UM11040.pdf, Table 114 */
+	const int  mii_ext_tx_clk_offsets_pqrs[] = {0x17, 0x1D, 0x23, 0x29, 0x2F};
+	const int *mii_ext_tx_clk_offsets;
 	const int clk_sources[] = {
 		CLKSRC_IDIV0,
 		CLKSRC_IDIV1,
@@ -127,6 +146,11 @@ int sja1105_cgu_mii_ext_tx_clk_config(
 		CLKSRC_IDIV3,
 		CLKSRC_IDIV4,
 	};
+
+	/* E/T and P/Q/R/S compatibility */
+	mii_ext_tx_clk_offsets = IS_ET(spi_setup->device_id) ?
+	                         mii_ext_tx_clk_offsets_et :
+	                         mii_ext_tx_clk_offsets_pqrs;
 
 	/* Payload for packed_buf */
 	mii_ext_tx_clk.clksrc    = clk_sources[port];
@@ -150,7 +174,10 @@ int sja1105_cgu_mii_ext_rx_clk_config(
 	uint8_t packed_buf[BUF_LEN];
 	struct  sja1105_cgu_mii_control mii_ext_rx_clk;
 	/* UM10944.pdf, Table 78, CGU Register overview */
-	const int mii_ext_rx_clk_offsets[] = {0x19, 0x20, 0x27, 0x2E, 0x35};
+	const int  mii_ext_rx_clk_offsets_et[]   = {0x19, 0x20, 0x27, 0x2E, 0x35};
+	/* UM11040.pdf, Table 114 */
+	const int  mii_ext_rx_clk_offsets_pqrs[] = {0x18, 0x1E, 0x24, 0x2A, 0x30};
+	const int *mii_ext_rx_clk_offsets;
 	const int clk_sources[] = {
 		CLKSRC_IDIV0,
 		CLKSRC_IDIV1,
@@ -158,6 +185,11 @@ int sja1105_cgu_mii_ext_rx_clk_config(
 		CLKSRC_IDIV3,
 		CLKSRC_IDIV4,
 	};
+
+	/* E/T and P/Q/R/S compatibility */
+	mii_ext_rx_clk_offsets = IS_ET(spi_setup->device_id) ?
+	                         mii_ext_rx_clk_offsets_et :
+	                         mii_ext_rx_clk_offsets_pqrs;
 
 	/* Payload for packed_buf */
 	mii_ext_rx_clk.clksrc    = clk_sources[port];
