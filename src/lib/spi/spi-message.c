@@ -78,15 +78,6 @@ void sja1105_spi_message_show(struct sja1105_spi_message *msg)
 	}
 }
 
-void spi_message_aggregate(char  *buf,
-                           struct sja1105_spi_message *hdr,
-                           char  *data,
-                           int    data_len)
-{
-	sja1105_spi_message_pack(buf, hdr);
-	memcpy(buf + SIZE_SPI_MSG_HEADER, data, data_len);
-}
-
 /* If read_or_write is:
  *     * SPI_WRITE: creates and sends an SPI write message at absolute
  *                  address reg_addr, taking size_bytes from *packed_buf

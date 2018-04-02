@@ -64,7 +64,6 @@ int sja1105_spi_configure(struct sja1105_spi_setup*);
 void sja1105_spi_message_unpack(void*, struct sja1105_spi_message*);
 void sja1105_spi_message_pack(void*, struct sja1105_spi_message*);
 void sja1105_spi_message_show(struct sja1105_spi_message*);
-void spi_message_aggregate(char*, struct sja1105_spi_message*, char*, int);
 int sja1105_spi_send_packed_buf(struct sja1105_spi_setup *spi_setup,
                                 enum sja1105_spi_access_mode read_or_write,
                                 uint64_t reg_addr,
