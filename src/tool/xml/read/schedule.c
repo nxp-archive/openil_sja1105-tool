@@ -57,7 +57,7 @@ static int parse_entry(xmlNode *node, struct sja1105_static_config *config)
 	if (config->schedule_count >= MAX_SCHEDULE_COUNT) {
 		loge("Cannot have more than %d Schedule Table entries!",
 		     MAX_SCHEDULE_COUNT);
-		rc = -1;
+		rc = -ERANGE;
 		goto out;
 	}
 	memset(&entry, 0, sizeof(entry));
@@ -74,7 +74,7 @@ int schedule_table_parse(xmlNode *node, struct sja1105_static_config *config)
 
 	if (node->type != XML_ELEMENT_NODE) {
 		loge("Schedule table node must be of element type!");
-		rc = -1;
+		rc = -EINVAL;
 		goto out;
 	}
 	for (c = node->children; c != NULL; c = c->next) {

@@ -33,7 +33,6 @@
 #include <string.h>
 #include <inttypes.h>
 #include <unistd.h>
-#include <errno.h>
 /* These are our include files */
 #include <lib/include/status.h>
 #include <lib/include/gtable.h>

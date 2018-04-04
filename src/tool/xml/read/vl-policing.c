@@ -55,7 +55,7 @@ static int parse_entry(xmlNode *node, struct sja1105_static_config *config)
 	if (config->vl_policing_count >= MAX_VL_POLICING_COUNT) {
 		loge("Cannot have more than %d VL Policing entries!",
 		     MAX_VL_POLICING_COUNT);
-		rc = -1;
+		rc = -ERANGE;
 		goto out;
 	}
 	memset(&entry, 0, sizeof(entry));
@@ -72,7 +72,7 @@ int vl_policing_table_parse(xmlNode *node, struct sja1105_static_config *config)
 
 	if (node->type != XML_ELEMENT_NODE) {
 		loge("VL Policing table node must be of element type!");
-		rc = -1;
+		rc = -EINVAL;
 		goto out;
 	}
 	for (c = node->children; c != NULL; c = c->next) {

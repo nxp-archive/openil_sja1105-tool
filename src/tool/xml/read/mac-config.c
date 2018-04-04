@@ -39,7 +39,7 @@ static int entry_get(xmlNode *node, struct sja1105_mac_config_entry *entry)
 	rc += xml_read_array(&entry->enabled, 8, "enabled", node);
 	if (rc != 8 * 3) {
 		loge("Must have exactly 8 entries for TOP, BASE and ENABLED!");
-		rc = -1;
+		rc = -ERANGE;
 		goto out;
 	}
 	rc  = xml_read_field(&entry->ifg, "ifg", node);
@@ -73,7 +73,7 @@ static int parse_entry(xmlNode *node, struct sja1105_static_config *config)
 	if (config->mac_config_count >= MAX_MAC_CONFIG_COUNT) {
 		loge("Cannot have more than %d MAC Configuration "
 		     "Table entries!", MAX_MAC_CONFIG_COUNT);
-		rc = -1;
+		rc = -ERANGE;
 		goto out;
 	}
 	memset(&entry, 0, sizeof(entry));
@@ -90,7 +90,7 @@ int mac_configuration_table_parse(xmlNode *node, struct sja1105_static_config *c
 
 	if (node->type != XML_ELEMENT_NODE) {
 		loge("MAC Configuration Table node must be of element type!");
-		rc = -1;
+		rc = -EINVAL;
 		goto out;
 	}
 	for (c = node->children; c != NULL; c = c->next) {

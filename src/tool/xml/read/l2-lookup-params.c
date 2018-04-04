@@ -53,7 +53,7 @@ static int parse_entry(xmlNode *node, struct sja1105_static_config *config)
 	if (config->l2_lookup_params_count >= MAX_L2_LOOKUP_PARAMS_COUNT) {
 		loge("Cannot have more than %d L2 Lookup "
 		     "Parameters Table entries!", MAX_L2_LOOKUP_PARAMS_COUNT);
-		rc = -1;
+		rc = -ERANGE;
 		goto out;
 	}
 	memset(&entry, 0, sizeof(entry));
@@ -71,7 +71,7 @@ int l2_address_lookup_parameters_table_parse(xmlNode *node, struct sja1105_stati
 	if (node->type != XML_ELEMENT_NODE) {
 		loge("L2 Lookup Parameters Table node must be "
 		     "of element type!");
-		rc = -1;
+		rc = -EINVAL;
 	}
 	for (c = node->children; c != NULL; c = c->next) {
 		if (c->type != XML_ELEMENT_NODE) {

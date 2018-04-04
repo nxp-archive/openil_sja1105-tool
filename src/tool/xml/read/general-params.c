@@ -67,7 +67,7 @@ static int parse_entry(xmlNode *node, struct sja1105_static_config *config)
 	if (config->general_params_count >= MAX_GENERAL_PARAMS_COUNT) {
 		loge("Cannot have more than %d General Parameters Table entries!",
 		     MAX_GENERAL_PARAMS_COUNT);
-		rc = -1;
+		rc = -ERANGE;
 		goto out;
 	}
 	memset(&entry, 0, sizeof(entry));
@@ -84,7 +84,7 @@ int general_parameters_table_parse(xmlNode *node, struct sja1105_static_config *
 
 	if (node->type != XML_ELEMENT_NODE) {
 		loge("General Parameters Table node must be of element type!");
-		rc = -1;
+		rc = -EINVAL;
 		goto out;
 	}
 	for (c = node->children; c != NULL; c = c->next) {

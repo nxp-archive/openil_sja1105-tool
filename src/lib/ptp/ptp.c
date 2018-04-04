@@ -30,7 +30,6 @@
  *****************************************************************************/
 #include <string.h>
 #include <inttypes.h>
-#include <errno.h>
 /* These are our own include files */
 #include <lib/include/ptp.h>
 #include <lib/include/gtable.h>
@@ -133,7 +132,7 @@ int sja1105_ptp_qbv_running(struct sja1105_spi_setup *spi_setup)
 		rc = 1;
 	} else {
 		/* Qbv is probably not configured with PTP clock source */
-		rc = -1;
+		rc = -EINVAL;
 	}
 out:
 	return rc;
@@ -398,7 +397,7 @@ int sja1105_ptp_pin_duration_set(struct sja1105_spi_setup *spi_setup,
 	sja1105_timespec_to_ptp_time(ts, &pindur);
 	if (pindur >= UINT32_MAX) {
 		loge("%s: provided ts is too large", __func__);
-		rc = -1;
+		rc = -ERANGE;
 		goto out;
 	}
 	rc = sja1105_ptp_write_reg(spi_setup,
@@ -418,7 +417,7 @@ int sja1105_ptp_qbv_correction_period_set(struct sja1105_spi_setup *spi_setup,
 	sja1105_timespec_to_ptp_time(ts, &ptpclkcorp);
 	if (ptpclkcorp >= UINT32_MAX) {
 		loge("%s: provided ts is too large", __func__);
-		rc = -1;
+		rc = -ERANGE;
 		goto out;
 	}
 	rc = sja1105_ptp_write_reg(spi_setup,
@@ -471,7 +470,7 @@ int sja1105_ptpegr_ts_poll(struct sja1105_spi_setup *spi_setup,
 		ptpclk_addr = SJA1105_PTPTSCLK_ADDR;
 	} else {
 		loge("%s: invalid source selection: %d", __func__, source);
-		rc = -1;
+		rc = -EINVAL;
 		goto out;
 	}
 	rc = sja1105_spi_send_packed_buf(spi_setup,
@@ -489,7 +488,7 @@ int sja1105_ptpegr_ts_poll(struct sja1105_spi_setup *spi_setup,
 
 	if (!update) {
 		/* No update. Keep trying, you'll make it someday. */
-		rc = -1;
+		rc = -EAGAIN;
 		goto out;
 	}
 	rc = sja1105_ptp_read_reg(spi_setup, ptpclk_addr,

@@ -148,7 +148,8 @@ int rmii_clocking_setup(struct sja1105_spi_setup *spi_setup, int port,
 
 	if (rmii_mode != XMII_MODE_MAC && rmii_mode != XMII_MODE_PHY) {
 		loge("RMII mode must either be MAC or PHY");
-		goto error;
+		rc = -EINVAL;
+		goto out;
 	}
 	logv("Configuring RMII-%s clocking for port %d",
 	    (rmii_mode == XMII_MODE_MAC) ? "MAC" : "PHY", port);
@@ -157,27 +158,26 @@ int rmii_clocking_setup(struct sja1105_spi_setup *spi_setup, int port,
 		/* Configure and enable PLL1 for 50Mhz output */
 		rc = sja1105_cgu_rmii_pll_config(spi_setup);
 		if (rc < 0) {
-			goto error;
+			goto out;
 		}
 	}
 	/* Disable IDIV for this port */
 	rc = sja1105_cgu_idiv_config(spi_setup, port, 0, 1);
 	if (rc < 0) {
-		goto error;
+		goto out;
 	}
 	/* Source to sink mappings */
 	rc = sja1105_cgu_rmii_ref_clk_config(spi_setup, port);
 	if (rc < 0) {
-		goto error;
+		goto out;
 	}
 	if (rmii_mode == XMII_MODE_MAC) {
 		rc = sja1105_cgu_rmii_ext_tx_clk_config(spi_setup, port);
 		if (rc < 0) {
-			goto error;
+			goto out;
 		}
 	}
-	return 0;
-error:
-	return -1;
+out:
+	return rc;
 }
 

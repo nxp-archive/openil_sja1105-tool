@@ -291,7 +291,7 @@ int read_config_file(char *filename, struct sja1105_spi_setup *spi_setup,
 	fd = fopen(filename, "r");
 	if (!fd) {
 		printf("%s not present, loading default config\n", filename);
-		rc = -1;
+		rc = -ENOENT;
 		goto default_conf;
 	}
 	memset(spi_setup, 0, sizeof(*spi_setup));
@@ -320,7 +320,7 @@ int read_config_file(char *filename, struct sja1105_spi_setup *spi_setup,
 			/* There was no equal on this line */
 			loge("Invalid format for line %d: \"%s\"", line_num, line);
 			loge("Accepted line format: \"<key> = <value>\"");
-			rc = -1;
+			rc = -EINVAL;
 			goto out;
 		}
 		key   = trimwhitespace(p);
@@ -329,7 +329,7 @@ int read_config_file(char *filename, struct sja1105_spi_setup *spi_setup,
 		                   key, value, section_hdr, &fields_set);
 		if (rc < 0) {
 			loge("Could not parse line %d: \"%s\"", line_num, line);
-			rc = -1;
+			rc = -EINVAL;
 			goto out;
 		}
 		line_num++;

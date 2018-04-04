@@ -33,7 +33,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <errno.h>
 /* For isspace */
 #include <ctype.h>
 #include <inttypes.h>
@@ -109,7 +108,7 @@ int mac_addr_from_string(uint64_t *to, char *from, char **endptr)
 		if (i == 0 && *p != 0) {
 			logi("exhibit a");
 			/* 6 bytes processed but more are present */
-			rc = -1;
+			rc = -EFBIG;
 			goto out;
 		} else if (i != 0 && *p == ':') {
 			p++;
@@ -169,13 +168,13 @@ int reliable_uint64_from_string(uint64_t *to, char *from, char **endptr)
 	}
 	if (errno) {
 		loge("Integer overflow occured while reading \"%s\"", from);
-		rc = -1;
+		rc = -EOVERFLOW;
 		goto out;
 	}
 	if (from == p) {
 		/* Read nothing */
 		loge("No integer stored at \"%s\"", from);
-		rc = -1;
+		rc = -EINVAL;
 		goto out;
 	}
 out:
@@ -193,7 +192,7 @@ int read_array(char *array_str, uint64_t *array_val, int max_count)
 	if (p[0] != '[') {
 		loge("Array must contain space-separated elements "
 		     "inside brackets, like [1 2 3]");
-		rc = -1;
+		rc = -EINVAL;
 		goto out;
 	}
 	/* Strip initial '[' character */
@@ -212,7 +211,7 @@ int read_array(char *array_str, uint64_t *array_val, int max_count)
 		count++;
 		if (count > max_count) {
 			loge("Input array larger than %d elements!", max_count);
-			rc = -1;
+			rc = -ERANGE;
 			goto out;
 		}
 	}

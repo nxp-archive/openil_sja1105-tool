@@ -29,7 +29,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 #include "xml/read/external.h"
-#include <errno.h>
 #include <lib/include/staging-area.h>
 #include <common.h>
 #include "internal.h"
@@ -62,7 +61,7 @@ int xml_read_field(void *where, char *field_name, xmlNode *node)
 	}
 	if (value == NULL) {
 		loge("no element named \"%s\"!", field_name);
-		rc = -1;
+		rc = -EINVAL;
 		goto out;
 	}
 	rc = reliable_uint64_from_string(field_val, value, NULL);
@@ -88,7 +87,7 @@ int xml_read_array(void *where, int max_count, char *field_name, xmlNode *node)
 	}
 	if (value == NULL) {
 		loge("no element named \"%s\"!", field_name);
-		rc = -1;
+		rc = -EINVAL;
 		goto out;
 	}
 	rc = read_array(value, field_val, max_count);
@@ -187,12 +186,12 @@ parse_root(xmlNode *root, struct sja1105_staging_area *staging_area)
 
 	if (root->type != XML_ELEMENT_NODE) {
 		loge("Root node must be of element type!");
-		rc = -1;
+		rc = -EINVAL;
 		goto out;
 	}
 	if (strcasecmp((char*) root->name, SJA1105_NETCONF_ROOT)) {
 		loge("Root node must be named \"%s\"!", SJA1105_NETCONF_ROOT);
-		rc = -1;
+		rc = -EINVAL;
 		goto out;
 	}
 	for (node = root->children; node != NULL; node = node->next) {

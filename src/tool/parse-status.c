@@ -101,12 +101,12 @@ int status_parse_args(struct sja1105_spi_setup *spi_setup,
 	int rc = 0;
 
 	if (argc < 1) {
-		rc = -1;
+		rc = -EINVAL;
 		goto parse_error;
 	}
 	match = get_match(argv[0], options, ARRAY_SIZE(options));
 	if (match < 0) {
-		rc = -1;
+		rc = -EINVAL;
 		goto parse_error;
 	} else if (matches(options[match], "general") == 0) {
 		struct sja1105_general_status status;
@@ -142,7 +142,7 @@ int status_parse_args(struct sja1105_spi_setup *spi_setup,
 			}
 			port_no = (int) tmp;
 		} else {
-			rc = -1;
+			rc = -EINVAL;
 			goto parse_error;
 		}
 		rc = sja1105_spi_configure(spi_setup);
@@ -164,7 +164,7 @@ int status_parse_args(struct sja1105_spi_setup *spi_setup,
 			}
 		}
 	} else {
-		rc = -1;
+		rc = -EINVAL;
 		goto parse_error;
 	}
 	return 0;

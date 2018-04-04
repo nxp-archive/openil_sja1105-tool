@@ -31,7 +31,6 @@
 #include <inttypes.h>
 #include <string.h>
 #include <stdio.h>
-#include <errno.h>
 /* These are our own libraries */
 #include <lib/include/static-config.h>
 #include <lib/include/gtable.h>
