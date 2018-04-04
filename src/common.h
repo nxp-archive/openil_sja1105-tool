@@ -33,6 +33,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <errno.h>
 
 #define MAX_LINE_SIZE 2048
 

@@ -182,7 +182,7 @@ sja1105_staging_area_to_xml(char *xml_file,
 	writer = xmlNewTextWriterFilename(xml_file, 0);
 	if (writer == NULL) {
 		loge("cannot create xml writer");
-		rc = -1;
+		rc = -errno;
 		goto out;
 	}
 	rc |= xmlTextWriterSetIndent(writer, 1);

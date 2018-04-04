@@ -36,7 +36,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <inttypes.h>
-#include <errno.h>
 #include "internal.h"
 /* From libsja1105 */
 #include <lib/include/static-config.h>

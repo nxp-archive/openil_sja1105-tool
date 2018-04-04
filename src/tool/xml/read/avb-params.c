@@ -49,7 +49,7 @@ static int parse_entry(xmlNode *node, struct sja1105_static_config *config)
 	if (config->avb_params_count >= MAX_AVB_PARAMS_COUNT) {
 		loge("Cannot have more than %d AVB Parameters Table entries!",
 		     MAX_AVB_PARAMS_COUNT);
-		rc = -1;
+		rc = -ERANGE;
 		goto out;
 	}
 	memset(&entry, 0, sizeof(entry));
@@ -66,7 +66,7 @@ int avb_parameters_table_parse(xmlNode *node, struct sja1105_static_config *conf
 
 	if (node->type != XML_ELEMENT_NODE) {
 		loge("AVB Parameters Table node must be of element type!");
-		rc = -1;
+		rc = -EINVAL;
 		goto out;
 	}
 	for (c = node->children; c != NULL; c = c->next) {

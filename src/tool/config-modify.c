@@ -32,7 +32,6 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
-#include <errno.h>
 #include "internal.h"
 /* From libsja1105 */
 #include <lib/include/staging-area.h>
@@ -57,7 +56,7 @@ static int generic_table_entry_modify(
 		loge("Index out of bounds!");
 		loge("Please adjust the entry count of the table:");
 		loge("* config modify <table> entry-count <value>)");
-		rc = -1;
+		rc = -ERANGE;
 		goto out;
 	}
 	if (entry_field_count == 1) {
@@ -981,7 +980,7 @@ staging_area_modify(struct sja1105_staging_area *staging_area,
 	logv("Table %s, entry %" PRIu64", field %s, value %s",
 	     static_config_options[rc], entry_index, field_name, field_val);
 	if (field_name == NULL) {
-		rc = -1;
+		rc = -EINVAL;
 		print_usage("sja1105-tool");
 		goto out;
 	}

@@ -53,7 +53,7 @@ static int parse_entry(xmlNode *node, struct sja1105_static_config *config)
 	if (config->vlan_lookup_count >= MAX_VLAN_LOOKUP_COUNT) {
 		loge("Cannot have more than %d L2 Forwarding "
 		     "Table entries!", MAX_VLAN_LOOKUP_COUNT);
-		rc = -1;
+		rc = -ERANGE;
 		goto out;
 	}
 	memset(&entry, 0, sizeof(entry));
@@ -70,7 +70,7 @@ int vlan_lookup_table_parse(xmlNode *node, struct sja1105_static_config *config)
 
 	if (node->type != XML_ELEMENT_NODE) {
 		loge("VLAN Lookup Table node must be of element type!");
-		rc = -1;
+		rc = -EINVAL;
 		goto out;
 	}
 	for (c = node->children; c != NULL; c = c->next) {

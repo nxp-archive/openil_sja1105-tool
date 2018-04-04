@@ -32,7 +32,6 @@
 #include "xml/write/external.h"
 #include "internal.h"
 #include <string.h>
-#include <errno.h>
 
 static void print_usage()
 {

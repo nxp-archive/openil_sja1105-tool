@@ -63,7 +63,7 @@ int sja1105_clocking_setup(struct sja1105_spi_setup *spi_setup,
 		} else {
 			loge("Invalid xmii_mode for port %d specified: %" PRIu64,
 			     i, params->xmii_mode[i]);
-			rc = -1;
+			rc = -EINVAL;
 			goto out;
 		}
 	}

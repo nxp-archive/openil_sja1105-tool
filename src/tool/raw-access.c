@@ -32,7 +32,7 @@ int reg_parse_args(struct sja1105_spi_setup *spi_setup,
 	uint64_t i;
 
 	if (argc < 1) {
-		rc = -1;
+		rc = -EINVAL;
 		goto out_parse_error;
 	}
 

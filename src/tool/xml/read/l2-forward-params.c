@@ -57,7 +57,7 @@ static int parse_entry(xmlNode *node, struct sja1105_static_config *config)
 	if (config->l2_forwarding_params_count >= MAX_L2_FORWARDING_PARAMS_COUNT) {
 		loge("Cannot have more than %d L2 Forwarding Parameters "
 		     "Table entries!", MAX_L2_FORWARDING_PARAMS_COUNT);
-		rc = -1;
+		rc = -ERANGE;
 		goto out;
 	}
 	memset(&entry, 0, sizeof(entry));
@@ -75,7 +75,7 @@ int l2_forwarding_parameters_table_parse(xmlNode *node, struct sja1105_static_co
 	if (node->type != XML_ELEMENT_NODE) {
 		loge("L2 Forwarding Parameters Table node must be "
 		     "of element type!");
-		rc = -1;
+		rc = -EINVAL;
 		goto out;
 	}
 	for (c = node->children; c != NULL; c = c->next) {

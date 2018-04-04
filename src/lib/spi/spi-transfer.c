@@ -39,7 +39,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <inttypes.h>
-#include <errno.h>
 /* These are our own libraries */
 #include <lib/include/static-config.h>
 #include <lib/include/gtable.h>
@@ -222,7 +221,7 @@ int sja1105_spi_transfer(const struct sja1105_spi_setup *spi_setup,
 		memset(rx, 0, size);
 		if (flock(spi_setup->fd, LOCK_EX) < 0) {
 			loge("locking spi device failed");
-			rc = -1;
+			rc = -EAGAIN;
 			goto out;
 		}
 		rc = ioctl(spi_setup->fd, SPI_IOC_MESSAGE(1), &tr);
@@ -232,7 +231,7 @@ int sja1105_spi_transfer(const struct sja1105_spi_setup *spi_setup,
 		}
 		if (flock(spi_setup->fd, LOCK_UN) < 0) {
 			loge("unlocking spi device failed");
-			rc = -1;
+			rc = -EAGAIN;
 		}
 	}
 out:
