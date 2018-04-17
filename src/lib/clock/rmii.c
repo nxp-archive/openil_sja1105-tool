@@ -93,7 +93,7 @@ int sja1105_cgu_rmii_ext_tx_clk_config(struct sja1105_spi_setup *spi_setup,
 static int sja1105_cgu_rmii_pll_config(struct sja1105_spi_setup *spi_setup)
 {
 	const int BUF_LEN = 4;
-	const int PLL1_OFFSET = 0x04;
+	const int PLL1_OFFSET = 0x0A;
 	struct  sja1105_cgu_pll_control pll;
 	uint8_t packed_buf[BUF_LEN];
 	int     rc;
