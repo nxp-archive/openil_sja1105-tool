@@ -71,16 +71,22 @@ struct sja1105_cgu_pll_status {
 	uint64_t lock;
 };
 
-/* UM10944 Table 81.
+/*
  * PLL_1_C control register
- * (address 10000Ah) */
+ *
+ * SJA1105 E/T: UM10944 Table 81 (address 10000Ah)
+ * SJA1105 P/Q/R/S: UM11040 Table 116 (address 10000Ah)
+ *
+ */
 struct sja1105_cgu_pll_control {
 	uint64_t pllclksrc;
 	uint64_t msel;
+	uint64_t nsel; /* Only for P/Q/R/S series */
 	uint64_t autoblock;
 	uint64_t psel;
 	uint64_t direct;
 	uint64_t fbsel;
+	uint64_t p23en; /* Only for P/Q/R/S series */
 	uint64_t bypass;
 	uint64_t pd;
 };
@@ -118,9 +124,13 @@ struct sja1105_cgu_mii_control {
 #define XMII_SPEED_RMII  1ull
 #define XMII_SPEED_RGMII 2ull
 
-void sja1105_cgu_pll_control_show(struct sja1105_cgu_pll_control*);
-void sja1105_cgu_pll_control_pack(void*, struct sja1105_cgu_pll_control*);
-void sja1105_cgu_pll_control_unpack(void*, struct sja1105_cgu_pll_control*);
+/* As struct sja1105_cgu_pll_control is hardware
+ * revision-dependent, it is necessary to pass the device id
+ * as an argument for proper identification
+ */
+void sja1105_cgu_pll_control_show(struct sja1105_cgu_pll_control*, uint64_t);
+void sja1105_cgu_pll_control_pack(void*, struct sja1105_cgu_pll_control*, uint64_t);
+void sja1105_cgu_pll_control_unpack(void*, struct sja1105_cgu_pll_control*, uint64_t);
 void sja1105_cgu_mii_control_pack(void*, struct sja1105_cgu_mii_control*);
 void sja1105_cgu_mii_control_unpack(void*, struct sja1105_cgu_mii_control*);
 void sja1105_cgu_mii_control_show(struct sja1105_cgu_mii_control *mii_control);
