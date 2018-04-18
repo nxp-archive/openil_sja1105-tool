@@ -37,7 +37,11 @@
 #include <lib/include/static-config.h>
 #include <lib/include/gtable.h>
 
-static void sja1105_cgu_pll_control_access(void *buf, struct sja1105_cgu_pll_control *pll_control, int write)
+static void
+sja1105_cgu_pll_control_access(void *buf,
+                               struct sja1105_cgu_pll_control *pll_control,
+                               int write,
+                               uint64_t device_id)
 {
 	int (*pack_or_unpack)(void*, uint64_t*, int, int, int);
 	int   size = 4;
@@ -57,24 +61,34 @@ static void sja1105_cgu_pll_control_access(void *buf, struct sja1105_cgu_pll_con
 	pack_or_unpack(buf, &pll_control->fbsel,      6,  6, 4);
 	pack_or_unpack(buf, &pll_control->bypass,     1,  1, 4);
 	pack_or_unpack(buf, &pll_control->pd,         0,  0, 4);
+	if (IS_PQRS(device_id)) {
+		pack_or_unpack(buf, &pll_control->nsel, 13, 12, 4);
+		pack_or_unpack(buf, &pll_control->p23en, 2,  2, 4);
+	}
 }
 
 void sja1105_cgu_pll_control_pack(void *buf,
-                                  struct sja1105_cgu_pll_control *pll_control)
+                                  struct sja1105_cgu_pll_control *pll_control,
+                                  uint64_t device_id)
 {
-	sja1105_cgu_pll_control_access(buf, pll_control, 1);
+	sja1105_cgu_pll_control_access(buf, pll_control, 1, device_id);
 }
 
 void sja1105_cgu_pll_control_unpack(void *buf, struct
-                                    sja1105_cgu_pll_control *pll_control)
+                                    sja1105_cgu_pll_control *pll_control,
+                                    uint64_t device_id)
 {
-	sja1105_cgu_pll_control_access(buf, pll_control, 0);
+	sja1105_cgu_pll_control_access(buf, pll_control, 0, device_id);
 }
 
-void sja1105_cgu_pll_control_show(struct sja1105_cgu_pll_control *pll_control)
+void sja1105_cgu_pll_control_show(struct sja1105_cgu_pll_control *pll_control,
+                                  uint64_t device_id)
 {
 	printf("PLLCLKSEL %" PRIX64 "\n", pll_control->pllclksrc);
 	printf("MSEL      %" PRIX64 "\n", pll_control->msel);
+	if (IS_PQRS(device_id)) {
+		printf("NSEL      %" PRIX64 "\n", pll_control->nsel);
+	}
 	printf("AUTOBLOCK %" PRIX64 "\n", pll_control->autoblock);
 	printf("PSEL      %" PRIX64 "\n", pll_control->psel);
 	printf("DIRECT    %" PRIX64 "\n", pll_control->direct);
