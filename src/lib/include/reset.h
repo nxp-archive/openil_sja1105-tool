@@ -35,14 +35,38 @@
 
 /* RGU */
 #define RGU_ADDR    0x100440
-#define RGU_MSG_LEN 8
-#define RGU_WARM    0x04
-#define RGU_COLD    0x08
 
-struct sja1105_reset_ctrl {
-	uint64_t rst_ctrl;
+/* Back-ported structure from UM11040 Table 112.
+ * Reset control register (addr. 100440h)
+ * In the SJA1105 E/T, only warm_rst and cold_rst are
+ * supported (exposed in UM10944 as rst_ctrl), but the bit
+ * offsets of warm_rst and cold_rst are actually reversed.
+ */
+struct sja1105_reset_cmd {
+	uint64_t switch_rst;
+	uint64_t cfg_rst;
+	uint64_t car_rst;
+	uint64_t otp_rst;
+	uint64_t warm_rst;
+	uint64_t cold_rst;
+	uint64_t por_rst;
 };
 
-int sja1105_reset(const struct sja1105_spi_setup*, struct sja1105_reset_ctrl*);
+void sja1105_reset_cmd_pack(void *buf,
+                             struct sja1105_reset_cmd *reset,
+                             uint64_t device_id);
+void sja1105_reset_cmd_unpack(void *buf,
+                               struct sja1105_reset_cmd *reset,
+                               uint64_t device_id);
+void sja1105_reset_cmd_show(struct sja1105_reset_cmd *reset);
+int sja1105_reset_cmd_commit(struct sja1105_spi_setup*,
+                             struct sja1105_reset_cmd*);
+int sja1105_switch_core_reset(struct sja1105_spi_setup *setup);
+int sja1105_config_reset(struct sja1105_spi_setup *setup);
+int sja1105_clocking_reset(struct sja1105_spi_setup *setup);
+int sja1105_otp_reset(struct sja1105_spi_setup *setup);
+int sja1105_warm_reset(struct sja1105_spi_setup *setup);
+int sja1105_cold_reset(struct sja1105_spi_setup *setup);
+int sja1105_por_reset(struct sja1105_spi_setup *setup);
 
 #endif

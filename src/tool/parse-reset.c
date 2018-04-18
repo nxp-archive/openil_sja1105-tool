@@ -35,33 +35,64 @@
 
 static void print_usage()
 {
-	printf("Usage: sja1105-tool reset [ cold | warm ] \n");
+	printf("Usage:\n");
+	printf(" * sja1105-tool reset core\n");
+	printf(" * sja1105-tool reset config\n");
+	printf(" * sja1105-tool reset clocking\n");
+	printf(" * sja1105-tool reset otp\n");
+	printf(" * sja1105-tool reset warm\n");
+	printf(" * sja1105-tool reset cold\n");
+	printf(" * sja1105-tool reset por\n");
 }
 
 int rgu_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv)
 {
-	struct sja1105_reset_ctrl reset;
+	const char *reset_options[] = {
+		"core",
+		"config",
+		"clocking",
+		"otp",
+		"warm",
+		"cold",
+		"por",
+	};
+	int (*sja1105_reset_fn[])(struct sja1105_spi_setup*) = {
+		sja1105_switch_core_reset,
+		sja1105_config_reset,
+		sja1105_clocking_reset,
+		sja1105_otp_reset,
+		sja1105_warm_reset,
+		sja1105_cold_reset,
+		sja1105_por_reset,
+	};
+	int match;
 	int rc;
 
 	if (argc < 1) {
-		goto parse_error;
+		goto out_parse_error_usage;
 	}
-	if (matches(argv[0], "warm") == 0) {
-		reset.rst_ctrl = RGU_WARM;
-	} else if (matches(argv[0], "cold") == 0) {
-		reset.rst_ctrl = RGU_COLD;
-	} else {
-		goto parse_error;
+	match = get_match(argv[0], reset_options, ARRAY_SIZE(reset_options));
+	if (match < 0) {
+		goto out_parse_error;
 	}
 	rc = sja1105_spi_configure(spi_setup);
 	if (rc < 0) {
 		loge("failed to open spi device");
-		goto out;
+		goto out_spi_configure_failed;
 	}
-	return sja1105_reset(spi_setup, &reset);
-parse_error:
+	rc = sja1105_reset_fn[match](spi_setup);
+	if (rc < 0) {
+		goto out_reset_failed;
+	}
+	goto out_ok;
+
+out_parse_error_usage:
 	print_usage();
-out:
-	return -1;
+out_parse_error:
+	rc = -EINVAL;
+out_spi_configure_failed:
+out_reset_failed:
+out_ok:
+	return rc;
 }
 

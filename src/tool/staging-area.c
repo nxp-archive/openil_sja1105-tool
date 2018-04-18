@@ -275,7 +275,6 @@ out:
 int static_config_flush(struct sja1105_spi_setup *spi_setup,
                         struct sja1105_static_config *config)
 {
-	struct sja1105_reset_ctrl     reset = {.rst_ctrl = RGU_COLD};
 	struct sja1105_general_status status;
 	struct sja1105_egress_port_mask port_mask;
 	int i, rc;
@@ -301,7 +300,7 @@ int static_config_flush(struct sja1105_spi_setup *spi_setup,
 	 */
 	usleep(1000);
 	/* Put the SJA1105 in programming mode */
-	rc = sja1105_reset(spi_setup, &reset);
+	rc = sja1105_cold_reset(spi_setup);
 	if (rc < 0) {
 		loge("sja1105_reset failed");
 		goto out;
