@@ -60,7 +60,10 @@ void print_version()
 	char buf[256];
 	sja1105_lib_get_version(buf);
 	printf("libsja1105 version: %s\n", buf);
+	sja1105_lib_get_build_date(buf);
+	printf("libsja1105 build date: %s\n", buf);
 	printf("sja1105-tool version: %s\n", VERSION);
+	printf("sja1105-tool build date: %s\n", __DATE__ " " __TIME__);
 }
 
 static int parse_special_args(int *argc, char ***argv,
