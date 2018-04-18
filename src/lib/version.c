@@ -35,3 +35,8 @@ void sja1105_lib_get_version(char *buf)
 	snprintf(buf, 256, VERSION);
 }
 
+void sja1105_lib_get_build_date(char *buf)
+{
+	snprintf(buf, 256, __DATE__ " " __TIME__);
+}
+
