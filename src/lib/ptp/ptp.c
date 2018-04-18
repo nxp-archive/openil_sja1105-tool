@@ -31,6 +31,7 @@
 #include <string.h>
 #include <inttypes.h>
 /* These are our own include files */
+#include <lib/include/static-config.h>
 #include <lib/include/ptp.h>
 #include <lib/include/gtable.h>
 #include <lib/include/status.h>
@@ -39,10 +40,11 @@
 
 #define NSEC_PER_SEC 1000000000LL
 
-static void sja1105_ptp_cmd_access(
-		void *buf,
-		struct sja1105_ptp_cmd *ptp_cmd,
-		int write)
+static void
+sja1105_ptp_cmd_access(void *buf,
+                       struct sja1105_ptp_cmd *ptp_cmd,
+                       int write,
+                       uint64_t device_id)
 {
 	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
 	int    size = 4;
@@ -61,24 +63,34 @@ static void sja1105_ptp_cmd_access(
 	pack_or_unpack(buf, &ptp_cmd->ptpstopsch, 29, 29, 4);
 	pack_or_unpack(buf, &ptp_cmd->startptpcp, 28, 28, 4);
 	pack_or_unpack(buf, &ptp_cmd->stopptpcp,  27, 27, 4);
-	pack_or_unpack(buf, &ptp_cmd->resptp,      2,  2, 4);
-	pack_or_unpack(buf, &ptp_cmd->corrclk4ts,  1,  1, 4);
-	pack_or_unpack(buf, &ptp_cmd->ptpclkadd,   0,  0, 4);
+	if (IS_ET(device_id)) {
+		pack_or_unpack(buf, &ptp_cmd->resptp,      3,  3, 4);
+		pack_or_unpack(buf, &ptp_cmd->corrclk4ts,  2,  2, 4);
+		pack_or_unpack(buf, &ptp_cmd->ptpclksub,   1,  1, 4);
+		pack_or_unpack(buf, &ptp_cmd->ptpclkadd,   0,  0, 4);
+	} else {
+		pack_or_unpack(buf, &ptp_cmd->cassync,    25, 25, 4);
+		pack_or_unpack(buf, &ptp_cmd->resptp,      2,  2, 4);
+		pack_or_unpack(buf, &ptp_cmd->corrclk4ts,  1,  1, 4);
+		pack_or_unpack(buf, &ptp_cmd->ptpclkadd,   0,  0, 4);
+	}
 }
 
 void sja1105_ptp_cmd_pack(void *buf,
-                          struct sja1105_ptp_cmd *ptp_cmd)
+                          struct sja1105_ptp_cmd *ptp_cmd,
+                          uint64_t device_id)
 {
-	sja1105_ptp_cmd_access(buf, ptp_cmd, 1);
+	sja1105_ptp_cmd_access(buf, ptp_cmd, 1, device_id);
 }
 
 void sja1105_ptp_cmd_unpack(void *buf,
-                            struct sja1105_ptp_cmd *ptp_cmd)
+                            struct sja1105_ptp_cmd *ptp_cmd,
+                            uint64_t device_id)
 {
-	sja1105_ptp_cmd_access(buf, ptp_cmd, 0);
+	sja1105_ptp_cmd_access(buf, ptp_cmd, 0, device_id);
 }
 
-void sja1105_ptp_cmd_show(struct sja1105_ptp_cmd *ptp_cmd)
+void sja1105_ptp_cmd_show(struct sja1105_ptp_cmd *ptp_cmd, uint64_t device_id)
 {
 	printf("PTPSTRTSCH %" PRIX64 "\n", ptp_cmd->ptpstrtsch);
 	printf("PTPSTOPSCH %" PRIX64 "\n", ptp_cmd->ptpstopsch);
@@ -87,42 +99,68 @@ void sja1105_ptp_cmd_show(struct sja1105_ptp_cmd *ptp_cmd)
 	printf("RESPTP     %" PRIX64 "\n", ptp_cmd->resptp);
 	printf("CORRCLK4TS %" PRIX64 "\n", ptp_cmd->corrclk4ts);
 	printf("PTPCLKADD  %" PRIX64 "\n", ptp_cmd->ptpclkadd);
+	if (IS_PQRS(device_id)) {
+		printf("PTPCLKSUB %" PRIX64 "\n", ptp_cmd->ptpclksub);
+		printf("CASSYNC   %" PRIX64 "\n", ptp_cmd->cassync);
+	}
 }
 
 /* Wrapper around sja1105_spi_send_packed_buf() */
 int sja1105_ptp_cmd_commit(struct sja1105_spi_setup *spi_setup,
                            struct sja1105_ptp_cmd *ptp_cmd)
 {
-	const int PTP_CONTROL_ADDR = 0x17;
 	const int BUF_LEN = 4;
 	uint8_t packed_buf[BUF_LEN];
+	int ptp_control_addr;
 
-	sja1105_ptp_cmd_pack(packed_buf, ptp_cmd);
+	/* Cannot perform all the compatibility matrix checks
+	 * in this relatively time-critical code portion.
+	 * Relying on the caller to not access an unsupported Qbv
+	 * register on non-Qbv-capable devices.
+	 */
+	if (IS_ET(spi_setup->device_id)) {
+		ptp_control_addr = 0x17;
+	} else {
+		ptp_control_addr = 0x18;
+	}
+	sja1105_ptp_cmd_pack(packed_buf, ptp_cmd, spi_setup->device_id);
 	return sja1105_spi_send_packed_buf(spi_setup,
 	                                   SPI_WRITE,
-	                                   CORE_ADDR + PTP_CONTROL_ADDR,
+	                                   CORE_ADDR + ptp_control_addr,
 	                                   packed_buf,
 	                                   BUF_LEN);
 };
 
 int sja1105_ptp_qbv_running(struct sja1105_spi_setup *spi_setup)
 {
-	const int PTP_CONTROL_ADDR = 0x17;
 	const int BUF_LEN = 4;
 	uint8_t packed_buf[BUF_LEN];
 	struct  sja1105_ptp_cmd ptp_cmd;
 	int rc;
+	int ptp_control_addr;
 
+	if (!SUPPORTS_TSN(spi_setup->device_id)) {
+		loge("1588 + Qbv is only supported on T and Q/S!");
+		rc = -EINVAL;
+		goto out;
+	}
+	if (IS_PQRS(spi_setup->device_id)) {
+		/* Only Q/S will enter here. */
+		ptp_control_addr = 0x18;
+	} else {
+		/* Only T will enter here */
+		ptp_control_addr = 0x17;
+	}
 	rc = sja1105_spi_send_packed_buf(spi_setup,
 	                                 SPI_READ,
-	                                 CORE_ADDR + PTP_CONTROL_ADDR,
+	                                 CORE_ADDR + ptp_control_addr,
 	                                 packed_buf,
 	                                 BUF_LEN);
 	if (rc < 0) {
 		loge("failed to read from spi");
 		goto out;
 	}
-	sja1105_ptp_cmd_unpack(packed_buf, &ptp_cmd);
+	sja1105_ptp_cmd_unpack(packed_buf, &ptp_cmd, spi_setup->device_id);
 
 	if (ptp_cmd.ptpstrtsch == 1) {
 		/* Qbv successfully started */
@@ -229,11 +267,17 @@ sja1105_ptp_write_reg(struct sja1105_spi_setup *spi_setup,
 int sja1105_ptp_ts_clk_get(struct sja1105_spi_setup *spi_setup,
                            struct timespec *ts)
 {
+	uint64_t ptptsclk_addr;
 	uint64_t ptptsclk;
 	int rc;
 
+	if (IS_ET(spi_setup->device_id)) {
+		ptptsclk_addr = SJA1105ET_PTPTSCLK_ADDR;
+	} else {
+		ptptsclk_addr = SJA1105PQRS_PTPTSCLK_ADDR;
+	}
 	rc = sja1105_ptp_read_reg(spi_setup,
-	                          SJA1105_PTPTSCLK_ADDR,
+	                          ptptsclk_addr,
 	                          &ptptsclk, 8);
 	if (rc < 0) {
 		loge("%s: failed to read ptptsclk", __func__);
@@ -248,11 +292,17 @@ out:
 int sja1105_ptp_clk_get(struct sja1105_spi_setup *spi_setup,
                         struct timespec *ts)
 {
+	uint64_t ptpclkval_addr;
 	uint64_t ptpclkval;
 	int rc;
 
+	if (IS_ET(spi_setup->device_id)) {
+		ptpclkval_addr = SJA1105ET_PTPCLKVAL_ADDR;
+	} else {
+		ptpclkval_addr = SJA1105PQRS_PTPCLKVAL_ADDR;
+	}
 	rc = sja1105_ptp_read_reg(spi_setup,
-	                          SJA1105_PTPCLKVAL_ADDR,
+	                          ptpclkval_addr,
 	                          &ptpclkval, 8);
 	if (rc < 0) {
 		loge("%s: failed to read ptpclkval", __func__);
@@ -285,10 +335,17 @@ static inline int
 sja1105_ptp_clk_write(struct sja1105_spi_setup *spi_setup,
                       const struct timespec *ts)
 {
+	uint64_t ptpclkval_addr;
 	uint64_t ptpclkval;
+
+	if (IS_ET(spi_setup->device_id)) {
+		ptpclkval_addr = SJA1105ET_PTPCLKVAL_ADDR;
+	} else {
+		ptpclkval_addr = SJA1105PQRS_PTPCLKVAL_ADDR;
+	}
 	sja1105_timespec_to_ptp_time(ts, &ptpclkval);
 	return sja1105_ptp_write_reg(spi_setup,
-	                             SJA1105_PTPCLKVAL_ADDR,
+	                             ptpclkval_addr,
 	                             &ptpclkval, 8);
 }
 
@@ -361,10 +418,16 @@ out:
 int sja1105_ptp_clk_rate_set(struct sja1105_spi_setup *spi_setup,
                              double ratio)
 {
+	uint64_t ptpclkrate_addr;
 	uint32_t ptpclkrate;
 	uint64_t ptpclkrate_ext;
 	int rc;
 
+	if (IS_ET(spi_setup->device_id)) {
+		ptpclkrate_addr = SJA1105ET_PTPCLKRATE_ADDR;
+	} else {
+		ptpclkrate_addr = SJA1105PQRS_PTPCLKRATE_ADDR;
+	}
 	rc = sja1105_ptpclkrate_from_ratio(ratio, &ptpclkrate);
 	if (rc < 0) {
 		loge("%s: failed to convert ratio %lf", __func__, ratio);
@@ -372,7 +435,7 @@ int sja1105_ptp_clk_rate_set(struct sja1105_spi_setup *spi_setup,
 	}
 	ptpclkrate_ext = ptpclkrate;
 	return sja1105_ptp_write_reg(spi_setup,
-	                             SJA1105_PTPCLKRATE_ADDR,
+	                             ptpclkrate_addr,
 	                             &ptpclkrate_ext, 4);
 }
 
@@ -380,10 +443,17 @@ int sja1105_ptp_clk_rate_set(struct sja1105_spi_setup *spi_setup,
 int sja1105_ptp_pin_start_time_set(struct sja1105_spi_setup *spi_setup,
                                    const struct timespec *ts)
 {
+	uint64_t ptppinst_addr;
 	uint64_t pinst;
+
+	if (IS_ET(spi_setup->device_id)) {
+		ptppinst_addr = SJA1105ET_PTPPINST_ADDR;
+	} else {
+		ptppinst_addr = SJA1105PQRS_PTPPINST_ADDR;
+	}
 	sja1105_timespec_to_ptp_time(ts, &pinst);
 	return sja1105_ptp_write_reg(spi_setup,
-	                             SJA1105_PTPPINST_ADDR,
+	                             ptppinst_addr,
 	                             &pinst, 8);
 }
 
@@ -391,9 +461,15 @@ int sja1105_ptp_pin_start_time_set(struct sja1105_spi_setup *spi_setup,
 int sja1105_ptp_pin_duration_set(struct sja1105_spi_setup *spi_setup,
                                  const struct timespec *ts)
 {
+	uint64_t ptppindur_addr;
 	uint64_t pindur;
 	int rc;
 
+	if (IS_ET(spi_setup->device_id)) {
+		ptppindur_addr = SJA1105ET_PTPPINDUR_ADDR;
+	} else {
+		ptppindur_addr = SJA1105PQRS_PTPPINDUR_ADDR;
+	}
 	sja1105_timespec_to_ptp_time(ts, &pindur);
 	if (pindur >= UINT32_MAX) {
 		loge("%s: provided ts is too large", __func__);
@@ -401,7 +477,7 @@ int sja1105_ptp_pin_duration_set(struct sja1105_spi_setup *spi_setup,
 		goto out;
 	}
 	rc = sja1105_ptp_write_reg(spi_setup,
-	                           SJA1105_PTPPINDUR_ADDR,
+	                           ptppindur_addr,
 	                           &pindur, 4);
 out:
 	return rc;
@@ -411,9 +487,22 @@ out:
 int sja1105_ptp_qbv_correction_period_set(struct sja1105_spi_setup *spi_setup,
                                           const struct timespec *ts)
 {
+	uint64_t ptpclkcorp_addr;
 	uint64_t ptpclkcorp;
 	int rc;
 
+	if (!SUPPORTS_TSN(spi_setup->device_id)) {
+		loge("1588 + Qbv is only supported on T and Q/S!");
+		rc = -EINVAL;
+		goto out;
+	}
+	if (IS_ET(spi_setup->device_id)) {
+		/* Only T will enter here */
+		ptpclkcorp_addr = SJA1105T_PTPCLKCORP_ADDR;
+	} else {
+		/* Only Q/S will enter here */
+		ptpclkcorp_addr = SJA1105QS_PTPCLKCORP_ADDR;
+	}
 	sja1105_timespec_to_ptp_time(ts, &ptpclkcorp);
 	if (ptpclkcorp >= UINT32_MAX) {
 		loge("%s: provided ts is too large", __func__);
@@ -421,7 +510,7 @@ int sja1105_ptp_qbv_correction_period_set(struct sja1105_spi_setup *spi_setup,
 		goto out;
 	}
 	rc = sja1105_ptp_write_reg(spi_setup,
-	                           SJA1105_PTPCLKCORP_ADDR,
+	                           ptpclkcorp_addr,
 	                           &ptpclkcorp, 4);
 out:
 	return rc;
@@ -431,10 +520,23 @@ out:
 int sja1105_ptp_qbv_start_time_set(struct sja1105_spi_setup *spi_setup,
                                    const struct timespec *ts)
 {
+	uint64_t ptpschtm_addr;
 	uint64_t ptpschtm;
+
+	if (!SUPPORTS_TSN(spi_setup->device_id)) {
+		loge("1588 + Qbv is only supported on T and Q/S!");
+		return -EINVAL;
+	}
+	if (IS_ET(spi_setup->device_id)) {
+		/* Only T enters here */
+		ptpschtm_addr = SJA1105T_PTPSCHTM_ADDR;
+	} else {
+		/* Only Q/S enter here */
+		ptpschtm_addr = SJA1105QS_PTPSCHTM_ADDR;
+	}
 	sja1105_timespec_to_ptp_time(ts, &ptpschtm);
 	return sja1105_ptp_write_reg(spi_setup,
-	                             SJA1105_PTPSCHTM_ADDR,
+	                             ptpschtm_addr,
 	                             &ptpschtm, 8);
 }
 
@@ -465,9 +567,15 @@ int sja1105_ptpegr_ts_poll(struct sja1105_spi_setup *spi_setup,
 	int       rc;
 
 	if (source == TS_PTPCLK) {
-		ptpclk_addr = SJA1105_PTPCLKVAL_ADDR;
+		/* Use PTPCLK */
+		ptpclk_addr = IS_ET(spi_setup->device_id) ?
+		              SJA1105ET_PTPCLKVAL_ADDR :
+		              SJA1105PQRS_PTPCLKVAL_ADDR;
 	} else if (source == TS_PTPTSCLK) {
-		ptpclk_addr = SJA1105_PTPTSCLK_ADDR;
+		/* Use PTPTSCLK */
+		ptpclk_addr = IS_ET(spi_setup->device_id) ?
+		              SJA1105ET_PTPTSCLK_ADDR :
+		              SJA1105PQRS_PTPTSCLK_ADDR;
 	} else {
 		loge("%s: invalid source selection: %d", __func__, source);
 		rc = -EINVAL;
@@ -497,18 +605,26 @@ int sja1105_ptpegr_ts_poll(struct sja1105_spi_setup *spi_setup,
 		loge("failed to read ptpclkval/ptptsclk");
 		goto out;
 	}
-	ptpegr_ts_mask = (1ull << 24ull) - 1;
+	/* E/T and P/Q/R/S have different sized egress timestamps */
+	if (IS_ET(spi_setup->device_id)) {
+		ptpegr_ts_mask = (1ull << 24ull) - 1;
+	} else {
+		ptpegr_ts_mask = (1ull << 32ull) - 1;
+	}
 	ptpegr_ts_reconstructed = (ptp_full_current_ts & ~ptpegr_ts_mask) |
 	                           ptpegr_ts_partial;
 	/* Check if wraparound occurred between moment when the partial
 	 * ptpegr timestamp was generated, and the moment when that
 	 * timestamp is being read out (now, ptpclkval/ptptsclk).
-	 * If last 24 bits of current ptpclkval/ptptsclk time are lower
-	 * than the partial timestamp, then wraparound surely occurred.
-	 * Otherwise, we'll never know...
-	 **/
+	 * If last 24 bits (32 for P/Q/R/S) of current ptpclkval/ptptsclk
+	 * time are lower than the partial timestamp, then wraparound surely
+	 * occurred, as ptpclkval is 64-bit.
+	 * What is up to anyone's guess is how many times has the wraparound
+	 * occurred. The code assumes (perhaps foolishly?) that if wraparound
+	 * is present, it has only occurred once, and thus corrects for it.
+	 */
 	if ((ptp_full_current_ts & ptpegr_ts_mask) <= ptpegr_ts_partial) {
-		ptpegr_ts_reconstructed -= (1ull << 24ull);
+		ptpegr_ts_reconstructed -= (ptpegr_ts_mask + 1ull);
 	}
 	sja1105_ptp_time_to_timespec(ts, ptpegr_ts_reconstructed);
 out:

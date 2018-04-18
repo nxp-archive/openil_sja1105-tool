@@ -35,13 +35,22 @@
 #include <time.h>
 #include <stdint.h>
 
-#define SJA1105_PTPCLKCORP_ADDR 0x1D
-#define SJA1105_PTPTSCLK_ADDR   0x1B
-#define SJA1105_PTPCLKRATE_ADDR 0x1A
-#define SJA1105_PTPCLKVAL_ADDR  0x18
-#define SJA1105_PTPPINDUR_ADDR  0x16
-#define SJA1105_PTPPINST_ADDR   0x14
-#define SJA1105_PTPSCHTM_ADDR   0x12
+#define SJA1105PQRS_PTPSYNCTS_ADDR  0x1F
+#define SJA1105QS_PTPCLKCORP_ADDR   0x1E
+#define SJA1105PQRS_PTPTSCLK_ADDR   0x1C
+#define SJA1105PQRS_PTPCLKRATE_ADDR 0x1B
+#define SJA1105PQRS_PTPCLKVAL_ADDR  0x19
+#define SJA1105PQRS_PTPPINDUR_ADDR  0x17
+#define SJA1105PQRS_PTPPINST_ADDR   0x15
+#define SJA1105QS_PTPSCHTM_ADDR     0x13
+
+#define SJA1105T_PTPCLKCORP_ADDR    0x1D
+#define SJA1105ET_PTPTSCLK_ADDR     0x1B
+#define SJA1105ET_PTPCLKRATE_ADDR   0x1A
+#define SJA1105ET_PTPCLKVAL_ADDR    0x18
+#define SJA1105ET_PTPPINDUR_ADDR    0x16
+#define SJA1105ET_PTPPINST_ADDR     0x14
+#define SJA1105T_PTPSCHTM_ADDR      0x12
 
 #define SIZE_PTP_CONFIG         (7*8)
 #define PTP_ADDR                0x0   /* Offset into CORE_ADDR */
@@ -61,9 +70,15 @@ struct sja1105_ptp_cmd {
 	uint64_t ptpstopsch;   /* stop schedule */
 	uint64_t startptpcp;   /* start pin toggle  */
 	uint64_t stopptpcp;    /* stop pin toggle */
+	uint64_t cassync;      /* if cascaded master, trigger a toggle of the
+	                          PTP_CLK pin, and store the timestamp of its
+	                          1588 clock (ptpclk or ptptsclk, depending on
+	                          corrclk4ts), in ptpsyncts.
+	                          only for P/Q/R/S series */
 	uint64_t resptp;       /* reset */
 	uint64_t corrclk4ts;   /* if (1) timestamps are based on ptpclk,
 	                          if (0) timestamps are based on ptptsclk */
+	uint64_t ptpclksub;    /* only for P/Q/R/S series */
 	uint64_t ptpclkadd;    /* enum sja1105_ptp_clk_add_mode */
 };
 
@@ -76,9 +91,9 @@ int  sja1105_ptp_clk_set(struct sja1105_spi_setup*, const struct timespec *ts);
 int  sja1105_ptp_clk_add(struct sja1105_spi_setup*, const struct timespec *ts);
 int  sja1105_ptp_clk_rate_set(struct sja1105_spi_setup*, double ratio);
 
-void sja1105_ptp_cmd_unpack(void *buf, struct sja1105_ptp_cmd*);
-void sja1105_ptp_cmd_pack(void *buf, struct sja1105_ptp_cmd*);
-void sja1105_ptp_cmd_show(struct sja1105_ptp_cmd*);
+void sja1105_ptp_cmd_unpack(void *buf, struct sja1105_ptp_cmd*, uint64_t);
+void sja1105_ptp_cmd_pack(void *buf, struct sja1105_ptp_cmd*, uint64_t);
+void sja1105_ptp_cmd_show(struct sja1105_ptp_cmd*, uint64_t);
 int  sja1105_ptp_cmd_commit(struct sja1105_spi_setup*,
                             struct sja1105_ptp_cmd*);
 
