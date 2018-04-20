@@ -37,7 +37,7 @@ static void print_usage()
 {
 	printf("Usage: sja1105-tool config <command> [<options>] \n");
 	printf("<command> can be:\n");
-	printf("* new\n");
+	printf("* new [-d|--device-id <value>], default 0x9e00030e (SJA1105T)\n");
 	printf("* load [-f|--flush] <filename.xml>\n");
 	printf("* save <filename.xml>\n");
 	printf("* default [-f|--flush] <config>, which can be:\n");
@@ -201,10 +201,29 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 			}
 		}
 	} else if (strcmp(options[match], "new") == 0) {
-		if (argc != 0) {
+		if (argc != 2 && argc != 0) {
+			/* The 2 forms that are allowed are:
+			 * sja1105-tool config new
+			 * sja1105-tool config new -d <device_id>
+			 */
 			goto parse_error;
 		}
 		memset(&staging_area, 0, sizeof(staging_area));
+		if (argc == 2) {
+			if ((matches(argv[0], "-d") == 0) ||
+			    (matches(argv[0], "--device-id") == 0)) {
+				/* sja1105-config new -d <device_id> was provided */
+				rc = reliable_uint64_from_string(&staging_area.static_config.device_id,
+				                                 argv[1], NULL);
+				if (rc < 0) {
+					loge("Invalid device id provided: %s", argv[1]);
+					goto parse_error;
+				}
+			}
+		} else {
+			logv("No device id provided, defaulting to SJA1105T");
+			staging_area.static_config.device_id = SJA1105T_DEVICE_ID;
+		}
 		rc = staging_area_save(spi_setup->staging_area, &staging_area);
 		if (rc < 0) {
 			goto error;

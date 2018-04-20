@@ -232,8 +232,7 @@ static_config_upload(struct sja1105_spi_setup *spi_setup,
 	int    crc_len;
 	int    rc;
 
-	config_buf_len = sja1105_static_config_get_length(config) +
-	                 SIZE_SJA1105_DEVICE_ID;
+	config_buf_len = sja1105_static_config_get_length(config);
 	config_buf = (char*) malloc(config_buf_len * sizeof(char));
 	if (!config_buf) {
 		loge("malloc failed");
