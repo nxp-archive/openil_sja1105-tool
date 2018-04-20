@@ -45,7 +45,8 @@
 #define SIZE_L2_POLICING_ENTRY                  8
 #define SIZE_VLAN_LOOKUP_ENTRY                  8
 #define SIZE_L2_FORWARDING_ENTRY                8
-#define SIZE_MAC_CONFIG_ENTRY                   28
+#define SIZE_SJA1105ET_MAC_CONFIG_ENTRY         28
+#define SIZE_SJA1105PQRS_MAC_CONFIG_ENTRY       32
 #define SIZE_SCHEDULE_PARAMS_ENTRY              12
 #define SIZE_SCHEDULE_ENTRY_POINTS_PARAMS_ENTRY 4
 #define SIZE_VL_FORWARDING_PARAMS_ENTRY         12
@@ -244,11 +245,18 @@ struct sja1105_mac_config_entry {
 	uint64_t egr_mirr;
 	uint64_t drpnona664;
 	uint64_t drpdtag;
+	uint64_t drpsotag;   /* only on P/Q/R/S */
+	uint64_t drpsitag;   /* only on P/Q/R/S */
 	uint64_t drpuntag;
 	uint64_t retag;
 	uint64_t dyn_learn;
 	uint64_t egress;
 	uint64_t ingress;
+	uint64_t mirrcie;    /* only on P/Q/R/S */
+	uint64_t mirrcetag;  /* only on P/Q/R/S */
+	uint64_t imgmirrvid; /* only on P/Q/R/S */
+	uint64_t imgmirrpcp; /* only on P/Q/R/S */
+	uint64_t imgmirrdei; /* only on P/Q/R/S */
 };
 
 struct sja1105_xmii_params_table {
@@ -444,8 +452,10 @@ void sja1105_l2_policing_entry_pack(void*, struct sja1105_l2_policing_entry*);
 void sja1105_l2_policing_entry_unpack(void*, struct sja1105_l2_policing_entry*);
 void sja1105_l2_policing_entry_show(struct sja1105_l2_policing_entry*);
 void sja1105_l2_policing_entry_fmt_show(char*, char*, struct sja1105_l2_policing_entry*);
-void sja1105_mac_config_entry_pack(void*, struct sja1105_mac_config_entry*);
-void sja1105_mac_config_entry_unpack(void*, struct sja1105_mac_config_entry*);
+void sja1105et_mac_config_entry_pack(void*, struct sja1105_mac_config_entry*);
+void sja1105et_mac_config_entry_unpack(void*, struct sja1105_mac_config_entry*);
+void sja1105pqrs_mac_config_entry_pack(void*, struct sja1105_mac_config_entry*);
+void sja1105pqrs_mac_config_entry_unpack(void*, struct sja1105_mac_config_entry*);
 void sja1105_mac_config_entry_show(struct sja1105_mac_config_entry*);
 void sja1105_mac_config_entry_fmt_show(char*, char*, struct sja1105_mac_config_entry*);
 void sja1105_schedule_entry_points_params_pack(void*, struct sja1105_schedule_entry_points_params*);

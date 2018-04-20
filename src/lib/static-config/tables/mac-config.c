@@ -38,13 +38,13 @@
 #include <lib/include/gtable.h>
 #include <common.h>
 
-static void sja1105_mac_config_entry_access(
-		void *buf,
-		struct sja1105_mac_config_entry *entry,
-		int write)
+static void
+sja1105et_mac_config_entry_access(void *buf,
+                                  struct sja1105_mac_config_entry *entry,
+                                  int write)
 {
 	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
-	int    size = SIZE_MAC_CONFIG_ENTRY;
+	int    size = SIZE_SJA1105ET_MAC_CONFIG_ENTRY;
 	int    offset;
 	int    i;
 
@@ -80,22 +80,83 @@ static void sja1105_mac_config_entry_access(
 	pack_or_unpack(buf, &entry->ingress,      1,  1, size);
 }
 
-void sja1105_mac_config_entry_pack(void *buf, struct
-                                   sja1105_mac_config_entry *entry)
+static void
+sja1105pqrs_mac_config_entry_access(void *buf,
+                                    struct sja1105_mac_config_entry *entry,
+                                    int write)
 {
-	sja1105_mac_config_entry_access(buf, entry, 1);
+	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
+	int    size = SIZE_SJA1105PQRS_MAC_CONFIG_ENTRY;
+	int    offset;
+	int    i;
+
+	if (write == 0) {
+		pack_or_unpack = gtable_unpack;
+		memset(entry, 0, sizeof(*entry));
+	} else {
+		pack_or_unpack = gtable_pack;
+		memset(buf, 0, size);
+	}
+	offset = 104;
+	for (i = 0; i < 8; i++) {
+		pack_or_unpack(buf, &entry->enabled[i], offset +  0, offset +  0, size);
+		pack_or_unpack(buf, &entry->base[i],    offset +  9, offset +  1, size);
+		pack_or_unpack(buf, &entry->top[i],     offset + 18, offset + 10, size);
+		offset += 19;
+	}
+	pack_or_unpack(buf, &entry->ifg,        103, 99, size);
+	pack_or_unpack(buf, &entry->speed,       98, 97, size);
+	pack_or_unpack(buf, &entry->tp_delin,    96, 81, size);
+	pack_or_unpack(buf, &entry->tp_delout,   80, 65, size);
+	pack_or_unpack(buf, &entry->maxage,      64, 57, size);
+	pack_or_unpack(buf, &entry->vlanprio,    56, 54, size);
+	pack_or_unpack(buf, &entry->vlanid,      53, 42, size);
+	pack_or_unpack(buf, &entry->ing_mirr,    41, 41, size);
+	pack_or_unpack(buf, &entry->egr_mirr,    40, 40, size);
+	pack_or_unpack(buf, &entry->drpnona664,  39, 39, size);
+	pack_or_unpack(buf, &entry->drpdtag,     38, 38, size);
+	pack_or_unpack(buf, &entry->drpsotag,    37, 37, size);
+	pack_or_unpack(buf, &entry->drpsitag,    36, 36, size);
+	pack_or_unpack(buf, &entry->drpuntag,    35, 35, size);
+	pack_or_unpack(buf, &entry->retag,       34, 34, size);
+	pack_or_unpack(buf, &entry->dyn_learn,   33, 33, size);
+	pack_or_unpack(buf, &entry->egress,      32, 32, size);
+	pack_or_unpack(buf, &entry->ingress,     31, 31, size);
+	pack_or_unpack(buf, &entry->mirrcie,     30, 30, size);
+	pack_or_unpack(buf, &entry->mirrcetag,   29, 29, size);
+	pack_or_unpack(buf, &entry->imgmirrvid,  28, 17, size);
+	pack_or_unpack(buf, &entry->imgmirrpcp,  16, 14, size);
+	pack_or_unpack(buf, &entry->imgmirrdei,  13, 13, size);
 }
 
-void sja1105_mac_config_entry_unpack(void *buf, struct
+void sja1105et_mac_config_entry_pack(void *buf, struct
                                      sja1105_mac_config_entry *entry)
 {
-	sja1105_mac_config_entry_access(buf, entry, 0);
+	sja1105et_mac_config_entry_access(buf, entry, 1);
 }
 
-void sja1105_mac_config_entry_fmt_show(
-		char *print_buf,
-		char *fmt,
-		struct sja1105_mac_config_entry *entry)
+void sja1105et_mac_config_entry_unpack(void *buf, struct
+                                       sja1105_mac_config_entry *entry)
+{
+	sja1105et_mac_config_entry_access(buf, entry, 0);
+}
+
+void sja1105pqrs_mac_config_entry_pack(void *buf, struct
+                                       sja1105_mac_config_entry *entry)
+{
+	sja1105pqrs_mac_config_entry_access(buf, entry, 1);
+}
+
+void sja1105pqrs_mac_config_entry_unpack(void *buf, struct
+                                         sja1105_mac_config_entry *entry)
+{
+	sja1105pqrs_mac_config_entry_access(buf, entry, 0);
+}
+
+void
+sja1105_mac_config_entry_fmt_show(char *print_buf,
+                                  char *fmt,
+                                  struct sja1105_mac_config_entry *entry)
 {
 	char    base_buf[MAX_LINE_SIZE];
 	char     top_buf[MAX_LINE_SIZE];
@@ -104,6 +165,11 @@ void sja1105_mac_config_entry_fmt_show(
 	print_array(base_buf,    entry->base, 8);
 	print_array(top_buf,     entry->top, 8);
 	print_array(enabled_buf, entry->enabled, 8);
+	/* We have to compromise by keeping the device_id out of the prototype
+	 * definition of this function. It is therefore preferable to see a few
+	 * extra zero-valued fields on the E/T rather than not see the values at
+	 * all on the P/Q/R/S.
+	 */
 	formatted_append(print_buf, fmt, "BASE      %s", base_buf);
 	formatted_append(print_buf, fmt, "TOP       %s", top_buf);
 	formatted_append(print_buf, fmt, "ENABLED   %s", enabled_buf);
@@ -119,10 +185,17 @@ void sja1105_mac_config_entry_fmt_show(
 	formatted_append(print_buf, fmt, "DRPNONA664 0x%" PRIX64, entry->drpnona664);
 	formatted_append(print_buf, fmt, "DRPDTAG    0x%" PRIX64, entry->drpdtag);
 	formatted_append(print_buf, fmt, "DRPUNTAG   0x%" PRIX64, entry->drpuntag);
+	formatted_append(print_buf, fmt, "DRPSOTAG   0x%" PRIX64, entry->drpsotag);
+	formatted_append(print_buf, fmt, "DRPSITAG   0x%" PRIX64, entry->drpsitag);
 	formatted_append(print_buf, fmt, "RETAG      0x%" PRIX64, entry->retag);
 	formatted_append(print_buf, fmt, "DYN_LEARN  0x%" PRIX64, entry->dyn_learn);
 	formatted_append(print_buf, fmt, "EGRESS     0x%" PRIX64, entry->egress);
 	formatted_append(print_buf, fmt, "INGRESS    0x%" PRIX64, entry->ingress);
+	formatted_append(print_buf, fmt, "MIRRCIE    0x%" PRIX64, entry->mirrcie);
+	formatted_append(print_buf, fmt, "MIRRCETAG  0x%" PRIX64, entry->mirrcetag);
+	formatted_append(print_buf, fmt, "IMGMIRRVID 0x%" PRIX64, entry->imgmirrvid);
+	formatted_append(print_buf, fmt, "IMGMIRRPCP 0x%" PRIX64, entry->imgmirrpcp);
+	formatted_append(print_buf, fmt, "IMGMIRRDEI 0x%" PRIX64, entry->imgmirrdei);
 }
 
 void sja1105_mac_config_entry_show(struct sja1105_mac_config_entry *entry)
