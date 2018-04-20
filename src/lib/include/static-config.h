@@ -111,6 +111,21 @@
 #define SJA1105S_DEVICE_ID         0xAE00030Eull
 #define SJA1105_DEVICE_ID_INVALID  0xFFFFFFFFull
 
+#define IS_PQRS(device_id) \
+	(((device_id) == SJA1105P_DEVICE_ID) || \
+	 ((device_id) == SJA1105Q_DEVICE_ID) || \
+	 ((device_id) == SJA1105R_DEVICE_ID) || \
+	 ((device_id) == SJA1105S_DEVICE_ID))
+#define IS_ET(device_id) \
+	(((device_id) == SJA1105E_DEVICE_ID) || \
+	 ((device_id) == SJA1105T_DEVICE_ID))
+#define DEVICE_ID_VALID(device_id) \
+	(IS_ET(device_id) || IS_PQRS(device_id))
+#define SUPPORTS_TSN(device_id) \
+	(((device_id) == SJA1105T_DEVICE_ID) || \
+	 ((device_id) == SJA1105Q_DEVICE_ID) || \
+	 ((device_id) == SJA1105S_DEVICE_ID))
+
 struct sja1105_schedule_entry {
 	uint64_t winstindex;
 	uint64_t winend;
