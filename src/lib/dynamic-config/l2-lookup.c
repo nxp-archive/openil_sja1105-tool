@@ -41,6 +41,10 @@
 #include <lib/helpers.h>
 #include <common.h>
 
+/*
+ * TODO: Update management routes for SJA1105 P/Q/R/S compatibility
+ */
+
 /* Prototype for non-externally-visible function in
  * src/lib/static-config/tables/l2-lookup.c */
 void sja1105_l2_lookup_entry_access(void *buf,
