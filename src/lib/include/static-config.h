@@ -357,6 +357,7 @@ struct sja1105_retagging_entry {
 };
 
 struct sja1105_static_config {
+	uint64_t device_id;
 	struct sja1105_schedule_entry \
 	       schedule[MAX_SCHEDULE_COUNT];
 	struct sja1105_schedule_entry_points_entry \

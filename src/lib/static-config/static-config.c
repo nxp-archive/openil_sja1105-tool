@@ -46,6 +46,15 @@ static void sja1105_table_write_crc(char *table_start, char *crc_ptr)
 	gtable_pack(crc_ptr, &computed_crc, 31, 0, 4);
 }
 
+/* Input: struct sja1105_table_header *hdr
+ *        void *buf
+ *        config->device_id
+ * Output: Depending on the provided table header,
+ *         the packed buffer is parsed accordingly and
+ *         unpacked into the corresponding
+ *         struct sja1105_static_config *config
+ *         field.
+ */
 int sja1105_static_config_add_entry(struct sja1105_table_header *hdr, void *buf,
                                     struct sja1105_static_config *config)
 {
@@ -361,6 +370,11 @@ int sja1105_static_config_hexdump(void *buf)
 	int bytes;
 
 	memset(&config, 0, sizeof(config));
+	/* Retrieve device_id from first 4 bytes of packed buffer */
+	gtable_unpack(p, &config.device_id, 31, 0, 4);
+	printf("Device ID is 0x%08" PRIx64 "\n", config.device_id);
+	p += SIZE_SJA1105_DEVICE_ID;
+
 	while (1) {
 		sja1105_table_header_unpack(p, &hdr);
 		/* This should match on last table header */
@@ -518,6 +532,9 @@ sja1105_static_config_unpack(void *buf, struct sja1105_static_config *config)
 	uint64_t computed_crc;
 
 	memset(config, 0, sizeof(*config));
+	/* Retrieve device_id from first 4 bytes of packed buffer */
+	gtable_unpack(p, &config->device_id, 31, 0, 4);
+	p += SIZE_SJA1105_DEVICE_ID;
 	while (1) {
 		sja1105_table_header_unpack(p, &hdr);
 		/* This should match on last table header */
@@ -585,12 +602,19 @@ sja1105_static_config_pack(void *buf, struct sja1105_static_config *config)
 		p += 4;                                                      \
 	}
 
-	struct sja1105_table_header header;
+	struct sja1105_table_header header = {0};
 	char  *p = buf;
 	char  *table_start;
 	int    i;
 
-	memset(&header, 0, sizeof(header));
+	if (!DEVICE_ID_VALID(config->device_id)) {
+		loge("Cannot pack invalid Device ID 0x08%" PRIx64 "!", config->device_id);
+		return;
+	}
+
+	gtable_pack(p, &config->device_id, 31, 0, 4);
+	p += SIZE_SJA1105_DEVICE_ID;
+
 	PACK_TABLE_IN_BUF_FN(config->schedule_count,
 	                     SIZE_SCHEDULE_ENTRY,
 	                     BLKID_SCHEDULE_TABLE,
@@ -714,6 +738,7 @@ sja1105_static_config_get_length(struct sja1105_static_config *config)
 	header_count += (config->general_params_count != 0);
 	header_count += (config->xmii_params_count != 0);
 	header_count += 1; /* Ending header */
+	sum += SIZE_SJA1105_DEVICE_ID;
 	sum += header_count * (SIZE_TABLE_HEADER + 4); /* plus CRC at the end */
 	sum += config->schedule_count * SIZE_SCHEDULE_ENTRY;
 	sum += config->schedule_entry_points_count * SIZE_SCHEDULE_ENTRY_POINTS_ENTRY;

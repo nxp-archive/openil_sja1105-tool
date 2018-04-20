@@ -38,8 +38,9 @@ int
 sja1105_default_staging_area(struct sja1105_staging_area *staging_area,
                              enum sja1105_default_staging_area config_name)
 {
-	struct sja1105_static_config *static_config;
 	uint8_t ls1021atsn_packed_buf[] = {
+		/* SJA1105T_DEVICE_ID */
+		0x9E, 0x00, 0x03, 0x0e,
 		/* L2 Policing Table, length 320 bytes (80 x 32-bit words), CRC 216F256B */
 		/* Header: */
 		0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x50, 0x21, 0x6F, 0x25, 0x6B,
@@ -195,14 +196,17 @@ sja1105_default_staging_area(struct sja1105_staging_area *staging_area,
 		0x00, 0x00, 0x00, 0x00,
 		0x8C, 0xCA, 0x28, 0x6D,
 	};
-	static_config = &staging_area->static_config;
+	int rc;
 
-	if (config_name == LS1021ATSN) {
-		return sja1105_static_config_unpack(ls1021atsn_packed_buf,
-		                                    static_config);
-	} else {
+	switch (config_name) {
+	case LS1021ATSN:
+		rc = sja1105_static_config_unpack(ls1021atsn_packed_buf,
+		                                  &staging_area->static_config);
+		break;
+	default:
 		loge("Unknown default config name %d", config_name);
-		return -1;
+		rc = -EINVAL;
 	}
+	return rc;
 }
 
