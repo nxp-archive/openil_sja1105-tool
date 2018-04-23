@@ -45,17 +45,18 @@
 #include <lib/include/spi.h>
 #include <common.h>
 
-static int sja1105_get_device_id(struct sja1105_spi_setup *spi_setup)
+int sja1105_device_id_get(struct sja1105_spi_setup *spi_setup,
+                          uint64_t *device_id, uint64_t *part_nr)
 {
-	struct sja1105_general_status status;
 	uint64_t compatible_device_ids[] = {
 		SJA1105E_DEVICE_ID,
 		SJA1105T_DEVICE_ID,
-		SJA1105P_DEVICE_ID,
+		SJA1105PR_DEVICE_ID,
 		SJA1105Q_DEVICE_ID,
-		SJA1105R_DEVICE_ID,
 		SJA1105S_DEVICE_ID,
 	};
+	uint64_t tmp_device_id;
+	uint64_t tmp_part_nr;
 	unsigned int i;
 	int rc;
 
@@ -65,22 +66,40 @@ static int sja1105_get_device_id(struct sja1105_spi_setup *spi_setup)
 		rc = 0;
 		goto out_found;
 	}
-	rc = sja1105_general_status_get(spi_setup, &status);
+	rc = sja1105_spi_send_int(spi_setup,
+	                          SPI_READ,
+	                          CORE_ADDR + 0x00,
+	                          &tmp_device_id,
+	                          SIZE_SJA1105_DEVICE_ID);
 	if (rc < 0) {
-		loge("sja1105_general_status_get failed");
+		loge("sja1105_spi_send_int failed");
 		goto out_error;
 	}
-	spi_setup->device_id = SJA1105_DEVICE_ID_INVALID;
+	*device_id = SJA1105_DEVICE_ID_INVALID;
 	for (i = 0; i < ARRAY_SIZE(compatible_device_ids); i++) {
-		if (status.device_id == compatible_device_ids[i]) {
-			spi_setup->device_id = compatible_device_ids[i];
+		if (tmp_device_id == compatible_device_ids[i]) {
+			*device_id = compatible_device_ids[i];
 			break;
 		}
 	}
-	if (spi_setup->device_id == SJA1105_DEVICE_ID_INVALID) {
-		loge("Unrecognized Device ID %" PRIx64, status.device_id);
+	if (*device_id == SJA1105_DEVICE_ID_INVALID) {
+		loge("Unrecognized Device ID %" PRIx64, tmp_device_id);
 		rc = -EINVAL;
 		goto out_error;
+	}
+	if (IS_PQRS(*device_id)) {
+		/* 0x100BC3 relative to 0x100800 */
+		const int PROD_ID_ADDR = 0x3C3;
+		rc = sja1105_spi_send_int(spi_setup,
+		                          SPI_READ,
+		                          ACU_ADDR + PROD_ID_ADDR,
+		                          &tmp_part_nr,
+		                          4);
+		if (rc < 0) {
+			loge("sja1105_spi_send_int failed");
+			goto out_error;
+		}
+		gtable_unpack(&tmp_part_nr, part_nr, 19, 4, 4);
 	}
 out_error:
 out_found:
@@ -182,7 +201,8 @@ int sja1105_spi_configure(struct sja1105_spi_setup *spi_setup)
 		/* Device ID was not overridden from sja1105.conf.
 		 * Check that we are talking with a compatible
 		 * device over SPI. */
-		rc = sja1105_get_device_id(spi_setup);
+		rc = sja1105_device_id_get(spi_setup, &spi_setup->device_id,
+		                          &spi_setup->part_nr);
 		if (rc < 0) {
 			goto out_unknown_device_id;
 		}
