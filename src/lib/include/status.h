@@ -35,6 +35,7 @@
 #include "spi.h"
 
 #define CORE_ADDR   0x000000
+#define ACU_ADDR    0x100800
 
 struct sja1105_general_status {
 	uint64_t device_id;
