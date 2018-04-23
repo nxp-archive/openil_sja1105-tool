@@ -41,10 +41,11 @@
 #include <common.h>
 
 void sja1105_port_status_show(struct sja1105_port_status *status,
-                              int    port,
-                              char  *print_buf)
+                              int    port, char  *print_buf,
+                              uint64_t device_id)
 {
 	char *fmt = "%-30s\n";
+	int i;
 	formatted_append(print_buf, fmt, "Port %d",          port);
 	formatted_append(print_buf, fmt, "");
 	formatted_append(print_buf, fmt, "MAC-Level Diagnostic Counters");
@@ -93,6 +94,14 @@ void sja1105_port_status_show(struct sja1105_port_status *status,
 	formatted_append(print_buf, fmt, "N_EGR_DISABLED  %" PRIu64, status->n_egr_disabled);
 	formatted_append(print_buf, fmt, "N_NOT_REACH     %" PRIu64, status->n_not_reach);
 	formatted_append(print_buf, fmt, "");
+	if (IS_PQRS(device_id)) {
+		formatted_append(print_buf, fmt, "Queue Levels");
+		for (i = 0; i < 8; i++) {
+			formatted_append(print_buf, fmt, "QLEVEL_HWM_%d   %" PRIu64, i, status->qlevel_hwm[i]);
+			formatted_append(print_buf, fmt, "QLEVEL_%d       %" PRIu64, i, status->qlevel[i]);
+		}
+		formatted_append(print_buf, fmt, "");
+	}
 }
 
 static void
@@ -167,17 +176,33 @@ sja1105_port_status_hl2_unpack(void *buf, struct
 	gtable_unpack(p + 0x0, &status->n_not_reach,    31,  0, 4);
 }
 
+static void
+sja1105pqrs_port_status_qlevel_unpack(void *buf, struct
+                                      sja1105_port_status *status)
+{
+	/* So that additions translate to 4 bytes */
+	uint32_t *p = (uint32_t*) buf;
+	int i;
+
+	for (i = 0; i < 8; i++) {
+		gtable_unpack(p + i, &status->qlevel_hwm[i], 24, 16, 4);
+		gtable_unpack(p + i, &status->qlevel[i],      8,  0, 4);
+	}
+}
+
 int sja1105_port_status_get(struct sja1105_spi_setup *spi_setup,
                             struct sja1105_port_status *status,
                             int port)
 {
-	const int SIZE_MAC_AREA = 0x02 * 4;
-	const int SIZE_HL_AREA  = 0x10 * 4;
-	/* The larger of the 2. Reusing some space. */
+	const int SIZE_MAC_AREA    = 0x02 * 4;
+	const int SIZE_HL_AREA     = 0x10 * 4;
+	const int SIZE_QLEVEL_AREA =  0x8 * 4; /* 0x4 to 0xB */
+	/* The larger of the 3. Reusing some space. */
 	const int BUF_LEN       = SIZE_HL_AREA;
 	const uint64_t mac_base_addr[]          = {0x200, 0x202, 0x204, 0x206, 0x208};
 	const uint64_t high_level_1_base_addr[] = {0x400, 0x410, 0x420, 0x430, 0x440};
 	const uint64_t high_level_2_base_addr[] = {0x600, 0x610, 0x620, 0x630, 0x640};
+	const uint64_t qlevel_base_addr[]       = {0x604, 0x614, 0x624, 0x634, 0x644};
 	uint8_t packed_buf[BUF_LEN];
 	int rc = 0;
 
@@ -218,6 +243,21 @@ int sja1105_port_status_get(struct sja1105_spi_setup *spi_setup,
 		goto out;
 	}
 	sja1105_port_status_hl2_unpack(packed_buf, status);
+
+	if (IS_ET(spi_setup->device_id)) {
+		/* Code below is strictly P/Q/R/S specific. */
+		goto out;
+	}
+	rc = sja1105_spi_send_packed_buf(spi_setup,
+	                                 SPI_READ,
+	                                 CORE_ADDR + qlevel_base_addr[port],
+	                                 packed_buf,
+	                                 SIZE_QLEVEL_AREA);
+	if (rc < 0) {
+		loge("failed to read high-level 1 registers");
+		goto out;
+	}
+	sja1105pqrs_port_status_qlevel_unpack(packed_buf, status);
 out:
 	return rc;
 }

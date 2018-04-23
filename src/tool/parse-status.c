@@ -64,7 +64,8 @@ static int status_ports(struct sja1105_spi_setup *spi_setup,
 				loge("sja1105_port_status_get failed");
 				goto out;
 			}
-			sja1105_port_status_show(&status, i, print_buf[i]);
+			sja1105_port_status_show(&status, i, print_buf[i],
+			                         spi_setup->device_id);
 		}
 		linewise_concat(print_buf, 5);
 
@@ -79,7 +80,8 @@ static int status_ports(struct sja1105_spi_setup *spi_setup,
 			loge("sja1105_port_status_get failed");
 			goto out;
 		}
-		sja1105_port_status_show(&status, port_no, print_buf[0]);
+		sja1105_port_status_show(&status, port_no, print_buf[0],
+		                         spi_setup->device_id);
 		printf("%s\n", print_buf[0]);
 		free(print_buf[0]);
 	}
