@@ -122,6 +122,8 @@ struct sja1105_port_status {
 	uint64_t n_part_drop;
 	uint64_t n_egr_disabled;
 	uint64_t n_not_reach;
+	uint64_t qlevel_hwm[8]; /* Only for P/Q/R/S */
+	uint64_t qlevel[8];     /* Only for P/Q/R/S */
 };
 
 struct sja1105_ptp_status {
@@ -150,8 +152,8 @@ int  sja1105_general_status_get(struct sja1105_spi_setup*,
 void sja1105_general_status_show(struct sja1105_general_status*,
                                  uint64_t device_id);
 void sja1105_port_status_show(struct sja1105_port_status*,
-                              int    port,
-                              char  *print_buf);
+                              int    port, char  *print_buf,
+                              uint64_t device_id);
 int sja1105_port_status_get(struct sja1105_spi_setup*,
                             struct sja1105_port_status*,
                             int port);
