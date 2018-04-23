@@ -182,7 +182,9 @@ sja1105_staging_area_show(struct sja1105_staging_area *staging_area,
 
 	if (table_name == NULL || strlen(table_name) == 0) {
 		logv("Showing all config tables");
-		printf("Device ID is 0x%08" PRIx64 "\n", static_config->device_id);
+		printf("Device ID is 0x%08" PRIx64 " (%s)\n",
+		       static_config->device_id, sja1105_device_id_string_get(
+		       static_config->device_id, SJA1105_PART_NR_DONT_CARE));
 		for (i = 0; i < ARRAY_SIZE(next_config_table_show); i++) {
 			rc = next_config_table_show[i](static_config, -1);
 		}

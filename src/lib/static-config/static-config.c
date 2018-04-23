@@ -379,7 +379,9 @@ int sja1105_static_config_hexdump(void *buf)
 	memset(&config, 0, sizeof(config));
 	/* Retrieve device_id from first 4 bytes of packed buffer */
 	gtable_unpack(p, &config.device_id, 31, 0, 4);
-	printf("Device ID is 0x%08" PRIx64 "\n", config.device_id);
+	printf("Device ID is 0x%08" PRIx64 " (%s)\n",
+	       config.device_id, sja1105_device_id_string_get(
+	       config.device_id, SJA1105_PART_NR_DONT_CARE));
 	p += SIZE_SJA1105_DEVICE_ID;
 
 	while (1) {
@@ -541,13 +543,18 @@ sja1105_static_config_unpack(void *buf, struct sja1105_static_config *config)
 	memset(config, 0, sizeof(*config));
 	/* Retrieve device_id from first 4 bytes of packed buffer */
 	gtable_unpack(p, &config->device_id, 31, 0, 4);
+	logv("Device ID is 0x%08" PRIx64 " (%s)",
+	     config->device_id, sja1105_device_id_string_get(
+	     config->device_id, SJA1105_PART_NR_DONT_CARE));
 	p += SIZE_SJA1105_DEVICE_ID;
+
 	while (1) {
 		sja1105_table_header_unpack(p, &hdr);
 		/* This should match on last table header */
 		if (hdr.len == 0) {
 			break;
 		}
+		/* Print table header with same verbosity level as "logv" */
 		if (SJA1105_VERBOSE_CONDITION) {
 			sja1105_table_header_show(&hdr);
 		}
@@ -615,7 +622,8 @@ sja1105_static_config_pack(void *buf, struct sja1105_static_config *config)
 	int    i;
 
 	if (!DEVICE_ID_VALID(config->device_id)) {
-		loge("Cannot pack invalid Device ID 0x08%" PRIx64 "!", config->device_id);
+		loge("Cannot pack invalid Device ID 0x08%"
+		     PRIx64 "!", config->device_id);
 		return -EINVAL;
 	}
 

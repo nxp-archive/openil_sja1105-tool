@@ -115,6 +115,7 @@
 #define SJA1105Q_PART_NR           0x9A85
 #define SJA1105R_PART_NR           0x9A86
 #define SJA1105S_PART_NR           0x9A87
+#define SJA1105_PART_NR_DONT_CARE  0xFFFF
 
 #define IS_PQRS(device_id) \
 	(((device_id) == SJA1105PR_DEVICE_ID) || \

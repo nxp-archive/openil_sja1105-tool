@@ -106,7 +106,9 @@ int device_id_parse(xmlNode *node, uint64_t *device_id)
 		loge("No device-id entry present in static config node!");
 		goto out;
 	}
-	logv("read device-id %" PRIx64, *device_id);
+	logv("read device-id 0x%" PRIx64 " (%s)",
+	     *device_id, sja1105_device_id_string_get(
+	     *device_id, SJA1105_PART_NR_DONT_CARE));
 out:
 	return rc;
 }
