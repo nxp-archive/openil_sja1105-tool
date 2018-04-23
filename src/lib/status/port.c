@@ -107,6 +107,7 @@ sja1105_port_status_mac_unpack(void *buf, struct
 	gtable_unpack(p + 0x0, &status->n_miierr,      7,  0, 4);
 	gtable_unpack(p + 0x1, &status->typeerr,      27, 27, 4);
 	gtable_unpack(p + 0x1, &status->sizeerr,      26, 26, 4);
+	gtable_unpack(p + 0x1, &status->tctimeout,    25, 25, 4);
 	gtable_unpack(p + 0x1, &status->priorerr,     24, 24, 4);
 	gtable_unpack(p + 0x1, &status->nomaster,     23, 23, 4);
 	gtable_unpack(p + 0x1, &status->memov,        22, 22, 4);
