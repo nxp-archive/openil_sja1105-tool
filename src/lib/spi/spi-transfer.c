@@ -45,6 +45,48 @@
 #include <lib/include/spi.h>
 #include <common.h>
 
+const char *SJA1105E_DEVICE_ID_STR        = "SJA1105E";
+const char *SJA1105T_DEVICE_ID_STR        = "SJA1105T";
+const char *SJA1105P_DEVICE_ID_STR        = "SJA1105P";
+const char *SJA1105Q_DEVICE_ID_STR        = "SJA1105Q";
+const char *SJA1105R_DEVICE_ID_STR        = "SJA1105R";
+const char *SJA1105S_DEVICE_ID_STR        = "SJA1105S";
+const char *SJA1105PR_DEVICE_ID_STR       = "SJA1105P or SJA1105R";
+const char *SJA1105_DEVICE_ID_INVALID_STR = "Invalid";
+
+const char *sja1105_device_id_string_get(uint64_t device_id, uint64_t part_nr)
+{
+	if (device_id == SJA1105E_DEVICE_ID) {
+		return SJA1105E_DEVICE_ID_STR;
+	}
+	if (device_id == SJA1105T_DEVICE_ID) {
+		return SJA1105T_DEVICE_ID_STR;
+	}
+	/* P and R have same Device ID, and differ by Part Number */
+	if (IS_P(device_id, part_nr)) {
+		return SJA1105P_DEVICE_ID_STR;
+	}
+	if (device_id == SJA1105Q_DEVICE_ID) {
+		return SJA1105Q_DEVICE_ID_STR;
+	}
+	/* P and R have same Device ID, and differ by Part Number */
+	if (IS_R(device_id, part_nr)) {
+		return SJA1105P_DEVICE_ID_STR;
+	}
+	if (device_id == SJA1105S_DEVICE_ID) {
+		return SJA1105S_DEVICE_ID_STR;
+	}
+	/* Fallback: if we don't know/care what the part_nr is, and we
+	 * have a P/R, we can simply pass -1 to part_nr and have this
+	 * function say it's either P or R, instead of reporting it
+	 * as invalid.
+	 */
+	if (device_id == SJA1105PR_DEVICE_ID) {
+		return SJA1105PR_DEVICE_ID_STR;
+	}
+	return SJA1105_DEVICE_ID_INVALID_STR;
+}
+
 int sja1105_device_id_get(struct sja1105_spi_setup *spi_setup,
                           uint64_t *device_id, uint64_t *part_nr)
 {
@@ -101,6 +143,8 @@ int sja1105_device_id_get(struct sja1105_spi_setup *spi_setup,
 		}
 		gtable_unpack(&tmp_part_nr, part_nr, 19, 4, 4);
 	}
+	logv("%s Device ID detected.",
+	     sja1105_device_id_string_get(*device_id, *part_nr));
 out_error:
 out_found:
 	return rc;
