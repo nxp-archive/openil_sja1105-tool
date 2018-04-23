@@ -150,7 +150,11 @@ int sja1105_static_config_add_entry(struct sja1105_table_header *hdr, void *buf,
 			       MAX_L2_LOOKUP_COUNT);
 			return -1;
 		}
-		sja1105_l2_lookup_entry_unpack(buf, &entry);
+		if (IS_ET(config->device_id)) {
+			sja1105et_l2_lookup_entry_unpack(buf, &entry);
+		} else {
+			sja1105pqrs_l2_lookup_entry_unpack(buf, &entry);
+		}
 		config->l2_lookup[config->l2_lookup_count++] = entry;
 		return SIZE_L2_LOOKUP_ENTRY;
 	}
@@ -655,11 +659,19 @@ sja1105_static_config_pack(void *buf, struct sja1105_static_config *config)
 	                     BLKID_VL_FORWARDING_TABLE,
 	                     sja1105_vl_forwarding_entry_pack,
 	                     config->vl_forwarding);
-	PACK_TABLE_IN_BUF_FN(config->l2_lookup_count,
-	                     SIZE_L2_LOOKUP_ENTRY,
-	                     BLKID_L2_LOOKUP_TABLE,
-	                     sja1105_l2_lookup_entry_pack,
-	                     config->l2_lookup);
+	if (IS_ET(config->device_id)) {
+		PACK_TABLE_IN_BUF_FN(config->l2_lookup_count,
+		                     SIZE_L2_LOOKUP_ENTRY,
+		                     BLKID_L2_LOOKUP_TABLE,
+		                     sja1105et_l2_lookup_entry_pack,
+		                     config->l2_lookup);
+	} else {
+		PACK_TABLE_IN_BUF_FN(config->l2_lookup_count,
+		                     SIZE_L2_LOOKUP_ENTRY,
+		                     BLKID_L2_LOOKUP_TABLE,
+		                     sja1105pqrs_l2_lookup_entry_pack,
+		                     config->l2_lookup);
+	}
 	PACK_TABLE_IN_BUF_FN(config->l2_policing_count,
 	                     SIZE_L2_POLICING_ENTRY,
 	                     BLKID_L2_POLICING_TABLE,

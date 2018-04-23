@@ -455,8 +455,10 @@ void sja1105_l2_lookup_params_table_pack(void*, struct sja1105_l2_lookup_params_
 void sja1105_l2_lookup_params_table_unpack(void*, struct sja1105_l2_lookup_params_table*);
 void sja1105_l2_lookup_params_table_show(struct sja1105_l2_lookup_params_table*);
 void sja1105_l2_lookup_params_table_fmt_show(char*, char*, struct sja1105_l2_lookup_params_table*);
-void sja1105_l2_lookup_entry_pack(void*, struct sja1105_l2_lookup_entry*);
-void sja1105_l2_lookup_entry_unpack(void*, struct sja1105_l2_lookup_entry*);
+void sja1105et_l2_lookup_entry_pack(void*, struct sja1105_l2_lookup_entry*);
+void sja1105et_l2_lookup_entry_unpack(void*, struct sja1105_l2_lookup_entry*);
+void sja1105pqrs_l2_lookup_entry_pack(void*, struct sja1105_l2_lookup_entry*);
+void sja1105pqrs_l2_lookup_entry_unpack(void*, struct sja1105_l2_lookup_entry*);
 void sja1105_l2_lookup_entry_show(struct sja1105_l2_lookup_entry*);
 void sja1105_l2_lookup_entry_fmt_show(char*, char*, struct sja1105_l2_lookup_entry*);
 void sja1105_l2_policing_entry_pack(void*, struct sja1105_l2_policing_entry*);
