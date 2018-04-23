@@ -197,6 +197,8 @@ parse_root(xmlNode *root, struct sja1105_staging_area *staging_area)
 {
 	char *config_section;
 	xmlNode *node;
+	int static_config_parsed = 0;
+	int device_id_parsed = 0;
 	int rc = 0;
 
 	if (root->type != XML_ELEMENT_NODE) {
@@ -217,6 +219,11 @@ parse_root(xmlNode *root, struct sja1105_staging_area *staging_area)
 		if (strcmp(config_section, "static") == 0) {
 			rc = parse_static_config(node,
 			                        &staging_area->static_config);
+			if (rc < 0) {
+				loge("Could not parse static config from XML!");
+				goto out;
+			}
+			static_config_parsed = 1;
 		} else if (strcmp(config_section, "device-id") == 0) {
 			rc = device_id_parse(root, &staging_area->
 			                     static_config.device_id);
@@ -224,14 +231,21 @@ parse_root(xmlNode *root, struct sja1105_staging_area *staging_area)
 				loge("Could not get device-id from XML!");
 				goto out;
 			}
+			device_id_parsed = 1;
 		} else {
 			loge("unknown config section %s", config_section);
 			rc = -EINVAL;
 		}
-		if (rc < 0) {
-			loge("Could not parse XML file!");
-			goto out;
-		}
+	}
+	if (!static_config_parsed) {
+		loge("<static-config> node not present in XML!");
+		rc = -EINVAL;
+		goto out;
+	}
+	if (!device_id_parsed) {
+		loge("<device-id> not present in XML!");
+		rc = -EINVAL;
+		goto out;
 	}
 out:
 	return rc;
