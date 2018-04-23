@@ -243,16 +243,8 @@ static_config_upload(struct sja1105_spi_setup *spi_setup,
 		rc = -errno;
 		goto out;
 	}
-	/* Write Device ID to first 4 bytes of config_buf */
-	rc = gtable_pack(config_buf, &spi_setup->device_id, 31, 0,
-	                 SIZE_SJA1105_DEVICE_ID);
-	if (rc < 0) {
-		loge("failed to write device id to buffer");
-		goto out_free;
-	}
-	/* Write config tables to config_buf */
-	rc = sja1105_static_config_pack(config_buf + SIZE_SJA1105_DEVICE_ID,
-	                                config);
+	/* Write Device ID and config tables to config_buf */
+	rc = sja1105_static_config_pack(config_buf, config);
 	if (rc < 0) {
 		loge("sja1105_static_config_pack failed");
 		goto out_free;
