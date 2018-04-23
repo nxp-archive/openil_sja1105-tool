@@ -34,6 +34,7 @@
 #include <inttypes.h>
 #include <unistd.h>
 /* These are our include files */
+#include <lib/include/static-config.h>
 #include <lib/include/status.h>
 #include <lib/include/gtable.h>
 #include <lib/include/spi.h>
@@ -223,7 +224,8 @@ out:
 int sja1105_port_status_clear(struct sja1105_spi_setup *spi_setup,
                               int port)
 {
-	const int PORT_STATUS_CTRL_ADDR = 0xf;
+	const int PORT_STATUS_CTRL_ADDR = IS_ET(spi_setup->device_id) ?
+	                                  0xf : 0x10;
 	const int BUF_LEN = 4;
 	uint8_t   packed_buf[BUF_LEN];
 	int       rc = 0;
