@@ -591,7 +591,7 @@ error:
 	return -1;
 }
 
-void
+int
 sja1105_static_config_pack(void *buf, struct sja1105_static_config *config)
 {
 #define PACK_TABLE_IN_BUF_FN(entry_count, entry_size, blk_id, set_fn, array) \
@@ -616,7 +616,7 @@ sja1105_static_config_pack(void *buf, struct sja1105_static_config *config)
 
 	if (!DEVICE_ID_VALID(config->device_id)) {
 		loge("Cannot pack invalid Device ID 0x08%" PRIx64 "!", config->device_id);
-		return;
+		return -EINVAL;
 	}
 
 	gtable_pack(p, &config->device_id, 31, 0, 4);
@@ -725,6 +725,7 @@ sja1105_static_config_pack(void *buf, struct sja1105_static_config *config)
 	header.len = 0;           /* Marks that header is final */
 	header.crc = 0xDEADBEEF;  /* Will be replaced on-the-fly on "config upload" */
 	sja1105_table_header_pack(p, &header);
+	return 0;
 }
 
 unsigned int

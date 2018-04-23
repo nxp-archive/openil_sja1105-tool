@@ -198,7 +198,11 @@ staging_area_save(const char *staging_area_file,
 		goto out_1;
 	}
 	logv("saving static config... %d bytes", static_config_len);
-	sja1105_static_config_pack(buf, static_config);
+	rc = sja1105_static_config_pack(buf, static_config);
+	if (rc < 0) {
+		loge("sja1105_static_config_pack failed");
+		goto out_2;
+	}
 
 	logv("total staging area size: %d bytes", staging_area_len);
 	fd = open(staging_area_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
@@ -247,8 +251,12 @@ static_config_upload(struct sja1105_spi_setup *spi_setup,
 		goto out_free;
 	}
 	/* Write config tables to config_buf */
-	sja1105_static_config_pack(config_buf + SIZE_SJA1105_DEVICE_ID,
-	                           config);
+	rc = sja1105_static_config_pack(config_buf + SIZE_SJA1105_DEVICE_ID,
+	                                config);
+	if (rc < 0) {
+		loge("sja1105_static_config_pack failed");
+		goto out_free;
+	}
 	/* Recalculate CRC of the last header */
 	/* Don't include the CRC field itself */
 	crc_len = config_buf_len - 4;
