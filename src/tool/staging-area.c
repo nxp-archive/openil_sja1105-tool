@@ -325,21 +325,24 @@ int static_config_flush(struct sja1105_spi_setup *spi_setup,
 			goto out;
 		}
 		if (status.ids == 1) {
-			loge("Not responding to configured device id");
-			loge("Wrote 0x%" PRIx64 ", wants 0x%" PRIx64,
-			     spi_setup->device_id, status.device_id);
+			loge("Mismatch between hardware and staging area "
+			     "device id. Wrote 0x%" PRIx64 ", wants 0x%" PRIx64,
+			     config->device_id, spi_setup->device_id);
 			goto out;
 		}
 		if (status.crcchkl == 1) {
 			loge("local crc failed while uploading config");
+			rc = -EINVAL;
 			goto out;
 		}
 		if (status.crcchkg == 1) {
 			loge("global crc failed while uploading config");
+			rc = -EINVAL;
 			goto out;
 		}
 		if (status.configs == 0) {
 			loge("configuration is invalid");
+			rc = -EINVAL;
 		}
 	}
 out:
