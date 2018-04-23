@@ -67,6 +67,12 @@ int xml_write_array(xmlTextWriterPtr writer, char *field, uint64_t *values, int 
 	return xmlTextWriterWriteElement(writer, BAD_CAST field, BAD_CAST print_buf);
 }
 
+static int device_id_write(xmlTextWriterPtr writer, uint64_t device_id)
+{
+	logv("writing device_id");
+	return xml_write_field(writer, "device-id", device_id);
+}
+
 static int
 static_config_write(xmlTextWriterPtr writer,
                     struct sja1105_static_config *config)
@@ -202,6 +208,8 @@ sja1105_staging_area_to_xml(char *xml_file,
 	}
 	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "xmlns",
 	                                 BAD_CAST SJA1105_NETCONF_NS);
+	/* Device ID */
+	device_id_write(writer, staging_area->static_config.device_id);
 	/* Static config */
 	rc = static_config_write(writer, &staging_area->static_config);
 	if (rc < 0) {

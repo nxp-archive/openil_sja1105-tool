@@ -31,6 +31,7 @@
 #include "xml/read/external.h"
 #include <lib/include/staging-area.h>
 #include <common.h>
+#include <inttypes.h>
 #include "internal.h"
 
 #ifndef LIBXML_TREE_ENABLED
@@ -93,6 +94,20 @@ int xml_read_array(void *where, int max_count, char *field_name, xmlNode *node)
 	rc = read_array(value, field_val, max_count);
 out:
 	xmlFree(value);
+	return rc;
+}
+
+int device_id_parse(xmlNode *node, uint64_t *device_id)
+{
+	int rc = 0;
+
+	rc = xml_read_field(device_id, "device-id", node);
+	if (rc < 0) {
+		loge("No device-id entry present in static config node!");
+		goto out;
+	}
+	logv("read device-id %" PRIx64, *device_id);
+out:
 	return rc;
 }
 
@@ -202,6 +217,13 @@ parse_root(xmlNode *root, struct sja1105_staging_area *staging_area)
 		if (strcmp(config_section, "static") == 0) {
 			rc = parse_static_config(node,
 			                        &staging_area->static_config);
+		} else if (strcmp(config_section, "device-id") == 0) {
+			rc = device_id_parse(root, &staging_area->
+			                     static_config.device_id);
+			if (rc < 0) {
+				loge("Could not get device-id from XML!");
+				goto out;
+			}
 		} else {
 			loge("unknown config section %s", config_section);
 			rc = -EINVAL;
