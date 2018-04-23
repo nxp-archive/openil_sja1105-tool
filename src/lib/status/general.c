@@ -40,13 +40,19 @@
 #include <lib/include/spi.h>
 #include <common.h>
 
-static void sja1105_general_status_unpack(void *buf, struct
-                                          sja1105_general_status *status)
+static void
+sja1105_general_status_unpack(void *buf, struct sja1105_general_status *status,
+                              uint64_t device_id)
 {
 	/* So that addition translates to 4 bytes */
 	uint32_t *p = (uint32_t*) buf;
 	memset(status, 0, sizeof(*status));
-	gtable_unpack(p + 0x0, &status->device_id, 31,  0, 4);
+	/* device_id is missing from the buffer, but we don't
+	 * want to diverge from the manual definition of the
+	 * register addresses, so we'll back off one step with
+	 * the register pointer, and never access p[0].
+	 */
+	p--;
 	gtable_unpack(p + 0x1, &status->configs,   31, 31, 4);
 	gtable_unpack(p + 0x1, &status->crcchkl,   30, 30, 4);
 	gtable_unpack(p + 0x1, &status->ids,       29, 29, 4);
@@ -87,7 +93,6 @@ static void sja1105_general_status_unpack(void *buf, struct
 
 void sja1105_general_status_show(struct sja1105_general_status *status)
 {
-	printf("DEVICE_ID  %" PRIX64 "\n", status->device_id);
 	printf("CONFIGS    %" PRIX64 "\n", status->configs);
 	printf("CRCCHKL    %" PRIX64 "\n", status->crcchkl);
 	printf("IDS        %" PRIX64 "\n", status->ids);
@@ -129,13 +134,15 @@ void sja1105_general_status_show(struct sja1105_general_status *status)
 int sja1105_general_status_get(struct sja1105_spi_setup *spi_setup,
                                struct sja1105_general_status *status)
 {
-	const int SIZE_GENERAL_STATUS = 0x0D * 4; /* 0x00 to 0x0C */
+	const int SIZE_GENERAL_STATUS = 0x0C * 4; /* 0x01 to 0x0C */
 	uint8_t packed_buf[SIZE_GENERAL_STATUS];
 	int rc;
 
+	/* The base address is off-by-1 compared to UM10944,
+	 * because we are skipping device_id from the readout. */
 	rc = sja1105_spi_send_packed_buf(spi_setup,
 	                                 SPI_READ,
-	                                 CORE_ADDR + 0x00,
+	                                 CORE_ADDR + 0x01,
 	                                 packed_buf,
 	                                 SIZE_GENERAL_STATUS);
 	if (rc < 0) {

@@ -38,7 +38,6 @@
 #define ACU_ADDR    0x100800
 
 struct sja1105_general_status {
-	uint64_t device_id;
 	uint64_t configs;
 	uint64_t crcchkl;
 	uint64_t ids;
