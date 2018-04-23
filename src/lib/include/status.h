@@ -69,6 +69,7 @@ struct sja1105_general_status {
 	uint64_t vlnotfound;
 	uint64_t emptys;
 	uint64_t buffers;
+	uint64_t buflwmark; /* Only on P/Q/R/S */
 	uint64_t port_0ah;
 	uint64_t fwds_0ah;
 	uint64_t parts;
@@ -146,7 +147,8 @@ struct sja1105_ptp_status {
 
 int  sja1105_general_status_get(struct sja1105_spi_setup*,
                                 struct sja1105_general_status*);
-void sja1105_general_status_show(struct sja1105_general_status*);
+void sja1105_general_status_show(struct sja1105_general_status*,
+                                 uint64_t device_id);
 void sja1105_port_status_show(struct sja1105_port_status*,
                               int    port,
                               char  *print_buf);
