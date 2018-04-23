@@ -125,7 +125,7 @@ int sja1105_device_id_get(struct sja1105_spi_setup *spi_setup,
 		}
 	}
 	if (*device_id == SJA1105_DEVICE_ID_INVALID) {
-		loge("Unrecognized Device ID %" PRIx64, tmp_device_id);
+		loge("Unrecognized Device ID 0x%08" PRIx64, tmp_device_id);
 		rc = -EINVAL;
 		goto out_error;
 	}
