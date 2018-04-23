@@ -41,7 +41,7 @@
 
 void sja1105_l2_lookup_entry_access(void *buf,
                                     struct sja1105_l2_lookup_entry *entry,
-                                    int write)
+                                    int write, uint64_t device_id)
 {
 	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
 	int    size = SIZE_L2_LOOKUP_ENTRY;
@@ -53,25 +53,52 @@ void sja1105_l2_lookup_entry_access(void *buf,
 		pack_or_unpack = gtable_pack;
 		memset(buf, 0, size);
 	}
-	pack_or_unpack(buf, &entry->vlanid,    95, 84, size);
-	pack_or_unpack(buf, &entry->macaddr,   83, 36, size);
-	pack_or_unpack(buf, &entry->destports, 35, 31, size);
-	pack_or_unpack(buf, &entry->enfport,   30, 30, size);
-	pack_or_unpack(buf, &entry->index,     29, 20, size);
+	if (IS_ET(device_id)) {
+		pack_or_unpack(buf, &entry->vlanid,    95, 84, size);
+		pack_or_unpack(buf, &entry->macaddr,   83, 36, size);
+		pack_or_unpack(buf, &entry->destports, 35, 31, size);
+		pack_or_unpack(buf, &entry->enfport,   30, 30, size);
+		pack_or_unpack(buf, &entry->index,     29, 20, size);
+	} else {
+		/* These are static L2 lookup entries, so the structure
+		 * should match UM11040 Table 16/17 definitions when
+		 * LOCKEDS is 1.
+		 */
+		pack_or_unpack(buf, &entry->vlanid,    81, 70, size);
+		pack_or_unpack(buf, &entry->macaddr,   69, 22, size);
+		pack_or_unpack(buf, &entry->destports, 21, 17, size);
+		pack_or_unpack(buf, &entry->enfport,   16, 16, size);
+		pack_or_unpack(buf, &entry->index,     15,  6, size);
+	}
 }
 
-void sja1105_l2_lookup_entry_pack(void *buf, struct
-                                  sja1105_l2_lookup_entry *entry)
-{
-	sja1105_l2_lookup_entry_access(buf, entry, 1);
-}
-
-void sja1105_l2_lookup_entry_unpack(void *buf, struct
+/* E/T functions */
+void sja1105et_l2_lookup_entry_pack(void *buf, struct
                                     sja1105_l2_lookup_entry *entry)
 {
-	sja1105_l2_lookup_entry_access(buf, entry, 0);
+	sja1105_l2_lookup_entry_access(buf, entry, 1, SJA1105T_DEVICE_ID);
 }
 
+void sja1105et_l2_lookup_entry_unpack(void *buf, struct
+                                      sja1105_l2_lookup_entry *entry)
+{
+	sja1105_l2_lookup_entry_access(buf, entry, 0, SJA1105T_DEVICE_ID);
+}
+
+/* P/Q/R/S functions */
+void sja1105pqrs_l2_lookup_entry_pack(void *buf, struct
+                                      sja1105_l2_lookup_entry *entry)
+{
+	sja1105_l2_lookup_entry_access(buf, entry, 1, SJA1105PR_DEVICE_ID);
+}
+
+void sja1105pqrs_l2_lookup_entry_unpack(void *buf, struct
+                                        sja1105_l2_lookup_entry *entry)
+{
+	sja1105_l2_lookup_entry_access(buf, entry, 0, SJA1105PR_DEVICE_ID);
+}
+
+/* Common functions */
 void sja1105_l2_lookup_entry_fmt_show(
 		char *print_buf,
 		char *fmt,
