@@ -121,7 +121,7 @@ int status_parse_args(struct sja1105_spi_setup *spi_setup,
 			goto error;
 		}
 		/* Display the collected general status registers */
-		sja1105_general_status_show(&status);
+		sja1105_general_status_show(&status, spi_setup->device_id);
 	} else if (matches(options[match], "ports") == 0) {
 		/* Consume "ports" */
 		argc--; argv++;
