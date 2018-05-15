@@ -73,7 +73,7 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 	};
 	struct sja1105_staging_area staging_area;
 	int match;
-	int rc;
+	int rc = SJA1105_ERR_OK;
 
 	if (argc < 1) {
 		goto parse_error;
@@ -91,22 +91,26 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 		}
 		rc = sja1105_staging_area_from_xml(argv[0], &staging_area);
 		if (rc < 0) {
-			goto error;
+			goto invalid_xml_error;
 		}
 		rc = staging_area_save(spi_setup->staging_area, &staging_area);
 		if (rc < 0) {
-			goto error;
+			goto filesystem_error;
 		}
 		if (spi_setup->flush) {
 			rc = sja1105_spi_configure(spi_setup);
 			if (rc < 0) {
 				loge("sja1105_spi_configure failed");
-				goto error;
+				goto hardware_not_responding_error;
 			}
 			rc = staging_area_flush(spi_setup, &staging_area);
 			if (rc < 0) {
 				loge("staging_area_flush failed");
-				goto error;
+				/* We have enough context to know that the staging
+				 * area is dirty, so we force this error instead of
+				 * propagating the return code from staging_area_flush
+				 */
+				goto hardware_left_floating_staging_area_dirty_error;
 			}
 		}
 	} else if (strcmp(options[match], "save") == 0) {
@@ -115,11 +119,11 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 		}
 		rc = staging_area_load(spi_setup->staging_area, &staging_area);
 		if (rc < 0) {
-			goto error;
+			goto propagated_error;
 		}
 		rc = sja1105_staging_area_to_xml(argv[0], &staging_area);
 		if (rc < 0) {
-			goto error;
+			goto invalid_xml_error;
 		}
 	} else if (strcmp(options[match], "default") == 0) {
 		const char *default_config_options[] = {
@@ -136,26 +140,30 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 		                  ARRAY_SIZE(default_config_options));
 		if (match < 0) {
 			loge("Unrecognized default config %s", argv[0]);
-			goto error;
+			goto parse_error;
 		}
 		rc = sja1105_default_staging_area(&staging_area,
 		                                  default_configs[match]);
 		if (rc < 0) {
-			goto error;
+			goto invalid_staging_area_error;
 		}
 		rc = staging_area_save(spi_setup->staging_area, &staging_area);
 		if (rc < 0) {
-			goto error;
+			goto filesystem_error;
 		}
 		if (spi_setup->flush) {
 			rc = sja1105_spi_configure(spi_setup);
 			if (rc < 0) {
 				loge("sja1105_spi_configure failed");
-				goto error;
+				goto hardware_not_responding_staging_area_dirty_error;
 			}
 			rc = staging_area_flush(spi_setup, &staging_area);
 			if (rc < 0) {
-				goto error;
+				/* We have enough context to know that the staging
+				 * area is dirty, so we force this error instead of
+				 * propagating the return code from staging_area_flush
+				 */
+				goto hardware_left_floating_staging_area_dirty_error;
 			}
 		}
 	} else if (strcmp(options[match], "upload") == 0) {
@@ -164,40 +172,44 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 		}
 		rc = staging_area_load(spi_setup->staging_area, &staging_area);
 		if (rc < 0) {
-			goto error;
+			goto propagated_error;
 		}
 		rc = sja1105_spi_configure(spi_setup);
 		if (rc < 0) {
 			loge("sja1105_spi_configure failed");
-			goto error;
+			goto hardware_not_responding_error;
 		}
 		rc = staging_area_flush(spi_setup, &staging_area);
 		if (rc < 0) {
-			goto error;
+			goto propagated_error;
 		}
 	} else if (strcmp(options[match], "modify") == 0) {
 		get_flush_mode(spi_setup, &argc, &argv);
 		rc = staging_area_load(spi_setup->staging_area, &staging_area);
 		if (rc < 0) {
-			goto error;
+			goto propagated_error;
 		}
 		rc = staging_area_modify_parse(&staging_area, &argc, &argv);
 		if (rc < 0) {
-			goto error;
+			goto propagated_error;
 		}
 		rc = staging_area_save(spi_setup->staging_area, &staging_area);
 		if (rc < 0) {
-			goto error;
+			goto filesystem_error;
 		}
 		if (spi_setup->flush) {
 			rc = sja1105_spi_configure(spi_setup);
 			if (rc < 0) {
 				loge("sja1105_spi_configure failed");
-				goto error;
+				goto hardware_not_responding_staging_area_dirty_error;
 			}
 			rc = staging_area_flush(spi_setup, &staging_area);
 			if (rc < 0) {
-				goto error;
+				/* We have enough context to know that the staging
+				 * area is dirty, so we force this error instead of
+				 * propagating the return code from staging_area_flush
+				 */
+				goto hardware_left_floating_staging_area_dirty_error;
 			}
 		}
 	} else if (strcmp(options[match], "new") == 0) {
@@ -226,7 +238,7 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 		}
 		rc = staging_area_save(spi_setup->staging_area, &staging_area);
 		if (rc < 0) {
-			goto error;
+			goto filesystem_error;
 		}
 	} else if (strcmp(options[match], "show") == 0) {
 		if (argc != 0 && argc != 1) {
@@ -234,11 +246,11 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 		}
 		rc = staging_area_load(spi_setup->staging_area, &staging_area);
 		if (rc < 0) {
-			goto error;
+			goto propagated_error;
 		}
 		rc = sja1105_staging_area_show(&staging_area, argv[0]);
 		if (rc < 0) {
-			goto error;
+			goto invalid_staging_area_error;
 		}
 	} else if (strcmp(options[match], "hexdump") == 0) {
 		if (argc != 0) {
@@ -246,14 +258,35 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 		}
 		rc = staging_area_hexdump(spi_setup->staging_area);
 		if (rc < 0) {
-			goto error;
+			goto propagated_error;
 		}
 	} else {
 		goto parse_error;
 	}
-	return 0;
+	sja1105_err_remap(rc, SJA1105_ERR_OK);
+	return rc;
+invalid_staging_area_error:
+	sja1105_err_remap(rc, SJA1105_ERR_STAGING_AREA_INVALID);
+	return rc;
+hardware_left_floating_staging_area_dirty_error:
+	sja1105_err_remap(rc, SJA1105_ERR_UPLOAD_FAILED_HW_LEFT_FLOATING_STAGING_AREA_DIRTY);
+	return rc;
+hardware_not_responding_staging_area_dirty_error:
+	sja1105_err_remap(rc, SJA1105_ERR_HW_NOT_RESPONDING_STAGING_AREA_DIRTY);
+	return rc;
+hardware_not_responding_error:
+	sja1105_err_remap(rc, SJA1105_ERR_HW_NOT_RESPONDING);
+	return rc;
+filesystem_error:
+	sja1105_err_remap(rc, SJA1105_ERR_FILESYSTEM);
+	return rc;
+invalid_xml_error:
+	sja1105_err_remap(rc, SJA1105_ERR_INVALID_XML);
+	return rc;
 parse_error:
+	sja1105_err_remap(rc, SJA1105_ERR_CMDLINE_PARSE);
 	print_usage();
-error:
-	return -1;
+	return rc;
+propagated_error:
+	return rc;
 }

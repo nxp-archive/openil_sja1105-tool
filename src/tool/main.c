@@ -84,7 +84,7 @@ static int parse_special_args(int *argc, char ***argv,
 			more_special_args = 1;
 			(*argc)--; (*argv)++;
 			/* Do not continue to run */
-			rc = -1;
+			sja1105_err_remap(rc, SJA1105_ERR_USAGE);
 		} else if (matches(arg, "-h") == 0 ||
 		           matches(arg, "help") == 0 ||
 		           matches(arg, "--help") == 0) {
@@ -93,7 +93,7 @@ static int parse_special_args(int *argc, char ***argv,
 			more_special_args = 1;
 			(*argc)--; (*argv)++;
 			/* Do not continue to run */
-			rc = -1;
+			sja1105_err_remap(rc, SJA1105_ERR_USAGE);
 		} else if (matches(arg, "-c") == 0 ||
 		           matches(arg, "--config-file") == 0) {
 			/* Parse non-default config file */
@@ -103,7 +103,7 @@ static int parse_special_args(int *argc, char ***argv,
 			(*argc)--; (*argv)++;
 			(*argc)--; (*argv)++;
 			/* Continue to run */
-			rc = 0;
+			sja1105_err_remap(rc, SJA1105_ERR_OK);
 		}
 	} while (more_special_args && (*argc));
 
@@ -158,11 +158,16 @@ void cleanup(struct sja1105_spi_setup *spi_setup)
 	}
 }
 
+static int reinterpreted_return_code(int rc)
+{
+	return -rc;
+}
+
 int main(int argc, char *argv[])
 {
 	char *sja1105_conf_file = (char*) default_sja1105_conf_file;
 	struct sja1105_spi_setup spi_setup;
-	int rc = 0;
+	int rc = SJA1105_ERR_OK;
 
 	/* discard program name */
 	argc--; argv++;
@@ -178,10 +183,10 @@ int main(int argc, char *argv[])
 	/* Adjust gtable for SJA1105 SPI memory layout */
 	gtable_configure(QUIRK_LSW32_IS_FIRST);
 	rc = parse_args(&spi_setup, argc, argv);
-	if (rc == 0) {
+	if (rc == SJA1105_ERR_OK) {
 		logv("ok");
 	}
 	cleanup(&spi_setup);
 out:
-	return rc;
+	return reinterpreted_return_code(rc);
 }

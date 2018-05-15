@@ -39,6 +39,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <inttypes.h>
+#include <errno.h>
 /* These are our own libraries */
 #include <lib/include/static-config.h>
 #include <lib/include/gtable.h>
@@ -274,13 +275,14 @@ int sja1105_spi_transfer(const struct sja1105_spi_setup *spi_setup,
 		.bits_per_word = spi_setup->bits,
 		.cs_change     = spi_setup->cs_change,
 	};
-	int rc;
+	int saved_ioctl_result;
+	int rc = 0;
 
 	if (spi_setup->dry_run) {
 		printf("spi-transfer: size %d bytes\n", size);
 		gtable_hexdump((void*) tx, size);
 		/* Do not fail */
-		rc = size;
+		saved_ioctl_result = size;
 	} else {
 		memset(rx, 0, size);
 		if (flock(spi_setup->fd, LOCK_EX) < 0) {
@@ -293,7 +295,9 @@ int sja1105_spi_transfer(const struct sja1105_spi_setup *spi_setup,
 			loge("ioctl failed");
 			/* Fall-through */
 		}
-		if (flock(spi_setup->fd, LOCK_UN) < 0) {
+		saved_ioctl_result = rc;
+		rc = flock(spi_setup->fd, LOCK_UN);
+		if (rc < 0) {
 			loge("unlocking spi device failed");
 			rc = -EAGAIN;
 		}
@@ -303,6 +307,10 @@ out:
 	 * the number of transferred bytes instead.
 	 * https://github.com/openil/sja1105-tool/issues/8
 	 */
-	return (rc == size) ? 0 : -1;
+	if (rc < 0) {
+		return rc;
+	} else {
+		return (saved_ioctl_result == size) ? 0 : -EIO;
+	}
 }
 

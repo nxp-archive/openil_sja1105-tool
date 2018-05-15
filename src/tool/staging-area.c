@@ -95,36 +95,40 @@ staging_area_hexdump(const char *staging_area_file)
 	if (fd < 0) {
 		loge("Staging area %s does not exist!", staging_area_file);
 		rc = fd;
-		goto out_1;
+		goto filesystem_error1;
 	}
 	rc = fstat(fd, &stat);
 	if (rc < 0) {
 		loge("could not read file size");
-		goto out_2;
+		goto filesystem_error2;
 	}
 	len = stat.st_size;
 	buf = (char*) malloc(len * sizeof(char));
 	if (!buf) {
 		loge("malloc failed");
-		goto out_2;
+		goto filesystem_error2;
 	}
 	rc = reliable_read(fd, buf, len);
 	if (rc < 0) {
-		goto out_3;
+		goto filesystem_error3;
 	}
 	printf("Static configuration:\n");
 	/* Returns number of bytes dumped */
 	rc = sja1105_static_config_hexdump(buf);
 	if (rc < 0) {
 		loge("error while interpreting config");
-		goto out_3;
+		goto invalid_staging_area_error;
 	}
 	logi("static config: dumped %d bytes", rc);
-out_3:
+filesystem_error3:
 	free(buf);
-out_2:
+filesystem_error2:
 	close(fd);
-out_1:
+filesystem_error1:
+	sja1105_err_remap(rc, SJA1105_ERR_FILESYSTEM);
+	return rc;
+invalid_staging_area_error:
+	sja1105_err_remap(rc, SJA1105_ERR_STAGING_AREA_INVALID);
 	return rc;
 }
 
@@ -145,35 +149,41 @@ staging_area_load(const char *staging_area_file,
 	if (fd < 0) {
 		loge("Staging area %s does not exist!", staging_area_file);
 		rc = fd;
-		goto out_1;
+		goto filesystem_error1;
 	}
 	rc = fstat(fd, &stat);
 	if (rc < 0) {
 		loge("could not read file size");
-		goto out_2;
+		goto filesystem_error2;
 	}
 	staging_area_len = stat.st_size;
 	buf = (char*) malloc(staging_area_len * sizeof(char));
 	if (!buf) {
 		loge("malloc failed");
-		goto out_2;
+		goto filesystem_error2;
 	}
 	rc = reliable_read(fd, buf, staging_area_len);
 	if (rc < 0) {
-		goto out_3;
+		loge("failed to read staging area from file %s",
+		     staging_area_file);
+		goto filesystem_error3;
 	}
 	/* Static config */
 	rc = sja1105_static_config_unpack(buf, static_config);
 	if (rc < 0) {
 		loge("error while interpreting config");
-		goto out_3;
+		goto invalid_staging_area_error;
 	}
-	rc = 0;
-out_3:
+	return 0;
+filesystem_error3:
 	free(buf);
-out_2:
+filesystem_error2:
 	close(fd);
-out_1:
+filesystem_error1:
+	sja1105_err_remap(rc, SJA1105_ERR_FILESYSTEM);
+	return rc;
+invalid_staging_area_error:
+	sja1105_err_remap(rc, SJA1105_ERR_STAGING_AREA_INVALID);
 	return rc;
 }
 
@@ -281,7 +291,7 @@ int static_config_flush(struct sja1105_spi_setup *spi_setup,
 	rc = sja1105_static_config_check_valid(config);
 	if (rc < 0) {
 		loge("cannot upload config, because it is not valid");
-		goto out;
+		goto staging_area_invalid_error;
 	}
 	/* Workaround for PHY jabbering during switch reset */
 	memset(&port_mask, 0, sizeof(port_mask));
@@ -291,7 +301,7 @@ int static_config_flush(struct sja1105_spi_setup *spi_setup,
 	rc = sja1105_inhibit_tx(spi_setup, &port_mask);
 	if (rc < 0) {
 		loge("sja1105_set_egress_port_mask failed");
-		goto out;
+		goto hardware_not_responding_error;
 	}
 	/* Wait for an eventual egress packet to finish transmission
 	 * (reach IFG). It is guaranteed that a second one will not
@@ -302,19 +312,19 @@ int static_config_flush(struct sja1105_spi_setup *spi_setup,
 	rc = sja1105_cold_reset(spi_setup);
 	if (rc < 0) {
 		loge("sja1105_reset failed");
-		goto out;
+		goto hardware_left_floating_error;
 	}
 	rc = static_config_upload(spi_setup, config);
 	if (rc < 0) {
 		loge("static_config_upload failed");
-		goto out;
+		goto hardware_left_floating_error;
 	}
 	/* Configure the CGU (PHY link modes and speeds) */
 	rc = sja1105_clocking_setup(spi_setup, &config->xmii_params[0],
 	                           &config->mac_config[0]);
 	if (rc < 0) {
 		loge("sja1105_clocking_setup failed");
-		goto out;
+		goto hardware_left_floating_error;
 	}
 	/* Check that SJA1105 responded well to the config upload */
 	if (spi_setup->dry_run == 0) {
@@ -322,30 +332,36 @@ int static_config_flush(struct sja1105_spi_setup *spi_setup,
 		 * make sense to have) if we are in dry run mode */
 		rc = sja1105_general_status_get(spi_setup, &status);
 		if (rc < 0) {
-			goto out;
+			goto hardware_left_floating_error;
 		}
 		if (status.ids == 1) {
 			loge("Mismatch between hardware and staging area "
 			     "device id. Wrote 0x%" PRIx64 ", wants 0x%" PRIx64,
 			     config->device_id, spi_setup->device_id);
-			goto out;
+			goto hardware_left_floating_error;
 		}
 		if (status.crcchkl == 1) {
 			loge("local crc failed while uploading config");
-			rc = -EINVAL;
-			goto out;
+			goto hardware_left_floating_error;
 		}
 		if (status.crcchkg == 1) {
 			loge("global crc failed while uploading config");
-			rc = -EINVAL;
-			goto out;
+			goto hardware_left_floating_error;
 		}
 		if (status.configs == 0) {
 			loge("configuration is invalid");
-			rc = -EINVAL;
+			goto hardware_left_floating_error;
 		}
 	}
-out:
+	return SJA1105_ERR_OK;
+staging_area_invalid_error:
+	sja1105_err_remap(rc, SJA1105_ERR_STAGING_AREA_INVALID);
+	return rc;
+hardware_left_floating_error:
+	sja1105_err_remap(rc, SJA1105_ERR_UPLOAD_FAILED_HW_LEFT_FLOATING);
+	return rc;
+hardware_not_responding_error:
+	sja1105_err_remap(rc, SJA1105_ERR_HW_NOT_RESPONDING);
 	return rc;
 }
 
@@ -360,6 +376,8 @@ staging_area_flush(struct sja1105_spi_setup *spi_setup,
 		loge("static_config_flush failed");
 		goto out;
 	}
+	/* TODO: other configuration tables?
+	 */
 out:
 	return rc;
 }
