@@ -48,11 +48,10 @@ l2_forwarding_table_write(xmlTextWriterPtr writer,
 		rc |= xmlTextWriterEndElement(writer);
 		if (rc < 0) {
 			loge("error while writing l2_forwarding Table element %d", i);
-			goto out;
+			return -EINVAL;
 		}
 	}
-out:
-	return rc;
+	return 0;
 }
 
 

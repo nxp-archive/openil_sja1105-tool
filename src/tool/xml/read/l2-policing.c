@@ -38,10 +38,11 @@ static int entry_get(xmlNode *node, struct sja1105_l2_policing_entry *entry)
 	rc |= xml_read_field(&entry->rate, "rate", node);
 	rc |= xml_read_field(&entry->maxlen, "maxlen", node);
 	rc |= xml_read_field(&entry->partition, "partition", node);
-	if (rc) {
+	if (rc < 0) {
 		loge("L2 Policing entry is incomplete!");
+		return -EINVAL;
 	}
-	return rc;
+	return 0;
 }
 
 static int parse_entry(xmlNode *node, struct sja1105_static_config *config)

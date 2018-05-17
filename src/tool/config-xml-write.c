@@ -56,6 +56,9 @@ int xml_write_field(xmlTextWriterPtr writer, char *field, uint64_t value)
 	else
 		snprintf(print_buf, MAX_LINE_SIZE, "0x%" PRIX64, value);
 
+	/* Returns the bytes written (may be 0 because of buffering) or -1 in case of error.
+	 * Had to read the libxml2 code for that.
+	 */
 	return xmlTextWriterWriteElement(writer, BAD_CAST field, BAD_CAST print_buf);
 }
 
@@ -158,7 +161,7 @@ static_config_write(xmlTextWriterPtr writer,
 			rc |= next_write_config_table[i](writer, config);
 			rc |= xmlTextWriterEndElement(writer);
 			if (rc < 0) {
-				goto out;
+				return -EINVAL;
 			}
 		}
 	}

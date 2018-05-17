@@ -37,10 +37,11 @@ static int entry_get(xmlNode *node, struct sja1105_vl_forwarding_entry *entry)
 	rc |= xml_read_field(&entry->priority, "priority", node);
 	rc |= xml_read_field(&entry->partition, "partition", node);
 	rc |= xml_read_field(&entry->destports, "destports", node);
-	if (rc) {
+	if (rc < 0) {
 		loge("VL Forwarding Table incomplete!");
+		return -EINVAL;
 	}
-	return rc;
+	return 0;
 }
 
 static int parse_entry(xmlNode *node, struct sja1105_static_config *config)

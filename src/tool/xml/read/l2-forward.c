@@ -32,18 +32,19 @@
 
 static int entry_get(xmlNode *node, struct sja1105_l2_forwarding_entry *entry)
 {
-	int rc = 0;
-	rc |= xml_read_field(&entry->bc_domain, "bc_domain", node);
+	int rc;
+
+	rc = xml_read_field(&entry->bc_domain, "bc_domain", node);
 	if (rc < 0) {
 		loge("bc_domain read failed");
 		goto error;
 	}
-	rc |= xml_read_field(&entry->reach_port, "reach_port", node);
+	rc = xml_read_field(&entry->reach_port, "reach_port", node);
 	if (rc < 0) {
 		loge("reach_port read failed");
 		goto error;
 	}
-	rc |= xml_read_field(&entry->fl_domain, "fl_domain", node);
+	rc = xml_read_field(&entry->fl_domain, "fl_domain", node);
 	if (rc < 0) {
 		loge("fl_domain read failed");
 		goto error;
@@ -55,10 +56,11 @@ static int entry_get(xmlNode *node, struct sja1105_l2_forwarding_entry *entry)
 	}
 	return 0;
 error:
-	if (rc) {
+	if (rc < 0) {
 		loge("L2 Forwarding entry is incomplete!");
+		return -EINVAL;
 	}
-	return rc;
+	return 0;
 }
 
 static int parse_entry(xmlNode *node, struct sja1105_static_config *config)

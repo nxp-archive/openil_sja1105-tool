@@ -39,10 +39,11 @@ static int entry_get(xmlNode *node, struct sja1105_vlan_lookup_entry *entry)
 	rc |= xml_read_field(&entry->vlan_bc, "vlan_bc", node);
 	rc |= xml_read_field(&entry->tag_port, "tag_port", node);
 	rc |= xml_read_field(&entry->vlanid, "vlanid", node);
-	if (rc) {
+	if (rc < 0) {
 		loge("VLAN Lookup entry is incomplete!");
+		return -EINVAL;
 	}
-	return rc;
+	return 0;
 }
 
 static int parse_entry(xmlNode *node, struct sja1105_static_config *config)

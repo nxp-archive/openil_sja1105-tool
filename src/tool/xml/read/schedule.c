@@ -43,10 +43,11 @@ static int entry_get(xmlNode *node, struct sja1105_schedule_entry *entry)
 	rc |= xml_read_field(&entry->resmedia, "resmedia", node);
 	rc |= xml_read_field(&entry->vlindex, "vlindex", node);
 	rc |= xml_read_field(&entry->delta, "delta", node);
-	if (rc) {
+	if (rc < 0) {
 		loge("Schedule entry is incomplete!");
+		return -EINVAL;
 	}
-	return rc;
+	return 0;
 }
 
 static int parse_entry(xmlNode *node, struct sja1105_static_config *config)
