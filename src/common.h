@@ -56,19 +56,20 @@
 extern int SJA1105_DEBUG_CONDITION;
 extern int SJA1105_VERBOSE_CONDITION;
 
-#define _log(file, fmt, ...) do { \
-	if (SJA1105_DEBUG_CONDITION) { \
-		fprintf(file, "%s@%d: " fmt "\n", \
-		__func__, __LINE__, ##__VA_ARGS__); \
-	} else { \
+#define _log(file, fmt, ...) do {                       \
+	if (SJA1105_DEBUG_CONDITION) {                  \
+		fprintf(file, "%s@%d: %s: " fmt "\n",   \
+		        __FILE__, __LINE__, __func__,   \
+		        ##__VA_ARGS__);                 \
+	} else {                                        \
 		fprintf(file, fmt "\n", ##__VA_ARGS__); \
-	} \
+	}                                               \
 } while(0);
 
-#define logc(file, condition, ...) do { \
-	if (condition) { \
-		_log(file, __VA_ARGS__); \
-	} \
+#define logc(file, condition, ...) do {                 \
+	if (condition) {                                \
+		_log(file, __VA_ARGS__);                \
+	}                                               \
 } while(0);
 
 #define loge(...) _log(stderr, __VA_ARGS__)
