@@ -40,7 +40,7 @@ static int entry_get(xmlNode *node, struct sja1105_vl_forwarding_params_table *t
 		goto out;
 	}
 	rc = xml_read_field(&table->debugen, "debugen", node);
-	if (rc) {
+	if (rc < 0) {
 		loge("VL Forwarding Params Table: failed to read DEBUGEN field!");
 	}
 out:

@@ -36,8 +36,9 @@ static int entry_get(xmlNode *node, struct sja1105_schedule_entry_points_entry *
 	rc |= xml_read_field(&entry->subschindx, "subschindx", node);
 	rc |= xml_read_field(&entry->delta, "delta", node);
 	rc |= xml_read_field(&entry->address, "address", node);
-	if (rc) {
+	if (rc < 0) {
 		loge("Schedule Entry Points entry is incomplete!");
+		return -EINVAL;
 	}
 	return rc;
 }

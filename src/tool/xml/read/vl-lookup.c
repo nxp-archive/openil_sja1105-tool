@@ -47,10 +47,11 @@ static int entry_get(xmlNode *node, struct sja1105_vl_lookup_entry *entry)
 		rc |= xml_read_field(&entry->ingrmirr,   "ingrmirr",   node);
 		rc |= xml_read_field(&entry->vlid,       "vlid",       node);
 	}
-	if (rc) {
+	if (rc < 0) {
 		loge("VL Lookup Table incomplete!");
+		return -EINVAL;
 	}
-	return rc;
+	return 0;
 }
 
 static int parse_entry(xmlNode *node, struct sja1105_static_config *config)

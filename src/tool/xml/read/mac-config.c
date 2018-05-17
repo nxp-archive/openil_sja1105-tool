@@ -59,8 +59,9 @@ static int entry_get(xmlNode *node, struct sja1105_mac_config_entry *entry)
 	rc |= xml_read_field(&entry->egress, "egress", node);
 	rc |= xml_read_field(&entry->ingress, "ingress", node);
 out:
-	if (rc) {
+	if (rc < 0) {
 		loge("MAC Configuration entry is incomplete!");
+		return -EINVAL;
 	}
 	return rc;
 }
