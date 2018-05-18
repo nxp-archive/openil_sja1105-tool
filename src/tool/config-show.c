@@ -111,16 +111,16 @@ static int
 retagging_table_show(__attribute__((unused)) struct sja1105_static_config *config,
                      __attribute__((unused)) int index)
 {
-	loge("Retagging Table unimplemented");
-	return -1;
+	logv("Retagging Table unimplemented");
+	return 0;
 }
 
 static int
 clock_sync_params_table_show(__attribute__((unused)) struct sja1105_static_config *config,
                              __attribute__((unused)) int index)
 {
-	loge("Clock Synchronization Table unimplemented");
-	return -1;
+	logv("Clock Synchronization Table unimplemented");
+	return 0;
 }
 
 int
