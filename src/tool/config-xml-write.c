@@ -125,28 +125,6 @@ static_config_write(xmlTextWriterPtr writer,
 		retagging_table_write,
 		xmii_mode_parameters_table_write,
 	};
-	uint64_t entry_counts[] = {
-		config->schedule_count,
-		config->schedule_entry_points_count,
-		config->vl_lookup_count,
-		config->vl_policing_count,
-		config->vl_forwarding_count,
-		config->l2_lookup_count,
-		config->l2_policing_count,
-		config->vlan_lookup_count,
-		config->l2_forwarding_count,
-		config->mac_config_count,
-		config->schedule_params_count,
-		config->schedule_entry_points_params_count,
-		config->vl_forwarding_params_count,
-		config->l2_lookup_params_count,
-		config->l2_forwarding_params_count,
-		config->clk_sync_params_count,
-		config->avb_params_count,
-		config->general_params_count,
-		config->retagging_count,
-		config->xmii_params_count,
-	};
 	int rc = 0;
 	unsigned int i;
 
@@ -156,13 +134,11 @@ static_config_write(xmlTextWriterPtr writer,
 		goto out;
 	}
 	for (i = 0; i < ARRAY_SIZE(options); i++) {
-		if (entry_counts[i]) {
-			rc |= xmlTextWriterStartElement(writer, BAD_CAST options[i]);
-			rc |= next_write_config_table[i](writer, config);
-			rc |= xmlTextWriterEndElement(writer);
-			if (rc < 0) {
-				return -EINVAL;
-			}
+		rc |= xmlTextWriterStartElement(writer, BAD_CAST options[i]);
+		rc |= next_write_config_table[i](writer, config);
+		rc |= xmlTextWriterEndElement(writer);
+		if (rc < 0) {
+			return -EINVAL;
 		}
 	}
 	rc = xmlTextWriterEndElement(writer);
@@ -234,7 +210,7 @@ sja1105_staging_area_to_xml(char *xml_file,
 	 */
 	xmlCleanupParser();
 out:
-	return rc;
+	return 0;
 }
 
 #endif

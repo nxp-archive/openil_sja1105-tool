@@ -310,7 +310,7 @@ int sja1105_static_config_add_entry(struct sja1105_table_header *hdr, void *buf,
 		return SIZE_L2_FORWARDING_PARAMS_TABLE;
 	}
 	case BLKID_CLK_SYNC_PARAMS_TABLE:
-		printf("Clock Synchronization Parameters Table Unimplemented\n");
+		logv("Clock Synchronization Parameters Table Unimplemented\n");
 		return SIZE_CLK_SYNC_PARAMS_TABLE;
 	case BLKID_AVB_PARAMS_TABLE:
 	{
@@ -345,7 +345,7 @@ int sja1105_static_config_add_entry(struct sja1105_table_header *hdr, void *buf,
 		return SIZE_GENERAL_PARAMS_TABLE;
 	}
 	case BLKID_RETAGGING_TABLE:
-		printf("Retagging Table Unimplemented\n");
+		logv("Retagging Table Unimplemented\n");
 		return SIZE_RETAGGING_ENTRY;
 	case BLKID_XMII_MODE_PARAMS_TABLE:
 	{

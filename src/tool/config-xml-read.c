@@ -240,7 +240,7 @@ parse_root(xmlNode *root, struct sja1105_staging_area *staging_area)
 		}
 	}
 	if (!static_config_parsed) {
-		loge("<static-config> node not present in XML!");
+		loge("<static> node not present in XML!");
 		rc = -EINVAL;
 		goto out;
 	}
