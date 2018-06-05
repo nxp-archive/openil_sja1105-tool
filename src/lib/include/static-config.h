@@ -109,7 +109,7 @@
 #define SJA1105PR_DEVICE_ID        0xAF00030Eull
 #define SJA1105Q_DEVICE_ID         0xAE00030Eull
 #define SJA1105S_DEVICE_ID         0xAE00030Eull
-#define SJA1105_DEVICE_ID_INVALID  0xFFFFFFFFull
+#define SJA1105_NO_DEVICE_ID       0x00000000ull
 
 #define SJA1105P_PART_NR           0x9A84
 #define SJA1105Q_PART_NR           0x9A85

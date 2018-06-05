@@ -53,7 +53,7 @@ const char *SJA1105Q_DEVICE_ID_STR        = "SJA1105Q";
 const char *SJA1105R_DEVICE_ID_STR        = "SJA1105R";
 const char *SJA1105S_DEVICE_ID_STR        = "SJA1105S";
 const char *SJA1105PR_DEVICE_ID_STR       = "SJA1105P or SJA1105R";
-const char *SJA1105_DEVICE_ID_INVALID_STR = "Invalid";
+const char *SJA1105_NO_DEVICE_ID_STR      = "None";
 
 const char *sja1105_device_id_string_get(uint64_t device_id, uint64_t part_nr)
 {
@@ -85,7 +85,7 @@ const char *sja1105_device_id_string_get(uint64_t device_id, uint64_t part_nr)
 	if (device_id == SJA1105PR_DEVICE_ID) {
 		return SJA1105PR_DEVICE_ID_STR;
 	}
-	return SJA1105_DEVICE_ID_INVALID_STR;
+	return SJA1105_NO_DEVICE_ID_STR;
 }
 
 int sja1105_device_id_get(struct sja1105_spi_setup *spi_setup,
@@ -118,14 +118,14 @@ int sja1105_device_id_get(struct sja1105_spi_setup *spi_setup,
 		loge("sja1105_spi_send_int failed");
 		goto out_error;
 	}
-	*device_id = SJA1105_DEVICE_ID_INVALID;
+	*device_id = SJA1105_NO_DEVICE_ID;
 	for (i = 0; i < ARRAY_SIZE(compatible_device_ids); i++) {
 		if (tmp_device_id == compatible_device_ids[i]) {
 			*device_id = compatible_device_ids[i];
 			break;
 		}
 	}
-	if (*device_id == SJA1105_DEVICE_ID_INVALID) {
+	if (*device_id == SJA1105_NO_DEVICE_ID) {
 		loge("Unrecognized Device ID 0x%08" PRIx64, tmp_device_id);
 		rc = -EINVAL;
 		goto out_error;
@@ -242,7 +242,7 @@ int sja1105_spi_configure(struct sja1105_spi_setup *spi_setup)
 	logv("bits per word: %d", spi_setup->bits);
 	logv("max speed: %d KHz", spi_setup->speed / 1000);
 
-	if (spi_setup->device_id == SJA1105_DEVICE_ID_INVALID) {
+	if (spi_setup->device_id == SJA1105_NO_DEVICE_ID) {
 		/* Device ID was not overridden from sja1105.conf.
 		 * Check that we are talking with a compatible
 		 * device over SPI. */

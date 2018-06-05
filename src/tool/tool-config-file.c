@@ -40,8 +40,8 @@
 
 const char *default_staging_area = "/etc/sja1105/.staging";
 const char *default_device = "/dev/spidev0.1";
-const uint64_t default_device_id = SJA1105_DEVICE_ID_INVALID;
-/* default_device_id of SJA1105_DEVICE_ID_INVALID signals
+const uint64_t default_device_id = SJA1105_NO_DEVICE_ID;
+/* default_device_id of SJA1105_NO_DEVICE_ID signals
  * to sja1105_spi_configure that it should attempt to read
  * the real Device ID over SPI. Its absence from sja1105.conf
  * is not an error - its presence is merely an override of the
