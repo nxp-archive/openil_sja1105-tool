@@ -61,6 +61,7 @@
 #define SIZE_GENERAL_PARAMS_ENTRY_PQRS          44
 #define SIZE_RETAGGING_ENTRY                    8
 #define SIZE_XMII_MODE_PARAMS_ENTRY             4
+#define SIZE_SGMII_ENTRY                        144
 
 /* UM10944.pdf Page 11, Table 2. Configuration Blocks */
 #define BLKID_SCHEDULE_TABLE                     0x00
@@ -83,6 +84,7 @@
 #define BLKID_GENERAL_PARAMS_TABLE               0x11
 #define BLKID_RETAGGING_TABLE                    0x12
 #define BLKID_XMII_MODE_PARAMS_TABLE             0x4E
+#define BLKID_SGMII_TABLE                        0xC8
 
 #define MAX_SCHEDULE_COUNT                       1024
 #define MAX_SCHEDULE_ENTRY_POINTS_COUNT          2048
@@ -102,6 +104,7 @@
 #define MAX_GENERAL_PARAMS_COUNT                 1
 #define MAX_RETAGGING_COUNT                      32
 #define MAX_XMII_PARAMS_COUNT                    1
+#define MAX_SGMII_COUNT                          1
 #define MAX_AVB_PARAMS_COUNT                     1
 #define MAX_CLK_SYNC_COUNT                       1
 
@@ -314,6 +317,17 @@ struct sja1105_avb_params_entry {
 	uint64_t srcmeta;
 };
 
+struct sja1105_sgmii_entry {
+	uint64_t digital_error_cnt;
+	uint64_t digital_control_2;
+	uint64_t debug_control;
+	uint64_t test_control;
+	uint64_t autoneg_control;
+	uint64_t digital_control_1;
+	uint64_t autoneg_adv;
+	uint64_t basic_control;
+};
+
 struct sja1105_vl_lookup_entry {
 	uint64_t format;
 	uint64_t port;
@@ -434,6 +448,7 @@ struct sja1105_static_config {
 	STATIC_CONFIG_MEMBER(vl_policing, MAX_VL_POLICING_COUNT);
 	STATIC_CONFIG_MEMBER(vl_lookup, MAX_VL_LOOKUP_COUNT);
 	STATIC_CONFIG_MEMBER(retagging, MAX_RETAGGING_COUNT);
+	STATIC_CONFIG_MEMBER(sgmii, MAX_SGMII_COUNT);
 };
 
 #include "clock.h"
@@ -463,6 +478,7 @@ DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(schedule_params);
 DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(schedule);
 DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(vlan_lookup);
 DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(xmii_params);
+DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(sgmii);
 DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(vl_forwarding_params);
 DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(vl_forwarding);
 DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(vl_policing);

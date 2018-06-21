@@ -215,6 +215,11 @@ int sja1105_static_config_add_entry(struct sja1105_table_header *hdr, void *buf,
 		POPULATE_CONFIG_TABLE(, xmii_params, buf, MAX_XMII_PARAMS_COUNT, "xMII Parameters");
 		return SIZE_XMII_MODE_PARAMS_ENTRY;
 	}
+	case BLKID_SGMII_TABLE:
+	{
+		POPULATE_CONFIG_TABLE(, sgmii, buf, MAX_SGMII_COUNT, "SGMII Table");
+		return SIZE_SGMII_ENTRY;
+	}
 	default:
 		printf("Unknown Table %" PRIX64 "\n", hdr->block_id);
 		return -1;
@@ -624,6 +629,11 @@ sja1105_static_config_pack(void *buf, struct sja1105_static_config *config)
 	                     BLKID_XMII_MODE_PARAMS_TABLE,
 	                     sja1105_xmii_params_entry_pack,
 	                     config->xmii_params);
+	PACK_TABLE_IN_BUF_FN(config->sgmii_count,
+	                     SIZE_SGMII_ENTRY,
+	                     BLKID_SGMII_TABLE,
+	                     sja1105_sgmii_entry_pack,
+	                     config->sgmii);
 	/* Final header */
 	header.block_id = 0;      /* Does not matter */
 	header.len = 0;           /* Marks that header is final */
@@ -657,6 +667,7 @@ sja1105_static_config_get_length(struct sja1105_static_config *config)
 	header_count += (config->avb_params_count != 0);
 	header_count += (config->general_params_count != 0);
 	header_count += (config->xmii_params_count != 0);
+	header_count += (config->sgmii_count != 0);
 	header_count += 1; /* Ending header */
 	sum += SIZE_SJA1105_DEVICE_ID;
 	sum += header_count * (SIZE_TABLE_HEADER + 4); /* plus CRC at the end */
@@ -678,6 +689,7 @@ sja1105_static_config_get_length(struct sja1105_static_config *config)
 	sum += config->avb_params_count * (IS_PQRS(config->device_id) ? SIZE_AVB_PARAMS_ENTRY_PQRS : SIZE_AVB_PARAMS_ENTRY_ET);
 	sum += config->general_params_count * (IS_PQRS(config->device_id) ? SIZE_GENERAL_PARAMS_ENTRY_PQRS : SIZE_GENERAL_PARAMS_ENTRY_ET);
 	sum += config->xmii_params_count * SIZE_XMII_MODE_PARAMS_ENTRY;
+	sum += config->sgmii_count * SIZE_SGMII_ENTRY;
 	sum -= 4; /* Last header does not have an extra CRC because there is no data */
 	logv("total: %d bytes", sum);
 	return sum;

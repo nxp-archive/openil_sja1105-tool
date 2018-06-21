@@ -64,5 +64,6 @@ int clock_synchronization_parameters_table_write(xmlTextWriterPtr, struct sja110
 int general_parameters_table_write(xmlTextWriterPtr, struct sja1105_static_config *config);
 int retagging_table_write(xmlTextWriterPtr, struct sja1105_static_config *config);
 int xmii_mode_parameters_table_write(xmlTextWriterPtr, struct sja1105_static_config *config);
+int sgmii_table_write(xmlTextWriterPtr, struct sja1105_static_config *config);
 
 #endif

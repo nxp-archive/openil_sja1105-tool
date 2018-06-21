@@ -732,6 +732,55 @@ out:
 	return rc;
 }
 
+static int sgmii_table_entry_modify(
+		struct sja1105_static_config *config,
+		int    entry_index,
+		char  *field_name,
+		char  *field_val)
+{
+	const char *options[] = {
+		"digital_error_cnt",
+		"digital_control_2",
+		"debug_control",
+		"test_control",
+		"autoneg_control",
+		"digital_control_1",
+		"autoneg_adv",
+		"basic_control",
+	};
+	uint64_t *fields[] = {
+		&config->sgmii[entry_index].digital_error_cnt,
+		&config->sgmii[entry_index].digital_control_2,
+		&config->sgmii[entry_index].debug_control,
+		&config->sgmii[entry_index].test_control,
+		&config->sgmii[entry_index].autoneg_control,
+		&config->sgmii[entry_index].digital_control_1,
+		&config->sgmii[entry_index].autoneg_adv,
+		&config->sgmii[entry_index].basic_control,
+	};
+	int entry_field_counts[] = {1, 1, 1, 1, 1, 1, 1, 1,};
+	uint64_t tmp;
+	int rc;
+
+	if (matches(field_name, "entry-count") == 0) {
+		rc = reliable_uint64_from_string(&tmp, field_val, NULL);
+		config->sgmii_count = tmp;
+		goto out;
+	}
+	rc = get_match(field_name, options, ARRAY_SIZE(options));
+	if (rc < 0) {
+		goto out;
+	}
+	rc = generic_table_entry_modify(
+			fields[rc],
+			entry_index,
+			config->sgmii_count,
+			entry_field_counts[rc],
+			field_val);
+out:
+	return rc;
+}
+
 static int vl_lookup_table_entry_modify(
 		struct sja1105_static_config *config,
 		int    entry_index,
@@ -992,6 +1041,7 @@ staging_area_modify(struct sja1105_staging_area *staging_area,
 		"general-parameters-table",
 		"retagging-table",
 		"xmii-mode-parameters-table",
+		"sgmii-table",
 	};
 	int (*next_static_table_modify[])(struct sja1105_static_config*, \
 	                                  int, char*, char*) = {
@@ -1015,6 +1065,7 @@ staging_area_modify(struct sja1105_staging_area *staging_area,
 		general_params_table_entry_modify,
 		retagging_table_entry_modify,
 		xmii_table_entry_modify,
+		sgmii_table_entry_modify,
 	};
 	struct   sja1105_static_config *static_config;
 	uint64_t entry_index;

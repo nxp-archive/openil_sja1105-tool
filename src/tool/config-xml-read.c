@@ -139,6 +139,7 @@ parse_config_table(xmlNode *node, struct sja1105_static_config *config)
 		"general-parameters-table",
 		"retagging-table",
 		"xmii-mode-parameters-table",
+		"sgmii-table",
 	};
 	int (*next_parse_config_table[])(xmlNode *, struct
 	                                 sja1105_static_config *) = {
@@ -162,6 +163,7 @@ parse_config_table(xmlNode *node, struct sja1105_static_config *config)
 		general_parameters_table_parse,
 		retagging_table_parse,
 		xmii_mode_parameters_table_parse,
+		sgmii_table_parse,
 	};
 	int rc;
 	table_name = (char*) node->name;
