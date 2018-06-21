@@ -550,6 +550,11 @@ sja1105_static_config_unpack(void *buf, struct sja1105_static_config *config)
 	logv("Device ID is 0x%08" PRIx64 " (%s)",
 	     config->device_id, sja1105_device_id_string_get(
 	     config->device_id, SJA1105_PART_NR_DONT_CARE));
+	if (DEVICE_ID_VALID(config->device_id) == 0) {
+		loge("Invalid device id in staging area: 0x%08" PRIx64,
+		     config->device_id);
+		goto error;
+	}
 	p += SIZE_SJA1105_DEVICE_ID;
 
 	while (1) {
