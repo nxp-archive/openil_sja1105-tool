@@ -53,6 +53,7 @@ const char *SJA1105Q_DEVICE_ID_STR        = "SJA1105Q";
 const char *SJA1105R_DEVICE_ID_STR        = "SJA1105R";
 const char *SJA1105S_DEVICE_ID_STR        = "SJA1105S";
 const char *SJA1105PR_DEVICE_ID_STR       = "SJA1105P or SJA1105R";
+const char *SJA1105QS_DEVICE_ID_STR       = "SJA1105Q or SJA1105S";
 const char *SJA1105_NO_DEVICE_ID_STR      = "None";
 
 const char *sja1105_device_id_string_get(uint64_t device_id, uint64_t part_nr)
@@ -63,18 +64,19 @@ const char *sja1105_device_id_string_get(uint64_t device_id, uint64_t part_nr)
 	if (device_id == SJA1105T_DEVICE_ID) {
 		return SJA1105T_DEVICE_ID_STR;
 	}
-	/* P and R have same Device ID, and differ by Part Number */
+	/* P and R have same Device ID, and differ by Part Number.
+	 * Same do Q and S.
+	 */
 	if (IS_P(device_id, part_nr)) {
 		return SJA1105P_DEVICE_ID_STR;
 	}
-	if (device_id == SJA1105Q_DEVICE_ID) {
+	if (IS_Q(device_id, part_nr)) {
 		return SJA1105Q_DEVICE_ID_STR;
 	}
-	/* P and R have same Device ID, and differ by Part Number */
 	if (IS_R(device_id, part_nr)) {
 		return SJA1105P_DEVICE_ID_STR;
 	}
-	if (device_id == SJA1105S_DEVICE_ID) {
+	if (IS_S(device_id, part_nr)) {
 		return SJA1105S_DEVICE_ID_STR;
 	}
 	/* Fallback: if we don't know/care what the part_nr is, and we
@@ -84,6 +86,9 @@ const char *sja1105_device_id_string_get(uint64_t device_id, uint64_t part_nr)
 	 */
 	if (device_id == SJA1105PR_DEVICE_ID) {
 		return SJA1105PR_DEVICE_ID_STR;
+	}
+	if (device_id == SJA1105QS_DEVICE_ID) {
+		return SJA1105QS_DEVICE_ID_STR;
 	}
 	return SJA1105_NO_DEVICE_ID_STR;
 }
@@ -95,8 +100,7 @@ int sja1105_device_id_get(struct sja1105_spi_setup *spi_setup,
 		SJA1105E_DEVICE_ID,
 		SJA1105T_DEVICE_ID,
 		SJA1105PR_DEVICE_ID,
-		SJA1105Q_DEVICE_ID,
-		SJA1105S_DEVICE_ID,
+		SJA1105QS_DEVICE_ID,
 	};
 	uint64_t tmp_device_id;
 	uint64_t tmp_part_nr;

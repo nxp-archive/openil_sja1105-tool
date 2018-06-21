@@ -107,8 +107,7 @@
 #define SJA1105E_DEVICE_ID         0x9C00000Cull
 #define SJA1105T_DEVICE_ID         0x9E00030Eull
 #define SJA1105PR_DEVICE_ID        0xAF00030Eull
-#define SJA1105Q_DEVICE_ID         0xAE00030Eull
-#define SJA1105S_DEVICE_ID         0xAE00030Eull
+#define SJA1105QS_DEVICE_ID        0xAE00030Eull
 #define SJA1105_NO_DEVICE_ID       0x00000000ull
 
 #define SJA1105P_PART_NR           0x9A84
@@ -119,8 +118,7 @@
 
 #define IS_PQRS(device_id) \
 	(((device_id) == SJA1105PR_DEVICE_ID) || \
-	 ((device_id) == SJA1105Q_DEVICE_ID) || \
-	 ((device_id) == SJA1105S_DEVICE_ID))
+	 ((device_id) == SJA1105QS_DEVICE_ID))
 #define IS_ET(device_id) \
 	(((device_id) == SJA1105E_DEVICE_ID) || \
 	 ((device_id) == SJA1105T_DEVICE_ID))
@@ -131,12 +129,18 @@
 #define IS_R(device_id, part_nr) \
 	(((device_id) == SJA1105PR_DEVICE_ID) && \
 	 ((part_nr) == SJA1105R_PART_NR))
+/* Same do Q and S */
+#define IS_Q(device_id, part_nr) \
+	(((device_id) == SJA1105QS_DEVICE_ID) && \
+	 ((part_nr) == SJA1105Q_PART_NR))
+#define IS_S(device_id, part_nr) \
+	(((device_id) == SJA1105QS_DEVICE_ID) && \
+	 ((part_nr) == SJA1105S_PART_NR))
 #define DEVICE_ID_VALID(device_id) \
 	(IS_ET(device_id) || IS_PQRS(device_id))
 #define SUPPORTS_TSN(device_id) \
 	(((device_id) == SJA1105T_DEVICE_ID) || \
-	 ((device_id) == SJA1105Q_DEVICE_ID) || \
-	 ((device_id) == SJA1105S_DEVICE_ID))
+	 ((device_id) == SJA1105QS_DEVICE_ID))
 
 struct sja1105_schedule_entry {
 	uint64_t winstindex;
