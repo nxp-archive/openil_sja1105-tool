@@ -68,16 +68,28 @@ LIB_SRC += $(shell find src/lib -name "*.[c|h]")   # All .c and .h files
 LIB_DEPS = $(patsubst %.c, %.o, $(LIB_SRC))        # All .o and .h files
 LIB_OBJ  = $(filter %.o, $(LIB_DEPS))              # Only the .o files
 
+KMOD_SRC = $(shell find src/kmod -name "*.[c|h]")  # All .c and .h files
+
 SJA1105_BIN = sja1105-tool
 SJA1105_LIB = libsja1105.so
+SJA1105_KMOD = src/kmod/sja1105.ko
 
-build: $(SJA1105_LIB) $(SJA1105_BIN)
+build: $(SJA1105_LIB) $(SJA1105_BIN) $(SJA1105_KMOD)
 
 $(SJA1105_LIB): $(LIB_DEPS)
 	$(CC) -shared $(LIB_OBJ) -o $@ $(LIB_LDFLAGS)
 
 $(SJA1105_BIN): $(BIN_DEPS) $(SJA1105_LIB)
 	$(CC) $(BIN_OBJ) -o $@ $(BIN_LDFLAGS)
+
+#ifneq (,$(filter $(SJA1105_KMOD),$(MAKECMDGOALS)))
+  ifeq ($(KDIR),)
+    $(error Please set KDIR variable to point to a kernel source tree.)
+  endif
+#endif
+
+$(SJA1105_KMOD): $(KMOD_SRC)
+	$(MAKE) -C $(KDIR) M=$$PWD/src/kmod
 
 src/common.o: src/common.c
 	$(CC) $(LIB_CFLAGS) -c $^ -o $@
@@ -157,6 +169,7 @@ uninstall:
 
 clean:
 	rm -f $(SJA1105_BIN) $(BIN_OBJ) $(SJA1105_LIB) $(LIB_OBJ)
+	$(MAKE) -C $(KDIR) M=$$PWD/src/kmod clean
 
 .PHONY: clean uninstall build man install install-binaries \
 	install-configs install-headers install-manpages
