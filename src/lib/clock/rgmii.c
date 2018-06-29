@@ -47,9 +47,17 @@ int sja1105_cgu_rgmii_tx_clk_config(
 	int clksrc;
 	const int BUF_LEN = 4;
 	/* UM10944.pdf, Table 78, CGU Register overview */
-	const int txc_offsets[] = {0x16, 0x1D, 0x24, 0x2B, 0x32};
+	const int txc_offsets_et[] = {0x16, 0x1D, 0x24, 0x2B, 0x32};
+	/* UM11040.pdf, Table 81, CGU Register overview */
+	const int txc_offsets_pqrs[] = {0x16, 0x1C, 0x22, 0x28, 0x2E};
+	const int *txc_offsets;
 	uint8_t packed_buf[BUF_LEN];
 	struct  sja1105_cgu_mii_control txc;
+
+	/* E/T and P/Q/R/S compatibility */
+	txc_offsets = IS_ET(spi_setup->device_id) ?
+	                     txc_offsets_et :
+	                     txc_offsets_pqrs;
 
 	if (speed_mbps == 1000) {
 		clksrc = CLKSRC_PLL0;
@@ -78,7 +86,7 @@ int sja1105_rgmii_cfg_pad_tx_config(struct sja1105_spi_setup *spi_setup, int por
 {
 	const int BUF_LEN = 4;
 	uint8_t packed_buf[BUF_LEN];
-	/* UM10944.pdf, Table 86, AGU Register overview */
+	/* UM10944.pdf, Table 86, ACU Register overview */
 	int     pad_mii_tx_offsets[] = {0x00, 0x02, 0x04, 0x06, 0x08};
 	struct  sja1105_cfg_pad_mii_tx pad_mii_tx;
 
