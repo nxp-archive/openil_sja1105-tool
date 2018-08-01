@@ -55,7 +55,8 @@
 #define SIZE_L2_LOOKUP_PARAMS_ENTRY_PQRS        16
 #define SIZE_L2_FORWARDING_PARAMS_ENTRY         12
 #define SIZE_CLK_SYNC_PARAMS_ENTRY              52
-#define SIZE_AVB_PARAMS_ENTRY                   12
+#define SIZE_AVB_PARAMS_ENTRY_ET                12
+#define SIZE_AVB_PARAMS_ENTRY_PQRS              16
 #define SIZE_GENERAL_PARAMS_ENTRY_ET            40
 #define SIZE_GENERAL_PARAMS_ENTRY_PQRS          44
 #define SIZE_RETAGGING_ENTRY                    8
@@ -298,6 +299,8 @@ struct sja1105_xmii_params_entry {
 };
 
 struct sja1105_avb_params_entry {
+	uint64_t l2cbs; /* only on P/Q/R/S */
+	uint64_t cas_master; /* only on P/Q/R/S */
 	uint64_t destmeta;
 	uint64_t srcmeta;
 };
@@ -451,11 +454,11 @@ DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(schedule_params);
 DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(schedule);
 DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(vlan_lookup);
 DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(xmii_params);
-DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(avb_params);
 DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(vl_forwarding_params);
 DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(vl_forwarding);
 DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(vl_policing);
 DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(vl_lookup);
+DEFINE_SEPARATE_HEADERS_FOR_CONFIG_TABLE(avb_params);
 DEFINE_SEPARATE_HEADERS_FOR_CONFIG_TABLE(general_params);
 DEFINE_SEPARATE_HEADERS_FOR_CONFIG_TABLE(mac_config);
 DEFINE_SEPARATE_HEADERS_FOR_CONFIG_TABLE(l2_lookup);
