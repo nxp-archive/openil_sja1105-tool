@@ -39,13 +39,13 @@
 #include <lib/helpers.h>
 #include <common.h>
 
-static void sja1105_avb_params_entry_access(
+static void sja1105et_avb_params_entry_access(
 		void *buf,
 		struct sja1105_avb_params_entry *entry,
 		int write)
 {
 	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
-	int    size = SIZE_AVB_PARAMS_ENTRY;
+	int    size = SIZE_AVB_PARAMS_ENTRY_ET;
 
 	if (write == 0) {
 		pack_or_unpack = gtable_unpack;
@@ -57,11 +57,34 @@ static void sja1105_avb_params_entry_access(
 	pack_or_unpack(buf, &entry->destmeta, 95, 48, size);
 	pack_or_unpack(buf, &entry->srcmeta,  47,  0, size);
 }
+
+static void sja1105pqrs_avb_params_entry_access(
+		void *buf,
+		struct sja1105_avb_params_entry *entry,
+		int write)
+{
+	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
+	int    size = SIZE_AVB_PARAMS_ENTRY_PQRS;
+
+	if (write == 0) {
+		pack_or_unpack = gtable_unpack;
+		memset(entry, 0, sizeof(*entry));
+	} else {
+		pack_or_unpack = gtable_pack;
+		memset(buf, 0, size);
+	}
+	pack_or_unpack(buf, &entry->l2cbs,      127, 127, size);
+	pack_or_unpack(buf, &entry->cas_master, 126, 126, size);
+	pack_or_unpack(buf, &entry->destmeta,   125,  78, size);
+	pack_or_unpack(buf, &entry->srcmeta,     77,  33, size);
+}
 /*
- * sja1105_avb_params_entry_pack
- * sja1105_avb_params_entry_unpack
+ * sja1105et_avb_params_entry_pack
+ * sja1105et_avb_params_entry_unpack
+ * sja1105pqrs_avb_params_entry_pack
+ * sja1105pqrs_avb_params_entry_unpack
  */
-DEFINE_PACK_UNPACK_ACCESSORS(avb_params);
+DEFINE_SEPARATE_PACK_UNPACK_ACCESSORS(avb_params);
 
 void sja1105_avb_params_entry_fmt_show(
 		char *print_buf,

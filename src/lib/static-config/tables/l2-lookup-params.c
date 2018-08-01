@@ -97,30 +97,13 @@ static void sja1105pqrs_l2_lookup_params_entry_access(
 	pack_or_unpack(buf, &entry->learn_once,      22,  22, size);
 }
 
-/* Device-specific pack/unpack accessors */
-void sja1105et_l2_lookup_params_entry_pack(void *buf, struct
-                                           sja1105_l2_lookup_params_entry *entry)
-{
-	sja1105et_l2_lookup_params_entry_access(buf, entry, 1);
-}
-
-void sja1105et_l2_lookup_params_entry_unpack(void *buf, struct
-                                             sja1105_l2_lookup_params_entry *entry)
-{
-	sja1105et_l2_lookup_params_entry_access(buf, entry, 0);
-}
-
-void sja1105pqrs_l2_lookup_params_entry_pack(void *buf, struct
-                                             sja1105_l2_lookup_params_entry *entry)
-{
-	sja1105pqrs_l2_lookup_params_entry_access(buf, entry, 1);
-}
-
-void sja1105pqrs_l2_lookup_params_entry_unpack(void *buf, struct
-                                               sja1105_l2_lookup_params_entry *entry)
-{
-	sja1105pqrs_l2_lookup_params_entry_access(buf, entry, 0);
-}
+/*
+ * sja1105et_l2_lookup_params_entry_pack
+ * sja1105et_l2_lookup_params_entry_unpack
+ * sja1105pqrs_l2_lookup_params_entry_pack
+ * sja1105pqrs_l2_lookup_params_entry_unpack
+ */
+DEFINE_SEPARATE_PACK_UNPACK_ACCESSORS(l2_lookup_params);
 
 void sja1105_l2_lookup_params_entry_fmt_show(
 		char *print_buf,

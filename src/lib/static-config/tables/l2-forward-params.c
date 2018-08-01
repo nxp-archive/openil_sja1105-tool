@@ -66,7 +66,7 @@ static void sja1105_l2_forwarding_params_entry_access(
  * sja1105_l2_forwarding_params_entry_pack
  * sja1105_l2_forwarding_params_entry_unpack
  */
-DEFINE_PACK_UNPACK_ACCESSORS(l2_forwarding_params);
+DEFINE_COMMON_PACK_UNPACK_ACCESSORS(l2_forwarding_params);
 
 void sja1105_l2_forwarding_params_entry_fmt_show(
 		char *print_buf,
