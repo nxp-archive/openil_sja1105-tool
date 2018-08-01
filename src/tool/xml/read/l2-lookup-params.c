@@ -30,7 +30,7 @@
  *****************************************************************************/
 #include "internal.h"
 
-static int entry_get(xmlNode *node, struct sja1105_l2_lookup_params_table *entry)
+static int entry_get(xmlNode *node, struct sja1105_l2_lookup_params_entry *entry)
 {
 	int rc = 0;
 	rc |= xml_read_field(&entry->maxage, "maxage", node);
@@ -48,7 +48,7 @@ static int entry_get(xmlNode *node, struct sja1105_l2_lookup_params_table *entry
 
 static int parse_entry(xmlNode *node, struct sja1105_static_config *config)
 {
-	struct sja1105_l2_lookup_params_table entry;
+	struct sja1105_l2_lookup_params_entry entry;
 	int rc;
 
 	if (config->l2_lookup_params_count >= MAX_L2_LOOKUP_PARAMS_COUNT) {

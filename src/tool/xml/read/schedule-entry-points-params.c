@@ -30,7 +30,7 @@
  *****************************************************************************/
 #include "internal.h"
 
-static int entry_get(xmlNode *node, struct sja1105_schedule_entry_points_params *entry)
+static int entry_get(xmlNode *node, struct sja1105_schedule_entry_points_params_entry *entry)
 {
 	int rc = 0;
 	rc |= xml_read_field(&entry->clksrc, "clksrc", node);
@@ -44,7 +44,7 @@ static int entry_get(xmlNode *node, struct sja1105_schedule_entry_points_params 
 
 static int parse_entry(xmlNode *node, struct sja1105_static_config *config)
 {
-	struct sja1105_schedule_entry_points_params entry;
+	struct sja1105_schedule_entry_points_params_entry entry;
 	int rc;
 
 	if (config->schedule_entry_points_params_count >= MAX_SCHEDULE_ENTRY_POINTS_PARAMS_COUNT) {

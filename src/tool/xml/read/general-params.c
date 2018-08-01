@@ -30,7 +30,7 @@
  *****************************************************************************/
 #include "internal.h"
 
-static int entry_get(xmlNode *node, struct sja1105_general_params_table *entry)
+static int entry_get(xmlNode *node, struct sja1105_general_params_entry *entry)
 {
 	int rc = 0;
 	rc |= xml_read_field(&entry->vllupformat, "vllupformat", node);
@@ -62,7 +62,7 @@ static int entry_get(xmlNode *node, struct sja1105_general_params_table *entry)
 
 static int parse_entry(xmlNode *node, struct sja1105_static_config *config)
 {
-	struct sja1105_general_params_table entry;
+	struct sja1105_general_params_entry entry;
 	int rc;
 
 	if (config->general_params_count >= MAX_GENERAL_PARAMS_COUNT) {

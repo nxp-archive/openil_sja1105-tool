@@ -39,7 +39,7 @@
 #include <lib/include/static-config.h>
 #include <common.h>
 
-#define DECLARE_TABLE_SHOW_FN(TABLE_NAME, TABLE_OR_ENTRY, MAX_TABLE_SIZE,     \
+#define DECLARE_TABLE_SHOW_FN(TABLE_NAME, MAX_TABLE_SIZE,                     \
                               STRING_NAME, FMT)                               \
 	static int                                                            \
 	TABLE_NAME##_table_show(struct sja1105_static_config *config,         \
@@ -75,7 +75,7 @@
 		}                                                             \
 		for (i = start; i < end; i++) {                               \
 			formatted_append(print_bufs[i], FMT, "Entry %d:", i); \
-			sja1105_##TABLE_NAME##_##TABLE_OR_ENTRY##_fmt_show(   \
+			sja1105_##TABLE_NAME##_entry_fmt_show(                \
 					print_bufs[i],                        \
 					FMT,                                  \
 					&config-> TABLE_NAME [i]);            \
@@ -88,24 +88,24 @@
 		return 0;                                                     \
 	}
 
-DECLARE_TABLE_SHOW_FN(schedule, entry, MAX_SCHEDULE_COUNT, "Schedule Table", "%-30s\n")
-DECLARE_TABLE_SHOW_FN(schedule_entry_points, entry, MAX_SCHEDULE_ENTRY_POINTS_COUNT, "Schedule Entry Points Table", "%-30s\n")
-DECLARE_TABLE_SHOW_FN(l2_lookup, entry, MAX_L2_LOOKUP_COUNT, "L2 Address Lookup Table", "%-30s\n")
-DECLARE_TABLE_SHOW_FN(l2_policing, entry, MAX_L2_POLICING_COUNT, "L2 Policing Table", "%-20s\n")
-DECLARE_TABLE_SHOW_FN(vlan_lookup, entry, MAX_VLAN_LOOKUP_COUNT, "VLAN Lookup Table", "%-20s\n")
-DECLARE_TABLE_SHOW_FN(l2_forwarding, entry, MAX_L2_FORWARDING_COUNT, "L2 Forwarding Table", "%-45s\n")
-DECLARE_TABLE_SHOW_FN(mac_config, entry, MAX_MAC_CONFIG_COUNT, "MAC Configuration Table", "%-60s\n")
-DECLARE_TABLE_SHOW_FN(schedule_params, entry, MAX_SCHEDULE_PARAMS_COUNT, "Schedule Parameters Table", "%-50s\n")
-DECLARE_TABLE_SHOW_FN(schedule_entry_points_params, table, MAX_SCHEDULE_ENTRY_POINTS_PARAMS_COUNT, "Schedule Entry Points Parameters Table", "%-30s\n")
-DECLARE_TABLE_SHOW_FN(l2_lookup_params, table, MAX_L2_LOOKUP_PARAMS_COUNT, "L2 Address Lookup Parameters Table", "%-30s\n")
-DECLARE_TABLE_SHOW_FN(l2_forwarding_params, table, MAX_L2_FORWARDING_PARAMS_COUNT, "L2 Forwarding Parameters Table", "%-50s\n")
-DECLARE_TABLE_SHOW_FN(general_params, table, MAX_GENERAL_PARAMS_COUNT, "General Parameters Table", "%-30s\n")
-DECLARE_TABLE_SHOW_FN(xmii_params, table, MAX_XMII_PARAMS_COUNT, "xMII Mode Parameters Table", "%-35s\n")
-DECLARE_TABLE_SHOW_FN(vl_lookup, entry, MAX_VL_LOOKUP_COUNT, "Virtual Link Address Lookup Table:", "%-35s\n")
-DECLARE_TABLE_SHOW_FN(vl_policing, entry, MAX_VL_POLICING_COUNT, "Virtual Link Policing Table:", "%-35s\n")
-DECLARE_TABLE_SHOW_FN(vl_forwarding, entry, MAX_VL_FORWARDING_COUNT, "Virtual Link Forwarding Table", "%-35s\n")
-DECLARE_TABLE_SHOW_FN(avb_params, table, MAX_AVB_PARAMS_COUNT, "Audio/Video Bridging Parameters Table", "%-35s\n")
-DECLARE_TABLE_SHOW_FN(vl_forwarding_params, table, MAX_VL_FORWARDING_PARAMS_COUNT, "Virtual Link Forwarding Parameters Table", "%-35s\n")
+DECLARE_TABLE_SHOW_FN(schedule, MAX_SCHEDULE_COUNT, "Schedule Table", "%-30s\n")
+DECLARE_TABLE_SHOW_FN(schedule_entry_points, MAX_SCHEDULE_ENTRY_POINTS_COUNT, "Schedule Entry Points Table", "%-30s\n")
+DECLARE_TABLE_SHOW_FN(l2_lookup, MAX_L2_LOOKUP_COUNT, "L2 Address Lookup Table", "%-30s\n")
+DECLARE_TABLE_SHOW_FN(l2_policing, MAX_L2_POLICING_COUNT, "L2 Policing Table", "%-20s\n")
+DECLARE_TABLE_SHOW_FN(vlan_lookup, MAX_VLAN_LOOKUP_COUNT, "VLAN Lookup Table", "%-20s\n")
+DECLARE_TABLE_SHOW_FN(l2_forwarding, MAX_L2_FORWARDING_COUNT, "L2 Forwarding Table", "%-45s\n")
+DECLARE_TABLE_SHOW_FN(mac_config, MAX_MAC_CONFIG_COUNT, "MAC Configuration Table", "%-60s\n")
+DECLARE_TABLE_SHOW_FN(schedule_params, MAX_SCHEDULE_PARAMS_COUNT, "Schedule Parameters Table", "%-50s\n")
+DECLARE_TABLE_SHOW_FN(schedule_entry_points_params, MAX_SCHEDULE_ENTRY_POINTS_PARAMS_COUNT, "Schedule Entry Points Parameters Table", "%-30s\n")
+DECLARE_TABLE_SHOW_FN(l2_lookup_params, MAX_L2_LOOKUP_PARAMS_COUNT, "L2 Address Lookup Parameters Table", "%-30s\n")
+DECLARE_TABLE_SHOW_FN(l2_forwarding_params, MAX_L2_FORWARDING_PARAMS_COUNT, "L2 Forwarding Parameters Table", "%-50s\n")
+DECLARE_TABLE_SHOW_FN(general_params, MAX_GENERAL_PARAMS_COUNT, "General Parameters Table", "%-30s\n")
+DECLARE_TABLE_SHOW_FN(xmii_params, MAX_XMII_PARAMS_COUNT, "xMII Mode Parameters Table", "%-35s\n")
+DECLARE_TABLE_SHOW_FN(vl_lookup, MAX_VL_LOOKUP_COUNT, "Virtual Link Address Lookup Table:", "%-35s\n")
+DECLARE_TABLE_SHOW_FN(vl_policing, MAX_VL_POLICING_COUNT, "Virtual Link Policing Table:", "%-35s\n")
+DECLARE_TABLE_SHOW_FN(vl_forwarding, MAX_VL_FORWARDING_COUNT, "Virtual Link Forwarding Table", "%-35s\n")
+DECLARE_TABLE_SHOW_FN(avb_params, MAX_AVB_PARAMS_COUNT, "Audio/Video Bridging Parameters Table", "%-35s\n")
+DECLARE_TABLE_SHOW_FN(vl_forwarding_params, MAX_VL_FORWARDING_PARAMS_COUNT, "Virtual Link Forwarding Parameters Table", "%-35s\n")
 
 static int
 retagging_table_show(__attribute__((unused)) struct sja1105_static_config *config,

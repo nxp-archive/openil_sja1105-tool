@@ -30,7 +30,7 @@
  *****************************************************************************/
 #include "internal.h"
 
-static int entry_get(xmlNode *node, struct sja1105_avb_params_table *entry)
+static int entry_get(xmlNode *node, struct sja1105_avb_params_entry *entry)
 {
 	int rc = 0;
 	rc |= xml_read_field(&entry->destmeta, "destmeta", node);
@@ -44,7 +44,7 @@ static int entry_get(xmlNode *node, struct sja1105_avb_params_table *entry)
 
 static int parse_entry(xmlNode *node, struct sja1105_static_config *config)
 {
-	struct sja1105_avb_params_table entry;
+	struct sja1105_avb_params_entry entry;
 	int rc;
 
 	if (config->avb_params_count >= MAX_AVB_PARAMS_COUNT) {
