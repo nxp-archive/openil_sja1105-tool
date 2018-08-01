@@ -117,31 +117,13 @@ static void sja1105pqrs_general_params_entry_access(
 	pack_or_unpack(buf, &entry->egrmirrdei,   25,  25, size);
 	pack_or_unpack(buf, &entry->replay_port,  24,  22, size);
 }
-
-/* Device-specific pack/unpack accessors */
-void sja1105et_general_params_entry_pack(void *buf, struct
-                                         sja1105_general_params_entry *entry)
-{
-	sja1105et_general_params_entry_access(buf, entry, 1);
-}
-
-void sja1105et_general_params_entry_unpack(void *buf, struct
-                                           sja1105_general_params_entry *entry)
-{
-	sja1105et_general_params_entry_access(buf, entry, 0);
-}
-
-void sja1105pqrs_general_params_entry_pack(void *buf, struct
-                                           sja1105_general_params_entry *entry)
-{
-	sja1105pqrs_general_params_entry_access(buf, entry, 1);
-}
-
-void sja1105pqrs_general_params_entry_unpack(void *buf, struct
-                                             sja1105_general_params_entry *entry)
-{
-	sja1105pqrs_general_params_entry_access(buf, entry, 0);
-}
+/* Device-specific pack/unpack accessors
+ * sja1105et_general_params_entry_pack
+ * sja1105et_general_params_entry_unpack
+ * sja1105pqrs_general_params_entry_pack
+ * sja1105pqrs_general_params_entry_unpack
+ */
+DEFINE_SEPARATE_PACK_UNPACK_ACCESSORS(general_params);
 
 void sja1105_general_params_entry_fmt_show(
 		char *print_buf,

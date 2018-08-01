@@ -62,7 +62,7 @@ static void sja1105_vl_forwarding_entry_access(
  * sja1105_vl_forwarding_entry_pack
  * sja1105_vl_forwarding_entry_unpack
  */
-DEFINE_PACK_UNPACK_ACCESSORS(vl_forwarding);
+DEFINE_COMMON_PACK_UNPACK_ACCESSORS(vl_forwarding);
 
 void sja1105_vl_forwarding_entry_fmt_show(
 		char *print_buf,

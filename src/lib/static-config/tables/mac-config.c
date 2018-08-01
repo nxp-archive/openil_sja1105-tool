@@ -128,30 +128,13 @@ sja1105pqrs_mac_config_entry_access(void *buf,
 	pack_or_unpack(buf, &entry->imgmirrpcp,  16, 14, size);
 	pack_or_unpack(buf, &entry->imgmirrdei,  13, 13, size);
 }
-
-void sja1105et_mac_config_entry_pack(void *buf, struct
-                                     sja1105_mac_config_entry *entry)
-{
-	sja1105et_mac_config_entry_access(buf, entry, 1);
-}
-
-void sja1105et_mac_config_entry_unpack(void *buf, struct
-                                       sja1105_mac_config_entry *entry)
-{
-	sja1105et_mac_config_entry_access(buf, entry, 0);
-}
-
-void sja1105pqrs_mac_config_entry_pack(void *buf, struct
-                                       sja1105_mac_config_entry *entry)
-{
-	sja1105pqrs_mac_config_entry_access(buf, entry, 1);
-}
-
-void sja1105pqrs_mac_config_entry_unpack(void *buf, struct
-                                         sja1105_mac_config_entry *entry)
-{
-	sja1105pqrs_mac_config_entry_access(buf, entry, 0);
-}
+/*
+ * sja1105et_mac_config_entry_pack
+ * sja1105et_mac_config_entry_unpack
+ * sja1105pqrs_mac_config_entry_pack
+ * sja1105pqrs_mac_config_entry_unpack
+ */
+DEFINE_SEPARATE_PACK_UNPACK_ACCESSORS(mac_config);
 
 void
 sja1105_mac_config_entry_fmt_show(char *print_buf,

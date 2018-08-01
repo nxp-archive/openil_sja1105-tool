@@ -65,7 +65,7 @@ static void sja1105_vlan_lookup_entry_access(
  * sja1105_vlan_lookup_entry_pack
  * sja1105_vlan_lookup_entry_unpack
  */
-DEFINE_PACK_UNPACK_ACCESSORS(vlan_lookup);
+DEFINE_COMMON_PACK_UNPACK_ACCESSORS(vlan_lookup);
 
 void sja1105_vlan_lookup_entry_fmt_show(
 		char *print_buf,

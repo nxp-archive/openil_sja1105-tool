@@ -61,7 +61,7 @@ static void sja1105_schedule_entry_points_entry_access(
  * sja1105_schedule_entry_points_entry_pack
  * sja1105_schedule_entry_points_entry_unpack
  */
-DEFINE_PACK_UNPACK_ACCESSORS(schedule_entry_points);
+DEFINE_COMMON_PACK_UNPACK_ACCESSORS(schedule_entry_points);
 
 void sja1105_schedule_entry_points_entry_fmt_show(
 		char  *print_buf,

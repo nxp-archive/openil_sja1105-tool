@@ -47,6 +47,27 @@ static void sja1105_table_write_crc(char *table_start, char *crc_ptr)
 	gtable_pack(crc_ptr, &computed_crc, 31, 0, 4);
 }
 
+#define CHECK_COUNT(entry_count, max_entry_count, table_name)                 \
+{                                                                             \
+	if ((entry_count) > (max_entry_count)) {                              \
+		printf("There can be no more than %d %s entries "             \
+		       "(%d present)\n",  (max_entry_count),                  \
+		       (table_name), (entry_count));                          \
+		return -1;                                                    \
+	}                                                                     \
+}
+
+#define POPULATE_CONFIG_TABLE(device, table, buf,                             \
+                              max_entry_count, table_name)                    \
+{                                                                             \
+	int count = config->table##_count;                                    \
+	struct sja1105_##table##_entry entry;                                 \
+	CHECK_COUNT(count, (max_entry_count), (table_name));                  \
+	sja1105##device##_##table##_entry_unpack(buf, &entry);                \
+	config->table[count++] = entry;                                       \
+	config->table##_count = count;                                        \
+}
+
 /* Input: struct sja1105_table_header *hdr
  *        void *buf
  *        config->device_id
@@ -59,127 +80,96 @@ static void sja1105_table_write_crc(char *table_start, char *crc_ptr)
 int sja1105_static_config_add_entry(struct sja1105_table_header *hdr, void *buf,
                                     struct sja1105_static_config *config)
 {
-#define CHECK_COUNT(entry_count, max_entry_count, table_name)                 \
-{                                                                             \
-	if ((entry_count) > (max_entry_count)) {                              \
-		printf("There can be no more than %d %s entries "             \
-		       "(%d present)\n",  (max_entry_count),                  \
-		       (table_name), (entry_count));                          \
-		return -1;                                                    \
-	}                                                                     \
-}
-
-#define POPULATE_CONFIG_TABLE(table, buf, max_entry_count, table_name)        \
-{                                                                             \
-	int count = config->table##_count;                                    \
-	struct sja1105_##table##_entry entry;                                 \
-	CHECK_COUNT(count, (max_entry_count), (table_name));                  \
-	sja1105_##table##_entry_unpack(buf, &entry);                          \
-	config->table[count++] = entry;                                       \
-	config->table##_count = count;                                        \
-}
 
 	switch (hdr->block_id) {
 	case BLKID_SCHEDULE_TABLE:
 	{
-		POPULATE_CONFIG_TABLE(schedule, buf, MAX_SCHEDULE_COUNT, "Schedule Table");
+		POPULATE_CONFIG_TABLE(, schedule, buf, MAX_SCHEDULE_COUNT, "Schedule Table");
 		return SIZE_SCHEDULE_ENTRY;
 	}
 	case BLKID_SCHEDULE_ENTRY_POINTS_TABLE:
 	{
-		POPULATE_CONFIG_TABLE(schedule_entry_points, buf, MAX_SCHEDULE_ENTRY_POINTS_COUNT, "Schedule Entry Points");
+		POPULATE_CONFIG_TABLE(, schedule_entry_points, buf, MAX_SCHEDULE_ENTRY_POINTS_COUNT, "Schedule Entry Points");
 		return SIZE_SCHEDULE_ENTRY_POINTS_ENTRY;
 	}
 	case BLKID_VL_LOOKUP_TABLE:
 	{
-		POPULATE_CONFIG_TABLE(vl_lookup, buf, MAX_VL_LOOKUP_COUNT, "VL Lookup");
+		POPULATE_CONFIG_TABLE(, vl_lookup, buf, MAX_VL_LOOKUP_COUNT, "VL Lookup");
 		return SIZE_VL_LOOKUP_ENTRY;
 	}
 	case BLKID_VL_POLICING_TABLE:
 	{
-		POPULATE_CONFIG_TABLE(vl_policing, buf, MAX_VL_POLICING_COUNT, "VL Policing");
+		POPULATE_CONFIG_TABLE(, vl_policing, buf, MAX_VL_POLICING_COUNT, "VL Policing");
 		return SIZE_VL_POLICING_ENTRY;
 	}
 	case BLKID_VL_FORWARDING_TABLE:
 	{
-		POPULATE_CONFIG_TABLE(vl_forwarding, buf, MAX_VL_FORWARDING_COUNT, "VL Forwarding");
+		POPULATE_CONFIG_TABLE(, vl_forwarding, buf, MAX_VL_FORWARDING_COUNT, "VL Forwarding");
 		return SIZE_VL_FORWARDING_ENTRY;
 	}
 	case BLKID_L2_LOOKUP_TABLE:
 	{
-		struct sja1105_l2_lookup_entry entry;
-		CHECK_COUNT(config->l2_lookup_count, MAX_L2_LOOKUP_COUNT, "L2 Lookup");
 		if (IS_ET(config->device_id)) {
-			sja1105et_l2_lookup_entry_unpack(buf, &entry);
-			config->l2_lookup[config->l2_lookup_count++] = entry;
+			POPULATE_CONFIG_TABLE(et, l2_lookup, buf, MAX_L2_LOOKUP_COUNT, "L2 Lookup");
 			return SIZE_L2_LOOKUP_ENTRY_ET;
 		} else {
-			sja1105pqrs_l2_lookup_entry_unpack(buf, &entry);
-			config->l2_lookup[config->l2_lookup_count++] = entry;
+			POPULATE_CONFIG_TABLE(pqrs, l2_lookup, buf, MAX_L2_LOOKUP_COUNT, "L2 Lookup");
 			return SIZE_L2_LOOKUP_ENTRY_PQRS;
 		}
 	}
 	case BLKID_L2_POLICING_TABLE:
 	{
-		POPULATE_CONFIG_TABLE(l2_policing, buf, MAX_L2_POLICING_COUNT, "L2 Policing");
+		POPULATE_CONFIG_TABLE(, l2_policing, buf, MAX_L2_POLICING_COUNT, "L2 Policing");
 		return SIZE_L2_POLICING_ENTRY;
 	}
 	case BLKID_VLAN_LOOKUP_TABLE:
 	{
-		POPULATE_CONFIG_TABLE(vlan_lookup, buf, MAX_VLAN_LOOKUP_COUNT, "VLAN Lookup");
+		POPULATE_CONFIG_TABLE(, vlan_lookup, buf, MAX_VLAN_LOOKUP_COUNT, "VLAN Lookup");
 		return SIZE_VLAN_LOOKUP_ENTRY;
 	}
 	case BLKID_L2_FORWARDING_TABLE:
 	{
-		POPULATE_CONFIG_TABLE(l2_forwarding, buf, MAX_L2_FORWARDING_COUNT, "L2 Forwarding");
+		POPULATE_CONFIG_TABLE(, l2_forwarding, buf, MAX_L2_FORWARDING_COUNT, "L2 Forwarding");
 		return SIZE_L2_FORWARDING_ENTRY;
 	}
 	case BLKID_MAC_CONFIG_TABLE:
 	{
-		struct sja1105_mac_config_entry entry;
-		CHECK_COUNT(config->mac_config_count, MAX_MAC_CONFIG_COUNT, "Mac Configuration");
 		if (IS_ET(config->device_id)) {
-			sja1105et_mac_config_entry_unpack(buf, &entry);
-			config->mac_config[config->mac_config_count++] = entry;
+			POPULATE_CONFIG_TABLE(et, mac_config, buf, MAX_MAC_CONFIG_COUNT, "Mac Configuration");
 			return SIZE_SJA1105ET_MAC_CONFIG_ENTRY;
 		} else {
-			sja1105pqrs_mac_config_entry_unpack(buf, &entry);
-			config->mac_config[config->mac_config_count++] = entry;
+			POPULATE_CONFIG_TABLE(pqrs, mac_config, buf, MAX_MAC_CONFIG_COUNT, "Mac Configuration");
 			return SIZE_SJA1105PQRS_MAC_CONFIG_ENTRY;
 		}
 	}
 	case BLKID_SCHEDULE_PARAMS_TABLE:
 	{
-		POPULATE_CONFIG_TABLE(schedule_params, buf, MAX_SCHEDULE_PARAMS_COUNT, "Schedule Parameters");
+		POPULATE_CONFIG_TABLE(, schedule_params, buf, MAX_SCHEDULE_PARAMS_COUNT, "Schedule Parameters");
 		return SIZE_SCHEDULE_PARAMS_ENTRY;
 	}
 	case BLKID_SCHEDULE_ENTRY_POINTS_PARAMS_TABLE:
 	{
-		POPULATE_CONFIG_TABLE(schedule_entry_points_params, buf, MAX_SCHEDULE_ENTRY_POINTS_PARAMS_COUNT, "Schedule Entry Points Parameters");
+		POPULATE_CONFIG_TABLE(, schedule_entry_points_params, buf, MAX_SCHEDULE_ENTRY_POINTS_PARAMS_COUNT, "Schedule Entry Points Parameters");
 		return SIZE_SCHEDULE_ENTRY_POINTS_PARAMS_ENTRY;
 	}
 	case BLKID_VL_FORWARDING_PARAMS_TABLE:
 	{
-		POPULATE_CONFIG_TABLE(vl_forwarding_params, buf, MAX_VL_FORWARDING_PARAMS_COUNT, "VL Forwarding Parameters");
+		POPULATE_CONFIG_TABLE(, vl_forwarding_params, buf, MAX_VL_FORWARDING_PARAMS_COUNT, "VL Forwarding Parameters");
 		return SIZE_VL_FORWARDING_PARAMS_ENTRY;
 	}
 	case BLKID_L2_LOOKUP_PARAMS_TABLE:
 	{
-		struct sja1105_l2_lookup_params_entry entry;
-		CHECK_COUNT(config->l2_lookup_count, MAX_L2_LOOKUP_PARAMS_COUNT, "L2 Lookup Parameters");
 		if (IS_ET(config->device_id)) {
-			sja1105et_l2_lookup_params_entry_unpack(buf, &entry);
-			config->l2_lookup_params[config->l2_lookup_params_count++] = entry;
+			POPULATE_CONFIG_TABLE(et, l2_lookup, buf, MAX_L2_LOOKUP_PARAMS_COUNT, "L2 Lookup Parameters");
 			return SIZE_L2_LOOKUP_PARAMS_ENTRY_ET;
 		} else {
-			sja1105pqrs_l2_lookup_params_entry_unpack(buf, &entry);
-			config->l2_lookup_params[config->l2_lookup_params_count++] = entry;
+			POPULATE_CONFIG_TABLE(pqrs, l2_lookup, buf, MAX_L2_LOOKUP_PARAMS_COUNT, "L2 Lookup Parameters");
 			return SIZE_L2_LOOKUP_PARAMS_ENTRY_PQRS;
 		}
 	}
 	case BLKID_L2_FORWARDING_PARAMS_TABLE:
 	{
-		POPULATE_CONFIG_TABLE(l2_forwarding_params, buf, MAX_L2_FORWARDING_PARAMS_COUNT, "L2 Forwarding Parameters");
+		POPULATE_CONFIG_TABLE(, l2_forwarding_params, buf, MAX_L2_FORWARDING_PARAMS_COUNT, "L2 Forwarding Parameters");
 		return SIZE_L2_FORWARDING_PARAMS_ENTRY;
 	}
 	case BLKID_CLK_SYNC_PARAMS_TABLE:
@@ -189,8 +179,17 @@ int sja1105_static_config_add_entry(struct sja1105_table_header *hdr, void *buf,
 	}
 	case BLKID_AVB_PARAMS_TABLE:
 	{
-		POPULATE_CONFIG_TABLE(avb_params, buf, MAX_AVB_PARAMS_COUNT, "AVB Parameters");
-		return SIZE_AVB_PARAMS_ENTRY;
+		struct sja1105_avb_params_entry entry;
+		CHECK_COUNT(config->avb_params_count, MAX_AVB_PARAMS_COUNT, "AVB Parameters");
+		if (IS_ET(config->device_id)) {
+			sja1105et_avb_params_entry_unpack(buf, &entry);
+			config->avb_params[config->avb_params_count++] = entry;
+			return SIZE_AVB_PARAMS_ENTRY_ET;
+		} else {
+			sja1105pqrs_avb_params_entry_unpack(buf, &entry);
+			config->avb_params[config->avb_params_count++] = entry;
+			return SIZE_AVB_PARAMS_ENTRY_PQRS;
+		}
 	}
 	case BLKID_GENERAL_PARAMS_TABLE:
 	{
@@ -213,7 +212,7 @@ int sja1105_static_config_add_entry(struct sja1105_table_header *hdr, void *buf,
 	}
 	case BLKID_XMII_MODE_PARAMS_TABLE:
 	{
-		POPULATE_CONFIG_TABLE(xmii_params, buf, MAX_XMII_PARAMS_COUNT, "xMII Parameters");
+		POPULATE_CONFIG_TABLE(, xmii_params, buf, MAX_XMII_PARAMS_COUNT, "xMII Parameters");
 		return SIZE_XMII_MODE_PARAMS_ENTRY;
 	}
 	default:
@@ -594,11 +593,19 @@ sja1105_static_config_pack(void *buf, struct sja1105_static_config *config)
 	                     BLKID_L2_FORWARDING_PARAMS_TABLE,
 	                     sja1105_l2_forwarding_params_entry_pack,
 	                     config->l2_forwarding_params);
-	PACK_TABLE_IN_BUF_FN(config->avb_params_count,
-	                     SIZE_AVB_PARAMS_ENTRY,
-	                     BLKID_AVB_PARAMS_TABLE,
-	                     sja1105_avb_params_entry_pack,
-	                     config->avb_params);
+	if (IS_ET(config->device_id)) {
+		PACK_TABLE_IN_BUF_FN(config->avb_params_count,
+		                     SIZE_AVB_PARAMS_ENTRY_ET,
+		                     BLKID_AVB_PARAMS_TABLE,
+		                     sja1105et_avb_params_entry_pack,
+		                     config->avb_params);
+	} else {
+		PACK_TABLE_IN_BUF_FN(config->avb_params_count,
+		                     SIZE_AVB_PARAMS_ENTRY_PQRS,
+		                     BLKID_AVB_PARAMS_TABLE,
+		                     sja1105pqrs_avb_params_entry_pack,
+		                     config->avb_params);
+	}
 	if (IS_ET(config->device_id)) {
 		PACK_TABLE_IN_BUF_FN(config->general_params_count,
 		                     SIZE_GENERAL_PARAMS_ENTRY_ET,
@@ -668,7 +675,7 @@ sja1105_static_config_get_length(struct sja1105_static_config *config)
 	sum += config->vl_forwarding_params_count * SIZE_VL_FORWARDING_PARAMS_ENTRY;
 	sum += config->l2_lookup_params_count * (IS_PQRS(config->device_id) ? SIZE_L2_LOOKUP_PARAMS_ENTRY_PQRS : SIZE_L2_LOOKUP_PARAMS_ENTRY_ET);
 	sum += config->l2_forwarding_params_count * SIZE_L2_FORWARDING_PARAMS_ENTRY;
-	sum += config->avb_params_count * SIZE_AVB_PARAMS_ENTRY;
+	sum += config->avb_params_count * (IS_PQRS(config->device_id) ? SIZE_AVB_PARAMS_ENTRY_PQRS : SIZE_AVB_PARAMS_ENTRY_ET);
 	sum += config->general_params_count * (IS_PQRS(config->device_id) ? SIZE_GENERAL_PARAMS_ENTRY_PQRS : SIZE_GENERAL_PARAMS_ENTRY_ET);
 	sum += config->xmii_params_count * SIZE_XMII_MODE_PARAMS_ENTRY;
 	sum -= 4; /* Last header does not have an extra CRC because there is no data */
