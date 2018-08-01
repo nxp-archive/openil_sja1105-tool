@@ -165,8 +165,17 @@ int sja1105_static_config_add_entry(struct sja1105_table_header *hdr, void *buf,
 	}
 	case BLKID_L2_LOOKUP_PARAMS_TABLE:
 	{
-		POPULATE_CONFIG_TABLE(l2_lookup_params, buf, MAX_L2_LOOKUP_PARAMS_COUNT, "L2 Lookup Parameters");
-		return SIZE_L2_LOOKUP_PARAMS_ENTRY;
+		struct sja1105_l2_lookup_params_entry entry;
+		CHECK_COUNT(config->l2_lookup_count, MAX_L2_LOOKUP_PARAMS_COUNT, "L2 Lookup Parameters");
+		if (IS_ET(config->device_id)) {
+			sja1105et_l2_lookup_params_entry_unpack(buf, &entry);
+			config->l2_lookup_params[config->l2_lookup_params_count++] = entry;
+			return SIZE_L2_LOOKUP_PARAMS_ENTRY_ET;
+		} else {
+			sja1105pqrs_l2_lookup_params_entry_unpack(buf, &entry);
+			config->l2_lookup_params[config->l2_lookup_params_count++] = entry;
+			return SIZE_L2_LOOKUP_PARAMS_ENTRY_PQRS;
+		}
 	}
 	case BLKID_L2_FORWARDING_PARAMS_TABLE:
 	{
@@ -558,11 +567,19 @@ sja1105_static_config_pack(void *buf, struct sja1105_static_config *config)
 	                     BLKID_VL_FORWARDING_PARAMS_TABLE,
 	                     sja1105_vl_forwarding_params_entry_pack,
 	                     config->vl_forwarding_params);
-	PACK_TABLE_IN_BUF_FN(config->l2_lookup_params_count,
-	                     SIZE_L2_LOOKUP_PARAMS_ENTRY,
-	                     BLKID_L2_LOOKUP_PARAMS_TABLE,
-	                     sja1105_l2_lookup_params_entry_pack,
-	                     config->l2_lookup_params);
+	if (IS_ET(config->device_id)) {
+		PACK_TABLE_IN_BUF_FN(config->l2_lookup_params_count,
+		                     SIZE_L2_LOOKUP_PARAMS_ENTRY_PQRS,
+		                     BLKID_L2_LOOKUP_PARAMS_TABLE,
+		                     sja1105et_l2_lookup_params_entry_pack,
+		                     config->l2_lookup_params);
+	} else {
+		PACK_TABLE_IN_BUF_FN(config->l2_lookup_params_count,
+		                     SIZE_L2_LOOKUP_PARAMS_ENTRY_PQRS,
+		                     BLKID_L2_LOOKUP_PARAMS_TABLE,
+		                     sja1105pqrs_l2_lookup_params_entry_pack,
+		                     config->l2_lookup_params);
+	}
 	PACK_TABLE_IN_BUF_FN(config->l2_forwarding_params_count,
 	                     SIZE_L2_FORWARDING_PARAMS_ENTRY,
 	                     BLKID_L2_FORWARDING_PARAMS_TABLE,
@@ -632,7 +649,7 @@ sja1105_static_config_get_length(struct sja1105_static_config *config)
 	sum += config->schedule_params_count * SIZE_SCHEDULE_PARAMS_ENTRY;
 	sum += config->schedule_entry_points_params_count * SIZE_SCHEDULE_ENTRY_POINTS_PARAMS_ENTRY;
 	sum += config->vl_forwarding_params_count * SIZE_VL_FORWARDING_PARAMS_ENTRY;
-	sum += config->l2_lookup_params_count * SIZE_L2_LOOKUP_PARAMS_ENTRY;
+	sum += config->l2_lookup_params_count * (IS_PQRS(config->device_id) ? SIZE_L2_LOOKUP_PARAMS_ENTRY_PQRS : SIZE_L2_LOOKUP_PARAMS_ENTRY_ET);
 	sum += config->l2_forwarding_params_count * SIZE_L2_FORWARDING_PARAMS_ENTRY;
 	sum += config->avb_params_count * SIZE_AVB_PARAMS_ENTRY;
 	sum += config->general_params_count * SIZE_GENERAL_PARAMS_ENTRY;

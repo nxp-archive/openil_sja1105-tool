@@ -51,7 +51,8 @@
 #define SIZE_SCHEDULE_PARAMS_ENTRY              12
 #define SIZE_SCHEDULE_ENTRY_POINTS_PARAMS_ENTRY 4
 #define SIZE_VL_FORWARDING_PARAMS_ENTRY         12
-#define SIZE_L2_LOOKUP_PARAMS_ENTRY             4
+#define SIZE_L2_LOOKUP_PARAMS_ENTRY_ET          4
+#define SIZE_L2_LOOKUP_PARAMS_ENTRY_PQRS        16
 #define SIZE_L2_FORWARDING_PARAMS_ENTRY         12
 #define SIZE_CLK_SYNC_PARAMS_ENTRY              52
 #define SIZE_AVB_PARAMS_ENTRY                   12
@@ -218,12 +219,21 @@ struct sja1105_l2_lookup_entry {
 };
 
 struct sja1105_l2_lookup_params_entry {
-	uint64_t maxage;
-	uint64_t dyn_tbsz;
-	uint64_t poly;
-	uint64_t shared_learn;
-	uint64_t no_enf_hostprt;
-	uint64_t no_mgmt_learn;
+	uint64_t drpbc;           /* P/Q/R/S only */
+	uint64_t drpmc;           /* P/Q/R/S only */
+	uint64_t drpuni;          /* P/Q/R/S only */
+	uint64_t maxaddrp[5];     /* P/Q/R/S only */
+	uint64_t start_dynspc;    /* P/Q/R/S only */
+	uint64_t drpnolearn;      /* P/Q/R/S only */
+	uint64_t use_static;      /* P/Q/R/S only */
+	uint64_t owr_dyn;         /* P/Q/R/S only */
+	uint64_t learn_once;      /* P/Q/R/S only */
+	uint64_t maxage;          /* Shared */
+	uint64_t dyn_tbsz;        /* E/T only */
+	uint64_t poly;            /* E/T only */
+	uint64_t shared_learn;    /* Shared */
+	uint64_t no_enf_hostprt;  /* Shared */
+	uint64_t no_mgmt_learn;   /* Shared */
 };
 
 struct sja1105_l2_forwarding_entry {
@@ -426,7 +436,6 @@ struct sja1105_static_config {
 
 DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(l2_forwarding_params);
 DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(l2_forwarding);
-DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(l2_lookup_params);
 DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(l2_policing);
 DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(mac_config);
 DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(schedule_entry_points_params);
@@ -443,6 +452,7 @@ DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(vl_policing);
 DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(vl_lookup);
 DEFINE_SEPARATE_HEADERS_FOR_CONFIG_TABLE(mac_config);
 DEFINE_SEPARATE_HEADERS_FOR_CONFIG_TABLE(l2_lookup);
+DEFINE_SEPARATE_HEADERS_FOR_CONFIG_TABLE(l2_lookup_params);
 
 /* These can't be summarized using the DEFINE_HEADERS_FOR_CONFIG_TABLE macro */
 void sja1105_table_header_pack(void*, struct sja1105_table_header*);
