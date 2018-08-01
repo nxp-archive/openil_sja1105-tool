@@ -41,7 +41,8 @@
 #define SIZE_VL_LOOKUP_ENTRY                    12
 #define SIZE_VL_POLICING_ENTRY                  8
 #define SIZE_VL_FORWARDING_ENTRY                4
-#define SIZE_L2_LOOKUP_ENTRY                    12
+#define SIZE_L2_LOOKUP_ENTRY_ET                 12
+#define SIZE_L2_LOOKUP_ENTRY_PQRS               20
 #define SIZE_L2_POLICING_ENTRY                  8
 #define SIZE_VLAN_LOOKUP_ENTRY                  8
 #define SIZE_L2_FORWARDING_ENTRY                8

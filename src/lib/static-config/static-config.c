@@ -110,11 +110,13 @@ int sja1105_static_config_add_entry(struct sja1105_table_header *hdr, void *buf,
 		CHECK_COUNT(config->l2_lookup_count, MAX_L2_LOOKUP_COUNT, "L2 Lookup");
 		if (IS_ET(config->device_id)) {
 			sja1105et_l2_lookup_entry_unpack(buf, &entry);
+			config->l2_lookup[config->l2_lookup_count++] = entry;
+			return SIZE_L2_LOOKUP_ENTRY_ET;
 		} else {
 			sja1105pqrs_l2_lookup_entry_unpack(buf, &entry);
+			config->l2_lookup[config->l2_lookup_count++] = entry;
+			return SIZE_L2_LOOKUP_ENTRY_PQRS;
 		}
-		config->l2_lookup[config->l2_lookup_count++] = entry;
-		return SIZE_L2_LOOKUP_ENTRY;
 	}
 	case BLKID_L2_POLICING_TABLE:
 	{
@@ -498,13 +500,13 @@ sja1105_static_config_pack(void *buf, struct sja1105_static_config *config)
 	                     config->vl_forwarding);
 	if (IS_ET(config->device_id)) {
 		PACK_TABLE_IN_BUF_FN(config->l2_lookup_count,
-		                     SIZE_L2_LOOKUP_ENTRY,
+		                     SIZE_L2_LOOKUP_ENTRY_ET,
 		                     BLKID_L2_LOOKUP_TABLE,
 		                     sja1105et_l2_lookup_entry_pack,
 		                     config->l2_lookup);
 	} else {
 		PACK_TABLE_IN_BUF_FN(config->l2_lookup_count,
-		                     SIZE_L2_LOOKUP_ENTRY,
+		                     SIZE_L2_LOOKUP_ENTRY_PQRS,
 		                     BLKID_L2_LOOKUP_TABLE,
 		                     sja1105pqrs_l2_lookup_entry_pack,
 		                     config->l2_lookup);
@@ -618,7 +620,7 @@ sja1105_static_config_get_length(struct sja1105_static_config *config)
 	sum += config->vl_lookup_count * SIZE_VL_LOOKUP_ENTRY;
 	sum += config->vl_policing_count * SIZE_VL_POLICING_ENTRY;
 	sum += config->vl_forwarding_count * SIZE_VL_FORWARDING_ENTRY;
-	sum += config->l2_lookup_count * SIZE_L2_LOOKUP_ENTRY;
+	sum += config->l2_lookup_count * (IS_PQRS(config->device_id) ? SIZE_L2_LOOKUP_ENTRY_PQRS : SIZE_L2_LOOKUP_ENTRY_ET);
 	sum += config->l2_policing_count * SIZE_L2_POLICING_ENTRY;
 	sum += config->vlan_lookup_count * SIZE_VLAN_LOOKUP_ENTRY;
 	sum += config->l2_forwarding_count * SIZE_L2_FORWARDING_ENTRY;

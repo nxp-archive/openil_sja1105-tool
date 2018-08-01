@@ -44,8 +44,8 @@ void sja1105_l2_lookup_entry_access(void *buf,
                                     int write, uint64_t device_id)
 {
 	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
-	int    size = SIZE_L2_LOOKUP_ENTRY;
-
+	int    size = IS_ET(device_id) ? SIZE_L2_LOOKUP_ENTRY_ET
+	                               : SIZE_L2_LOOKUP_ENTRY_PQRS;
 	if (write == 0) {
 		pack_or_unpack = gtable_unpack;
 		memset(entry, 0, sizeof(*entry));
