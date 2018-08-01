@@ -39,13 +39,13 @@
 #include <lib/helpers.h>
 #include <common.h>
 
-static void sja1105_general_params_entry_access(
+static void sja1105et_general_params_entry_access(
 		void *buf,
 		struct sja1105_general_params_entry *entry,
 		int write)
 {
 	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
-	int    size = SIZE_GENERAL_PARAMS_ENTRY;
+	int    size = SIZE_GENERAL_PARAMS_ENTRY_ET;
 
 	if (write == 0) {
 		pack_or_unpack = gtable_unpack;
@@ -69,17 +69,79 @@ static void sja1105_general_params_entry_access(
 	pack_or_unpack(buf, &entry->casc_port,   115, 113, size);
 	pack_or_unpack(buf, &entry->host_port,   112, 110, size);
 	pack_or_unpack(buf, &entry->mirr_port,   109, 107, size);
-	pack_or_unpack(buf, &entry->vlmarker,    106, 75,  size);
-	pack_or_unpack(buf, &entry->vlmask,      74, 43,   size);
-	pack_or_unpack(buf, &entry->tpid,        42, 27,   size);
-	pack_or_unpack(buf, &entry->ignore2stf,  26, 26,   size);
-	pack_or_unpack(buf, &entry->tpid2,       25, 10,   size);
+	pack_or_unpack(buf, &entry->vlmarker,    106,  75, size);
+	pack_or_unpack(buf, &entry->vlmask,       74,  43, size);
+	pack_or_unpack(buf, &entry->tpid,         42,  27, size);
+	pack_or_unpack(buf, &entry->ignore2stf,   26,  26, size);
+	pack_or_unpack(buf, &entry->tpid2,        25,  10, size);
 }
-/*
- * sja1105_general_params_entry_pack
- * sja1105_general_params_entry_unpack
- */
-DEFINE_PACK_UNPACK_ACCESSORS(general_params);
+
+static void sja1105pqrs_general_params_entry_access(
+		void *buf,
+		struct sja1105_general_params_entry *entry,
+		int write)
+{
+	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
+	int    size = SIZE_GENERAL_PARAMS_ENTRY_PQRS;
+
+	if (write == 0) {
+		pack_or_unpack = gtable_unpack;
+		memset(entry, 0, sizeof(*entry));
+	} else {
+		pack_or_unpack = gtable_pack;
+		memset(buf, 0, size);
+	}
+	pack_or_unpack(buf, &entry->vllupformat, 351, 351, size);
+	pack_or_unpack(buf, &entry->mirr_ptacu,  350, 350, size);
+	pack_or_unpack(buf, &entry->switchid,    349, 347, size);
+	pack_or_unpack(buf, &entry->hostprio,    346, 344, size);
+	pack_or_unpack(buf, &entry->mac_fltres1, 343, 296, size);
+	pack_or_unpack(buf, &entry->mac_fltres0, 295, 248, size);
+	pack_or_unpack(buf, &entry->mac_flt1,    247, 200, size);
+	pack_or_unpack(buf, &entry->mac_flt0,    199, 152, size);
+	pack_or_unpack(buf, &entry->incl_srcpt1, 151, 151, size);
+	pack_or_unpack(buf, &entry->incl_srcpt0, 150, 150, size);
+	pack_or_unpack(buf, &entry->send_meta1,  149, 149, size);
+	pack_or_unpack(buf, &entry->send_meta0,  148, 148, size);
+	pack_or_unpack(buf, &entry->casc_port,   147, 145, size);
+	pack_or_unpack(buf, &entry->host_port,   144, 142, size);
+	pack_or_unpack(buf, &entry->mirr_port,   141, 139, size);
+	pack_or_unpack(buf, &entry->vlmarker,    138, 107, size);
+	pack_or_unpack(buf, &entry->vlmask,      106,  75, size);
+	pack_or_unpack(buf, &entry->tpid,         74,  59, size);
+	pack_or_unpack(buf, &entry->ignore2stf,   58,  58, size);
+	pack_or_unpack(buf, &entry->tpid2,        57,  42, size);
+	pack_or_unpack(buf, &entry->queue_ts,     41,  41, size);
+	pack_or_unpack(buf, &entry->egrmirrvid,   40,  29, size);
+	pack_or_unpack(buf, &entry->egrmirrpcp,   28,  26, size);
+	pack_or_unpack(buf, &entry->egrmirrdei,   25,  25, size);
+	pack_or_unpack(buf, &entry->replay_port,  24,  22, size);
+}
+
+/* Device-specific pack/unpack accessors */
+void sja1105et_general_params_entry_pack(void *buf, struct
+                                         sja1105_general_params_entry *entry)
+{
+	sja1105et_general_params_entry_access(buf, entry, 1);
+}
+
+void sja1105et_general_params_entry_unpack(void *buf, struct
+                                           sja1105_general_params_entry *entry)
+{
+	sja1105et_general_params_entry_access(buf, entry, 0);
+}
+
+void sja1105pqrs_general_params_entry_pack(void *buf, struct
+                                           sja1105_general_params_entry *entry)
+{
+	sja1105pqrs_general_params_entry_access(buf, entry, 1);
+}
+
+void sja1105pqrs_general_params_entry_unpack(void *buf, struct
+                                             sja1105_general_params_entry *entry)
+{
+	sja1105pqrs_general_params_entry_access(buf, entry, 0);
+}
 
 void sja1105_general_params_entry_fmt_show(
 		char *print_buf,
