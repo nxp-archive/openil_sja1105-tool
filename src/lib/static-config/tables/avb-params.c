@@ -39,58 +39,51 @@
 #include <lib/helpers.h>
 #include <common.h>
 
-static void sja1105_avb_params_table_access(
+static void sja1105_avb_params_entry_access(
 		void *buf,
-		struct sja1105_avb_params_table *table,
+		struct sja1105_avb_params_entry *entry,
 		int write)
 {
 	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
-	int    size = SIZE_AVB_PARAMS_TABLE;
+	int    size = SIZE_AVB_PARAMS_ENTRY;
 
 	if (write == 0) {
 		pack_or_unpack = gtable_unpack;
-		memset(table, 0, sizeof(*table));
+		memset(entry, 0, sizeof(*entry));
 	} else {
 		pack_or_unpack = gtable_pack;
 		memset(buf, 0, size);
 	}
-	pack_or_unpack(buf, &table->destmeta, 95, 48, size);
-	pack_or_unpack(buf, &table->srcmeta,  47,  0, size);
+	pack_or_unpack(buf, &entry->destmeta, 95, 48, size);
+	pack_or_unpack(buf, &entry->srcmeta,  47,  0, size);
 }
+/*
+ * sja1105_avb_params_entry_pack
+ * sja1105_avb_params_entry_unpack
+ */
+DEFINE_PACK_UNPACK_ACCESSORS(avb_params);
 
-void sja1105_avb_params_table_pack(void *buf,
-                                  struct sja1105_avb_params_table *table)
-{
-	sja1105_avb_params_table_access(buf, table, 1);
-}
-
-void sja1105_avb_params_table_unpack(void *buf,
-                                  struct sja1105_avb_params_table *table)
-{
-	sja1105_avb_params_table_access(buf, table, 0);
-}
-
-void sja1105_avb_params_table_fmt_show(
+void sja1105_avb_params_entry_fmt_show(
 		char *print_buf,
 		char *fmt,
-		struct sja1105_avb_params_table *table)
+		struct sja1105_avb_params_entry *entry)
 {
 	char mac_buf[MAC_ADDR_SIZE];
 
 	memset(mac_buf, 0, sizeof(mac_buf));
-	mac_addr_sprintf(mac_buf, table->destmeta);
+	mac_addr_sprintf(mac_buf, entry->destmeta);
 	formatted_append(print_buf, fmt, "DESTMETA %s", mac_buf);
 	memset(mac_buf, 0, sizeof(mac_buf));
-	mac_addr_sprintf(mac_buf, table->srcmeta);
+	mac_addr_sprintf(mac_buf, entry->srcmeta);
 	formatted_append(print_buf, fmt, "SRCMETA  %s", mac_buf);
 }
 
-void sja1105_avb_params_table_show(struct sja1105_avb_params_table *entry)
+void sja1105_avb_params_entry_show(struct sja1105_avb_params_entry *entry)
 {
 	char print_buf[MAX_LINE_SIZE];
 	char *fmt = "%s\n";
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_avb_params_table_fmt_show(print_buf, fmt, entry);
+	sja1105_avb_params_entry_fmt_show(print_buf, fmt, entry);
 	puts(print_buf);
 }

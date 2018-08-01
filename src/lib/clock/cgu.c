@@ -40,7 +40,7 @@
 #include <common.h>
 
 int sja1105_clocking_setup(struct sja1105_spi_setup *spi_setup,
-                           struct sja1105_xmii_params_table *params,
+                           struct sja1105_xmii_params_entry *params,
                            struct sja1105_mac_config_entry  *mac_config)
 {
 	int speed_mbps;
