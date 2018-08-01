@@ -65,7 +65,7 @@ static void sja1105_vl_policing_entry_access(
  * sja1105_vl_policing_entry_pack
  * sja1105_vl_policing_entry_unpack
  */
-DEFINE_PACK_UNPACK_ACCESSORS(vl_policing);
+DEFINE_COMMON_PACK_UNPACK_ACCESSORS(vl_policing);
 
 void sja1105_vl_policing_entry_fmt_show(
 		char *print_buf,

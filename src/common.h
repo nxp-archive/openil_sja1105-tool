@@ -83,18 +83,25 @@ void print_array(char *print_buf, uint64_t *array, int count);
 #define min(x, y) (((x) < (y)) ? (x) : (y))
 
 
-#define DEFINE_PACK_UNPACK_ACCESSORS(table)                                        \
+#define DEFINE_PACK_UNPACK_ACCESSORS(device, table)                                \
                                                                                    \
-	void sja1105_##table##_entry_pack(void *buf,                               \
-	                                  struct sja1105_##table##_entry *entry)   \
+	void sja1105##device##_##table##_entry_pack(void *buf,                     \
+	                           struct sja1105_##table##_entry *entry)          \
 	{                                                                          \
-		sja1105_##table##_entry_access(buf, entry, 1);                     \
+		sja1105##device##_##table##_entry_access(buf, entry, 1);           \
 	}                                                                          \
                                                                                    \
-	void sja1105_##table##_entry_unpack(void *buf,                             \
-	                                    struct sja1105_##table##_entry *entry) \
+	void sja1105##device##_##table##_entry_unpack(void *buf,                   \
+	                           struct sja1105_##table##_entry *entry)          \
 	{                                                                          \
-		sja1105_##table##_entry_access(buf, entry, 0);                     \
+		sja1105##device##_##table##_entry_access(buf, entry, 0);           \
 	}
+
+#define DEFINE_COMMON_PACK_UNPACK_ACCESSORS(table)                                 \
+	DEFINE_PACK_UNPACK_ACCESSORS(, table);                                     \
+
+#define DEFINE_SEPARATE_PACK_UNPACK_ACCESSORS(table)                               \
+	DEFINE_PACK_UNPACK_ACCESSORS(et, table);                                   \
+	DEFINE_PACK_UNPACK_ACCESSORS(pqrs, table);                                 \
 
 #endif

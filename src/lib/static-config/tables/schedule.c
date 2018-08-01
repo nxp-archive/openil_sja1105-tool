@@ -68,7 +68,7 @@ static void sja1105_schedule_entry_access(
  * sja1105_schedule_entry_pack
  * sja1105_schedule_entry_unpack
  */
-DEFINE_PACK_UNPACK_ACCESSORS(schedule);
+DEFINE_COMMON_PACK_UNPACK_ACCESSORS(schedule);
 
 void sja1105_schedule_entry_fmt_show(char *print_buf, char *fmt, struct sja1105_schedule_entry *entry)
 {

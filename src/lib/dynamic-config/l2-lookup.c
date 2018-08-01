@@ -45,12 +45,6 @@
  * TODO: Update management routes for SJA1105 P/Q/R/S compatibility
  */
 
-/* Prototype for non-externally-visible function in
- * src/lib/static-config/tables/l2-lookup.c */
-void sja1105_l2_lookup_entry_access(void *buf,
-                                    struct sja1105_l2_lookup_entry *entry,
-                                    int write);
-
 /* Buffer is segregated into 2 parts:
  *   * ENTRY: a portion of SIZE_L2_LOOKUP_ENTRY (12) bytes,
  *            corresponding to addresses 0x20, 0x21 and 0x22
