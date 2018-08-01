@@ -61,7 +61,7 @@ int sja1105_static_config_add_entry(struct sja1105_table_header *hdr, void *buf,
 {
 #define CHECK_COUNT(entry_count, max_entry_count, table_name)                 \
 {                                                                             \
-	if ((entry_count) >= (max_entry_count)) {                             \
+	if ((entry_count) > (max_entry_count)) {                              \
 		printf("There can be no more than %d %s entries "             \
 		       "(%d present)\n",  (max_entry_count),                  \
 		       (table_name), (entry_count));                          \
