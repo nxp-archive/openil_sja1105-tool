@@ -38,13 +38,13 @@
 #include <lib/include/gtable.h>
 #include <common.h>
 
-static void sja1105_l2_lookup_params_entry_access(
+static void sja1105et_l2_lookup_params_entry_access(
 		void *buf,
 		struct sja1105_l2_lookup_params_entry *entry,
 		int write)
 {
 	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
-	int    size = SIZE_L2_LOOKUP_PARAMS_ENTRY;
+	int    size = SIZE_L2_LOOKUP_PARAMS_ENTRY_ET;
 
 	if (write == 0) {
 		pack_or_unpack = gtable_unpack;
@@ -60,11 +60,67 @@ static void sja1105_l2_lookup_params_entry_access(
 	pack_or_unpack(buf, &entry->no_enf_hostprt,  4,  4, size);
 	pack_or_unpack(buf, &entry->no_mgmt_learn,   3,  3, size);
 }
-/*
- * sja1105_l2_lookup_params_entry_pack
- * sja1105_l2_lookup_params_entry_unpack
- */
-DEFINE_PACK_UNPACK_ACCESSORS(l2_lookup_params);
+
+static void sja1105pqrs_l2_lookup_params_entry_access(
+		void *buf,
+		struct sja1105_l2_lookup_params_entry *entry,
+		int write)
+{
+	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
+	int    size = SIZE_L2_LOOKUP_PARAMS_ENTRY_PQRS;
+	int    offset;
+	int    i;
+
+	if (write == 0) {
+		pack_or_unpack = gtable_unpack;
+		memset(entry, 0, sizeof(*entry));
+	} else {
+		pack_or_unpack = gtable_pack;
+		memset(buf, 0, size);
+	}
+	pack_or_unpack(buf, &entry->drpbc,          127, 123, size);
+	pack_or_unpack(buf, &entry->drpmc,          122, 118, size);
+	pack_or_unpack(buf, &entry->drpuni,         117, 113, size);
+	offset = 58;
+	for (i = 0; i < 5; i++) {
+		pack_or_unpack(buf, &entry->maxaddrp[i], offset + 10, offset + 0, size);
+		offset += 11;
+	}
+	pack_or_unpack(buf, &entry->maxage,          57,  43, size);
+	pack_or_unpack(buf, &entry->start_dynspc,    42,  33, size);
+	pack_or_unpack(buf, &entry->drpnolearn,      32,  28, size);
+	pack_or_unpack(buf, &entry->shared_learn,    27,  27, size);
+	pack_or_unpack(buf, &entry->no_enf_hostprt,  26,  26, size);
+	pack_or_unpack(buf, &entry->no_mgmt_learn,   25,  25, size);
+	pack_or_unpack(buf, &entry->use_static,      24,  24, size);
+	pack_or_unpack(buf, &entry->owr_dyn,         23,  23, size);
+	pack_or_unpack(buf, &entry->learn_once,      22,  22, size);
+}
+
+/* Device-specific pack/unpack accessors */
+void sja1105et_l2_lookup_params_entry_pack(void *buf, struct
+                                           sja1105_l2_lookup_params_entry *entry)
+{
+	sja1105et_l2_lookup_params_entry_access(buf, entry, 1);
+}
+
+void sja1105et_l2_lookup_params_entry_unpack(void *buf, struct
+                                             sja1105_l2_lookup_params_entry *entry)
+{
+	sja1105et_l2_lookup_params_entry_access(buf, entry, 0);
+}
+
+void sja1105pqrs_l2_lookup_params_entry_pack(void *buf, struct
+                                             sja1105_l2_lookup_params_entry *entry)
+{
+	sja1105pqrs_l2_lookup_params_entry_access(buf, entry, 1);
+}
+
+void sja1105pqrs_l2_lookup_params_entry_unpack(void *buf, struct
+                                               sja1105_l2_lookup_params_entry *entry)
+{
+	sja1105pqrs_l2_lookup_params_entry_access(buf, entry, 0);
+}
 
 void sja1105_l2_lookup_params_entry_fmt_show(
 		char *print_buf,
