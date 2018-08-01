@@ -411,43 +411,40 @@ struct sja1105_static_config {
 #include "reset.h"
 #include "status.h"
 
-#define DEFINE_HEADERS_FOR_CONFIG_TABLE(table)                                                \
-	void sja1105_##table##_entry_show(struct sja1105_##table##_entry*);                   \
-	void sja1105_##table##_entry_fmt_show(char*, char*, struct sja1105_##table##_entry*); \
-	void sja1105_##table##_entry_pack(void*, struct sja1105_##table##_entry*);            \
-	void sja1105_##table##_entry_unpack(void*, struct sja1105_##table##_entry*);          \
+#define DEFINE_HEADERS_FOR_CONFIG_TABLE(device, table)                                         \
+	void sja1105_##table##_entry_show(struct sja1105_##table##_entry*);                    \
+	void sja1105_##table##_entry_fmt_show(char*, char*, struct sja1105_##table##_entry*);  \
+	void sja1105##device##_##table##_entry_pack(void*, struct sja1105_##table##_entry*);   \
+	void sja1105##device##_##table##_entry_unpack(void*, struct sja1105_##table##_entry*); \
 
-DEFINE_HEADERS_FOR_CONFIG_TABLE(l2_forwarding_params);
-DEFINE_HEADERS_FOR_CONFIG_TABLE(l2_forwarding);
-DEFINE_HEADERS_FOR_CONFIG_TABLE(l2_lookup_params);
-DEFINE_HEADERS_FOR_CONFIG_TABLE(l2_policing);
-DEFINE_HEADERS_FOR_CONFIG_TABLE(mac_config);
-DEFINE_HEADERS_FOR_CONFIG_TABLE(schedule_entry_points_params);
-DEFINE_HEADERS_FOR_CONFIG_TABLE(schedule_entry_points);
-DEFINE_HEADERS_FOR_CONFIG_TABLE(schedule_params);
-DEFINE_HEADERS_FOR_CONFIG_TABLE(schedule);
-DEFINE_HEADERS_FOR_CONFIG_TABLE(vlan_lookup);
-DEFINE_HEADERS_FOR_CONFIG_TABLE(xmii_params);
-DEFINE_HEADERS_FOR_CONFIG_TABLE(general_params);
-DEFINE_HEADERS_FOR_CONFIG_TABLE(avb_params);
-DEFINE_HEADERS_FOR_CONFIG_TABLE(vl_forwarding_params);
-DEFINE_HEADERS_FOR_CONFIG_TABLE(vl_forwarding);
-DEFINE_HEADERS_FOR_CONFIG_TABLE(vl_policing);
-DEFINE_HEADERS_FOR_CONFIG_TABLE(vl_lookup);
+#define DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(table)                                          \
+	DEFINE_HEADERS_FOR_CONFIG_TABLE(, table)                                               \
+
+#define DEFINE_SEPARATE_HEADERS_FOR_CONFIG_TABLE(table)                                        \
+	DEFINE_HEADERS_FOR_CONFIG_TABLE(et, table)                                             \
+	DEFINE_HEADERS_FOR_CONFIG_TABLE(pqrs, table)                                           \
+
+DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(l2_forwarding_params);
+DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(l2_forwarding);
+DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(l2_lookup_params);
+DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(l2_policing);
+DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(mac_config);
+DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(schedule_entry_points_params);
+DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(schedule_entry_points);
+DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(schedule_params);
+DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(schedule);
+DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(vlan_lookup);
+DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(xmii_params);
+DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(general_params);
+DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(avb_params);
+DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(vl_forwarding_params);
+DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(vl_forwarding);
+DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(vl_policing);
+DEFINE_COMMON_HEADERS_FOR_CONFIG_TABLE(vl_lookup);
+DEFINE_SEPARATE_HEADERS_FOR_CONFIG_TABLE(mac_config);
+DEFINE_SEPARATE_HEADERS_FOR_CONFIG_TABLE(l2_lookup);
 
 /* These can't be summarized using the DEFINE_HEADERS_FOR_CONFIG_TABLE macro */
-void sja1105et_mac_config_entry_pack(void*, struct sja1105_mac_config_entry*);
-void sja1105et_mac_config_entry_unpack(void*, struct sja1105_mac_config_entry*);
-void sja1105pqrs_mac_config_entry_pack(void*, struct sja1105_mac_config_entry*);
-void sja1105pqrs_mac_config_entry_unpack(void*, struct sja1105_mac_config_entry*);
-void sja1105_l2_lookup_entry_show(struct sja1105_l2_lookup_entry*);
-void sja1105_l2_lookup_entry_fmt_show(char*, char*, struct sja1105_l2_lookup_entry*);
-void sja1105et_l2_lookup_entry_pack(void*, struct sja1105_l2_lookup_entry*);
-void sja1105et_l2_lookup_entry_unpack(void*, struct sja1105_l2_lookup_entry*);
-void sja1105pqrs_l2_lookup_entry_pack(void*, struct sja1105_l2_lookup_entry*);
-void sja1105pqrs_l2_lookup_entry_unpack(void*, struct sja1105_l2_lookup_entry*);
-void sja1105_mac_config_entry_show(struct sja1105_mac_config_entry*);
-void sja1105_mac_config_entry_fmt_show(char*, char*, struct sja1105_mac_config_entry*);
 void sja1105_table_header_pack(void*, struct sja1105_table_header*);
 void sja1105_table_header_unpack(void*, struct sja1105_table_header*);
 void sja1105_table_header_pack_with_crc(void*, struct sja1105_table_header *hdr);
