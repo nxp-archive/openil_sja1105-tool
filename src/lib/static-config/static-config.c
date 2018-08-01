@@ -35,6 +35,7 @@
 #include <lib/include/static-config.h>
 #include <lib/include/gtable.h>
 #include <common.h>
+#include <stddef.h>
 
 static void sja1105_table_write_crc(char *table_start, char *crc_ptr)
 {
@@ -247,7 +248,7 @@ int sja1105_static_config_hexdump(void *buf)
 		if (p != table_end) {
 			loge("WARNING: Incorrect table length specified in header!");
 			printf("Extra:\n");
-			gtable_hexdump(p, (int) (table_end - p));
+			gtable_hexdump(p, (ptrdiff_t) (table_end - p));
 			p = table_end;
 		}
 		printf("Table Data CRC:\n");
@@ -255,7 +256,7 @@ int sja1105_static_config_hexdump(void *buf)
 		p += 4;
 		printf("\n");
 	}
-	return ((const char*)p - (const char*)buf) * sizeof(*buf);
+	return ((ptrdiff_t) (p - (char*) buf)) * sizeof(*buf);
 error:
 	return -1;
 }
@@ -423,7 +424,10 @@ sja1105_static_config_unpack(void *buf, struct sja1105_static_config *config)
 			p += bytes;
 		};
 		if (p != table_end) {
-			loge("WARNING: Incorrect table length specified in header!");
+			loge("WARNING: Incorrect table length for:");
+			sja1105_table_header_show(&hdr);
+			loge("Table data has %ld extra bytes compared to header!",
+			     (ptrdiff_t) (table_end - p));
 			p = table_end;
 		}
 		gtable_unpack(p, &read_crc, 31, 0, 4);
