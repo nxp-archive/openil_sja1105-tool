@@ -50,13 +50,13 @@
 #define SIZE_SCHEDULE_PARAMS_ENTRY              12
 #define SIZE_SCHEDULE_ENTRY_POINTS_PARAMS_ENTRY 4
 #define SIZE_VL_FORWARDING_PARAMS_ENTRY         12
-#define SIZE_L2_LOOKUP_PARAMS_TABLE             4
-#define SIZE_L2_FORWARDING_PARAMS_TABLE         12
-#define SIZE_CLK_SYNC_PARAMS_TABLE              52
-#define SIZE_AVB_PARAMS_TABLE                   12
-#define SIZE_GENERAL_PARAMS_TABLE               40
+#define SIZE_L2_LOOKUP_PARAMS_ENTRY             4
+#define SIZE_L2_FORWARDING_PARAMS_ENTRY         12
+#define SIZE_CLK_SYNC_PARAMS_ENTRY              52
+#define SIZE_AVB_PARAMS_ENTRY                   12
+#define SIZE_GENERAL_PARAMS_ENTRY               40
 #define SIZE_RETAGGING_ENTRY                    8
-#define SIZE_XMII_MODE_PARAMS_TABLE             4
+#define SIZE_XMII_MODE_PARAMS_ENTRY             4
 
 /* UM10944.pdf Page 11, Table 2. Configuration Blocks */
 #define BLKID_SCHEDULE_TABLE                     0x00
@@ -159,7 +159,7 @@ struct sja1105_schedule_params_entry {
 	uint64_t subscheind[8];
 };
 
-struct sja1105_general_params_table {
+struct sja1105_general_params_entry {
 	uint64_t vllupformat;
 	uint64_t mirr_ptacu;
 	uint64_t switchid;
@@ -188,7 +188,7 @@ struct sja1105_schedule_entry_points_entry {
 	uint64_t address;
 };
 
-struct sja1105_schedule_entry_points_params {
+struct sja1105_schedule_entry_points_params_entry {
 	uint64_t clksrc;
 	uint64_t actsubsch;
 };
@@ -216,7 +216,7 @@ struct sja1105_l2_lookup_entry {
 	uint64_t index;
 };
 
-struct sja1105_l2_lookup_params_table {
+struct sja1105_l2_lookup_params_entry {
 	uint64_t maxage;
 	uint64_t dyn_tbsz;
 	uint64_t poly;
@@ -232,7 +232,7 @@ struct sja1105_l2_forwarding_entry {
 	uint64_t vlan_pmap[8];
 };
 
-struct sja1105_l2_forwarding_params_table {
+struct sja1105_l2_forwarding_params_entry {
 	uint64_t max_dynp;
 	uint64_t part_spc[8];
 };
@@ -274,12 +274,12 @@ struct sja1105_mac_config_entry {
 	uint64_t imgmirrdei; /* only on P/Q/R/S */
 };
 
-struct sja1105_xmii_params_table {
+struct sja1105_xmii_params_entry {
 	uint64_t phy_mac[5];
 	uint64_t xmii_mode[5];
 };
 
-struct sja1105_avb_params_table {
+struct sja1105_avb_params_entry {
 	uint64_t destmeta;
 	uint64_t srcmeta;
 };
@@ -320,12 +320,12 @@ struct sja1105_vl_forwarding_entry {
 	uint64_t destports;
 };
 
-struct sja1105_vl_forwarding_params_table {
+struct sja1105_vl_forwarding_params_entry {
 	uint64_t partspc[8];
 	uint64_t debugen;
 };
 
-struct sja1105_clk_sync_params_table {
+struct sja1105_clk_sync_params_entry {
 	uint64_t etssrcpcf;
 	uint64_t waitthsync;
 	uint64_t wfintmout;
@@ -379,154 +379,78 @@ struct sja1105_retagging_entry {
 	uint64_t destports;
 };
 
+#define STATIC_CONFIG_MEMBER(table, size)           \
+	struct sja1105_##table##_entry table[size]; \
+	int table##_count;                          \
+
 struct sja1105_static_config {
 	uint64_t device_id;
-	struct sja1105_schedule_entry \
-	       schedule[MAX_SCHEDULE_COUNT];
-	struct sja1105_schedule_entry_points_entry \
-	       schedule_entry_points[MAX_SCHEDULE_ENTRY_POINTS_COUNT];
-	struct sja1105_vl_lookup_entry \
-	       vl_lookup[MAX_VL_LOOKUP_COUNT];
-	struct sja1105_vl_policing_entry \
-	       vl_policing[MAX_VL_POLICING_COUNT];
-	struct sja1105_vl_forwarding_entry \
-	       vl_forwarding[MAX_VL_FORWARDING_COUNT];
-	struct sja1105_l2_lookup_entry \
-	       l2_lookup[MAX_L2_LOOKUP_COUNT];
-	struct sja1105_l2_policing_entry \
-	       l2_policing[MAX_L2_POLICING_COUNT];
-	struct sja1105_vlan_lookup_entry \
-	       vlan_lookup[MAX_VLAN_LOOKUP_COUNT];
-	struct sja1105_l2_forwarding_entry \
-	       l2_forwarding[MAX_L2_FORWARDING_COUNT];
-	struct sja1105_mac_config_entry \
-	       mac_config[MAX_MAC_CONFIG_COUNT];
-	struct sja1105_schedule_params_entry \
-	       schedule_params[MAX_SCHEDULE_PARAMS_COUNT];
-	struct sja1105_schedule_entry_points_params \
-	       schedule_entry_points_params[MAX_SCHEDULE_ENTRY_POINTS_PARAMS_COUNT];
-	struct sja1105_vl_forwarding_params_table \
-	       vl_forwarding_params[MAX_VL_FORWARDING_PARAMS_COUNT];
-	struct sja1105_l2_lookup_params_table \
-	       l2_lookup_params[MAX_L2_LOOKUP_PARAMS_COUNT];
-	struct sja1105_l2_forwarding_params_table \
-	       l2_forwarding_params[MAX_L2_FORWARDING_PARAMS_COUNT];
-	struct sja1105_avb_params_table \
-	       avb_params[MAX_AVB_PARAMS_COUNT];
-	struct sja1105_clk_sync_params_table \
-	       clk_sync_params[MAX_CLK_SYNC_COUNT];
-	struct sja1105_general_params_table \
-	       general_params[MAX_GENERAL_PARAMS_COUNT];
-	struct sja1105_retagging_entry \
-	       retagging[MAX_RETAGGING_COUNT];
-	struct sja1105_xmii_params_table \
-	       xmii_params[MAX_XMII_PARAMS_COUNT];
-	int    schedule_count;
-	int    schedule_entry_points_count;
-	int    vl_lookup_count;
-	int    vl_policing_count;
-	int    vl_forwarding_count;
-	int    l2_lookup_count;
-	int    l2_policing_count;
-	int    vlan_lookup_count;
-	int    l2_forwarding_count;
-	int    mac_config_count;
-	int    schedule_params_count;
-	int    schedule_entry_points_params_count;
-	int    vl_forwarding_params_count;
-	int    l2_lookup_params_count;
-	int    l2_forwarding_params_count;
-	int    avb_params_count;
-	int    clk_sync_params_count;
-	int    general_params_count;
-	int    retagging_count;
-	int    xmii_params_count;
+	STATIC_CONFIG_MEMBER(l2_forwarding_params, MAX_L2_FORWARDING_PARAMS_COUNT);
+	STATIC_CONFIG_MEMBER(l2_forwarding, MAX_L2_FORWARDING_COUNT);
+	STATIC_CONFIG_MEMBER(l2_lookup, MAX_L2_LOOKUP_COUNT);
+	STATIC_CONFIG_MEMBER(l2_lookup_params, MAX_L2_LOOKUP_PARAMS_COUNT);
+	STATIC_CONFIG_MEMBER(l2_policing, MAX_L2_POLICING_COUNT);
+	STATIC_CONFIG_MEMBER(mac_config, MAX_MAC_CONFIG_COUNT);
+	STATIC_CONFIG_MEMBER(schedule_entry_points_params, MAX_SCHEDULE_ENTRY_POINTS_PARAMS_COUNT);
+	STATIC_CONFIG_MEMBER(schedule_entry_points, MAX_SCHEDULE_ENTRY_POINTS_COUNT);
+	STATIC_CONFIG_MEMBER(schedule_params, MAX_SCHEDULE_PARAMS_COUNT);
+	STATIC_CONFIG_MEMBER(schedule, MAX_SCHEDULE_COUNT);
+	STATIC_CONFIG_MEMBER(vlan_lookup, MAX_VLAN_LOOKUP_COUNT);
+	STATIC_CONFIG_MEMBER(xmii_params, MAX_XMII_PARAMS_COUNT);
+	STATIC_CONFIG_MEMBER(general_params, MAX_GENERAL_PARAMS_COUNT);
+	STATIC_CONFIG_MEMBER(avb_params, MAX_AVB_PARAMS_COUNT);
+	STATIC_CONFIG_MEMBER(vl_forwarding_params, MAX_VL_FORWARDING_PARAMS_COUNT);
+	STATIC_CONFIG_MEMBER(vl_forwarding, MAX_VL_FORWARDING_COUNT);
+	STATIC_CONFIG_MEMBER(vl_policing, MAX_VL_POLICING_COUNT);
+	STATIC_CONFIG_MEMBER(vl_lookup, MAX_VL_LOOKUP_COUNT);
+	STATIC_CONFIG_MEMBER(retagging, MAX_RETAGGING_COUNT);
 };
 
 #include "clock.h"
 #include "reset.h"
 #include "status.h"
 
-void sja1105_l2_forwarding_params_table_show(struct sja1105_l2_forwarding_params_table*);
-void sja1105_l2_forwarding_params_table_fmt_show(char*, char*, struct sja1105_l2_forwarding_params_table*);
-void sja1105_l2_forwarding_params_table_unpack(void*, struct sja1105_l2_forwarding_params_table*);
-void sja1105_l2_forwarding_params_table_pack(void*, struct sja1105_l2_forwarding_params_table*);
-void sja1105_l2_forwarding_entry_pack(void*, struct sja1105_l2_forwarding_entry*);
-void sja1105_l2_forwarding_entry_unpack(void*, struct sja1105_l2_forwarding_entry*);
-void sja1105_l2_forwarding_entry_show(struct sja1105_l2_forwarding_entry*);
-void sja1105_l2_forwarding_entry_fmt_show(char*, char*, struct sja1105_l2_forwarding_entry*);
-void sja1105_l2_lookup_params_table_pack(void*, struct sja1105_l2_lookup_params_table*);
-void sja1105_l2_lookup_params_table_unpack(void*, struct sja1105_l2_lookup_params_table*);
-void sja1105_l2_lookup_params_table_show(struct sja1105_l2_lookup_params_table*);
-void sja1105_l2_lookup_params_table_fmt_show(char*, char*, struct sja1105_l2_lookup_params_table*);
-void sja1105et_l2_lookup_entry_pack(void*, struct sja1105_l2_lookup_entry*);
-void sja1105et_l2_lookup_entry_unpack(void*, struct sja1105_l2_lookup_entry*);
-void sja1105pqrs_l2_lookup_entry_pack(void*, struct sja1105_l2_lookup_entry*);
-void sja1105pqrs_l2_lookup_entry_unpack(void*, struct sja1105_l2_lookup_entry*);
-void sja1105_l2_lookup_entry_show(struct sja1105_l2_lookup_entry*);
-void sja1105_l2_lookup_entry_fmt_show(char*, char*, struct sja1105_l2_lookup_entry*);
-void sja1105_l2_policing_entry_pack(void*, struct sja1105_l2_policing_entry*);
-void sja1105_l2_policing_entry_unpack(void*, struct sja1105_l2_policing_entry*);
-void sja1105_l2_policing_entry_show(struct sja1105_l2_policing_entry*);
-void sja1105_l2_policing_entry_fmt_show(char*, char*, struct sja1105_l2_policing_entry*);
+#define DEFINE_HEADERS_FOR_CONFIG_TABLE(table)                                                \
+	void sja1105_##table##_entry_show(struct sja1105_##table##_entry*);                   \
+	void sja1105_##table##_entry_fmt_show(char*, char*, struct sja1105_##table##_entry*); \
+	void sja1105_##table##_entry_pack(void*, struct sja1105_##table##_entry*);            \
+	void sja1105_##table##_entry_unpack(void*, struct sja1105_##table##_entry*);          \
+
+DEFINE_HEADERS_FOR_CONFIG_TABLE(l2_forwarding_params);
+DEFINE_HEADERS_FOR_CONFIG_TABLE(l2_forwarding);
+DEFINE_HEADERS_FOR_CONFIG_TABLE(l2_lookup_params);
+DEFINE_HEADERS_FOR_CONFIG_TABLE(l2_policing);
+DEFINE_HEADERS_FOR_CONFIG_TABLE(mac_config);
+DEFINE_HEADERS_FOR_CONFIG_TABLE(schedule_entry_points_params);
+DEFINE_HEADERS_FOR_CONFIG_TABLE(schedule_entry_points);
+DEFINE_HEADERS_FOR_CONFIG_TABLE(schedule_params);
+DEFINE_HEADERS_FOR_CONFIG_TABLE(schedule);
+DEFINE_HEADERS_FOR_CONFIG_TABLE(vlan_lookup);
+DEFINE_HEADERS_FOR_CONFIG_TABLE(xmii_params);
+DEFINE_HEADERS_FOR_CONFIG_TABLE(general_params);
+DEFINE_HEADERS_FOR_CONFIG_TABLE(avb_params);
+DEFINE_HEADERS_FOR_CONFIG_TABLE(vl_forwarding_params);
+DEFINE_HEADERS_FOR_CONFIG_TABLE(vl_forwarding);
+DEFINE_HEADERS_FOR_CONFIG_TABLE(vl_policing);
+DEFINE_HEADERS_FOR_CONFIG_TABLE(vl_lookup);
+
+/* These can't be summarized using the DEFINE_HEADERS_FOR_CONFIG_TABLE macro */
 void sja1105et_mac_config_entry_pack(void*, struct sja1105_mac_config_entry*);
 void sja1105et_mac_config_entry_unpack(void*, struct sja1105_mac_config_entry*);
 void sja1105pqrs_mac_config_entry_pack(void*, struct sja1105_mac_config_entry*);
 void sja1105pqrs_mac_config_entry_unpack(void*, struct sja1105_mac_config_entry*);
+void sja1105_l2_lookup_entry_show(struct sja1105_l2_lookup_entry*);
+void sja1105_l2_lookup_entry_fmt_show(char*, char*, struct sja1105_l2_lookup_entry*);
+void sja1105et_l2_lookup_entry_pack(void*, struct sja1105_l2_lookup_entry*);
+void sja1105et_l2_lookup_entry_unpack(void*, struct sja1105_l2_lookup_entry*);
+void sja1105pqrs_l2_lookup_entry_pack(void*, struct sja1105_l2_lookup_entry*);
+void sja1105pqrs_l2_lookup_entry_unpack(void*, struct sja1105_l2_lookup_entry*);
 void sja1105_mac_config_entry_show(struct sja1105_mac_config_entry*);
 void sja1105_mac_config_entry_fmt_show(char*, char*, struct sja1105_mac_config_entry*);
-void sja1105_schedule_entry_points_params_pack(void*, struct sja1105_schedule_entry_points_params*);
-void sja1105_schedule_entry_points_params_unpack(void*, struct sja1105_schedule_entry_points_params*);
-void sja1105_schedule_entry_points_params_table_show(struct sja1105_schedule_entry_points_params*);
-void sja1105_schedule_entry_points_params_table_fmt_show(char*, char*, struct sja1105_schedule_entry_points_params*);
-void sja1105_schedule_entry_points_entry_pack(void*, struct sja1105_schedule_entry_points_entry*);
-void sja1105_schedule_entry_points_entry_unpack(void*, struct sja1105_schedule_entry_points_entry*);
-void sja1105_schedule_entry_points_entry_show(struct sja1105_schedule_entry_points_entry*);
-void sja1105_schedule_entry_points_entry_fmt_show(char*, char*, struct sja1105_schedule_entry_points_entry*);
-void sja1105_schedule_params_entry_pack(void*, struct sja1105_schedule_params_entry*);
-void sja1105_schedule_params_entry_unpack(void*, struct sja1105_schedule_params_entry*);
-void sja1105_schedule_params_entry_show(struct sja1105_schedule_params_entry*);
-void sja1105_schedule_params_entry_fmt_show(char*, char*, struct sja1105_schedule_params_entry*);
-void sja1105_schedule_entry_pack(void*, struct sja1105_schedule_entry*);
-void sja1105_schedule_entry_unpack(void*, struct sja1105_schedule_entry*);
-void sja1105_schedule_entry_show(struct sja1105_schedule_entry*);
-void sja1105_schedule_entry_fmt_show(char*, char*, struct sja1105_schedule_entry*);
 void sja1105_table_header_pack(void*, struct sja1105_table_header*);
 void sja1105_table_header_unpack(void*, struct sja1105_table_header*);
 void sja1105_table_header_pack_with_crc(void*, struct sja1105_table_header *hdr);
 void sja1105_table_header_show(struct sja1105_table_header *hdr);
-void sja1105_vlan_lookup_entry_pack(void*, struct sja1105_vlan_lookup_entry*);
-void sja1105_vlan_lookup_entry_unpack(void*, struct sja1105_vlan_lookup_entry*);
-void sja1105_vlan_lookup_entry_show(struct sja1105_vlan_lookup_entry*);
-void sja1105_vlan_lookup_entry_fmt_show(char*, char*, struct sja1105_vlan_lookup_entry*);
-void sja1105_xmii_params_table_pack(void*, struct sja1105_xmii_params_table*);
-void sja1105_xmii_params_table_unpack(void*, struct sja1105_xmii_params_table*);
-void sja1105_xmii_params_table_show(struct sja1105_xmii_params_table*);
-void sja1105_xmii_params_table_fmt_show(char*, char*, struct sja1105_xmii_params_table*);
-void sja1105_general_params_table_pack(void*, struct sja1105_general_params_table*);
-void sja1105_general_params_table_unpack(void*, struct sja1105_general_params_table*);
-void sja1105_general_params_table_show(struct sja1105_general_params_table*);
-void sja1105_general_params_table_fmt_show(char*, char*, struct sja1105_general_params_table*);
-void sja1105_avb_params_table_pack(void*, struct sja1105_avb_params_table*);
-void sja1105_avb_params_table_unpack(void*, struct sja1105_avb_params_table*);
-void sja1105_avb_params_table_show(struct sja1105_avb_params_table*);
-void sja1105_avb_params_table_fmt_show(char*, char*, struct sja1105_avb_params_table*);
-void sja1105_vl_forwarding_params_table_pack(void*, struct sja1105_vl_forwarding_params_table*);
-void sja1105_vl_forwarding_params_table_unpack(void*, struct sja1105_vl_forwarding_params_table*);
-void sja1105_vl_forwarding_params_table_show(struct sja1105_vl_forwarding_params_table*);
-void sja1105_vl_forwarding_params_table_fmt_show(char*, char*, struct sja1105_vl_forwarding_params_table*);
-void sja1105_vl_forwarding_entry_pack(void*, struct sja1105_vl_forwarding_entry*);
-void sja1105_vl_forwarding_entry_unpack(void*, struct sja1105_vl_forwarding_entry*);
-void sja1105_vl_forwarding_entry_show(struct sja1105_vl_forwarding_entry*);
-void sja1105_vl_forwarding_entry_fmt_show(char*, char*, struct sja1105_vl_forwarding_entry*);
-void sja1105_vl_policing_entry_pack(void*, struct sja1105_vl_policing_entry*);
-void sja1105_vl_policing_entry_unpack(void*, struct sja1105_vl_policing_entry*);
-void sja1105_vl_policing_entry_show(struct sja1105_vl_policing_entry*);
-void sja1105_vl_policing_entry_fmt_show(char*, char*, struct sja1105_vl_policing_entry*);
-void sja1105_vl_lookup_entry_pack(void*, struct sja1105_vl_lookup_entry*);
-void sja1105_vl_lookup_entry_unpack(void*, struct sja1105_vl_lookup_entry*);
-void sja1105_vl_lookup_entry_show(struct sja1105_vl_lookup_entry*);
-void sja1105_vl_lookup_entry_fmt_show(char*, char*, struct sja1105_vl_lookup_entry*);
 
 /* From static-config.c */
 unsigned int sja1105_static_config_get_length(struct sja1105_static_config*);

@@ -62,9 +62,9 @@ sja1105_dyn_l2_lookup_cmd_access(void *buf,
                                  int write)
 {
 	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
-	int    size = 4 + SIZE_L2_LOOKUP_ENTRY;
+	int    size = 4 + SIZE_L2_LOOKUP_ENTRY_ET;
 	uint8_t *entry_ptr = (uint8_t*) buf;
-	uint8_t *cmd_ptr   = (uint8_t*) buf + SIZE_L2_LOOKUP_ENTRY;
+	uint8_t *cmd_ptr   = (uint8_t*) buf + SIZE_L2_LOOKUP_ENTRY_ET;
 
 	if (write == 0) {
 		pack_or_unpack = gtable_unpack;

@@ -38,63 +38,54 @@
 #include <lib/include/gtable.h>
 #include <common.h>
 
-static void sja1105_l2_lookup_params_table_access(
+static void sja1105_l2_lookup_params_entry_access(
 		void *buf,
-		struct sja1105_l2_lookup_params_table *table,
+		struct sja1105_l2_lookup_params_entry *entry,
 		int write)
 {
 	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
-	int    size = SIZE_L2_LOOKUP_PARAMS_TABLE;
+	int    size = SIZE_L2_LOOKUP_PARAMS_ENTRY;
 
 	if (write == 0) {
 		pack_or_unpack = gtable_unpack;
-		memset(table, 0, sizeof(*table));
+		memset(entry, 0, sizeof(*entry));
 	} else {
 		pack_or_unpack = gtable_pack;
 		memset(buf, 0, size);
 	}
-	pack_or_unpack(buf, &table->maxage,         31, 17, size);
-	pack_or_unpack(buf, &table->dyn_tbsz,       16, 14, size);
-	pack_or_unpack(buf, &table->poly,           13,  6, size);
-	pack_or_unpack(buf, &table->shared_learn,    5,  5, size);
-	pack_or_unpack(buf, &table->no_enf_hostprt,  4,  4, size);
-	pack_or_unpack(buf, &table->no_mgmt_learn,   3,  3, size);
+	pack_or_unpack(buf, &entry->maxage,         31, 17, size);
+	pack_or_unpack(buf, &entry->dyn_tbsz,       16, 14, size);
+	pack_or_unpack(buf, &entry->poly,           13,  6, size);
+	pack_or_unpack(buf, &entry->shared_learn,    5,  5, size);
+	pack_or_unpack(buf, &entry->no_enf_hostprt,  4,  4, size);
+	pack_or_unpack(buf, &entry->no_mgmt_learn,   3,  3, size);
 }
+/*
+ * sja1105_l2_lookup_params_entry_pack
+ * sja1105_l2_lookup_params_entry_unpack
+ */
+DEFINE_PACK_UNPACK_ACCESSORS(l2_lookup_params);
 
-void sja1105_l2_lookup_params_table_pack(
-		void *buf,
-		struct sja1105_l2_lookup_params_table *table)
-{
-	sja1105_l2_lookup_params_table_access(buf, table, 1);
-}
-
-void sja1105_l2_lookup_params_table_unpack(
-		void *buf,
-		struct sja1105_l2_lookup_params_table *table)
-{
-	sja1105_l2_lookup_params_table_access(buf, table, 0);
-}
-
-void sja1105_l2_lookup_params_table_fmt_show(
+void sja1105_l2_lookup_params_entry_fmt_show(
 		char *print_buf,
 		char *fmt,
-		struct sja1105_l2_lookup_params_table *table)
+		struct sja1105_l2_lookup_params_entry *entry)
 {
-	formatted_append(print_buf, fmt, "MAXAGE         0x%" PRIX64, table->maxage);
-	formatted_append(print_buf, fmt, "DYN_TBSZ       0x%" PRIX64, table->dyn_tbsz);
-	formatted_append(print_buf, fmt, "POLY           0x%" PRIX64, table->poly);
-	formatted_append(print_buf, fmt, "SHARED_LEARN   0x%" PRIX64, table->shared_learn);
-	formatted_append(print_buf, fmt, "NO_ENF_HOSTPRT 0x%" PRIX64, table->no_enf_hostprt);
-	formatted_append(print_buf, fmt, "NO_MGMT_LEARN  0x%" PRIX64, table->no_mgmt_learn);
+	formatted_append(print_buf, fmt, "MAXAGE         0x%" PRIX64, entry->maxage);
+	formatted_append(print_buf, fmt, "DYN_TBSZ       0x%" PRIX64, entry->dyn_tbsz);
+	formatted_append(print_buf, fmt, "POLY           0x%" PRIX64, entry->poly);
+	formatted_append(print_buf, fmt, "SHARED_LEARN   0x%" PRIX64, entry->shared_learn);
+	formatted_append(print_buf, fmt, "NO_ENF_HOSTPRT 0x%" PRIX64, entry->no_enf_hostprt);
+	formatted_append(print_buf, fmt, "NO_MGMT_LEARN  0x%" PRIX64, entry->no_mgmt_learn);
 }
 
-void sja1105_l2_lookup_params_table_show(struct sja1105_l2_lookup_params_table *table)
+void sja1105_l2_lookup_params_entry_show(struct sja1105_l2_lookup_params_entry *entry)
 {
 	char print_buf[MAX_LINE_SIZE];
 	char *fmt = "%s\n";
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_l2_lookup_params_table_fmt_show(print_buf, fmt, table);
+	sja1105_l2_lookup_params_entry_fmt_show(print_buf, fmt, entry);
 	puts(print_buf);
 }
 

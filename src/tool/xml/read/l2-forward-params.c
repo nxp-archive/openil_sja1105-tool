@@ -30,7 +30,7 @@
  *****************************************************************************/
 #include "internal.h"
 
-static int entry_get(xmlNode *node, struct sja1105_l2_forwarding_params_table *entry)
+static int entry_get(xmlNode *node, struct sja1105_l2_forwarding_params_entry *entry)
 {
 	int rc;
 
@@ -51,7 +51,7 @@ error:
 
 static int parse_entry(xmlNode *node, struct sja1105_static_config *config)
 {
-	struct sja1105_l2_forwarding_params_table entry;
+	struct sja1105_l2_forwarding_params_entry entry;
 	int rc;
 
 	if (config->l2_forwarding_params_count >= MAX_L2_FORWARDING_PARAMS_COUNT) {

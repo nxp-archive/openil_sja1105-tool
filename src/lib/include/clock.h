@@ -146,7 +146,7 @@ void sja1105_cgu_idiv_pack(void*, struct sja1105_cgu_idiv*);
 void sja1105_cgu_idiv_unpack(void*, struct sja1105_cgu_idiv*);
 void sja1105_cgu_idiv_show(struct sja1105_cgu_idiv*);
 int sja1105_cgu_idiv_config(struct sja1105_spi_setup*, int, int, int);
-int sja1105_clocking_setup(struct sja1105_spi_setup*, struct sja1105_xmii_params_table*,
+int sja1105_clocking_setup(struct sja1105_spi_setup*, struct sja1105_xmii_params_entry*,
                            struct sja1105_mac_config_entry*);
 
 int mii_clocking_setup(struct sja1105_spi_setup *spi_setup, int port,

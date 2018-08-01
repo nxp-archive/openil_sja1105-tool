@@ -82,4 +82,19 @@ void print_array(char *print_buf, uint64_t *array, int count);
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 #define min(x, y) (((x) < (y)) ? (x) : (y))
 
+
+#define DEFINE_PACK_UNPACK_ACCESSORS(table)                                        \
+                                                                                   \
+	void sja1105_##table##_entry_pack(void *buf,                               \
+	                                  struct sja1105_##table##_entry *entry)   \
+	{                                                                          \
+		sja1105_##table##_entry_access(buf, entry, 1);                     \
+	}                                                                          \
+                                                                                   \
+	void sja1105_##table##_entry_unpack(void *buf,                             \
+	                                    struct sja1105_##table##_entry *entry) \
+	{                                                                          \
+		sja1105_##table##_entry_access(buf, entry, 0);                     \
+	}
+
 #endif
