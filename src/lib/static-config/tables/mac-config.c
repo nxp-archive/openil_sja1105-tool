@@ -44,7 +44,7 @@ sja1105et_mac_config_entry_access(void *buf,
                                   int write)
 {
 	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
-	int    size = SIZE_SJA1105ET_MAC_CONFIG_ENTRY;
+	int    size = SIZE_MAC_CONFIG_ENTRY_ET;
 	int    offset;
 	int    i;
 
@@ -86,7 +86,7 @@ sja1105pqrs_mac_config_entry_access(void *buf,
                                     int write)
 {
 	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
-	int    size = SIZE_SJA1105PQRS_MAC_CONFIG_ENTRY;
+	int    size = SIZE_MAC_CONFIG_ENTRY_PQRS;
 	int    offset;
 	int    i;
 
@@ -124,9 +124,9 @@ sja1105pqrs_mac_config_entry_access(void *buf,
 	pack_or_unpack(buf, &entry->ingress,     31, 31, size);
 	pack_or_unpack(buf, &entry->mirrcie,     30, 30, size);
 	pack_or_unpack(buf, &entry->mirrcetag,   29, 29, size);
-	pack_or_unpack(buf, &entry->imgmirrvid,  28, 17, size);
-	pack_or_unpack(buf, &entry->imgmirrpcp,  16, 14, size);
-	pack_or_unpack(buf, &entry->imgmirrdei,  13, 13, size);
+	pack_or_unpack(buf, &entry->ingmirrvid,  28, 17, size);
+	pack_or_unpack(buf, &entry->ingmirrpcp,  16, 14, size);
+	pack_or_unpack(buf, &entry->ingmirrdei,  13, 13, size);
 }
 /*
  * sja1105et_mac_config_entry_pack
@@ -176,9 +176,9 @@ sja1105_mac_config_entry_fmt_show(char *print_buf,
 	formatted_append(print_buf, fmt, "INGRESS    0x%" PRIX64, entry->ingress);
 	formatted_append(print_buf, fmt, "MIRRCIE    0x%" PRIX64, entry->mirrcie);
 	formatted_append(print_buf, fmt, "MIRRCETAG  0x%" PRIX64, entry->mirrcetag);
-	formatted_append(print_buf, fmt, "IMGMIRRVID 0x%" PRIX64, entry->imgmirrvid);
-	formatted_append(print_buf, fmt, "IMGMIRRPCP 0x%" PRIX64, entry->imgmirrpcp);
-	formatted_append(print_buf, fmt, "IMGMIRRDEI 0x%" PRIX64, entry->imgmirrdei);
+	formatted_append(print_buf, fmt, "INGMIRRVID 0x%" PRIX64, entry->ingmirrvid);
+	formatted_append(print_buf, fmt, "INGMIRRPCP 0x%" PRIX64, entry->ingmirrpcp);
+	formatted_append(print_buf, fmt, "INGMIRRDEI 0x%" PRIX64, entry->ingmirrdei);
 }
 
 void sja1105_mac_config_entry_show(struct sja1105_mac_config_entry *entry)
