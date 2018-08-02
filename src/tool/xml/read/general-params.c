@@ -53,6 +53,11 @@ static int entry_get(xmlNode *node, struct sja1105_general_params_entry *entry)
 	rc |= xml_read_field(&entry->tpid,        "tpid", node);
 	rc |= xml_read_field(&entry->ignore2stf,  "ignore2stf", node);
 	rc |= xml_read_field(&entry->tpid2,       "tpid2", node);
+	rc |= xml_read_field(&entry->queue_ts,    "queue_ts", node);
+	rc |= xml_read_field(&entry->egrmirrvid,  "egrmirrvid", node);
+	rc |= xml_read_field(&entry->egrmirrpcp,  "egrmirrpcp", node);
+	rc |= xml_read_field(&entry->egrmirrdei,  "egrmirrdei", node);
+	rc |= xml_read_field(&entry->replay_port, "replay_port", node);
 	if (rc < 0) {
 		loge("General Parameters entry is incomplete!");
 		return -EINVAL;

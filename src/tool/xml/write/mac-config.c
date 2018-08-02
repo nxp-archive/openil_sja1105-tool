@@ -55,11 +55,18 @@ mac_configuration_table_write(xmlTextWriterPtr writer,
 		rc |= xml_write_field(writer, "egr_mirr", config->mac_config[i].egr_mirr);
 		rc |= xml_write_field(writer, "drpnona664", config->mac_config[i].drpnona664);
 		rc |= xml_write_field(writer, "drpdtag", config->mac_config[i].drpdtag);
+		rc |= xml_write_field(writer, "drpsotag", config->mac_config[i].drpsotag);
+		rc |= xml_write_field(writer, "drpsitag", config->mac_config[i].drpsitag);
 		rc |= xml_write_field(writer, "drpuntag", config->mac_config[i].drpuntag);
 		rc |= xml_write_field(writer, "retag", config->mac_config[i].retag);
 		rc |= xml_write_field(writer, "dyn_learn", config->mac_config[i].dyn_learn);
 		rc |= xml_write_field(writer, "egress", config->mac_config[i].egress);
 		rc |= xml_write_field(writer, "ingress", config->mac_config[i].ingress);
+		rc |= xml_write_field(writer, "mirrcie", config->mac_config[i].mirrcie);
+		rc |= xml_write_field(writer, "mirrcetag", config->mac_config[i].mirrcetag);
+		rc |= xml_write_field(writer, "ingmirrvid", config->mac_config[i].ingmirrvid);
+		rc |= xml_write_field(writer, "ingmirrpcp", config->mac_config[i].ingmirrpcp);
+		rc |= xml_write_field(writer, "ingmirrdei", config->mac_config[i].ingmirrdei);
 		rc |= xmlTextWriterEndElement(writer);
 		if (rc < 0) {
 			loge("error while writing mac_config Table element %d", i);

@@ -33,6 +33,15 @@
 static int entry_get(xmlNode *node, struct sja1105_l2_lookup_entry *entry)
 {
 	int rc = 0;
+	rc |= xml_read_field(&entry->tsreg, "tsreg", node);
+	rc |= xml_read_field(&entry->mirrvlan, "mirrvlan", node);
+	rc |= xml_read_field(&entry->takets, "takets", node);
+	rc |= xml_read_field(&entry->mirr, "mirr", node);
+	rc |= xml_read_field(&entry->retag, "retag", node);
+	rc |= xml_read_field(&entry->mask_iotag, "mask_iotag", node);
+	rc |= xml_read_field(&entry->mask_vlanid, "mask_vlanid", node);
+	rc |= xml_read_field(&entry->mask_macaddr, "mask_macaddr", node);
+	rc |= xml_read_field(&entry->iotag, "iotag", node);
 	rc |= xml_read_field(&entry->vlanid, "vlanid", node);
 	rc |= xml_read_field(&entry->macaddr, "macaddr", node);
 	rc |= xml_read_field(&entry->destports, "destports", node);
