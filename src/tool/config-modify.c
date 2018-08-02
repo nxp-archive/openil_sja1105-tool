@@ -169,6 +169,15 @@ static int l2_lookup_table_entry_modify(
 		char  *field_val)
 {
 	const char *options[] = {
+		"tsreg",        /* P/Q/R/S only - LOCKEDS=1 */
+		"mirrvlan",     /* P/Q/R/S only - LOCKEDS=1 */
+		"takets",       /* P/Q/R/S only - LOCKEDS=1 */
+		"mirr",         /* P/Q/R/S only - LOCKEDS=1 */
+		"retag",        /* P/Q/R/S only - LOCKEDS=1 */
+		"mask_iotag",   /* P/Q/R/S only */
+		"mask_vlanid",  /* P/Q/R/S only */
+		"mask_macaddr", /* P/Q/R/S only */
+		"iotag",        /* P/Q/R/S only */
 		"vlanid",
 		"macaddr",
 		"destports",
@@ -176,13 +185,22 @@ static int l2_lookup_table_entry_modify(
 		"index",
 	};
 	uint64_t *fields[] = {
+		&config->l2_lookup[entry_index].tsreg,
+		&config->l2_lookup[entry_index].mirrvlan,
+		&config->l2_lookup[entry_index].takets,
+		&config->l2_lookup[entry_index].mirr,
+		&config->l2_lookup[entry_index].retag,
+		&config->l2_lookup[entry_index].mask_iotag,
+		&config->l2_lookup[entry_index].mask_vlanid,
+		&config->l2_lookup[entry_index].mask_macaddr,
+		&config->l2_lookup[entry_index].iotag,
 		&config->l2_lookup[entry_index].vlanid,
 		&config->l2_lookup[entry_index].macaddr,
 		&config->l2_lookup[entry_index].destports,
 		&config->l2_lookup[entry_index].enfport,
 		&config->l2_lookup[entry_index].index,
 	};
-	int entry_field_counts[] = {1, 1, 1, 1, 1,};
+	int entry_field_counts[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,};
 	uint64_t tmp;
 	int rc;
 
@@ -358,11 +376,18 @@ static int mac_config_table_entry_modify(
 		"egr_mirr",
 		"drpnona664",
 		"drpdtag",
+		"drpsotag", /* P/Q/R/S only */
+		"drpsitag", /* P/Q/R/S only */
 		"drpuntag",
 		"retag",
 		"dyn_learn",
 		"egress",
 		"ingress",
+		"mirrcie", /* P/Q/R/S only */
+		"mirrcetag", /* P/Q/R/S only */
+		"ingmirrvid", /* P/Q/R/S only */
+		"ingmirrpcp", /* P/Q/R/S only */
+		"ingmirrdei", /* P/Q/R/S only */
 	};
 	uint64_t *fields[] = {
 		config->mac_config[entry_index].top,
@@ -379,13 +404,20 @@ static int mac_config_table_entry_modify(
 		&config->mac_config[entry_index].egr_mirr,
 		&config->mac_config[entry_index].drpnona664,
 		&config->mac_config[entry_index].drpdtag,
+		&config->mac_config[entry_index].drpsotag,
+		&config->mac_config[entry_index].drpsitag,
 		&config->mac_config[entry_index].drpuntag,
 		&config->mac_config[entry_index].retag,
 		&config->mac_config[entry_index].dyn_learn,
 		&config->mac_config[entry_index].egress,
 		&config->mac_config[entry_index].ingress,
+		&config->mac_config[entry_index].mirrcie,
+		&config->mac_config[entry_index].mirrcetag,
+		&config->mac_config[entry_index].ingmirrvid,
+		&config->mac_config[entry_index].ingmirrpcp,
+		&config->mac_config[entry_index].ingmirrdei,
 	};
-	int entry_field_counts[] = {8, 8, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,};
+	int entry_field_counts[] = {8, 8, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,};
 	uint64_t tmp;
 	int rc;
 
@@ -487,22 +519,40 @@ static int l2_lookup_params_table_entry_modify(
 		char  *field_val)
 {
 	const char *options[] = {
+		"drpbc", /* P/Q/R/S only */
+		"drpmc", /* P/Q/R/S only */
+		"drpuni", /* P/Q/R/S only */
+		"maxaddrp", /* P/Q/R/S only */
 		"maxage",
+		"start_dynspc", /* P/Q/R/S only */
+		"drpnolearn", /* P/Q/R/S only */
 		"dyn_tbsz",
 		"poly",
 		"shared_learn",
 		"no_enf_hostprt",
 		"no_mgmt_learn",
+		"use_static", /* P/Q/R/S only */
+		"owr_dyn", /* P/Q/R/S only */
+		"learn_once", /* P/Q/R/S only */
 	};
 	uint64_t *fields[] = {
+		&config->l2_lookup_params[entry_index].drpbc,
+		&config->l2_lookup_params[entry_index].drpmc,
+		&config->l2_lookup_params[entry_index].drpuni,
+		config->l2_lookup_params[entry_index].maxaddrp,
 		&config->l2_lookup_params[entry_index].maxage,
+		&config->l2_lookup_params[entry_index].start_dynspc,
+		&config->l2_lookup_params[entry_index].drpnolearn,
 		&config->l2_lookup_params[entry_index].dyn_tbsz,
 		&config->l2_lookup_params[entry_index].poly,
 		&config->l2_lookup_params[entry_index].shared_learn,
 		&config->l2_lookup_params[entry_index].no_enf_hostprt,
 		&config->l2_lookup_params[entry_index].no_mgmt_learn,
+		&config->l2_lookup_params[entry_index].use_static,
+		&config->l2_lookup_params[entry_index].owr_dyn,
+		&config->l2_lookup_params[entry_index].learn_once,
 	};
-	int entry_field_counts[] = {1, 1, 1, 1, 1, 1,};
+	int entry_field_counts[] = {1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,};
 	uint64_t tmp;
 	int rc;
 
@@ -588,7 +638,12 @@ static int general_params_table_entry_modify(
 		"vlmask",
 		"tpid",
 		"ignore2stf",
-		"tpid2"
+		"tpid2",
+		"queue_ts", /* P/Q/R/S only */
+		"egrmirrvid", /* P/Q/R/S only */
+		"egrmirrpcp", /* P/Q/R/S only */
+		"egrmirrdei", /* P/Q/R/S only */
+		"replay_port", /* P/Q/R/S only */
 	};
 	uint64_t *fields[] = {
 		&config->general_params[entry_index].vllupformat,
@@ -610,9 +665,14 @@ static int general_params_table_entry_modify(
 		&config->general_params[entry_index].vlmask,
 		&config->general_params[entry_index].tpid,
 		&config->general_params[entry_index].ignore2stf,
-		&config->general_params[entry_index].tpid2
+		&config->general_params[entry_index].tpid2,
+		&config->general_params[entry_index].queue_ts,
+		&config->general_params[entry_index].egrmirrvid,
+		&config->general_params[entry_index].egrmirrpcp,
+		&config->general_params[entry_index].egrmirrdei,
+		&config->general_params[entry_index].replay_port,
 	};
-	int entry_field_counts[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+	int entry_field_counts[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,};
 	uint64_t tmp;
 	int rc;
 
@@ -824,14 +884,18 @@ static int avb_params_table_entry_modify(
 		char  *field_val)
 {
 	const char *options[] = {
+		"l2cbs", /* P/Q/R/S only */
+		"cas_master", /* P/Q/R/S only */
 		"destmeta",
 		"srcmeta",
 	};
 	uint64_t *fields[] = {
+		&config->avb_params[entry_index].l2cbs,
+		&config->avb_params[entry_index].cas_master,
 		&config->avb_params[entry_index].destmeta,
 		&config->avb_params[entry_index].srcmeta,
 	};
-	int entry_field_counts[] = {1, 1,};
+	int entry_field_counts[] = {1, 1, 1, 1,};
 	uint64_t tmp;
 	int rc;
 
