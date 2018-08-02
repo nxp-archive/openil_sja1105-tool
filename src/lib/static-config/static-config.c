@@ -136,10 +136,10 @@ int sja1105_static_config_add_entry(struct sja1105_table_header *hdr, void *buf,
 	{
 		if (IS_ET(config->device_id)) {
 			POPULATE_CONFIG_TABLE(et, mac_config, buf, MAX_MAC_CONFIG_COUNT, "Mac Configuration");
-			return SIZE_SJA1105ET_MAC_CONFIG_ENTRY;
+			return SIZE_MAC_CONFIG_ENTRY_ET;
 		} else {
 			POPULATE_CONFIG_TABLE(pqrs, mac_config, buf, MAX_MAC_CONFIG_COUNT, "Mac Configuration");
-			return SIZE_SJA1105PQRS_MAC_CONFIG_ENTRY;
+			return SIZE_MAC_CONFIG_ENTRY_PQRS;
 		}
 	}
 	case BLKID_SCHEDULE_PARAMS_TABLE:
@@ -549,13 +549,13 @@ sja1105_static_config_pack(void *buf, struct sja1105_static_config *config)
 	                     config->l2_forwarding);
 	if (IS_ET(config->device_id)) {
 		PACK_TABLE_IN_BUF_FN(config->mac_config_count,
-		                     SIZE_SJA1105ET_MAC_CONFIG_ENTRY,
+		                     SIZE_MAC_CONFIG_ENTRY_ET,
 		                     BLKID_MAC_CONFIG_TABLE,
 		                     sja1105et_mac_config_entry_pack,
 		                     config->mac_config);
 	} else {
 		PACK_TABLE_IN_BUF_FN(config->mac_config_count,
-		                     SIZE_SJA1105PQRS_MAC_CONFIG_ENTRY,
+		                     SIZE_MAC_CONFIG_ENTRY_PQRS,
 		                     BLKID_MAC_CONFIG_TABLE,
 		                     sja1105pqrs_mac_config_entry_pack,
 		                     config->mac_config);
@@ -669,7 +669,7 @@ sja1105_static_config_get_length(struct sja1105_static_config *config)
 	sum += config->l2_policing_count * SIZE_L2_POLICING_ENTRY;
 	sum += config->vlan_lookup_count * SIZE_VLAN_LOOKUP_ENTRY;
 	sum += config->l2_forwarding_count * SIZE_L2_FORWARDING_ENTRY;
-	sum += config->mac_config_count * (IS_PQRS(config->device_id) ? SIZE_SJA1105PQRS_MAC_CONFIG_ENTRY : SIZE_SJA1105ET_MAC_CONFIG_ENTRY);
+	sum += config->mac_config_count * (IS_PQRS(config->device_id) ? SIZE_MAC_CONFIG_ENTRY_PQRS : SIZE_MAC_CONFIG_ENTRY_ET);
 	sum += config->schedule_params_count * SIZE_SCHEDULE_PARAMS_ENTRY;
 	sum += config->schedule_entry_points_params_count * SIZE_SCHEDULE_ENTRY_POINTS_PARAMS_ENTRY;
 	sum += config->vl_forwarding_params_count * SIZE_VL_FORWARDING_PARAMS_ENTRY;
