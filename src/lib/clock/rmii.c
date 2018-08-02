@@ -128,6 +128,9 @@ static int sja1105_cgu_rmii_pll_config(struct sja1105_spi_setup *spi_setup)
 	pll.fbsel     = 0x1;
 	pll.bypass    = 0x0;
 	pll.pd        = 0x1;
+	/* P/Q/R/S only */
+	pll.nsel      = 0x0; /* PLL pre-divider is 1 (nsel + 1) */
+	pll.p23en     = 0x0; /* disable 120 and 240 degree phase PLL outputs */
 
 	sja1105_cgu_pll_control_pack(packed_buf, &pll, spi_setup->device_id);
 	rc = sja1105_spi_send_packed_buf(spi_setup,
