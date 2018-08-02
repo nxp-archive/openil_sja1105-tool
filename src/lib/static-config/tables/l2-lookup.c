@@ -78,11 +78,20 @@ void sja1105pqrs_l2_lookup_entry_access(void *buf,
 	 * should match UM11040 Table 16/17 definitions when
 	 * LOCKEDS is 1.
 	 */
-	pack_or_unpack(buf, &entry->vlanid,    81, 70, size);
-	pack_or_unpack(buf, &entry->macaddr,   69, 22, size);
-	pack_or_unpack(buf, &entry->destports, 21, 17, size);
-	pack_or_unpack(buf, &entry->enfport,   16, 16, size);
-	pack_or_unpack(buf, &entry->index,     15,  6, size);
+	pack_or_unpack(buf, &entry->tsreg,        159, 159, size);
+	pack_or_unpack(buf, &entry->mirrvlan,     158, 147, size);
+	pack_or_unpack(buf, &entry->takets,       146, 146, size);
+	pack_or_unpack(buf, &entry->mirr,         145, 145, size);
+	pack_or_unpack(buf, &entry->retag,        144, 144, size);
+	pack_or_unpack(buf, &entry->mask_iotag,   143, 143, size);
+	pack_or_unpack(buf, &entry->mask_vlanid,  142, 131, size);
+	pack_or_unpack(buf, &entry->mask_macaddr, 130,  83, size);
+	pack_or_unpack(buf, &entry->iotag,         82,  82, size);
+	pack_or_unpack(buf, &entry->vlanid,        81,  70, size);
+	pack_or_unpack(buf, &entry->macaddr,       69,  22, size);
+	pack_or_unpack(buf, &entry->destports,     21,  17, size);
+	pack_or_unpack(buf, &entry->enfport,       16,  16, size);
+	pack_or_unpack(buf, &entry->index,         15,   6, size);
 }
 
 /*

@@ -219,6 +219,15 @@ struct sja1105_vlan_lookup_entry {
 };
 
 struct sja1105_l2_lookup_entry {
+	uint64_t tsreg;         /* P/Q/R/S only - LOCKEDS=1 */
+	uint64_t mirrvlan;      /* P/Q/R/S only - LOCKEDS=1 */
+	uint64_t takets;        /* P/Q/R/S only - LOCKEDS=1 */
+	uint64_t mirr;          /* P/Q/R/S only - LOCKEDS=1 */
+	uint64_t retag;         /* P/Q/R/S only - LOCKEDS=1 */
+	uint64_t mask_iotag;    /* P/Q/R/S only */
+	uint64_t mask_vlanid;   /* P/Q/R/S only */
+	uint64_t mask_macaddr;  /* P/Q/R/S only */
+	uint64_t iotag;         /* P/Q/R/S only */
 	uint64_t vlanid;
 	uint64_t macaddr;
 	uint64_t destports;
