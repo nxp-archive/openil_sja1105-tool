@@ -123,6 +123,7 @@ struct sja1105_cgu_mii_control {
 #define XMII_SPEED_MII   0ull
 #define XMII_SPEED_RMII  1ull
 #define XMII_SPEED_RGMII 2ull
+#define XMII_SPEED_SGMII 3ull /* Only available for port 4 on R/S */
 
 /* As struct sja1105_cgu_pll_control is hardware
  * revision-dependent, it is necessary to pass the device id
@@ -154,6 +155,8 @@ int mii_clocking_setup(struct sja1105_spi_setup *spi_setup, int port,
 int rmii_clocking_setup(struct sja1105_spi_setup *spi_setup, int port,
                         int rmii_mode);
 int rgmii_clocking_setup(struct sja1105_spi_setup *spi_setup,
+                         int port, int speed_mbps);
+int sgmii_clocking_setup(struct sja1105_spi_setup *spi_setup,
                          int port, int speed_mbps);
 
 void sja1105_cfg_pad_mii_tx_pack(void*, struct sja1105_cfg_pad_mii_tx*);
