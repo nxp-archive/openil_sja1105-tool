@@ -33,8 +33,10 @@
 static int entry_get(xmlNode *node, struct sja1105_avb_params_entry *entry)
 {
 	int rc = 0;
-	rc |= xml_read_field(&entry->destmeta, "destmeta", node);
-	rc |= xml_read_field(&entry->srcmeta,  "srcmeta", node);
+	rc |= xml_read_field(&entry->l2cbs,      "l2cbs", node);
+	rc |= xml_read_field(&entry->cas_master, "cas_master", node);
+	rc |= xml_read_field(&entry->destmeta,   "destmeta", node);
+	rc |= xml_read_field(&entry->srcmeta,    "srcmeta", node);
 	if (rc < 0) {
 		loge("AVB Parameters entry is incomplete!");
 		return -EINVAL;
