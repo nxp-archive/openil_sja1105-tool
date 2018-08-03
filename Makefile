@@ -121,12 +121,20 @@ MD_DOCS  := $(wildcard docs/md/*.md)
 PDF_DOCS := $(patsubst docs/md/%.md, docs/pdf/%.pdf, $(MD_DOCS))
 MANPAGES := $(patsubst docs/md/%.md, docs/man/%, $(MD_DOCS))
 
+# Input: file in the format docs/man/sja1105-conf.5
+# Output: 5
+define get_man_section
+    $(lastword $(subst ., ,$1))
+endef
+
 # Input: path to manpage file from sources
 # Output: DESTDIR-prefixed install location
-get_man_section := $(lastword $(subst ., ,$1))
-get_manpage_destination := $(join $(DESTDIR)${mandir}/man, \
-                           $(join $(call get_man_section,$1)/, \
-                           $(subst docs/man/,,$1)))
+define get_manpage_destination
+    $(eval section := $(call get_man_section,$1))             \
+    $(eval base_name := $(subst docs/man/,,$1))               \
+    $(eval dest_prefix := $(DESTDIR)$(mandir)/man$(section)/) \
+    $(addprefix $(dest_prefix), $(base_name))
+endef
 
 man: $(MANPAGES)
 
