@@ -56,7 +56,6 @@ BIN_CFLAGS  += -DVERSION=\"${VERSION}\"
 BIN_CFLAGS  += -Wall -Wextra -Werror -g -fstack-protector-all -Isrc
 BIN_CFLAGS  += $(shell ${PKG_CONFIG} --cflags libxml-2.0)
 BIN_LDFLAGS += $(shell ${PKG_CONFIG} --libs libxml-2.0)
-BIN_LDFLAGS += -L. -lsja1105
 
 BIN_SRC  := src/common.c src/common.h
 LIB_SRC  := src/common.c src/common.h
@@ -70,19 +69,22 @@ LIB_OBJ  := $(filter %.o, $(LIB_DEPS))              # Only the .o files
 
 KMOD_SRC := $(shell find src/kmod -name "*.[c|h]")  # All .c and .h files
 
-SJA1105_BIN  := sja1105-tool
-SJA1105_LIB  := libsja1105.so
-SJA1105_KMOD := src/kmod/sja1105.ko
-
 # Handling for the O= Make variable which sets the path of intermediary objects
 ifneq ($(O),)
     override O := $(addsuffix /,$(O))
+else
+    override O := ./
 endif
 
 BIN_DEPS := $(patsubst %.o, $(addprefix $(O),%.o), $(BIN_DEPS))
 LIB_DEPS := $(patsubst %.o, $(addprefix $(O),%.o), $(LIB_DEPS))
 BIN_OBJ  := $(addprefix $(O),$(BIN_OBJ))
 LIB_OBJ  := $(addprefix $(O),$(LIB_OBJ))
+BIN_LDFLAGS += -L$(O) -lsja1105
+
+SJA1105_BIN  := $(O)sja1105-tool
+SJA1105_LIB  := $(O)libsja1105.so
+SJA1105_KMOD := src/kmod/sja1105.ko
 
 # Make targets
 build: $(SJA1105_LIB) $(SJA1105_BIN) $(SJA1105_KMOD)
@@ -99,7 +101,7 @@ $(SJA1105_BIN): $(BIN_DEPS) $(SJA1105_LIB)
   endif
 #endif
 
-$(O)$(SJA1105_KMOD): $(KMOD_SRC)
+$(SJA1105_KMOD): $(KMOD_SRC)
 	@mkdir -p $(dir $@)
 	$(MAKE) -C $(KDIR) M=$$PWD/src/kmod
 
@@ -117,9 +119,11 @@ $(O)src/lib/%.o: src/lib/%.c
 
 # Manpages
 
+# Inputs
 MD_DOCS  := $(wildcard docs/md/*.md)
-PDF_DOCS := $(patsubst docs/md/%.md, docs/pdf/%.pdf, $(MD_DOCS))
-MANPAGES := $(patsubst docs/md/%.md, docs/man/%, $(MD_DOCS))
+# Outputs
+PDF_DOCS := $(patsubst docs/md/%.md, $(O)docs/pdf/%.pdf, $(MD_DOCS))
+MANPAGES := $(patsubst docs/md/%.md, $(O)docs/man/%, $(MD_DOCS))
 
 # Input: file in the format docs/man/sja1105-conf.5
 # Output: 5
@@ -140,10 +144,12 @@ man: $(MANPAGES)
 
 pdf: $(PDF_DOCS)
 
-docs/man/%: docs/md/%.md
+$(O)docs/man/%: docs/md/%.md
+	@mkdir -p $(dir $@)
 	pandoc --standalone --to man $^ -o $@
 
-docs/pdf/%.pdf: docs/md/%.md
+$(O)docs/pdf/%.pdf: docs/md/%.md
+	@mkdir -p $(dir $@)
 	pandoc --standalone -t latex $^ -o $@
 
 # Headers
@@ -160,8 +166,8 @@ get_header_destination := $(patsubst src/lib/include/%, \
 install: install-binaries install-configs install-manpages install-headers
 
 install-binaries: $(SJA1105_LIB) $(SJA1105_BIN)
-	install -m 0755 -D libsja1105.so $(DESTDIR)${libdir}/libsja1105.so
-	install -m 0755 -D sja1105-tool  $(DESTDIR)${bindir}/sja1105-tool
+	install -m 0755 -D $(SJA1105_LIB) $(DESTDIR)${libdir}/$(notdir $(SJA1105_LIB))
+	install -m 0755 -D $(SJA1105_BIN) $(DESTDIR)${bindir}/$(notdir $(SJA1105_BIN))
 	install -m 0755 -D etc/etsec_mdio $(DESTDIR)${bindir}/etsec_mdio
 
 install-configs: etc/sja1105-init etc/sja1105.conf
@@ -194,5 +200,5 @@ clean:
 	rm -f $(SJA1105_BIN) $(BIN_OBJ) $(SJA1105_LIB) $(LIB_OBJ)
 	$(MAKE) -C $(KDIR) M=$$PWD/src/kmod clean
 
-.PHONY: clean uninstall build man install install-binaries \
+.PHONY: clean uninstall build man pdf install install-binaries \
 	install-configs install-headers install-manpages
