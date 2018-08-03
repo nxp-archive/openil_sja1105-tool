@@ -4,8 +4,8 @@ set -e -u -o pipefail
 
 [ -z "${TOPDIR+x}" ] && { echo "Please source envsetup before running this script."; exit 1; }
 
-SJA1105_TOPDIR=$(realpath "${TOPDIR}/../..")
-BUILD_DIR=$(realpath "${TOPDIR}/_build")
+SJA1105_TOPDIR="${TOPDIR}/../.."
+BUILD_DIR="${TOPDIR}/_build"
 if [ -d ${BUILD_DIR} ]; then
 	echo "sja1105-tool already built, exiting"
 	exit
