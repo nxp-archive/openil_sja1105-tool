@@ -74,6 +74,17 @@ SJA1105_BIN  := sja1105-tool
 SJA1105_LIB  := libsja1105.so
 SJA1105_KMOD := src/kmod/sja1105.ko
 
+# Handling for the O= Make variable which sets the path of intermediary objects
+ifneq ($(O),)
+    override O := $(addsuffix /,$(O))
+endif
+
+BIN_DEPS := $(patsubst %.o, $(addprefix $(O),%.o), $(BIN_DEPS))
+LIB_DEPS := $(patsubst %.o, $(addprefix $(O),%.o), $(LIB_DEPS))
+BIN_OBJ  := $(addprefix $(O),$(BIN_OBJ))
+LIB_OBJ  := $(addprefix $(O),$(LIB_OBJ))
+
+# Make targets
 build: $(SJA1105_LIB) $(SJA1105_BIN) $(SJA1105_KMOD)
 
 $(SJA1105_LIB): $(LIB_DEPS)
@@ -88,16 +99,20 @@ $(SJA1105_BIN): $(BIN_DEPS) $(SJA1105_LIB)
   endif
 #endif
 
-$(SJA1105_KMOD): $(KMOD_SRC)
+$(O)$(SJA1105_KMOD): $(KMOD_SRC)
+	@mkdir -p $(dir $@)
 	$(MAKE) -C $(KDIR) M=$$PWD/src/kmod
 
-src/common.o: src/common.c
+$(O)src/common.o: src/common.c
+	@mkdir -p $(dir $@)
 	$(CC) $(LIB_CFLAGS) -c $^ -o $@
 
-src/tool/%.o: src/tool/%.c
+$(O)src/tool/%.o: src/tool/%.c
+	@mkdir -p $(dir $@)
 	$(CC) $(BIN_CFLAGS) -c $^ -o $@
 
-src/lib/%.o: src/lib/%.c
+$(O)src/lib/%.o: src/lib/%.c
+	@mkdir -p $(dir $@)
 	$(CC) $(LIB_CFLAGS) -c $^ -o $@
 
 # Manpages
