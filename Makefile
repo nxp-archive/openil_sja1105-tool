@@ -44,35 +44,35 @@ PKG_CONFIG ?= pkg-config
 # If taken from git, report the version relative to the latest tag
 # If not, default to the VERSION file
 VERSION = $(or $(shell test -d .git && git describe --tags), $(shell cat VERSION))
-LIB_CFLAGS   = $(CFLAGS)
-LIB_LDFLAGS  = $(LDFLAGS)
+LIB_CFLAGS  := $(CFLAGS)
+LIB_LDFLAGS := $(LDFLAGS)
 LIB_CFLAGS  += -Wall -Wextra -Werror -g -fstack-protector-all -Isrc -fPIC
 LIB_CFLAGS  += -DVERSION=\"${VERSION}\"
 LIB_LDFLAGS +=
 
-BIN_CFLAGS   = $(CFLAGS)
-BIN_LDFLAGS  = $(LDFLAGS)
+BIN_CFLAGS  := $(CFLAGS)
+BIN_LDFLAGS := $(LDFLAGS)
 BIN_CFLAGS  += -DVERSION=\"${VERSION}\"
 BIN_CFLAGS  += -Wall -Wextra -Werror -g -fstack-protector-all -Isrc
 BIN_CFLAGS  += $(shell ${PKG_CONFIG} --cflags libxml-2.0)
 BIN_LDFLAGS += $(shell ${PKG_CONFIG} --libs libxml-2.0)
 BIN_LDFLAGS += -L. -lsja1105
 
-BIN_SRC  = src/common.c src/common.h
-LIB_SRC  = src/common.c src/common.h
-BIN_SRC += $(shell find src/tool -name "*.[c|h]")  # All .c and .h files
-BIN_DEPS = $(patsubst %.c, %.o, $(BIN_SRC))        # All .o and .h files
-BIN_OBJ  = $(filter %.o, $(BIN_DEPS))              # Only the .o files
+BIN_SRC  := src/common.c src/common.h
+LIB_SRC  := src/common.c src/common.h
+BIN_SRC  += $(shell find src/tool -name "*.[c|h]")  # All .c and .h files
+BIN_DEPS := $(patsubst %.c, %.o, $(BIN_SRC))        # All .o and .h files
+BIN_OBJ  := $(filter %.o, $(BIN_DEPS))              # Only the .o files
 
-LIB_SRC += $(shell find src/lib -name "*.[c|h]")   # All .c and .h files
-LIB_DEPS = $(patsubst %.c, %.o, $(LIB_SRC))        # All .o and .h files
-LIB_OBJ  = $(filter %.o, $(LIB_DEPS))              # Only the .o files
+LIB_SRC  += $(shell find src/lib -name "*.[c|h]")   # All .c and .h files
+LIB_DEPS := $(patsubst %.c, %.o, $(LIB_SRC))        # All .o and .h files
+LIB_OBJ  := $(filter %.o, $(LIB_DEPS))              # Only the .o files
 
-KMOD_SRC = $(shell find src/kmod -name "*.[c|h]")  # All .c and .h files
+KMOD_SRC := $(shell find src/kmod -name "*.[c|h]")  # All .c and .h files
 
-SJA1105_BIN = sja1105-tool
-SJA1105_LIB = libsja1105.so
-SJA1105_KMOD = src/kmod/sja1105.ko
+SJA1105_BIN  := sja1105-tool
+SJA1105_LIB  := libsja1105.so
+SJA1105_KMOD := src/kmod/sja1105.ko
 
 build: $(SJA1105_LIB) $(SJA1105_BIN) $(SJA1105_KMOD)
 
@@ -102,16 +102,16 @@ src/lib/%.o: src/lib/%.c
 
 # Manpages
 
-MD_DOCS  = $(wildcard docs/md/*.md)
-PDF_DOCS = $(patsubst docs/md/%.md, docs/pdf/%.pdf, $(MD_DOCS))
-MANPAGES = $(patsubst docs/md/%.md, docs/man/%, $(MD_DOCS))
+MD_DOCS  := $(wildcard docs/md/*.md)
+PDF_DOCS := $(patsubst docs/md/%.md, docs/pdf/%.pdf, $(MD_DOCS))
+MANPAGES := $(patsubst docs/md/%.md, docs/man/%, $(MD_DOCS))
 
 # Input: path to manpage file from sources
 # Output: DESTDIR-prefixed install location
-get_man_section = $(lastword $(subst ., ,$1))
-get_manpage_destination = $(join $(DESTDIR)${mandir}/man, \
-                          $(join $(call get_man_section,$1)/, \
-                          $(subst docs/man/,,$1)))
+get_man_section := $(lastword $(subst ., ,$1))
+get_manpage_destination := $(join $(DESTDIR)${mandir}/man, \
+                           $(join $(call get_man_section,$1)/, \
+                           $(subst docs/man/,,$1)))
 
 man: $(MANPAGES)
 
@@ -125,12 +125,12 @@ docs/pdf/%.pdf: docs/md/%.md
 
 # Headers
 
-HEADERS=$(wildcard src/lib/include/*.h)
+HEADERS := $(wildcard src/lib/include/*.h)
 
 # Input: path to header file from sources
 # Output: DESTDIR-prefixed install location
-get_header_destination = $(patsubst src/lib/include/%, \
-                                    $(DESTDIR)${includedir}/sja1105/%, $1)
+get_header_destination := $(patsubst src/lib/include/%, \
+                                     $(DESTDIR)${includedir}/sja1105/%, $1)
 
 # Installation
 
