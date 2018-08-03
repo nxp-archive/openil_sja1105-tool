@@ -6,12 +6,13 @@ set -e -u -o pipefail
 
 SJA1105_TOPDIR="${TOPDIR}/../.."
 BUILD_DIR="${TOPDIR}/_build"
+OBJ_DIR="${BUILD_DIR}/obj"
 if [ -d ${BUILD_DIR} ]; then
 	echo "sja1105-tool already built, exiting"
 	exit
 fi
 make -C ${SJA1105_TOPDIR} clean
-DESTDIR=${BUILD_DIR} make -C ${SJA1105_TOPDIR} -j $(nproc) \
+DESTDIR=${BUILD_DIR} O=${OBJ_DIR} make -C ${SJA1105_TOPDIR} -j $(nproc) \
 	install-binaries \
 	install-configs \
 	install-manpages \
