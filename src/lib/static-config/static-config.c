@@ -448,7 +448,7 @@ sja1105_static_config_unpack(void *buf, struct sja1105_static_config *config)
 		if (p != table_end) {
 			loge("WARNING: Incorrect table length for:");
 			sja1105_table_header_show(&hdr);
-			loge("Table data has %ld extra bytes compared to header!",
+			loge("Table data has %td extra bytes compared to header!",
 			     (ptrdiff_t) (table_end - p));
 			p = table_end;
 		}
