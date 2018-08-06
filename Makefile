@@ -158,8 +158,10 @@ HEADERS := $(wildcard src/lib/include/*.h)
 
 # Input: path to header file from sources
 # Output: DESTDIR-prefixed install location
-get_header_destination := $(patsubst src/lib/include/%, \
-                                     $(DESTDIR)${includedir}/sja1105/%, $1)
+define get_header_destination
+    $(eval new_prefix := $(DESTDIR)$(includedir)/sja1105) \
+    $(patsubst src/lib/include/%, $(new_prefix)/%, $1)
+endef
 
 # Installation
 
