@@ -130,8 +130,6 @@ install-binaries: $(SJA1105_LIB) $(SJA1105_BIN)
 	install -m 0755 -D etc/etsec_mdio $(DESTDIR)${bindir}/etsec_mdio
 
 install-configs: etc/sja1105-init etc/sja1105.conf
-	install -m 0755 -D etc/sja1105-link-speed-fixup $(DESTDIR)${sysconfdir}/init.d/S46sja1105-link-speed-fixup
-	install -m 0755 -D etc/sja1105-init $(DESTDIR)${sysconfdir}/init.d/S45sja1105
 	install -m 0644 -D etc/sja1105.conf $(DESTDIR)${sysconfdir}/sja1105/sja1105.conf
 
 install-manpages: $(MANPAGES)
