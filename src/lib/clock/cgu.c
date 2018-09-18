@@ -49,10 +49,13 @@ int sja1105_clocking_setup(struct sja1105_spi_setup *spi_setup,
 
 	for (i = 0; i < 5; i++) {
 		switch (mac_config[i].speed) {
+		case 0: speed_mbps = 1000; break;   /* speed shall be set at runtime,
+		                                       use max speed for RGMII clocking
+		                                       setup here */
 		case 1: speed_mbps = 1000; break;
 		case 2: speed_mbps = 100;  break;
 		case 3: speed_mbps = 10;   break;
-		default: loge("auto speed not yet supported"); return -1;
+		default: loge("invalid speed setting"); return -1;
 		}
 		if (params->xmii_mode[i] == XMII_SPEED_MII) {
 			mii_clocking_setup(spi_setup, i, params->phy_mac[i]);
