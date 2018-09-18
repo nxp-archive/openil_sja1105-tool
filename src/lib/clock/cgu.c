@@ -41,42 +41,56 @@
 
 int sja1105_clocking_setup(struct sja1105_spi_setup *spi_setup,
                            struct sja1105_xmii_params_entry *params,
-                           struct sja1105_mac_config_entry  *mac_config)
+                           struct sja1105_mac_config_entry  *mac_configs)
 {
-	int speed_mbps;
 	int rc = 0;
 	int i;
 
 	for (i = 0; i < 5; i++) {
-		switch (mac_config[i].speed) {
-		case 0: speed_mbps = 1000; break;   /* speed shall be set at runtime,
-		                                       use max speed for RGMII clocking
-		                                       setup here */
-		case 1: speed_mbps = 1000; break;
-		case 2: speed_mbps = 100;  break;
-		case 3: speed_mbps = 10;   break;
-		default: loge("invalid speed setting"); return -1;
+		rc = sja1105_clocking_setup_port(spi_setup, i, params, &mac_configs[i]);
+		if (rc != 0) {
+			break;
 		}
-		if (params->xmii_mode[i] == XMII_SPEED_MII) {
-			mii_clocking_setup(spi_setup, i, params->phy_mac[i]);
-		} else if (params->xmii_mode[i] == XMII_SPEED_RMII) {
-			rmii_clocking_setup(spi_setup, i, params->phy_mac[i]);
-		} else if (params->xmii_mode[i] == XMII_SPEED_RGMII) {
-			rgmii_clocking_setup(spi_setup, i, speed_mbps);
-		} else if (params->xmii_mode[i] == XMII_SPEED_SGMII &&
-		           IS_PQRS(spi_setup->device_id)) {
-			if ((i == 4) && (IS_R(spi_setup->device_id, spi_setup->part_nr) ||
-			                 IS_S(spi_setup->device_id, spi_setup->part_nr))) {
-				sgmii_clocking_setup(spi_setup, i, speed_mbps);
-			} else {
-				logv("Port %d is tri-stated", i);
-			}
+	}
+
+	return rc;
+}
+
+int sja1105_clocking_setup_port(struct sja1105_spi_setup *spi_setup, int port,
+                                struct sja1105_xmii_params_entry *params,
+                                struct sja1105_mac_config_entry  *mac_config)
+{
+	int speed_mbps;
+	int rc = 0;
+
+	switch (mac_config->speed) {
+	case 0: speed_mbps = 1000; break;   /* speed shall be set at runtime,
+	                                       use max speed for RGMII clocking
+	                                       setup here */
+	case 1: speed_mbps = 1000; break;
+	case 2: speed_mbps = 100;  break;
+	case 3: speed_mbps = 10;   break;
+	default: loge("invalid speed setting"); return -1;
+	}
+	if (params->xmii_mode[port] == XMII_SPEED_MII) {
+		mii_clocking_setup(spi_setup, port, params->phy_mac[port]);
+	} else if (params->xmii_mode[port] == XMII_SPEED_RMII) {
+		rmii_clocking_setup(spi_setup, port, params->phy_mac[port]);
+	} else if (params->xmii_mode[port] == XMII_SPEED_RGMII) {
+		rgmii_clocking_setup(spi_setup, port, speed_mbps);
+	} else if (params->xmii_mode[port] == XMII_SPEED_SGMII &&
+				  IS_PQRS(spi_setup->device_id)) {
+		if ((port == 4) && (IS_R(spi_setup->device_id, spi_setup->part_nr) ||
+							  IS_S(spi_setup->device_id, spi_setup->part_nr))) {
+			sgmii_clocking_setup(spi_setup, port, speed_mbps);
 		} else {
-			loge("Invalid xmii_mode for port %d specified: %" PRIu64,
-			     i, params->xmii_mode[i]);
-			rc = -EINVAL;
-			goto out;
+			logv("Port %d is tri-stated", port);
 		}
+	} else {
+		loge("Invalid xmii_mode for port %d specified: %" PRIu64,
+			  port, params->xmii_mode[port]);
+		rc = -EINVAL;
+		goto out;
 	}
 out:
 	return rc;
