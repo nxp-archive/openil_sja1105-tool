@@ -48,6 +48,7 @@ void print_usage()
 	       "   * status\n"
 	       "   * reset\n"
 	       "   * reg\n"
+	       "   * reconfig\n"
 	       "   * help | -h | --help\n"
 	       "   * version | -V | --version\n");
 	printf("\n");
@@ -117,12 +118,14 @@ static int parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 		"status",
 		"reset",
 		"reg",
+		"reconfigure",
 	};
 	int (*next_parse_args[])(struct sja1105_spi_setup*, int, char**) = {
 		config_parse_args,
 		status_parse_args,
 		rgu_parse_args,
 		reg_parse_args,
+		reconfig_parse_args,
 	};
 	int  rc;
 
