@@ -88,10 +88,22 @@ int reconfig_parse_args(struct sja1105_spi_setup *spi_setup,
 			goto out_static_config_mismatch;
 		}
 
-		/* Read, modify and write mac config table */
-		rc = sja1105_mac_config_get(spi_setup, &mac_entry, port);
-		if (rc < 0) {
-			goto out_read_failed;
+		/* Read, modify and write MAC config table */
+		if (IS_PQRS(spi_setup->device_id)) {
+			/* We can read from the device via the MAC
+			 * reconfiguration tables. In fact we do just that.
+			 */
+			rc = sja1105_mac_config_get(spi_setup, &mac_entry, port);
+			if (rc < 0) {
+				goto out_read_failed;
+			}
+		} else {
+			/* On E/T, MAC reconfig tables are not readable.
+			 * We have to *know* what the MAC looks like.
+			 * We'll use the static configuration tables as a
+			 * reasonable approximation.
+			 */
+			mac_entry = staging_area.static_config.mac_config[port];
 		}
 		logv("Setting MAC speed for port %" PRIu64
 		     ": before %" PRIu64 ", now %" PRIu64,
