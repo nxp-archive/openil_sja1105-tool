@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2017, NXP Semiconductors
+ * Copyright (c) 2018, NXP Semiconductors
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,59 +35,123 @@
 #include <stdio.h>
 /* These are our own include files */
 #include <lib/include/dynamic-config.h>
+#include <lib/include/static-config.h>
 #include <lib/include/gtable.h>
 #include <lib/include/spi.h>
 #include <lib/helpers.h>
 #include <common.h>
 
-
-
-#define SIZE_MAC_CONFIG_ENTRY_PQRS   32
-
-struct sja1105pqrs_dyn_mac_config_cmd {
+struct sja1105_dyn_mac_reconfig_entry {
 	uint64_t valid;
-	uint64_t errors;
-	uint64_t rdwrset;
+	uint64_t errors;  /* Only on P/Q/R/S */
+	uint64_t rdwrset; /* Only on P/Q/R/S */
 	uint64_t portidx;
 	struct sja1105_mac_config_entry entry;
 };
 
-
-
 static void
-sja1105pqrs_dyn_mac_config_cmd_pack(void *buf, struct
-                                    sja1105pqrs_dyn_mac_config_cmd *cmd)
+sja1105et_dyn_mac_reconfig_entry_access(void *buf, struct
+                                        sja1105_dyn_mac_reconfig_entry *cmd,
+                                        int write)
 {
 	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
-	uint8_t *entry_ptr = (uint8_t*) buf;
-	uint8_t *cmd_ptr   = (uint8_t*) buf + SIZE_MAC_CONFIG_ENTRY_PQRS;
+	void *reg2 = (void*)buf; /* yup */
+	void *reg1 = (void*)((char*)buf + 4);
+	int   size = 8;
 
-	pack_or_unpack = gtable_pack;
-	memset(buf, 0, SIZE_MAC_CONFIG_ENTRY_PQRS);
-
-	pack_or_unpack(cmd_ptr, &cmd->valid,     31, 31, 4);
-	pack_or_unpack(cmd_ptr, &cmd->errors,    30, 30, 4);
-	pack_or_unpack(cmd_ptr, &cmd->rdwrset,   29, 29, 4);
-	pack_or_unpack(cmd_ptr, &cmd->portidx,    2,  0, 4);
-	sja1105pqrs_mac_config_entry_pack(entry_ptr, &cmd->entry);
+	if (write == 0) {
+		pack_or_unpack = gtable_unpack;
+		memset(cmd, 0, sizeof(*cmd));
+	} else {
+		pack_or_unpack = gtable_pack;
+		memset(buf, 0, size);
+	}
+	pack_or_unpack(reg1, &cmd->valid,           31, 31, 4);
+	pack_or_unpack(reg1, &cmd->entry.speed,     30, 29, 4);
+	pack_or_unpack(reg1, &cmd->portidx,         26, 24, 4);
+	pack_or_unpack(reg1, &cmd->entry.drpdtag,   23, 23, 4);
+	pack_or_unpack(reg1, &cmd->entry.drpuntag,  22, 22, 4);
+	pack_or_unpack(reg1, &cmd->entry.retag,     21, 21, 4);
+	pack_or_unpack(reg1, &cmd->entry.dyn_learn, 20, 20, 4);
+	pack_or_unpack(reg1, &cmd->entry.egress,    19, 19, 4);
+	pack_or_unpack(reg1, &cmd->entry.ingress,   18, 18, 4);
+	pack_or_unpack(reg1, &cmd->entry.ing_mirr,  17, 17, 4);
+	pack_or_unpack(reg1, &cmd->entry.egr_mirr,  16, 16, 4);
+	pack_or_unpack(reg1, &cmd->entry.vlanprio,  14, 12, 4);
+	pack_or_unpack(reg1, &cmd->entry.vlanid,    11,  0, 4);
+	pack_or_unpack(reg2, &cmd->entry.tp_delin,  31, 16, 4);
+	pack_or_unpack(reg2, &cmd->entry.tp_delout, 15,  0, 4);
+	/* MAC configuration table entries which can't be reconfigured:
+	 * top, base, enabled, ifg, maxage, drpnona664 */
 }
 
 static void
-sja1105pqrs_dyn_mac_config_cmd_unpack(void *buf, struct
-                                      sja1105pqrs_dyn_mac_config_cmd *cmd)
+sja1105pqrs_dyn_mac_reconfig_entry_access(void *buf, struct
+                                          sja1105_dyn_mac_reconfig_entry *cmd,
+                                          int write)
 {
 	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
+	void (*mac_entry_pack_or_unpack)(void*, struct
+	                                 sja1105_mac_config_entry*);
 	uint8_t *entry_ptr = (uint8_t*) buf;
 	uint8_t *cmd_ptr   = (uint8_t*) buf + SIZE_MAC_CONFIG_ENTRY_PQRS;
 
-	pack_or_unpack = gtable_unpack;
-	memset(cmd, 0, sizeof(*cmd));
-
+	if (write == 0) {
+		mac_entry_pack_or_unpack = sja1105pqrs_mac_config_entry_unpack;
+		pack_or_unpack = gtable_unpack;
+		memset(cmd, 0, sizeof(*cmd));
+	} else {
+		mac_entry_pack_or_unpack = sja1105pqrs_mac_config_entry_pack;
+		pack_or_unpack = gtable_pack;
+		memset(buf, 0, SIZE_MAC_CONFIG_ENTRY_PQRS);
+	}
 	pack_or_unpack(cmd_ptr, &cmd->valid,     31, 31, 4);
 	pack_or_unpack(cmd_ptr, &cmd->errors,    30, 30, 4);
 	pack_or_unpack(cmd_ptr, &cmd->rdwrset,   29, 29, 4);
 	pack_or_unpack(cmd_ptr, &cmd->portidx,    2,  0, 4);
-	sja1105pqrs_mac_config_entry_unpack(entry_ptr, &cmd->entry);
+	mac_entry_pack_or_unpack(entry_ptr, &cmd->entry);
+}
+/*
+ * sja1105et_dyn_mac_reconfig_entry_pack
+ * sja1105et_dyn_mac_reconfig_entry_unpack
+ * sja1105pqrs_dyn_mac_reconfig_entry_pack
+ * sja1105pqrs_dyn_mac_reconfig_entry_unpack
+ */
+DEFINE_SEPARATE_PACK_UNPACK_ACCESSORS(dyn_mac_reconfig);
+
+static int sja1105et_mac_config_commit(struct sja1105_spi_setup *spi_setup,
+                                       struct sja1105_mac_config_entry *entry,
+                                       int port)
+{
+	/* UM10944 Table 71. MAC configuration table reconfiguration register 2
+	 * (address 36h) */
+	const int ENTRY_ADDR = 0x36;
+	const int BUF_LEN    = 8;
+	/* SPI payload buffer */
+	uint8_t packed_buf[BUF_LEN];
+	/* Structure to hold command we are constructing */
+	struct sja1105_dyn_mac_reconfig_entry cmd;
+	int rc;
+
+	memset(&cmd, 0, sizeof(cmd));
+	cmd.valid     = 1;
+	cmd.portidx   = port;
+	memcpy(&cmd.entry, entry, sizeof(*entry));
+
+	sja1105et_dyn_mac_reconfig_entry_pack(packed_buf, &cmd);
+
+	/* Send SPI write operation: "write mac reconfig table entry" */
+	rc = sja1105_spi_send_packed_buf(spi_setup,
+	                                 SPI_WRITE,
+	                                 ENTRY_ADDR,
+	                                 packed_buf,
+	                                 BUF_LEN);
+	if (rc < 0) {
+		loge("failed to read from spi");
+		goto out;
+	}
+out:
+	return rc;
 }
 
 static int sja1105pqrs_mac_config_commit(struct sja1105_spi_setup *spi_setup,
@@ -101,7 +165,7 @@ static int sja1105pqrs_mac_config_commit(struct sja1105_spi_setup *spi_setup,
 	/* SPI payload buffer */
 	uint8_t packed_buf[BUF_LEN];
 	/* Structure to hold command we are constructing */
-	struct sja1105pqrs_dyn_mac_config_cmd cmd;
+	struct sja1105_dyn_mac_reconfig_entry cmd;
 	int rc;
 
 	memset(&cmd, 0, sizeof(cmd));
@@ -113,7 +177,7 @@ static int sja1105pqrs_mac_config_commit(struct sja1105_spi_setup *spi_setup,
 		memcpy(&cmd.entry, entry, sizeof(*entry));
 	}
 
-	sja1105pqrs_dyn_mac_config_cmd_pack(packed_buf, &cmd);
+	sja1105pqrs_dyn_mac_reconfig_entry_pack(packed_buf, &cmd);
 
 	/* Send SPI write operation: "read/write mac config table entry" */
 	rc = sja1105_spi_send_packed_buf(spi_setup,
@@ -139,7 +203,7 @@ static int sja1105pqrs_mac_config_commit(struct sja1105_spi_setup *spi_setup,
 			loge("failed to read from spi");
 			goto out;
 		}
-		sja1105pqrs_dyn_mac_config_cmd_unpack(packed_buf, &cmd);
+		sja1105pqrs_dyn_mac_reconfig_entry_unpack(packed_buf, &cmd);
 		memcpy(entry, &cmd.entry, sizeof(*entry));
 	}
 out:
@@ -150,14 +214,12 @@ int sja1105_mac_config_get(struct sja1105_spi_setup *spi_setup,
                            struct sja1105_mac_config_entry *entry,
                            int port)
 {
-	int rc;
-
-	if (IS_ET(spi_setup->device_id))
-		rc = -1;   /* TODO: Implement this for ET devices */
-	else
-		rc = sja1105pqrs_mac_config_commit(spi_setup, entry,
-		                                   SPI_READ, port);
-	return rc;
+	if (IS_ET(spi_setup->device_id)) {
+		loge("Reading MAC reconfiguration table not supported on E/T!\n");
+		return -EINVAL;
+	}
+	return sja1105pqrs_mac_config_commit(spi_setup, entry,
+	                                     SPI_READ, port);
 }
 
 int sja1105_mac_config_set(struct sja1105_spi_setup *spi_setup,
@@ -167,7 +229,7 @@ int sja1105_mac_config_set(struct sja1105_spi_setup *spi_setup,
 	int rc;
 
 	if (IS_ET(spi_setup->device_id))
-		rc = -1;   /* TODO: Implement this for ET devices */
+		rc = sja1105et_mac_config_commit(spi_setup, entry, port);
 	else
 		rc = sja1105pqrs_mac_config_commit(spi_setup, entry,
 		                                   SPI_WRITE, port);
