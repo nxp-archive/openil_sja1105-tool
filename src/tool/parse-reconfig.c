@@ -49,8 +49,7 @@ int reconfig_parse_args(struct sja1105_spi_setup *spi_setup,
 			loge("could not read speed param %s", argv[2]);
 			goto out_parse_error;
 		}
-		switch (speed_mbps)
-		{
+		switch (speed_mbps) {
 		case 10:
 			speed = 3;
 			break;
@@ -64,7 +63,6 @@ int reconfig_parse_args(struct sja1105_spi_setup *spi_setup,
 			rc = -EINVAL;
 			loge("invalid speed %s", argv[2]);
 			goto out_parse_error;
-			break;
 		}
 
 		rc = sja1105_spi_configure(spi_setup);
@@ -79,12 +77,15 @@ int reconfig_parse_args(struct sja1105_spi_setup *spi_setup,
 			goto out_read_config_failed;
 		}
 
-		/* Check if speed in staic config is 0 */
+		/* Check if speed in static config is 0 */
 		if (staging_area.static_config.mac_config[port].speed != 0) {
 			rc = -EINVAL;
-			loge("error, static speed config shall be 0, but is %u",
-			     (unsigned)staging_area.static_config.mac_config[port].speed);
-			goto out_static_config_missmatch;
+			loge("Speed for port %" PRIu64 " is currently fixed at %" PRIu64 ".",
+			     port, staging_area.static_config.mac_config[port].speed);
+			loge("To allow reconfiguration, run:\n"
+			     "$ sja1105-tool config modify -f mac-configuration-table[%"
+			     PRIu64 "] speed 0", port);
+			goto out_static_config_mismatch;
 		}
 
 		/* Read, modify and write mac config table */
@@ -92,9 +93,9 @@ int reconfig_parse_args(struct sja1105_spi_setup *spi_setup,
 		if (rc < 0) {
 			goto out_read_failed;
 		}
-		logv("Setting MAC speed for port %u: Speed value before: %u, now: %u",
-		     (unsigned)port, (unsigned)mac_entry.speed,
-		     (unsigned)speed);
+		logv("Setting MAC speed for port %" PRIu64
+		     ": before %" PRIu64 ", now %" PRIu64,
+		     port, mac_entry.speed, speed);
 		mac_entry.speed = speed;
 		rc = sja1105_mac_config_set(spi_setup, &mac_entry, port);
 		if (rc < 0) {
@@ -119,7 +120,7 @@ int reconfig_parse_args(struct sja1105_spi_setup *spi_setup,
 
 out_parse_error:
 	print_usage();
-out_static_config_missmatch:
+out_static_config_mismatch:
 out_spi_configure_failed:
 out_read_config_failed:
 out_write_failed:
