@@ -79,9 +79,9 @@ int sja1105_clocking_setup_port(struct sja1105_spi_setup *spi_setup, int port,
 	} else if (params->xmii_mode[port] == XMII_SPEED_RGMII) {
 		rgmii_clocking_setup(spi_setup, port, speed_mbps);
 	} else if (params->xmii_mode[port] == XMII_SPEED_SGMII &&
-				  IS_PQRS(spi_setup->device_id)) {
+	           IS_PQRS(spi_setup->device_id)) {
 		if ((port == 4) && (IS_R(spi_setup->device_id, spi_setup->part_nr) ||
-							  IS_S(spi_setup->device_id, spi_setup->part_nr))) {
+		                    IS_S(spi_setup->device_id, spi_setup->part_nr))) {
 			sgmii_clocking_setup(spi_setup, port, speed_mbps);
 		} else {
 			logv("Port %d is tri-stated", port);
