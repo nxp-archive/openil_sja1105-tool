@@ -160,10 +160,10 @@ int sja1105_static_config_add_entry(struct sja1105_table_header *hdr, void *buf,
 	case BLKID_L2_LOOKUP_PARAMS_TABLE:
 	{
 		if (IS_ET(config->device_id)) {
-			POPULATE_CONFIG_TABLE(et, l2_lookup, buf, MAX_L2_LOOKUP_PARAMS_COUNT, "L2 Lookup Parameters");
+			POPULATE_CONFIG_TABLE(et, l2_lookup_params, buf, MAX_L2_LOOKUP_PARAMS_COUNT, "L2 Lookup Parameters");
 			return SIZE_L2_LOOKUP_PARAMS_ENTRY_ET;
 		} else {
-			POPULATE_CONFIG_TABLE(pqrs, l2_lookup, buf, MAX_L2_LOOKUP_PARAMS_COUNT, "L2 Lookup Parameters");
+			POPULATE_CONFIG_TABLE(pqrs, l2_lookup_params, buf, MAX_L2_LOOKUP_PARAMS_COUNT, "L2 Lookup Parameters");
 			return SIZE_L2_LOOKUP_PARAMS_ENTRY_PQRS;
 		}
 	}
@@ -582,7 +582,7 @@ sja1105_static_config_pack(void *buf, struct sja1105_static_config *config)
 	                     config->vl_forwarding_params);
 	if (IS_ET(config->device_id)) {
 		PACK_TABLE_IN_BUF_FN(config->l2_lookup_params_count,
-		                     SIZE_L2_LOOKUP_PARAMS_ENTRY_PQRS,
+		                     SIZE_L2_LOOKUP_PARAMS_ENTRY_ET,
 		                     BLKID_L2_LOOKUP_PARAMS_TABLE,
 		                     sja1105et_l2_lookup_params_entry_pack,
 		                     config->l2_lookup_params);
