@@ -82,11 +82,11 @@ int get_match(const char *cmd, const char **options, int option_count)
 			printf("   * %s\n", cmd_matches[i]);
 		}
 	};
-	for (i = 0; i < match_count; i++) {
-		free(cmd_matches[i]);
-	}
 out:
-	free(cmd_matches);
+	for (i = 0; i < option_count; i++) {
+		FREE(cmd_matches[i]);
+	}
+	FREE(cmd_matches);
 out_1:
 	return (match_count == 1) ? match_index : -1;
 }
@@ -253,8 +253,8 @@ void linewise_concat(char **buffers, int count)
 			printf("\n");
 		}
 	}
-	free(next_line);
-	free(current_line);
+	FREE(next_line);
+	FREE(current_line);
 }
 
 /*
