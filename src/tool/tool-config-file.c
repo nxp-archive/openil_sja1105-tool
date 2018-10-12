@@ -81,8 +81,8 @@ config_set_defaults(struct sja1105_spi_setup *spi_setup,
 		struct_ptr->field = value; \
 	}
 	SET_DEFAULT_VAL(spi_setup, device_id, default_device_id, logv, "0x%" PRIx64);
-	SET_DEFAULT_VAL(spi_setup, device, default_device, logi, "%s");
-	SET_DEFAULT_VAL(spi_setup, staging_area, default_staging_area, logi, "%s");
+	SET_DEFAULT_VAL(spi_setup, device, strdup(default_device), logi, "%s");
+	SET_DEFAULT_VAL(spi_setup, staging_area, strdup(default_staging_area), logi, "%s");
 	SET_DEFAULT_VAL(spi_setup, mode, SPI_CPHA, logi, "0x%x" );
 	SET_DEFAULT_VAL(spi_setup, bits, 8, logi, "%d");
 	SET_DEFAULT_VAL(spi_setup, speed, 1000000, logi, "%u");
@@ -305,7 +305,7 @@ int read_config_file(char *filename, struct sja1105_spi_setup *spi_setup,
 		if (p[0] == '[') {
 			/* This is a section header */
 			if (section_hdr != NULL) {
-				free(section_hdr);
+				FREE(section_hdr);
 			}
 			section_hdr = strdup(p);
 			continue;
@@ -336,7 +336,7 @@ int read_config_file(char *filename, struct sja1105_spi_setup *spi_setup,
 	}
 out:
 	if (section_hdr != NULL) {
-		free(section_hdr);
+		FREE(section_hdr);
 	}
 	fclose(fd);
 default_conf:
