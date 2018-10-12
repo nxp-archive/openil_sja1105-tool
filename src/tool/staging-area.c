@@ -121,7 +121,7 @@ staging_area_hexdump(const char *staging_area_file)
 	}
 	logi("static config: dumped %d bytes", rc);
 filesystem_error3:
-	free(buf);
+	FREE(buf);
 filesystem_error2:
 	close(fd);
 filesystem_error1:
@@ -176,7 +176,7 @@ staging_area_load(const char *staging_area_file,
 	}
 	return 0;
 filesystem_error3:
-	free(buf);
+	FREE(buf);
 filesystem_error2:
 	close(fd);
 filesystem_error1:
@@ -224,13 +224,14 @@ staging_area_save(const char *staging_area_file,
 
 	rc = reliable_write(fd, buf, staging_area_len);
 	if (rc < 0) {
+		close(fd); /* close fd before leaving */
 		goto out_2;
 	}
 	logv("done");
 
 	close(fd);
 out_2:
-	free(buf);
+	FREE(buf);
 out_1:
 	return rc;
 }
@@ -276,7 +277,7 @@ static_config_upload(struct sja1105_spi_setup *spi_setup,
 	                                      config_buf,
 	                                      config_buf_len);
 out_free:
-	free(config_buf);
+	FREE(config_buf);
 out:
 	return rc;
 }
