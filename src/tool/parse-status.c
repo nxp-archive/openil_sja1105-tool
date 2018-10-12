@@ -70,7 +70,7 @@ static int status_ports(struct sja1105_spi_setup *spi_setup,
 		linewise_concat(print_buf, 5);
 
 		for (i = 0; i < 5; i++) {
-			free(print_buf[i]);
+			FREE(print_buf[i]);
 		}
 	} else {
 		/* Show for single port */
@@ -83,9 +83,12 @@ static int status_ports(struct sja1105_spi_setup *spi_setup,
 		sja1105_port_status_show(&status, port_no, print_buf[0],
 		                         spi_setup->device_id);
 		printf("%s\n", print_buf[0]);
-		free(print_buf[0]);
+		FREE(print_buf[0]);
 	}
 out:
+	for (i = 0; i < 5; i++) {
+		FREE(print_buf[i]);
+	}
 	return rc;
 }
 
