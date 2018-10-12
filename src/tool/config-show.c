@@ -62,13 +62,14 @@
 			     entry_count - 1);                                \
 			return -1;                                            \
 		}                                                             \
+		for (i=0;i<MAX_TABLE_SIZE;i++) print_bufs[i] = NULL; \
 		printf(STRING_NAME ": %d entries\n", entry_count);            \
 		for (i = start; i < end; i++) {                               \
 			print_bufs[i] = calloc(sizeof(char), MAX_LINE_SIZE);  \
 			if (print_bufs[i] == NULL) {                          \
 				loge("malloc failed");                        \
 				while (i-- > start) {                         \
-					free(print_bufs[i]);                  \
+					  FREE(print_bufs[i]);                  \
 				}                                             \
 				return -1;                                    \
 			}                                                     \
@@ -83,7 +84,7 @@
 		}                                                             \
 		show_print_bufs(print_bufs + start, end - start);             \
 		for (i = start; i < end; i++) {                               \
-			free(print_bufs[i]);                                  \
+			FREE(print_bufs[i]);                  \
 		}                                                             \
 		return 0;                                                     \
 	}
