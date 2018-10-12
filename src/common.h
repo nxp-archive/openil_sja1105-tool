@@ -31,12 +31,15 @@
 #ifndef _SJA1105_TOOL_COMMON_H
 #define _SJA1105_TOOL_COMMON_H
 
+#include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <errno.h>
 
 /* These are our own error codes */
 #include <lib/include/errors.h>
+
+#define FREE(P) {if (P) {free(P); (P)=NULL;}} /* robust free() */
 
 /* Since remapping is used internally, and many checks
  * search for a negative return code, we do that here.
