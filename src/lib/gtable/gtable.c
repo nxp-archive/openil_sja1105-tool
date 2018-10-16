@@ -35,7 +35,7 @@
 #define ONES_TO_RIGHT_OF(x) ((1ull << ((x) + 1)) - 1)
 #define ONES_TO_LEFT_OF(x) (~((1ull << (x)) - 1))
 
-#define xchg(type, x, y) \
+#define exchg(type, x, y) \
 	{ \
 		type z; \
 		z = x; \
@@ -100,7 +100,7 @@ correct_for_msb_right_quirk(
 	*to_write <<= *box_bit_end;
 	*box_bit_start = box_bit_width - *box_bit_start - 1;
 	*box_bit_end   = box_bit_width - *box_bit_end - 1;
-	xchg(int, *box_bit_start, *box_bit_end);
+	exchg(int, *box_bit_start, *box_bit_end);
 	*box_bit_mask  = ONES_TO_RIGHT_OF(*box_bit_start) &
 			 ONES_TO_LEFT_OF(*box_bit_end);
 }
