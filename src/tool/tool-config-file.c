@@ -305,7 +305,7 @@ int read_config_file(char *filename, struct sja1105_spi_setup *spi_setup,
 		if (p[0] == '[') {
 			/* This is a section header */
 			if (section_hdr != NULL) {
-				FREE(section_hdr);
+				free(section_hdr);
 			}
 			section_hdr = strdup(p);
 			continue;
@@ -336,7 +336,7 @@ int read_config_file(char *filename, struct sja1105_spi_setup *spi_setup,
 	}
 out:
 	if (section_hdr != NULL) {
-		FREE(section_hdr);
+		free(section_hdr);
 	}
 	fclose(fd);
 default_conf:
