@@ -507,4 +507,7 @@ int  sja1105_static_config_unpack(void*, struct sja1105_static_config*);
 void sja1105_lib_get_build_date(char *buf);
 void sja1105_lib_get_version(char *buf);
 
+int sja1105_static_config_flush(struct sja1105_spi_setup *spi_setup,
+                                struct sja1105_static_config *config);
+
 #endif
