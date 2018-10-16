@@ -31,7 +31,7 @@
 #ifndef _STATUS_PARSE_ARGS_H
 #define _STATUS_PARSE_ARGS_H
 
-#include <stdint.h>
+#include <common.h>
 #include "spi.h"
 
 #define CORE_ADDR   0x000000

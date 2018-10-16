@@ -28,11 +28,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
-#include <inttypes.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <errno.h>
 #include <lib/include/gtable.h>
+#include <common.h>
 
 /* these are *inclusive* */
 #define ONES_TO_RIGHT_OF(x) ((1ull << ((x) + 1)) - 1)
@@ -45,8 +42,6 @@
 		x = y; \
 		y = z; \
 	}
-
-#define loge(fmt, ...) fprintf(stderr, fmt "\n", ##__VA_ARGS__)
 
 int g_quirks = QUIRK_LSW32_IS_FIRST;
 

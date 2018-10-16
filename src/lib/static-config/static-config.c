@@ -28,14 +28,9 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
-#include <inttypes.h>
-#include <stdint.h>
-#include <string.h>
-/* These are our own include files */
 #include <lib/include/static-config.h>
 #include <lib/include/gtable.h>
 #include <common.h>
-#include <stddef.h>
 
 static void sja1105_table_write_crc(char *table_start, char *crc_ptr)
 {

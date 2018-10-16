@@ -31,8 +31,7 @@
 #ifndef _SPI_EXTERNAL_H
 #define _SPI_EXTERNAL_H
 
-#include <linux/spi/spidev.h>
-#include <stdint.h>
+#include <common.h>
 
 struct sja1105_spi_setup {
 	uint64_t    device_id;

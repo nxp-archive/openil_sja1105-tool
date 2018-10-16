@@ -31,7 +31,7 @@
 #ifndef _TABLES_EXTERNAL_H
 #define _TABLES_EXTERNAL_H
 
-#include <stdint.h>
+#include <common.h>
 
 #define CONFIG_ADDR 0x20000
 

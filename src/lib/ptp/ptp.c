@@ -28,9 +28,6 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
-#include <string.h>
-#include <inttypes.h>
-/* These are our own include files */
 #include <lib/include/static-config.h>
 #include <lib/include/ptp.h>
 #include <lib/include/gtable.h>

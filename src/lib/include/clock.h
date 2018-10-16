@@ -31,9 +31,9 @@
 #ifndef _CGU_EXTERNAL_H
 #define _CGU_EXTERNAL_H
 
+#include <common.h>
 #include "spi.h"
 #include "static-config.h"
-#include <stdint.h>
 
 /* AGU */
 #define AGU_ADDR    0x100800
