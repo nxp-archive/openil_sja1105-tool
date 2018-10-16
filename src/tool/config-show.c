@@ -69,7 +69,7 @@
 			if (print_bufs[i] == NULL) {                          \
 				loge("malloc failed");                        \
 				while (i-- > start) {                         \
-					  FREE(print_bufs[i]);                  \
+					  if (print_bufs[i]) free(print_bufs[i]);      \
 				}                                             \
 				return -1;                                    \
 			}                                                     \
@@ -84,7 +84,7 @@
 		}                                                             \
 		show_print_bufs(print_bufs + start, end - start);             \
 		for (i = start; i < end; i++) {                               \
-			FREE(print_bufs[i]);                  \
+			if (print_bufs[i]) free(print_bufs[i]);                  \
 		}                                                             \
 		return 0;                                                     \
 	}
