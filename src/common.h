@@ -39,8 +39,6 @@
 /* These are our own error codes */
 #include <lib/include/errors.h>
 
-#define FREE(P) {if (P) {free(P); (P)=NULL;}} /* robust free() */
-
 /* Since remapping is used internally, and many checks
  * search for a negative return code, we do that here.
  * The sign is flipped again when returning the error
