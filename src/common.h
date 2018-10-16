@@ -31,9 +31,15 @@
 #ifndef _SJA1105_TOOL_COMMON_H
 #define _SJA1105_TOOL_COMMON_H
 
-#include <stdint.h>
-#include <stdio.h>
-#include <errno.h>
+ #include <inttypes.h>
+ #include <stdint.h>
+ #include <stdlib.h>
+ #include <stdio.h>
+ #include <string.h>
+ #include <stdarg.h>
+ #include <errno.h>
+ #include <stddef.h>
+ #include <unistd.h>
 
 /* These are our own error codes */
 #include <lib/include/errors.h>

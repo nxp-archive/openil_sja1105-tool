@@ -28,13 +28,6 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
-#include <inttypes.h>
-#include <unistd.h>
-/* These are our include files */
 #include <lib/include/static-config.h>
 #include <lib/include/status.h>
 #include <lib/include/gtable.h>

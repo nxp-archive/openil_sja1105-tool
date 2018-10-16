@@ -28,10 +28,6 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
-#include <string.h>
-#include <inttypes.h>
-/* For va_start and va_end */
-#include <stdarg.h>
 #include "common.h"
 
 void print_array(char *print_buf, uint64_t *array, int count)

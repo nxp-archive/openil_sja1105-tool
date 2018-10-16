@@ -31,6 +31,8 @@
 #ifndef _GTABLE_H
 #define _GTABLE_H
 
+#include <common.h>
+
 #define QUIRK_MSB_ON_THE_RIGHT (1 << 0ull)
 #define QUIRK_LITTLE_ENDIAN    (1 << 1ull)
 #define QUIRK_LSW32_IS_FIRST   (1 << 2ull)

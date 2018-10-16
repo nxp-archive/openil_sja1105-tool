@@ -31,9 +31,8 @@
 #ifndef _PTP_H
 #define _PTP_H
 
+#include <common.h>
 #include "spi.h"
-#include <time.h>
-#include <stdint.h>
 
 #define SJA1105PQRS_PTPSYNCTS_ADDR  0x1F
 #define SJA1105QS_PTPCLKCORP_ADDR   0x1E
