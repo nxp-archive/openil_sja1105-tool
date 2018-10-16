@@ -117,11 +117,15 @@ staging_area_hexdump(const char *staging_area_file)
 	rc = sja1105_static_config_hexdump(buf);
 	if (rc < 0) {
 		loge("error while interpreting config");
+		/* free 'buf' and close the file handle 'fd'
+		   before leaving the function: */
+		if (buf != NULL) free(buf);
+		close(fd);
 		goto invalid_staging_area_error;
 	}
 	logi("static config: dumped %d bytes", rc);
 filesystem_error3:
-	FREE(buf);
+	if (buf != NULL) free(buf);
 filesystem_error2:
 	close(fd);
 filesystem_error1:
@@ -172,11 +176,15 @@ staging_area_load(const char *staging_area_file,
 	rc = sja1105_static_config_unpack(buf, static_config);
 	if (rc < 0) {
 		loge("error while interpreting config");
+		/* free 'buf' and close the file handle 'fd'
+		   before leaving the function: */
+		if (buf != NULL) free(buf);
+		close(fd);
 		goto invalid_staging_area_error;
 	}
 	return 0;
 filesystem_error3:
-	FREE(buf);
+	if (buf != NULL) free(buf);
 filesystem_error2:
 	close(fd);
 filesystem_error1:
@@ -231,7 +239,7 @@ staging_area_save(const char *staging_area_file,
 
 	close(fd);
 out_2:
-	FREE(buf);
+	if (buf != NULL) free(buf);
 out_1:
 	return rc;
 }
@@ -277,7 +285,7 @@ static_config_upload(struct sja1105_spi_setup *spi_setup,
 	                                      config_buf,
 	                                      config_buf_len);
 out_free:
-	FREE(config_buf);
+	if (config_buf != NULL) free(config_buf);
 out:
 	return rc;
 }
