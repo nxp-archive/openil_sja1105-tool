@@ -314,6 +314,25 @@ int static_config_flush(struct sja1105_spi_setup *spi_setup,
 		loge("sja1105_reset failed");
 		goto hardware_left_floating_error;
 	}
+	/* If we are configuring static FDB entries (L2 Address Lookup),
+	 * we must wait until L2BUSYS clears. Only do this if we are
+	 * talking to real hardware.
+	 */
+	if (spi_setup->dry_run == 0 && config->l2_lookup_count > 0) {
+		int retries = 100; /* max 1 second */
+
+		do {
+			rc = sja1105_general_status_get(spi_setup, &status);
+			if (rc < 0)
+				goto hardware_not_responding_error;
+			if (status.l2busys == 0)
+				break;
+			usleep(10000); /* 10 ms */
+		} while (--retries);
+
+		if (retries == 0)
+			goto hardware_not_responding_error;
+	}
 	rc = static_config_upload(spi_setup, config);
 	if (rc < 0) {
 		loge("static_config_upload failed");
