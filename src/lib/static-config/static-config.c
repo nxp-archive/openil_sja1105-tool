@@ -461,6 +461,7 @@ sja1105_static_config_pack(void *buf, struct sja1105_static_config *config)
 {
 #define PACK_TABLE_IN_BUF_FN(entry_count, entry_size, blk_id, set_fn, array) \
 	if (entry_count) {                                                   \
+		logv("Packing table " #blk_id " to buffer");                 \
 		header.block_id = (blk_id);                                  \
 		header.len = (entry_count) * (entry_size) / 4;               \
 		sja1105_table_header_pack_with_crc(p, &header);              \
