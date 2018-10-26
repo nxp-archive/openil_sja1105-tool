@@ -53,7 +53,7 @@
 		                                                              \
 		if (entry_count == 0) {                                       \
 			loge(STRING_NAME " is empty");                        \
-			return -1;                                            \
+			return 0;                                             \
 		}                                                             \
 		if (index < -1 || index >= entry_count) {                     \
 			loge("Index out of bounds!");                         \
