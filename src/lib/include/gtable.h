@@ -41,5 +41,6 @@ int  gtable_pack(void*, uint64_t*, int, int, int);
 void gtable_hexdump(void*, int);
 void gtable_bitdump(void*, int);
 uint32_t ether_crc32_le(void*, unsigned int);
+uint8_t fdb_hash(uint64_t vlanid, uint64_t macaddr, uint64_t poly_koopman);
 
 #endif
