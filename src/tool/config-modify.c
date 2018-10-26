@@ -182,7 +182,6 @@ static int l2_lookup_table_entry_modify(
 		"macaddr",
 		"destports",
 		"enfport",
-		"index",
 	};
 	uint64_t *fields[] = {
 		&config->l2_lookup[entry_index].tsreg,
@@ -198,9 +197,8 @@ static int l2_lookup_table_entry_modify(
 		&config->l2_lookup[entry_index].macaddr,
 		&config->l2_lookup[entry_index].destports,
 		&config->l2_lookup[entry_index].enfport,
-		&config->l2_lookup[entry_index].index,
 	};
-	int entry_field_counts[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,};
+	int entry_field_counts[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, };
 	uint64_t tmp;
 	int rc;
 

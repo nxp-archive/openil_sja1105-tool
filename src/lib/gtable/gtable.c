@@ -336,3 +336,39 @@ uint32_t ether_crc32_le(void *buf, unsigned int len)
 	return bit_reverse(~crc, 32);
 }
 
+static uint8_t crc8_add(uint8_t crc, uint8_t byte, uint8_t poly)
+{
+	int i;
+
+	for (i = 0; i < 8; i++) {
+		if ((crc ^ byte) & (1 << 7)) {
+			crc <<= 1;
+			crc ^= poly;
+		} else {
+			crc <<= 1;
+		}
+		byte <<= 1;
+	}
+	return crc;
+}
+
+/* CRC8 algorithm with non-reversed input, non-reversed output,
+ * no input xor and no output xor. Code customized for receiving
+ * the SJA1105 E/T FDB keys (vlanid, macaddr) as input. CRC polynomial
+ * is also received as argument in the Koopman notation that the switch
+ * hardware stores it in.
+ */
+uint8_t fdb_hash(uint64_t vlanid, uint64_t macaddr, uint64_t poly_koopman)
+{
+	/* Convert polynomial from Koopman to 'normal' notation */
+	uint8_t  poly = (uint8_t) (1 + (poly_koopman << 1));
+	uint64_t input = (vlanid << 48) | macaddr;
+	uint8_t crc = 0; /* seed */
+	int i;
+
+	/* Mask the eight bytes starting from MSB one at a time */
+	for (i = 56; i >= 0; i -= 8)
+		crc = crc8_add(crc, (input & (0xffull << i)) >> i, poly);
+	return crc;
+}
+
