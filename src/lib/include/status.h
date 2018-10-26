@@ -77,7 +77,7 @@ struct sja1105_general_status {
 	uint64_t ramparerru;
 };
 
-struct sja1105_port_status {
+struct sja1105_port_status_mac {
 	uint64_t n_runt;
 	uint64_t n_soferr;
 	uint64_t n_alignerr;
@@ -102,6 +102,9 @@ struct sja1105_port_status {
 	uint64_t drpnona664err;
 	uint64_t spcerr;
 	uint64_t agedrp;
+};
+
+struct sja1105_port_status_hl1 {
 	uint64_t n_n664err;
 	uint64_t n_vlanerr;
 	uint64_t n_unreleased;
@@ -118,12 +121,21 @@ struct sja1105_port_status {
 	uint64_t n_txfrm;
 	uint64_t n_txbytesh;
 	uint64_t n_txbyte;
+};
+
+struct sja1105_port_status_hl2 {
 	uint64_t n_qfull;
 	uint64_t n_part_drop;
 	uint64_t n_egr_disabled;
 	uint64_t n_not_reach;
 	uint64_t qlevel_hwm[8]; /* Only for P/Q/R/S */
 	uint64_t qlevel[8];     /* Only for P/Q/R/S */
+};
+
+struct sja1105_port_status {
+	struct sja1105_port_status_mac mac;
+	struct sja1105_port_status_hl1 hl1;
+	struct sja1105_port_status_hl2 hl2;
 };
 
 struct sja1105_ptp_status {
@@ -155,6 +167,15 @@ void sja1105_general_status_show(struct sja1105_general_status*,
 void sja1105_port_status_show(struct sja1105_port_status*,
                               int, char*, size_t,
                               uint64_t device_id);
+int sja1105_port_status_get_mac(struct sja1105_spi_setup *spi_setup,
+                                struct sja1105_port_status_mac *status,
+                                int port);
+int sja1105_port_status_get_hl1(struct sja1105_spi_setup *spi_setup,
+                                struct sja1105_port_status_hl1 *status,
+                                int port);
+int sja1105_port_status_get_hl2(struct sja1105_spi_setup *spi_setup,
+                                struct sja1105_port_status_hl2 *status,
+                                int port);
 int sja1105_port_status_get(struct sja1105_spi_setup*,
                             struct sja1105_port_status*,
                             int port);

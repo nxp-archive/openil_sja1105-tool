@@ -43,56 +43,56 @@ void sja1105_port_status_show(struct sja1105_port_status *status,
 	formatted_append(print_buf, len, fmt, "Port %d",          port);
 	formatted_append(print_buf, len, fmt, "");
 	formatted_append(print_buf, len, fmt, "MAC-Level Diagnostic Counters");
-	formatted_append(print_buf, len, fmt, "N_RUNT          %" PRIu64, status->n_runt);
-	formatted_append(print_buf, len, fmt, "N_SOFERR        %" PRIu64, status->n_soferr);
-	formatted_append(print_buf, len, fmt, "N_ALIGNERR      %" PRIu64, status->n_alignerr);
-	formatted_append(print_buf, len, fmt, "N_MIIERR        %" PRIu64, status->n_miierr);
+	formatted_append(print_buf, len, fmt, "N_RUNT          %" PRIu64, status->mac.n_runt);
+	formatted_append(print_buf, len, fmt, "N_SOFERR        %" PRIu64, status->mac.n_soferr);
+	formatted_append(print_buf, len, fmt, "N_ALIGNERR      %" PRIu64, status->mac.n_alignerr);
+	formatted_append(print_buf, len, fmt, "N_MIIERR        %" PRIu64, status->mac.n_miierr);
 	formatted_append(print_buf, len, fmt, "");
 	formatted_append(print_buf, len, fmt, "MAC-Level Diagnostic Flags");
-	formatted_append(print_buf, len, fmt, "TYPEERR         %" PRIX64, status->typeerr);
-	formatted_append(print_buf, len, fmt, "SIZEERR         %" PRIX64, status->sizeerr);
-	formatted_append(print_buf, len, fmt, "TCTIMEOUT       %" PRIX64, status->tctimeout);
-	formatted_append(print_buf, len, fmt, "PRIORERR        %" PRIX64, status->priorerr);
-	formatted_append(print_buf, len, fmt, "NOMASTER        %" PRIX64, status->nomaster);
-	formatted_append(print_buf, len, fmt, "MEMOV           %" PRIX64, status->memov);
-	formatted_append(print_buf, len, fmt, "MEMERR          %" PRIX64, status->memerr);
-	formatted_append(print_buf, len, fmt, "INVTYP          %" PRIX64, status->invtyp);
-	formatted_append(print_buf, len, fmt, "INTCYOV         %" PRIX64, status->intcyov);
-	formatted_append(print_buf, len, fmt, "DOMERR          %" PRIX64, status->domerr);
-	formatted_append(print_buf, len, fmt, "PCFBAGDROP      %" PRIX64, status->pcfbagdrop);
-	formatted_append(print_buf, len, fmt, "SPCPRIOR        %" PRIX64, status->spcprior);
-	formatted_append(print_buf, len, fmt, "AGEPRIOR        %" PRIX64, status->ageprior);
-	formatted_append(print_buf, len, fmt, "PORTDROP        %" PRIX64, status->portdrop);
-	formatted_append(print_buf, len, fmt, "LENDROP         %" PRIX64, status->lendrop);
-	formatted_append(print_buf, len, fmt, "BAGDROP         %" PRIX64, status->bagdrop);
-	formatted_append(print_buf, len, fmt, "POLICEERR       %" PRIX64, status->policeerr);
-	formatted_append(print_buf, len, fmt, "DRPNON664ERR    %" PRIX64, status->drpnona664err);
-	formatted_append(print_buf, len, fmt, "SPCERR          %" PRIX64, status->spcerr);
-	formatted_append(print_buf, len, fmt, "AGEDRP          %" PRIX64, status->agedrp);
+	formatted_append(print_buf, len, fmt, "TYPEERR         %" PRIX64, status->mac.typeerr);
+	formatted_append(print_buf, len, fmt, "SIZEERR         %" PRIX64, status->mac.sizeerr);
+	formatted_append(print_buf, len, fmt, "TCTIMEOUT       %" PRIX64, status->mac.tctimeout);
+	formatted_append(print_buf, len, fmt, "PRIORERR        %" PRIX64, status->mac.priorerr);
+	formatted_append(print_buf, len, fmt, "NOMASTER        %" PRIX64, status->mac.nomaster);
+	formatted_append(print_buf, len, fmt, "MEMOV           %" PRIX64, status->mac.memov);
+	formatted_append(print_buf, len, fmt, "MEMERR          %" PRIX64, status->mac.memerr);
+	formatted_append(print_buf, len, fmt, "INVTYP          %" PRIX64, status->mac.invtyp);
+	formatted_append(print_buf, len, fmt, "INTCYOV         %" PRIX64, status->mac.intcyov);
+	formatted_append(print_buf, len, fmt, "DOMERR          %" PRIX64, status->mac.domerr);
+	formatted_append(print_buf, len, fmt, "PCFBAGDROP      %" PRIX64, status->mac.pcfbagdrop);
+	formatted_append(print_buf, len, fmt, "SPCPRIOR        %" PRIX64, status->mac.spcprior);
+	formatted_append(print_buf, len, fmt, "AGEPRIOR        %" PRIX64, status->mac.ageprior);
+	formatted_append(print_buf, len, fmt, "PORTDROP        %" PRIX64, status->mac.portdrop);
+	formatted_append(print_buf, len, fmt, "LENDROP         %" PRIX64, status->mac.lendrop);
+	formatted_append(print_buf, len, fmt, "BAGDROP         %" PRIX64, status->mac.bagdrop);
+	formatted_append(print_buf, len, fmt, "POLICEERR       %" PRIX64, status->mac.policeerr);
+	formatted_append(print_buf, len, fmt, "DRPNON664ERR    %" PRIX64, status->mac.drpnona664err);
+	formatted_append(print_buf, len, fmt, "SPCERR          %" PRIX64, status->mac.spcerr);
+	formatted_append(print_buf, len, fmt, "AGEDRP          %" PRIX64, status->mac.agedrp);
 	formatted_append(print_buf, len, fmt, "");
 	formatted_append(print_buf, len, fmt, "High-Level Diagnostic Counters");
-	formatted_append(print_buf, len, fmt, "N_N664ERR       %" PRIu64, status->n_n664err);
-	formatted_append(print_buf, len, fmt, "N_VLANERR       %" PRIu64, status->n_vlanerr);
-	formatted_append(print_buf, len, fmt, "N_UNRELEASED    %" PRIu64, status->n_unreleased);
-	formatted_append(print_buf, len, fmt, "N_SIZERR        %" PRIu64, status->n_sizerr);
-	formatted_append(print_buf, len, fmt, "N_CRCERR        %" PRIu64, status->n_crcerr);
-	formatted_append(print_buf, len, fmt, "N_VLNOTFOUND    %" PRIu64, status->n_vlnotfound);
-	formatted_append(print_buf, len, fmt, "N_BEPOLERR      %" PRIu64, status->n_bepolerr);
-	formatted_append(print_buf, len, fmt, "N_POLERR        %" PRIu64, status->n_polerr);
-	formatted_append(print_buf, len, fmt, "N_RXFRM         %" PRIu64, status->n_rxfrm);
-	formatted_append(print_buf, len, fmt, "N_RXBYTE        %" PRIu64, status->n_rxbyte);
-	formatted_append(print_buf, len, fmt, "N_TXFRM         %" PRIu64, status->n_txfrm);
-	formatted_append(print_buf, len, fmt, "N_TXBYTE        %" PRIu64, status->n_txbyte);
-	formatted_append(print_buf, len, fmt, "N_QFULL         %" PRIu64, status->n_qfull);
-	formatted_append(print_buf, len, fmt, "N_PART_DROP     %" PRIu64, status->n_part_drop);
-	formatted_append(print_buf, len, fmt, "N_EGR_DISABLED  %" PRIu64, status->n_egr_disabled);
-	formatted_append(print_buf, len, fmt, "N_NOT_REACH     %" PRIu64, status->n_not_reach);
+	formatted_append(print_buf, len, fmt, "N_N664ERR       %" PRIu64, status->hl1.n_n664err);
+	formatted_append(print_buf, len, fmt, "N_VLANERR       %" PRIu64, status->hl1.n_vlanerr);
+	formatted_append(print_buf, len, fmt, "N_UNRELEASED    %" PRIu64, status->hl1.n_unreleased);
+	formatted_append(print_buf, len, fmt, "N_SIZERR        %" PRIu64, status->hl1.n_sizerr);
+	formatted_append(print_buf, len, fmt, "N_CRCERR        %" PRIu64, status->hl1.n_crcerr);
+	formatted_append(print_buf, len, fmt, "N_VLNOTFOUND    %" PRIu64, status->hl1.n_vlnotfound);
+	formatted_append(print_buf, len, fmt, "N_BEPOLERR      %" PRIu64, status->hl1.n_bepolerr);
+	formatted_append(print_buf, len, fmt, "N_POLERR        %" PRIu64, status->hl1.n_polerr);
+	formatted_append(print_buf, len, fmt, "N_RXFRM         %" PRIu64, status->hl1.n_rxfrm);
+	formatted_append(print_buf, len, fmt, "N_RXBYTE        %" PRIu64, status->hl1.n_rxbyte);
+	formatted_append(print_buf, len, fmt, "N_TXFRM         %" PRIu64, status->hl1.n_txfrm);
+	formatted_append(print_buf, len, fmt, "N_TXBYTE        %" PRIu64, status->hl1.n_txbyte);
+	formatted_append(print_buf, len, fmt, "N_QFULL         %" PRIu64, status->hl2.n_qfull);
+	formatted_append(print_buf, len, fmt, "N_PART_DROP     %" PRIu64, status->hl2.n_part_drop);
+	formatted_append(print_buf, len, fmt, "N_EGR_DISABLED  %" PRIu64, status->hl2.n_egr_disabled);
+	formatted_append(print_buf, len, fmt, "N_NOT_REACH     %" PRIu64, status->hl2.n_not_reach);
 	formatted_append(print_buf, len, fmt, "");
 	if (IS_PQRS(device_id)) {
 		formatted_append(print_buf, len, fmt, "Queue Levels");
 		for (i = 0; i < 8; i++) {
-			formatted_append(print_buf, len, fmt, "QLEVEL_HWM_%d   %" PRIu64, i, status->qlevel_hwm[i]);
-			formatted_append(print_buf, len, fmt, "QLEVEL_%d       %" PRIu64, i, status->qlevel[i]);
+			formatted_append(print_buf, len, fmt, "QLEVEL_HWM_%d   %" PRIu64, i, status->hl2.qlevel_hwm[i]);
+			formatted_append(print_buf, len, fmt, "QLEVEL_%d       %" PRIu64, i, status->hl2.qlevel[i]);
 		}
 		formatted_append(print_buf, len, fmt, "");
 	}
@@ -100,7 +100,7 @@ void sja1105_port_status_show(struct sja1105_port_status *status,
 
 static void
 sja1105_port_status_mac_unpack(void *buf, struct
-                               sja1105_port_status *status)
+                               sja1105_port_status_mac *status)
 {
 	/* So that additions translate to 4 bytes */
 	uint32_t *p = (uint32_t*) buf;
@@ -132,7 +132,7 @@ sja1105_port_status_mac_unpack(void *buf, struct
 
 static void
 sja1105_port_status_hl1_unpack(void *buf, struct
-                               sja1105_port_status *status)
+                               sja1105_port_status_hl1 *status)
 {
 	/* So that additions translate to 4 bytes */
 	uint32_t *p = (uint32_t*) buf;
@@ -142,7 +142,7 @@ sja1105_port_status_hl1_unpack(void *buf, struct
 	gtable_unpack(p + 0xC, &status->n_sizerr,     31,  0, 4);
 	gtable_unpack(p + 0xB, &status->n_crcerr,     31,  0, 4);
 	gtable_unpack(p + 0xA, &status->n_vlnotfound, 31,  0, 4);
-	gtable_unpack(p + 0x9, &status->n_bepolerr,   31,  0, 4);
+	gtable_unpack(p + 0x9, &status->n_ctpolerr,   31,  0, 4);
 	gtable_unpack(p + 0x8, &status->n_polerr,     31,  0, 4);
 	gtable_unpack(p + 0x7, &status->n_rxfrmsh,    31,  0, 4);
 	gtable_unpack(p + 0x6, &status->n_rxfrm,      31,  0, 4);
@@ -160,7 +160,7 @@ sja1105_port_status_hl1_unpack(void *buf, struct
 
 static void
 sja1105_port_status_hl2_unpack(void *buf, struct
-                               sja1105_port_status *status)
+                               sja1105_port_status_hl2 *status)
 {
 	/* So that additions translate to 4 bytes */
 	uint32_t *p = (uint32_t*) buf;
@@ -172,7 +172,7 @@ sja1105_port_status_hl2_unpack(void *buf, struct
 
 static void
 sja1105pqrs_port_status_qlevel_unpack(void *buf, struct
-                                      sja1105_port_status *status)
+                                      sja1105_port_status_hl2 *status)
 {
 	/* So that additions translate to 4 bytes */
 	uint32_t *p = (uint32_t*) buf;
@@ -184,20 +184,13 @@ sja1105pqrs_port_status_qlevel_unpack(void *buf, struct
 	}
 }
 
-int sja1105_port_status_get(struct sja1105_spi_setup *spi_setup,
-                            struct sja1105_port_status *status,
-                            int port)
+int sja1105_port_status_get_mac(struct sja1105_spi_setup *spi_setup,
+                                struct sja1105_port_status_mac *status,
+                                int port)
 {
-	const int SIZE_MAC_AREA    = 0x02 * 4;
-	const int SIZE_HL_AREA     = 0x10 * 4;
-	const int SIZE_QLEVEL_AREA =  0x8 * 4; /* 0x4 to 0xB */
-	/* The larger of the 3. Reusing some space. */
-	const int BUF_LEN       = SIZE_HL_AREA;
-	const uint64_t mac_base_addr[]          = {0x200, 0x202, 0x204, 0x206, 0x208};
-	const uint64_t high_level_1_base_addr[] = {0x400, 0x410, 0x420, 0x430, 0x440};
-	const uint64_t high_level_2_base_addr[] = {0x600, 0x610, 0x620, 0x630, 0x640};
-	const uint64_t qlevel_base_addr[]       = {0x604, 0x614, 0x624, 0x634, 0x644};
-	uint8_t packed_buf[BUF_LEN];
+	const int SIZE_MAC_AREA = 0x02 * 4;
+	const uint64_t mac_base_addr[] = {0x200, 0x202, 0x204, 0x206, 0x208};
+	uint8_t packed_buf[SIZE_MAC_AREA];
 	int rc = 0;
 
 	memset(status, 0, sizeof(*status));
@@ -213,25 +206,53 @@ int sja1105_port_status_get(struct sja1105_spi_setup *spi_setup,
 		goto out;
 	}
 	sja1105_port_status_mac_unpack(packed_buf, status);
+out:
+	return rc;
+}
 
-	/* High-level 1 */
+int sja1105_port_status_get_hl1(struct sja1105_spi_setup *spi_setup,
+                                struct sja1105_port_status_hl1 *status,
+                                int port)
+{
+	const int SIZE_HL1_AREA = 0x10 * 4;
+	const uint64_t high_level_1_base_addr[] = {0x400, 0x410, 0x420, 0x430, 0x440};
+	uint8_t packed_buf[SIZE_HL1_AREA];
+	int rc = 0;
+
+	memset(status, 0, sizeof(*status));
+
 	rc = sja1105_spi_send_packed_buf(spi_setup,
 	                                 SPI_READ,
 	                                 CORE_ADDR + high_level_1_base_addr[port],
 	                                 packed_buf,
-	                                 SIZE_HL_AREA);
+	                                 SIZE_HL1_AREA);
 	if (rc < 0) {
 		loge("failed to read high-level 1 registers");
 		goto out;
 	}
 	sja1105_port_status_hl1_unpack(packed_buf, status);
+out:
+	return rc;
+}
 
-	/* High-level 2 */
+int sja1105_port_status_get_hl2(struct sja1105_spi_setup *spi_setup,
+                                struct sja1105_port_status_hl2 *status,
+                                int port)
+{
+	const int SIZE_HL2_AREA = 0x4 * 4;
+	const int SIZE_QLEVEL_AREA =  0x8 * 4; /* 0x4 to 0xB */
+	const uint64_t high_level_2_base_addr[] = {0x600, 0x610, 0x620, 0x630, 0x640};
+	const uint64_t qlevel_base_addr[]       = {0x604, 0x614, 0x624, 0x634, 0x644};
+	uint8_t packed_buf[SIZE_QLEVEL_AREA];
+	int rc = 0;
+
+	memset(status, 0, sizeof(*status));
+
 	rc = sja1105_spi_send_packed_buf(spi_setup,
 	                                 SPI_READ,
 	                                 CORE_ADDR + high_level_2_base_addr[port],
 	                                 packed_buf,
-	                                 SIZE_HL_AREA);
+	                                 SIZE_HL2_AREA);
 	if (rc < 0) {
 		loge("failed to read high-level 2 registers");
 		goto out;
@@ -252,6 +273,31 @@ int sja1105_port_status_get(struct sja1105_spi_setup *spi_setup,
 		goto out;
 	}
 	sja1105pqrs_port_status_qlevel_unpack(packed_buf, status);
+out:
+	return rc;
+}
+
+int sja1105_port_status_get(struct sja1105_spi_setup *spi_setup,
+                            struct sja1105_port_status *status,
+                            int port)
+{
+	int rc;
+
+	rc = sja1105_port_status_get_mac(spi_setup, &status->mac, port);
+	if (rc < 0) {
+		goto out;
+	}
+
+	rc = sja1105_port_status_get_hl1(spi_setup, &status->hl1, port);
+	if (rc < 0) {
+		goto out;
+	}
+
+	rc = sja1105_port_status_get_hl2(spi_setup, &status->hl2, port);
+	if (rc < 0) {
+		goto out;
+	}
+
 out:
 	return rc;
 }
