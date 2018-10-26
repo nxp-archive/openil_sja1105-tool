@@ -111,6 +111,8 @@
 #define MAX_FRAME_MEMORY                         929
 #define MAX_FRAME_MEMORY_RETAGGING               910
 
+#define SJA1105ET_FDB_BIN_SIZE                   4
+
 #define SJA1105E_DEVICE_ID         0x9C00000Cull
 #define SJA1105T_DEVICE_ID         0x9E00030Eull
 #define SJA1105PR_DEVICE_ID        0xAF00030Eull
@@ -429,6 +431,7 @@ struct sja1105_retagging_entry {
 
 struct sja1105_static_config {
 	uint64_t device_id;
+	uint8_t entries_in_fdb_bin[MAX_L2_LOOKUP_COUNT / SJA1105ET_FDB_BIN_SIZE];
 	STATIC_CONFIG_MEMBER(l2_forwarding_params, MAX_L2_FORWARDING_PARAMS_COUNT);
 	STATIC_CONFIG_MEMBER(l2_forwarding, MAX_L2_FORWARDING_COUNT);
 	STATIC_CONFIG_MEMBER(l2_lookup, MAX_L2_LOOKUP_COUNT);

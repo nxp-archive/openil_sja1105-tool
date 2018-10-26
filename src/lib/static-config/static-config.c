@@ -391,6 +391,38 @@ int sja1105_static_config_check_valid(struct sja1105_static_config *config)
 	return sja1105_static_config_check_memory_size(config);
 }
 
+void sja1105_static_config_patch_fdb(struct sja1105_static_config *config)
+{
+	int i;
+
+	for (i = 0; i < config->l2_lookup_count; i++) {
+		struct  sja1105_l2_lookup_entry *entry;
+		uint8_t index_in_bin;
+		uint8_t bin;
+
+		entry = &config->l2_lookup[i];
+		bin = fdb_hash(config->l2_lookup_params[0].shared_learn ? 0 : entry->vlanid,
+		               entry->macaddr,
+		               config->l2_lookup_params[0].poly);
+		index_in_bin = config->entries_in_fdb_bin[bin] % SJA1105ET_FDB_BIN_SIZE;
+
+		entry->index = (SJA1105ET_FDB_BIN_SIZE * bin) + index_in_bin;
+
+		if (config->entries_in_fdb_bin[bin] >= SJA1105ET_FDB_BIN_SIZE - 1) {
+			loge("Warning, FDB bin %d full while adding "
+			     "this static entry:", bin);
+			sja1105_l2_lookup_entry_show(entry);
+			loge("Evicting index %" PRIu64 " (entry %d of bin), "
+			     "this may not be what you want.",
+			     entry->index, index_in_bin);
+			loge("To attempt to vary the distribution function of "
+			     "FDB entries, you may change the value of "
+			     "l2-address-lookup-parameters-table field POLY\n");
+		}
+		config->entries_in_fdb_bin[bin]++;
+	}
+}
+
 int
 sja1105_static_config_unpack(void *buf, struct sja1105_static_config *config)
 {
@@ -400,6 +432,7 @@ sja1105_static_config_unpack(void *buf, struct sja1105_static_config *config)
 	int bytes;
 	uint64_t read_crc;
 	uint64_t computed_crc;
+	int i;
 
 	memset(config, 0, sizeof(*config));
 	/* Retrieve device_id from first 4 bytes of packed buffer */
@@ -462,6 +495,13 @@ sja1105_static_config_unpack(void *buf, struct sja1105_static_config *config)
 		}
 	}
 	sja1105_static_config_patch_vllupformat(config);
+	for (i = 0; i < config->l2_lookup_count; i++) {
+		struct sja1105_l2_lookup_entry *entry;
+		uint8_t bin;
+		entry = &config->l2_lookup[i];
+		bin = entry->index / SJA1105ET_FDB_BIN_SIZE;
+		config->entries_in_fdb_bin[bin]++;
+	}
 	return 0;
 error:
 	return -1;
@@ -499,6 +539,8 @@ sja1105_static_config_pack(void *buf, struct sja1105_static_config *config)
 
 	gtable_pack(p, &config->device_id, 31, 0, 4);
 	p += SIZE_SJA1105_DEVICE_ID;
+
+	sja1105_static_config_patch_fdb(config);
 
 	PACK_TABLE_IN_BUF_FN(config->schedule_count,
 	                     SIZE_SCHEDULE_ENTRY,

@@ -53,7 +53,6 @@ l2_address_lookup_table_write(xmlTextWriterPtr writer,
 		rc |= xml_write_field(writer, "macaddr",   config->l2_lookup[i].macaddr);
 		rc |= xml_write_field(writer, "destports", config->l2_lookup[i].destports);
 		rc |= xml_write_field(writer, "enfport",   config->l2_lookup[i].enfport);
-		rc |= xml_write_field(writer, "index",     config->l2_lookup[i].index);
 		rc |= xmlTextWriterEndElement(writer);
 		if (rc < 0) {
 			loge("error while writing l2_lookup Table element %d", i);
