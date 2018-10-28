@@ -43,3 +43,6 @@ sja1105-y := sja1105-kmod.o \
              ../lib/dynamic-config/mac-config.o
 
 ccflags-y := -DSJA1105_KMOD_BUILD -I${M}/../
+ifeq ($(ARCH),arm)
+ccflags-y += -mlong-calls
+endif
