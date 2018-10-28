@@ -67,8 +67,6 @@ LIB_SRC  += $(shell find src/lib -name "*.[c|h]")   # All .c and .h files
 LIB_DEPS := $(patsubst %.c, %.o, $(LIB_SRC))        # All .o and .h files
 LIB_OBJ  := $(filter %.o, $(LIB_DEPS))              # Only the .o files
 
-KMOD_SRC := $(shell find src/kmod -name "*.[c|h]")  # All .c and .h files
-
 # Handling for the O= Make variable which sets the path of intermediary objects
 ifneq ($(O),)
     override O := $(addsuffix /,$(O))
@@ -101,7 +99,11 @@ $(SJA1105_BIN): $(BIN_DEPS) $(SJA1105_LIB)
   endif
 #endif
 
-$(SJA1105_KMOD): $(KMOD_SRC)
+# Determine kmod dependencies by parsing its Kbuild file
+include src/kmod/Kbuild
+KMOD_DEPS := $(addprefix src/kmod/, $(sja1105-y))
+
+$(SJA1105_KMOD): $(KMOD_DEPS)
 	@mkdir -p $(dir $@)
 	$(MAKE) -C $(KDIR) M=$$PWD/src/kmod
 
@@ -203,4 +205,4 @@ clean:
 	$(MAKE) -C $(KDIR) M=$$PWD/src/kmod clean
 
 .PHONY: clean uninstall build man pdf install install-binaries \
-	install-configs install-headers install-manpages
+	install-configs install-headers install-manpages $(KMOD_DEPS)
