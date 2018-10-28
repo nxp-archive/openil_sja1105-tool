@@ -67,8 +67,6 @@ LIB_SRC  += $(shell find src/lib -name "*.[c|h]")   # All .c and .h files
 LIB_DEPS := $(patsubst %.c, %.o, $(LIB_SRC))        # All .o and .h files
 LIB_OBJ  := $(filter %.o, $(LIB_DEPS))              # Only the .o files
 
-KMOD_SRC := $(shell find src/kmod -name "*.[c|h]")  # All .c and .h files
-
 # Handling for the O= Make variable which sets the path of intermediary objects
 ifneq ($(O),)
     override O := $(addsuffix /,$(O))
@@ -106,6 +104,10 @@ $(O)$(SJA1105_BIN): $(BIN_DEPS) $(O)$(SJA1105_LIB)
     $(error Please set KDIR variable to point to a kernel source tree.)
   endif
 #endif
+
+# Determine kmod dependencies by parsing its Kbuild file
+include src/kmod/Kbuild
+KMOD_SRC := $(patsubst %.o, %.c, $(addprefix src/kmod/, $(sja1105-y)))
 
 $(SJA1105_KMOD): $(KMOD_SRC)
 	@mkdir -p $(dir $@)
