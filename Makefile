@@ -94,10 +94,12 @@ $(SJA1105_LIB): $(O)$(SJA1105_LIB)
 endif
 
 $(O)$(SJA1105_LIB): $(LIB_DEPS)
-	$(CC) -shared $(LIB_OBJ) -o $@ $(LIB_LDFLAGS)
+	@echo "  LD [lib]    $@"
+	@$(CC) -shared $(LIB_OBJ) -o $@ $(LIB_LDFLAGS)
 
 $(O)$(SJA1105_BIN): $(BIN_DEPS) $(O)$(SJA1105_LIB)
-	$(CC) $(BIN_OBJ) -o $@ $(BIN_LDFLAGS)
+	@echo "  LD [tool]   $@"
+	@$(CC) $(BIN_OBJ) -o $@ $(BIN_LDFLAGS)
 
 ifneq (,$(filter $(SJA1105_KMOD) clean build,$(MAKECMDGOALS)))
   ifeq ($(KDIR),)
@@ -115,15 +117,18 @@ $(SJA1105_KMOD): $(KMOD_SRC)
 
 $(O)src/common.o: src/common.c
 	@mkdir -p $(dir $@)
-	$(CC) $(LIB_CFLAGS) -c $^ -o $@
+	@echo "  CC [common] $@"
+	@$(CC) $(LIB_CFLAGS) -c $^ -o $@
 
 $(O)src/tool/%.o: src/tool/%.c
 	@mkdir -p $(dir $@)
-	$(CC) $(BIN_CFLAGS) -c $^ -o $@
+	@echo "  CC [tool]   $@"
+	@$(CC) $(BIN_CFLAGS) -c $^ -o $@
 
 $(O)src/lib/%.o: src/lib/%.c
 	@mkdir -p $(dir $@)
-	$(CC) $(LIB_CFLAGS) -c $^ -o $@
+	@echo "  CC [lib]    $@"
+	@$(CC) $(LIB_CFLAGS) -c $^ -o $@
 
 # Manpages
 
