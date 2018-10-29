@@ -99,11 +99,11 @@ $(O)$(SJA1105_LIB): $(LIB_DEPS)
 $(O)$(SJA1105_BIN): $(BIN_DEPS) $(O)$(SJA1105_LIB)
 	$(CC) $(BIN_OBJ) -o $@ $(BIN_LDFLAGS)
 
-#ifneq (,$(filter $(SJA1105_KMOD),$(MAKECMDGOALS)))
+ifneq (,$(filter $(SJA1105_KMOD) clean build,$(MAKECMDGOALS)))
   ifeq ($(KDIR),)
     $(error Please set KDIR variable to point to a kernel source tree.)
   endif
-#endif
+endif
 
 # Determine kmod dependencies by parsing its Kbuild file
 include src/kmod/Kbuild
