@@ -111,7 +111,7 @@ struct sja1105_port_status_hl1 {
 	uint64_t n_sizerr;
 	uint64_t n_crcerr;
 	uint64_t n_vlnotfound;
-	uint64_t n_bepolerr;
+	uint64_t n_ctpolerr;
 	uint64_t n_polerr;
 	uint64_t n_rxfrmsh;
 	uint64_t n_rxfrm;

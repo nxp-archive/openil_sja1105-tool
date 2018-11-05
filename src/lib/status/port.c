@@ -77,7 +77,7 @@ void sja1105_port_status_show(struct sja1105_port_status *status,
 	formatted_append(print_buf, len, fmt, "N_SIZERR        %" PRIu64, status->hl1.n_sizerr);
 	formatted_append(print_buf, len, fmt, "N_CRCERR        %" PRIu64, status->hl1.n_crcerr);
 	formatted_append(print_buf, len, fmt, "N_VLNOTFOUND    %" PRIu64, status->hl1.n_vlnotfound);
-	formatted_append(print_buf, len, fmt, "N_BEPOLERR      %" PRIu64, status->hl1.n_bepolerr);
+	formatted_append(print_buf, len, fmt, "N_CTPOLERR      %" PRIu64, status->hl1.n_ctpolerr);
 	formatted_append(print_buf, len, fmt, "N_POLERR        %" PRIu64, status->hl1.n_polerr);
 	formatted_append(print_buf, len, fmt, "N_RXFRM         %" PRIu64, status->hl1.n_rxfrm);
 	formatted_append(print_buf, len, fmt, "N_RXBYTE        %" PRIu64, status->hl1.n_rxbyte);
