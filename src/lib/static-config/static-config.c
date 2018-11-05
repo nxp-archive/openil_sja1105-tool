@@ -388,7 +388,8 @@ int sja1105_static_config_check_valid(struct sja1105_static_config *config)
 }
 
 int
-sja1105_static_config_unpack(void *buf, struct sja1105_static_config *config)
+sja1105_static_config_unpack(void *buf, ssize_t buf_len,
+                             struct sja1105_static_config *config)
 {
 	struct sja1105_table_header hdr;
 	char *p = buf;
@@ -398,6 +399,11 @@ sja1105_static_config_unpack(void *buf, struct sja1105_static_config *config)
 	uint64_t computed_crc;
 
 	memset(config, 0, sizeof(*config));
+	/* Guard memory access to buffer */
+	if (buf_len >= 4)
+		buf_len -= 4;
+	else
+		goto error;
 	/* Retrieve device_id from first 4 bytes of packed buffer */
 	gtable_unpack(p, &config->device_id, 31, 0, 4);
 	logv("Device ID is 0x%08" PRIx64 " (%s)",
@@ -411,11 +417,16 @@ sja1105_static_config_unpack(void *buf, struct sja1105_static_config *config)
 	p += SIZE_SJA1105_DEVICE_ID;
 
 	while (1) {
+		/* Guard memory access to buffer */
+		if (buf_len >= SIZE_TABLE_HEADER)
+			buf_len -= SIZE_TABLE_HEADER;
+		else
+			goto error;
 		sja1105_table_header_unpack(p, &hdr);
 		/* This should match on last table header */
-		if (hdr.len == 0) {
+		if (hdr.len == 0)
 			break;
-		}
+
 		/* Print table header with same verbosity level as "logv" */
 		if (SJA1105_VERBOSE_CONDITION) {
 			sja1105_table_header_show(&hdr);
@@ -430,6 +441,12 @@ sja1105_static_config_unpack(void *buf, struct sja1105_static_config *config)
 			goto error;
 		}
 		p += SIZE_TABLE_HEADER;
+
+		/* Guard memory access to buffer */
+		if (buf_len >= (int) hdr.len * 4)
+			buf_len -= (int) hdr.len * 4;
+		else
+			goto error;
 
 		table_end = p + hdr.len * 4;
 		computed_crc = ether_crc32_le(p, hdr.len * 4);
@@ -448,6 +465,12 @@ sja1105_static_config_unpack(void *buf, struct sja1105_static_config *config)
 			     (ptrdiff_t) (table_end - p));
 			p = table_end;
 		}
+		/* Guard memory access to buffer */
+		if (buf_len >= 4)
+			buf_len -= 4;
+		else
+			goto error;
+
 		gtable_unpack(p, &read_crc, 31, 0, 4);
 		p += 4;
 		if (computed_crc != read_crc) {
@@ -457,6 +480,10 @@ sja1105_static_config_unpack(void *buf, struct sja1105_static_config *config)
 			goto error;
 		}
 	}
+	if (buf_len)
+		logi("%zd bytes left unparsed at end of static config buffer",
+		     buf_len);
+
 	sja1105_static_config_patch_vllupformat(config);
 	return 0;
 error:

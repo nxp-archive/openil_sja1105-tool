@@ -169,7 +169,7 @@ staging_area_load(const char *staging_area_file,
 		goto filesystem_error3;
 	}
 	/* Static config */
-	rc = sja1105_static_config_unpack(buf, static_config);
+	rc = sja1105_static_config_unpack(buf, staging_area_len, static_config);
 	if (rc < 0) {
 		loge("error while interpreting config");
 		goto invalid_staging_area_error;
