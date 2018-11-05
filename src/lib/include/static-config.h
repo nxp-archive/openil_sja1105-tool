@@ -502,7 +502,7 @@ int  sja1105_static_config_add_entry(struct sja1105_table_header*, void *,
 int  sja1105_static_config_hexdump(void*);
 int  sja1105_static_config_check_valid(struct sja1105_static_config*);
 int  sja1105_static_config_pack(void*, struct sja1105_static_config*);
-int  sja1105_static_config_unpack(void*, struct sja1105_static_config*);
+int  sja1105_static_config_unpack(void*, ssize_t, struct sja1105_static_config*);
 
 void sja1105_lib_get_build_date(char *buf);
 void sja1105_lib_get_version(char *buf);

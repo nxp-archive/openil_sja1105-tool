@@ -199,6 +199,7 @@ sja1105_default_staging_area(struct sja1105_staging_area *staging_area,
 	switch (config_name) {
 	case LS1021ATSN:
 		rc = sja1105_static_config_unpack(ls1021atsn_packed_buf,
+		                                  ARRAY_SIZE(ls1021atsn_packed_buf),
 		                                  &staging_area->static_config);
 		break;
 	default:
