@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016, NXP Semiconductors
+ * Copyright (c) 2017, NXP Semiconductors
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,49 +28,55 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
-#ifndef _SPI_EXTERNAL_H
-#define _SPI_EXTERNAL_H
-
 #include <common.h>
+#include <lib/include/spi.h>
 
-struct sja1105_spi_setup {
-	uint64_t    device_id;
-	uint64_t    part_nr; /* Needed for P/R distinction (same switch core) */
-	const char *device;
-	int         dry_run;
-	const char *staging_area;
-	int         flush;
-};
-
-struct sja1105_spi_message {
-	uint64_t access;
-	uint64_t read_count;
-	uint64_t address;
-};
-
-enum sja1105_spi_access_mode {
-	SPI_READ = 0,
-	SPI_WRITE = 1,
-};
+/*
+ * TODO:
+ * Dummy implementation of SPI functions for sja1105-tool/libsja1105 build target.
+ * For this build target, all library functions that call one of this SPI
+ * functions shall be replaced with functions that get the required
+ * information from the kernel module.
+ */
 
 int sja1105_spi_send_packed_buf(struct sja1105_spi_setup *spi_setup,
                                 enum sja1105_spi_access_mode read_or_write,
                                 uint64_t reg_addr,
                                 void    *packed_buf,
-                                uint64_t size_bytes);
+                                uint64_t size_bytes)
+{
+	(void)spi_setup;
+	(void)read_or_write;
+	(void)reg_addr;
+	(void)packed_buf;
+	(void)size_bytes;
+	return -1;
+}
+
 int sja1105_spi_send_int(struct sja1105_spi_setup *spi_setup,
                          enum sja1105_spi_access_mode read_or_write,
                          uint64_t reg_offset,
                          uint64_t *value,
-                         uint64_t size_bytes);
+                         uint64_t size_bytes)
+{
+	(void)spi_setup;
+	(void)read_or_write;
+	(void)reg_offset;
+	(void)value;
+	(void)size_bytes;
+	return -1;
+}
+
 int sja1105_spi_send_long_packed_buf(struct sja1105_spi_setup *spi_setup,
                                      enum sja1105_spi_access_mode read_or_write,
                                      uint64_t base_addr,
                                      char    *packed_buf,
-                                     uint64_t size_bytes);
-
-#define SIZE_SJA1105_DEVICE_ID 4
-#define SIZE_SPI_MSG_HEADER    4
-#define SIZE_SPI_MSG_MAXLEN    64 * 4
-
-#endif
+                                     uint64_t size_bytes)
+{
+	(void)spi_setup;
+	(void)read_or_write;
+	(void)base_addr;
+	(void)packed_buf;
+	(void)size_bytes;
+	return -1;
+}
