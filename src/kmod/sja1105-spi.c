@@ -28,10 +28,52 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
+#include <linux/module.h>
+#include <linux/kernel.h>
+#include <linux/spi/spi.h>
+#include <linux/netdevice.h>
 #include <lib/include/static-config.h>
 #include <lib/include/gtable.h>
 #include <lib/include/spi.h>
 #include <common.h>
+#include "sja1105.h"
+
+
+#define SPI_TRANSFER_SIZE_MAX      (SIZE_SPI_MSG_HEADER + SIZE_SPI_MSG_MAXLEN)
+
+
+static int sja1105_spi_transfer(const struct sja1105_spi_setup *spi_setup,
+                         const void *tx, void *rx, int size)
+{
+	struct sja1105_spi_private *priv = container_of(spi_setup,
+	                         struct sja1105_spi_private, spi_setup);
+	struct spi_device *spi = priv->spi_dev;
+	struct spi_transfer transfer = {
+	   .tx_buf = tx,
+	   .rx_buf = rx,
+	   .len = size,
+	};
+	struct spi_message msg;
+	int rc;
+
+	if (size > SPI_TRANSFER_SIZE_MAX) {
+		dev_err(&spi->dev, "Spi message too long: is=%i, max=%i\n",
+		        size, SPI_TRANSFER_SIZE_MAX);
+		return -EMSGSIZE;
+	}
+
+	spi_message_init(&msg);
+
+	spi_message_add_tail(&transfer, &msg);
+
+	rc = spi_sync(spi, &msg);
+	if (rc) {
+		dev_err(&spi->dev, "Spi transfer failed: rc = %d\n", rc);
+		return rc;
+	}
+
+	return rc;
+}
 
 static void sja1105_spi_message_access(void  *buf,
                                        struct sja1105_spi_message *msg,
@@ -60,18 +102,6 @@ void sja1105_spi_message_unpack(void *buf, struct sja1105_spi_message *msg)
 void sja1105_spi_message_pack(void *buf, struct sja1105_spi_message *msg)
 {
 	sja1105_spi_message_access(buf, msg, 1);
-}
-
-void sja1105_spi_message_show(struct sja1105_spi_message *msg)
-{
-	logi("SPI Message Header:\n");
-	if (msg->access == 1) {
-		logi("Access mode write, address 0x%" PRIX64 "\n",
-		     msg->address);
-	} else {
-		logi("Access mode read, %" PRIu64 " 32-bit words, address 0x%"
-		     PRIX64 "\n", msg->read_count, msg->address);
-	}
 }
 
 /* If read_or_write is:
@@ -192,7 +222,7 @@ int sja1105_spi_send_long_packed_buf(struct sja1105_spi_setup *spi_setup,
 	/* Initialize chunk */
 	chunk.buf_ptr = packed_buf;
 	chunk.spi_address = base_addr;
-	chunk.len = min(buf_len, SIZE_SPI_MSG_MAXLEN);
+	chunk.len = min((int)buf_len, SIZE_SPI_MSG_MAXLEN);
 
 	while (chunk.len) {
 		rc = sja1105_spi_send_packed_buf(spi_setup,
