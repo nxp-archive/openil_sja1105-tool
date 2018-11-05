@@ -59,10 +59,6 @@ enum sja1105_spi_access_mode {
 	SPI_WRITE = 1,
 };
 
-const char *sja1105_device_id_string_get(uint64_t device_id, uint64_t part_nr);
-int sja1105_device_id_get(struct sja1105_spi_setup *spi_setup,
-                          uint64_t *device_id, uint64_t *part_nr);
-
 int sja1105_spi_transfer(const struct sja1105_spi_setup*, const void *tx, void *rx, int size);
 int sja1105_spi_configure(struct sja1105_spi_setup*);
 void sja1105_spi_message_unpack(void*, struct sja1105_spi_message*);
