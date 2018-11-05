@@ -181,4 +181,7 @@ int sja1105_port_status_get(struct sja1105_spi_setup*,
                             int port);
 int sja1105_port_status_clear(struct sja1105_spi_setup*, int);
 
+const char *sja1105_device_id_string_get(uint64_t device_id, uint64_t part_nr);
+int sja1105_device_id_get(struct sja1105_spi_setup *spi_setup,
+                          uint64_t *device_id, uint64_t *part_nr);
 #endif
