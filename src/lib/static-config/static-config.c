@@ -46,7 +46,7 @@ static void sja1105_table_write_crc(char *table_start, char *crc_ptr)
 #define CHECK_COUNT(entry_count, max_entry_count, table_name)                 \
 {                                                                             \
 	if ((entry_count) > (max_entry_count)) {                              \
-		printf("There can be no more than %d %s entries "             \
+		loge("There can be no more than %d %s entries "             \
 		       "(%d present)\n",  (max_entry_count),                  \
 		       (table_name), (entry_count));                          \
 		return -1;                                                    \
@@ -217,66 +217,10 @@ int sja1105_static_config_add_entry(struct sja1105_table_header *hdr, void *buf,
 		return SIZE_SGMII_ENTRY;
 	}
 	default:
-		printf("Unknown Table %" PRIX64 "\n", hdr->block_id);
+		loge("Unknown Table %" PRIX64 "\n", hdr->block_id);
 		return -1;
 	}
 	return 0;
-}
-
-/* Returns number of bytes that were dumped
- * (length of static config) */
-int sja1105_static_config_hexdump(void *buf)
-{
-	struct sja1105_table_header hdr;
-	struct sja1105_static_config config;
-	char *p = buf;
-	char *table_end;
-	int bytes;
-
-	memset(&config, 0, sizeof(config));
-	/* Retrieve device_id from first 4 bytes of packed buffer */
-	gtable_unpack(p, &config.device_id, 31, 0, 4);
-	printf("Device ID is 0x%08" PRIx64 " (%s)\n",
-	       config.device_id, sja1105_device_id_string_get(
-	       config.device_id, SJA1105_PART_NR_DONT_CARE));
-	p += SIZE_SJA1105_DEVICE_ID;
-
-	while (1) {
-		sja1105_table_header_unpack(p, &hdr);
-		/* This should match on last table header */
-		if (hdr.len == 0) {
-			break;
-		}
-		sja1105_table_header_show(&hdr);
-		printf("Header:\n");
-		gtable_hexdump(p, SIZE_TABLE_HEADER);
-		p += SIZE_TABLE_HEADER;
-
-		table_end = p + hdr.len * 4;
-		while (p < table_end) {
-			bytes = sja1105_static_config_add_entry(&hdr, p,
-			                                        &config);
-			if (bytes < 0) {
-				goto error;
-			}
-			printf("Entry (%d bytes):\n", bytes);
-			gtable_hexdump(p, bytes);
-			p += bytes;
-		};
-		if (p != table_end) {
-			loge("WARNING: Incorrect table length specified in header!");
-			printf("Extra:\n");
-			gtable_hexdump(p, (ptrdiff_t) (table_end - p));
-			p = table_end;
-		}
-		printf("Table Data CRC:\n");
-		gtable_hexdump(p, 4);
-		p += 4;
-		printf("\n");
-	}
-	return ((ptrdiff_t) (p - (char*) buf)) * sizeof(*buf);
-error:
-	return -1;
 }
 
 static void
@@ -429,7 +373,9 @@ sja1105_static_config_unpack(void *buf, ssize_t buf_len,
 
 		/* Print table header with same verbosity level as "logv" */
 		if (SJA1105_VERBOSE_CONDITION) {
-			sja1105_table_header_show(&hdr);
+			char print_buf[512];
+			sja1105_table_header_fmt_show(print_buf, 512, &hdr);
+			logv("%s", print_buf);
 		}
 		computed_crc = ether_crc32_le(p, SIZE_TABLE_HEADER - 4);
 		computed_crc &= 0xFFFFFFFF;
@@ -459,8 +405,10 @@ sja1105_static_config_unpack(void *buf, ssize_t buf_len,
 			p += bytes;
 		};
 		if (p != table_end) {
+			char print_buf[512];
 			loge("WARNING: Incorrect table length for:");
-			sja1105_table_header_show(&hdr);
+			sja1105_table_header_fmt_show(print_buf, 512, &hdr);
+			loge("%s", print_buf);
 			loge("Table data has %td extra bytes compared to header!",
 			     (ptrdiff_t) (table_end - p));
 			p = table_end;

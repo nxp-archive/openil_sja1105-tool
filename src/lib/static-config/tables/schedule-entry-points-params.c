@@ -65,14 +65,3 @@ void sja1105_schedule_entry_points_params_entry_fmt_show(
 	formatted_append(print_buf, len, fmt, "CLKSRC    0x%" PRIX64, entry->clksrc);
 	formatted_append(print_buf, len, fmt, "ACTSUBSCH 0x%" PRIX64, entry->actsubsch);
 }
-
-void sja1105_schedule_entry_points_params_entry_show(struct sja1105_schedule_entry_points_params_entry *entry)
-{
-	char print_buf[MAX_LINE_SIZE];
-	char *fmt = "%s\n";
-
-	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_schedule_entry_points_params_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
-	puts(print_buf);
-}
-

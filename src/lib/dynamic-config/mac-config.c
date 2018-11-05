@@ -32,7 +32,6 @@
 #include <lib/include/static-config.h>
 #include <lib/include/gtable.h>
 #include <lib/include/spi.h>
-#include <lib/helpers.h>
 #include <common.h>
 
 struct sja1105_dyn_mac_reconfig_entry {

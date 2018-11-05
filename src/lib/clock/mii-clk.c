@@ -62,10 +62,3 @@ void sja1105_cgu_mii_control_unpack(void *buf, struct
 	sja1105_cgu_mii_control_access(buf, mii_control, 0);
 }
 
-void sja1105_cgu_mii_control_show(struct sja1105_cgu_mii_control *mii_control)
-{
-	printf("CLKSEL    %" PRIX64 "\n", mii_control->clksrc);
-	printf("AUTOBLOCK %" PRIX64 "\n", mii_control->autoblock);
-	printf("PD        %" PRIX64 "\n", mii_control->pd);
-}
-

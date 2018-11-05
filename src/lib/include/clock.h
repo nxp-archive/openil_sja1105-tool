@@ -129,12 +129,10 @@ struct sja1105_cgu_mii_control {
  * revision-dependent, it is necessary to pass the device id
  * as an argument for proper identification
  */
-void sja1105_cgu_pll_control_show(struct sja1105_cgu_pll_control*, uint64_t);
 void sja1105_cgu_pll_control_pack(void*, struct sja1105_cgu_pll_control*, uint64_t);
 void sja1105_cgu_pll_control_unpack(void*, struct sja1105_cgu_pll_control*, uint64_t);
 void sja1105_cgu_mii_control_pack(void*, struct sja1105_cgu_mii_control*);
 void sja1105_cgu_mii_control_unpack(void*, struct sja1105_cgu_mii_control*);
-void sja1105_cgu_mii_control_show(struct sja1105_cgu_mii_control *mii_control);
 int sja1105_cgu_rmii_ref_clk_config(struct sja1105_spi_setup*, int);
 int sja1105_cgu_rmii_ext_tx_clk_config(struct sja1105_spi_setup*, int);
 int sja1105_cgu_mii_tx_clk_config(struct sja1105_spi_setup*, int, int);
@@ -145,7 +143,6 @@ int sja1105_cgu_rgmii_tx_clk_config(struct sja1105_spi_setup*, int, int);
 int sja1105_rgmii_cfg_pad_tx_config(struct sja1105_spi_setup *spi_setup, int port);
 void sja1105_cgu_idiv_pack(void*, struct sja1105_cgu_idiv*);
 void sja1105_cgu_idiv_unpack(void*, struct sja1105_cgu_idiv*);
-void sja1105_cgu_idiv_show(struct sja1105_cgu_idiv*);
 int sja1105_cgu_idiv_config(struct sja1105_spi_setup*, int, int, int);
 int sja1105_clocking_setup(struct sja1105_spi_setup*, struct sja1105_xmii_params_entry*,
                            struct sja1105_mac_config_entry*);
@@ -164,6 +161,5 @@ int sgmii_clocking_setup(struct sja1105_spi_setup *spi_setup,
 
 void sja1105_cfg_pad_mii_tx_pack(void*, struct sja1105_cfg_pad_mii_tx*);
 void sja1105_cfg_pad_mii_tx_unpack(void*, struct sja1105_cfg_pad_mii_tx*);
-void sja1105_cfg_pad_mii_tx_show(struct sja1105_cfg_pad_mii_tx*);
 
 #endif

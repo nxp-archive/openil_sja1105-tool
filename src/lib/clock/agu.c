@@ -71,16 +71,3 @@ void sja1105_cfg_pad_mii_tx_unpack(void *buf,
 	sja1105_cfg_pad_mii_tx_access(buf, pad_mii_tx, 0);
 }
 
-void sja1105_cfg_pad_mii_tx_show(struct sja1105_cfg_pad_mii_tx *pad_mii_tx)
-{
-	printf("D32_OS    %" PRIX64 "\n", pad_mii_tx->d32_os);
-	printf("D32_IPUD  %" PRIX64 "\n", pad_mii_tx->d32_ipud);
-	printf("D10_OS    %" PRIX64 "\n", pad_mii_tx->d10_os);
-	printf("D10_IPUD  %" PRIX64 "\n", pad_mii_tx->d10_ipud);
-	printf("CTRL_OS   %" PRIX64 "\n", pad_mii_tx->ctrl_os);
-	printf("CTRL_IPUD %" PRIX64 "\n", pad_mii_tx->ctrl_ipud);
-	printf("CLK_OS    %" PRIX64 "\n", pad_mii_tx->clk_os);
-	printf("CLK_IH    %" PRIX64 "\n", pad_mii_tx->clk_ih);
-	printf("CLK_IPUD  %" PRIX64 "\n", pad_mii_tx->clk_ipud);
-}
-

@@ -74,14 +74,3 @@ void sja1105_vl_forwarding_params_entry_fmt_show(
 	formatted_append(print_buf, len, fmt, "PARTSPC  %s", buf);
 	formatted_append(print_buf, len, fmt, "DEBUGEN  0x%" PRIX64, entry->debugen);
 }
-
-void sja1105_vl_forwarding_params_entry_show(struct sja1105_vl_forwarding_params_entry *entry)
-{
-	char print_buf[MAX_LINE_SIZE];
-	char *fmt = "%s\n";
-
-	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_vl_forwarding_params_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
-	puts(print_buf);
-}
-

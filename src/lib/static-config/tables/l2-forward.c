@@ -78,14 +78,3 @@ void sja1105_l2_forwarding_entry_fmt_show(
 	formatted_append(print_buf, len, fmt, "FL_DOMAIN  0x%" PRIX64, entry->fl_domain);
 	formatted_append(print_buf, len, fmt, "VLAN_PMAP %s", vlan_pmap_buf);
 }
-
-void sja1105_l2_forwarding_entry_show(struct sja1105_l2_forwarding_entry *entry)
-{
-	char print_buf[MAX_LINE_SIZE];
-	char *fmt = "%s\n";
-
-	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_l2_forwarding_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
-	puts(print_buf);
-}
-

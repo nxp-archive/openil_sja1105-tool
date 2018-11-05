@@ -76,19 +76,3 @@ void sja1105_cgu_pll_control_unpack(void *buf, struct
 	sja1105_cgu_pll_control_access(buf, pll_control, 0, device_id);
 }
 
-void sja1105_cgu_pll_control_show(struct sja1105_cgu_pll_control *pll_control,
-                                  uint64_t device_id)
-{
-	printf("PLLCLKSEL %" PRIX64 "\n", pll_control->pllclksrc);
-	printf("MSEL      %" PRIX64 "\n", pll_control->msel);
-	if (IS_PQRS(device_id)) {
-		printf("NSEL      %" PRIX64 "\n", pll_control->nsel);
-	}
-	printf("AUTOBLOCK %" PRIX64 "\n", pll_control->autoblock);
-	printf("PSEL      %" PRIX64 "\n", pll_control->psel);
-	printf("DIRECT    %" PRIX64 "\n", pll_control->direct);
-	printf("FBSEL     %" PRIX64 "\n", pll_control->fbsel);
-	printf("BYPASS    %" PRIX64 "\n", pll_control->bypass);
-	printf("PD        %" PRIX64 "\n", pll_control->pd);
-}
-

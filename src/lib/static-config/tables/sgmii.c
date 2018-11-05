@@ -109,14 +109,3 @@ sja1105_sgmii_entry_fmt_show(char *print_buf,
 	formatted_append(print_buf, len, fmt, "AUTONEG_ADV       0x%" PRIX64, entry->autoneg_adv);
 	formatted_append(print_buf, len, fmt, "BASIC_CONTROL     0x%" PRIX64, entry->basic_control);
 }
-
-void sja1105_sgmii_entry_show(struct sja1105_sgmii_entry *entry)
-{
-	char print_buf[MAX_LINE_SIZE];
-	char *fmt = "%s\n";
-
-	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_sgmii_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
-	puts(print_buf);
-}
-

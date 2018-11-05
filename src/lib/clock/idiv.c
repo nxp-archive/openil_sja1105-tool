@@ -62,14 +62,6 @@ void sja1105_cgu_idiv_unpack(void *buf, struct sja1105_cgu_idiv *idiv)
 	sja1105_cgu_idiv_access(buf, idiv, 0);
 }
 
-void sja1105_cgu_idiv_show(struct sja1105_cgu_idiv *idiv)
-{
-	printf("CLKSRC    %" PRIX64 "\n", idiv->clksrc);
-	printf("AUTOBLOCK %" PRIX64 "\n", idiv->autoblock);
-	printf("IDIV      %" PRIX64 "\n", idiv->idiv);
-	printf("PD        %" PRIX64 "\n", idiv->pd);
-}
-
 int sja1105_cgu_idiv_config(struct sja1105_spi_setup *spi_setup,
                             int port, int enabled, int factor)
 {
