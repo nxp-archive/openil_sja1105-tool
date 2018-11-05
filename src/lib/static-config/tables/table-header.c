@@ -78,75 +78,79 @@ void sja1105_table_header_pack_with_crc(
 	gtable_pack(buf + SIZE_TABLE_HEADER - 4, &hdr->crc, 31, 0, 4);
 }
 
-void sja1105_table_header_show(struct sja1105_table_header *hdr)
+void sja1105_table_header_fmt_show(char *print_buf,size_t len,
+                                   struct sja1105_table_header *hdr)
 {
+	char *fmt = "%s";
+
 	switch (hdr->block_id) {
 		case BLKID_SCHEDULE_TABLE:
-			printf("Schedule Table");
+			snprintf(print_buf, len, "Schedule Table");
 			break;
 		case BLKID_SCHEDULE_ENTRY_POINTS_TABLE:
-			printf("Schedule Entry Points Table");
+			snprintf(print_buf, len, "Schedule Entry Points Table");
 			break;
 		case BLKID_VL_LOOKUP_TABLE:
-			printf("VL Lookup Table");
+			snprintf(print_buf, len, "VL Lookup Table");
 			break;
 		case BLKID_VL_POLICING_TABLE:
-			printf("VL Policing Table");
+			snprintf(print_buf, len, "VL Policing Table");
 			break;
 		case BLKID_VL_FORWARDING_TABLE:
-			printf("VL Forwarding Table");
+			snprintf(print_buf, len, "VL Forwarding Table");
 			break;
 		case BLKID_L2_LOOKUP_TABLE:
-			printf("L2 Lookup Table");
+			snprintf(print_buf, len, "L2 Lookup Table");
 			break;
 		case BLKID_L2_POLICING_TABLE:
-			printf("L2 Policing Table");
+			snprintf(print_buf, len, "L2 Policing Table");
 			break;
 		case BLKID_VLAN_LOOKUP_TABLE:
-			printf("VLAN Lookup Table");
+			snprintf(print_buf, len, "VLAN Lookup Table");
 			break;
 		case BLKID_L2_FORWARDING_TABLE:
-			printf("L2 Forwarding Table");
+			snprintf(print_buf, len, "L2 Forwarding Table");
 			break;
 		case BLKID_MAC_CONFIG_TABLE:
-			printf("MAC Configuration Table");
+			snprintf(print_buf, len, "MAC Configuration Table");
 			break;
 		case BLKID_SCHEDULE_PARAMS_TABLE:
-			printf("Schedule Parameters Table");
+			snprintf(print_buf, len, "Schedule Parameters Table");
 			break;
 		case BLKID_SCHEDULE_ENTRY_POINTS_PARAMS_TABLE:
-			printf("Schedule Entry Points Parameters Table");
+			snprintf(print_buf, len, "Schedule Entry Points Parameters Table");
 			break;
 		case BLKID_VL_FORWARDING_PARAMS_TABLE:
-			printf("VL Forwarding Parameters Table");
+			snprintf(print_buf, len, "VL Forwarding Parameters Table");
 			break;
 		case BLKID_L2_LOOKUP_PARAMS_TABLE:
-			printf("L2 Lookup Parameters Table");
+			snprintf(print_buf, len, "L2 Lookup Parameters Table");
 			break;
 		case BLKID_L2_FORWARDING_PARAMS_TABLE:
-			printf("L2 Forwarding Parameters Table");
+			snprintf(print_buf, len, "L2 Forwarding Parameters Table");
 			break;
 		case BLKID_CLK_SYNC_PARAMS_TABLE:
-			printf("Clock Synchronization Parameters Table");
+			snprintf(print_buf, len, "Clock Synchronization Parameters Table");
 			break;
 		case BLKID_AVB_PARAMS_TABLE:
-			printf("AVB Parameters Table");
+			snprintf(print_buf, len, "AVB Parameters Table");
 			break;
 		case BLKID_GENERAL_PARAMS_TABLE:
-			printf("General Parameters Table");
+			snprintf(print_buf, len, "General Parameters Table");
 			break;
 		case BLKID_RETAGGING_TABLE:
-			printf("Retagging Table");
+			snprintf(print_buf, len, "Retagging Table");
 			break;
 		case BLKID_XMII_MODE_PARAMS_TABLE:
-			printf("xMII Mode Parameters Table");
+			snprintf(print_buf, len, "xMII Mode Parameters Table");
 			break;
 		case BLKID_SGMII_TABLE:
-			printf("SGMII Table");
+			snprintf(print_buf, len, "SGMII Table");
 			break;
 		default:
-			printf("Unknown Table %" PRIX64 " ", hdr->block_id);
+			snprintf(print_buf, len, "Unknown Table %" PRIX64 " ", hdr->block_id);
 	}
-	printf(", length %" PRIu64 " bytes (%" PRIu64 " x 32-bit words), CRC %" PRIX64 "\n",
-	       hdr->len * 4, hdr->len, hdr->crc);
+	formatted_append(print_buf, len, fmt,
+	        ", length %" PRIu64 " bytes (%" PRIu64 " x 32-bit words), CRC %" PRIX64 "\n",
+	        hdr->len * 4, hdr->len, hdr->crc);
 }

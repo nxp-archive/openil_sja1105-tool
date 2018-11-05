@@ -113,14 +113,3 @@ void sja1105_l2_lookup_entry_fmt_show(
 	formatted_append(print_buf, len, fmt, "ENFPORT   0x%" PRIX64, entry->enfport);
 	formatted_append(print_buf, len, fmt, "INDEX     0x%" PRIX64, entry->index);
 }
-
-void sja1105_l2_lookup_entry_show(struct sja1105_l2_lookup_entry *entry)
-{
-	char print_buf[MAX_LINE_SIZE];
-	char *fmt = "%s\n";
-
-	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_l2_lookup_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
-	puts(print_buf);
-}
-

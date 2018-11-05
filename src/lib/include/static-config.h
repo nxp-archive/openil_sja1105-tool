@@ -456,7 +456,6 @@ struct sja1105_static_config {
 #include "status.h"
 
 #define DEFINE_HEADERS_FOR_CONFIG_TABLE(device, table)                                         \
-	void sja1105_##table##_entry_show(struct sja1105_##table##_entry*);                    \
 	void sja1105_##table##_entry_fmt_show(char*, size_t, char*, struct sja1105_##table##_entry*);  \
 	void sja1105##device##_##table##_entry_pack(void*, struct sja1105_##table##_entry*);   \
 	void sja1105##device##_##table##_entry_unpack(void*, struct sja1105_##table##_entry*); \
@@ -493,13 +492,13 @@ DEFINE_SEPARATE_HEADERS_FOR_CONFIG_TABLE(l2_lookup_params);
 void sja1105_table_header_pack(void*, struct sja1105_table_header*);
 void sja1105_table_header_unpack(void*, struct sja1105_table_header*);
 void sja1105_table_header_pack_with_crc(void*, struct sja1105_table_header *hdr);
-void sja1105_table_header_show(struct sja1105_table_header *hdr);
+void sja1105_table_header_fmt_show(char *print_buf,size_t len,
+                                   struct sja1105_table_header *hdr);
 
 /* From static-config.c */
 unsigned int sja1105_static_config_get_length(struct sja1105_static_config*);
 int  sja1105_static_config_add_entry(struct sja1105_table_header*, void *,
                                      struct sja1105_static_config*);
-int  sja1105_static_config_hexdump(void*);
 int  sja1105_static_config_check_valid(struct sja1105_static_config*);
 int  sja1105_static_config_pack(void*, struct sja1105_static_config*);
 int  sja1105_static_config_unpack(void*, ssize_t, struct sja1105_static_config*);

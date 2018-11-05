@@ -32,7 +32,6 @@
 #include <lib/include/static-config.h>
 #include <lib/include/gtable.h>
 #include <lib/include/spi.h>
-#include <lib/helpers.h>
 #include <common.h>
 
 /*
@@ -96,31 +95,6 @@ void sja1105_dyn_l2_lookup_cmd_unpack(void *buf, struct
                                       sja1105_dyn_l2_lookup_cmd *cmd)
 {
 	sja1105_dyn_l2_lookup_cmd_access(buf, cmd, 0);
-}
-
-void sja1105_mgmt_entry_show(struct sja1105_mgmt_entry *entry)
-{
-	printf("TS_REGID  %" PRIX64 "\n", entry->ts_regid);
-	printf("EGR_TS    %" PRIX64 "\n", entry->egr_ts);
-	printf("MACADDR   %" PRIX64 "\n", entry->macaddr);
-	printf("DESTPORTS %" PRIX64 "\n", entry->destports);
-	printf("ENFPORT   %" PRIX64 "\n", entry->enfport);
-	printf("INDEX     %" PRIX64 "\n", entry->index);
-}
-
-void sja1105_dyn_l2_lookup_cmd_show(struct sja1105_dyn_l2_lookup_cmd *cmd)
-{
-	printf("VALID     %" PRIX64 "\n", cmd->valid);
-	printf("RDWRSET   %" PRIX64 "\n", cmd->rdwrset);
-	printf("ERRORS    %" PRIX64 "\n", cmd->errors);
-	printf("LOCKEDS   %" PRIX64 "\n", cmd->lockeds);
-	printf("VALIDENT  %" PRIX64 "\n", cmd->valident);
-	printf("MGMTROUTE %" PRIX64 "\n", cmd->mgmtroute);
-	if (cmd->mgmtroute) {
-		sja1105_mgmt_entry_show(&cmd->entry.mgmt);
-	} else {
-		sja1105_l2_lookup_entry_show(&cmd->entry.l2);
-	}
 }
 
 static inline int

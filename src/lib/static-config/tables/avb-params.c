@@ -95,13 +95,3 @@ void sja1105_avb_params_entry_fmt_show(
 	mac_addr_sprintf(mac_buf, entry->srcmeta);
 	formatted_append(print_buf, len, fmt, "SRCMETA  %s", mac_buf);
 }
-
-void sja1105_avb_params_entry_show(struct sja1105_avb_params_entry *entry)
-{
-	char print_buf[MAX_LINE_SIZE];
-	char *fmt = "%s\n";
-
-	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_avb_params_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
-	puts(print_buf);
-}

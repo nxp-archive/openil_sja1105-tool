@@ -40,8 +40,6 @@
 int  gtable_configure(int quirks);
 int  gtable_unpack(void*, uint64_t*, int, int, int);
 int  gtable_pack(void*, uint64_t*, int, int, int);
-void gtable_hexdump(void*, int);
-void gtable_bitdump(void*, int);
 uint32_t ether_crc32_le(void*, unsigned int);
 
 #endif

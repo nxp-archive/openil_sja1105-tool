@@ -95,17 +95,6 @@ void sja1105_cbs_cmd_unpack(void *buf,
 	sja1105_cbs_cmd_access(buf, cbs, 0);
 }
 
-void sja1105_cbs_show(struct sja1105_cbs *cbs)
-{
-	printf("SHAPER_ID  %" PRIX64 "\n", cbs->index);
-	printf("CBS_PORT   %" PRIX64 "\n", cbs->port);
-	printf("CBS_PRIO   %" PRIX64 "\n", cbs->prio);
-	printf("CREDIT_LO  %" PRIX64 "\n", cbs->credit_lo);
-	printf("CREDIT_HI  %" PRIX64 "\n", cbs->credit_hi);
-	printf("SEND_SLOPE %" PRIX64 "\n", cbs->send_slope);
-	printf("IDLE_SLOPE %" PRIX64 "\n", cbs->idle_slope);
-}
-
 /* Wrapper around sja1105_spi_send_packed_buf() */
 int sja1105_cbs_commit(struct sja1105_spi_setup *spi_setup,
                        struct sja1105_cbs *cbs)

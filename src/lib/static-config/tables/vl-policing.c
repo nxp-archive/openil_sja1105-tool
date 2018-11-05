@@ -75,14 +75,3 @@ void sja1105_vl_policing_entry_fmt_show(
 		formatted_append(print_buf, len, fmt, "JITTER    0x%" PRIX64, entry->jitter);
 	}
 }
-
-void sja1105_vl_policing_entry_show(struct sja1105_vl_policing_entry *entry)
-{
-	char print_buf[MAX_LINE_SIZE];
-	char *fmt = "%s\n";
-
-	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_vl_policing_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
-	puts(print_buf);
-}
-

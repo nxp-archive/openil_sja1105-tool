@@ -75,14 +75,3 @@ void sja1105_xmii_params_entry_fmt_show(
 	formatted_append(print_buf, len, fmt, "PHY_MAC   %s", phy_mac_buf);
 	formatted_append(print_buf, len, fmt, "xMII_MODE %s", xmii_mode_buf);
 }
-
-void sja1105_xmii_params_entry_show(struct sja1105_xmii_params_entry *entry)
-{
-	char print_buf[MAX_LINE_SIZE];
-	char *fmt = "%s\n";
-
-	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_xmii_params_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
-	puts(print_buf);
-}
-

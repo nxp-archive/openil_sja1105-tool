@@ -64,12 +64,13 @@ void sja1105_spi_message_pack(void *buf, struct sja1105_spi_message *msg)
 
 void sja1105_spi_message_show(struct sja1105_spi_message *msg)
 {
-	printf("SPI Message Header:\n");
+	logi("SPI Message Header:\n");
 	if (msg->access == 1) {
-		printf("Access mode write, address 0x%" PRIX64 "\n", msg->address);
+		logi("Access mode write, address 0x%" PRIX64 "\n",
+		     msg->address);
 	} else {
-		printf("Access mode read, %" PRIu64 " 32-bit words, address 0x%"
-		       PRIX64 "\n", msg->read_count, msg->address);
+		logi("Access mode read, %" PRIu64 " 32-bit words, address 0x%"
+		     PRIX64 "\n", msg->read_count, msg->address);
 	}
 }
 

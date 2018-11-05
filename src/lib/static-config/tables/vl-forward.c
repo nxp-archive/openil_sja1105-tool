@@ -69,14 +69,3 @@ void sja1105_vl_forwarding_entry_fmt_show(
 	formatted_append(print_buf, len, fmt, "PARTITION 0x%" PRIX64, entry->partition);
 	formatted_append(print_buf, len, fmt, "DESTPORTS 0x%" PRIX64, entry->destports);
 }
-
-void sja1105_vl_forwarding_entry_show(struct sja1105_vl_forwarding_entry *entry)
-{
-	char print_buf[MAX_LINE_SIZE];
-	char *fmt = "%s\n";
-
-	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_vl_forwarding_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
-	puts(print_buf);
-}
-

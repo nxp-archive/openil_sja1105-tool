@@ -242,49 +242,6 @@ gtable_pack(void *buf, uint64_t *value, int start, int end,
 	                           len_bytes, GTABLE_PACK, g_quirks);
 }
 
-void gtable_hexdump(void *table, int len)
-{
-	uint8_t *p = (uint8_t*) table;
-	int i;
-
-	for (i = 0; i < len; i++) {
-		if (i && (i % 4 == 0)) {
-			printf(" ");
-		}
-		if (i % 8 == 0) {
-			if (i) {
-				printf("\n");
-			}
-			printf("(%.4X): ", i);
-		}
-		printf("%.2X ", p[i]);
-	}
-	printf("\n");
-}
-
-void gtable_bitdump(void *table, int len)
-{
-	uint8_t *p = (uint8_t*) table;
-	int i, bit;
-
-	for (i = 0; i < len; i++) {
-		if (i && (i % 4 == 0)) {
-			printf(" ");
-		}
-		if (i % 8 == 0) {
-			if (i) {
-				printf("\n");
-			}
-			printf("(%.4X): ", i);
-		}
-		for (bit = 7; bit >= 0; bit--) {
-			printf("%d", (p[i] & (1 << bit)) >> bit);
-		}
-		printf(" ");
-	}
-	printf("\n");
-}
-
 int gtable_configure(int quirks)
 {
 	g_quirks = quirks;
