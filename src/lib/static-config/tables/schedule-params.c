@@ -67,7 +67,7 @@ void sja1105_schedule_params_entry_fmt_show(
 		char *fmt,
 		struct sja1105_schedule_params_entry *entry)
 {
-	char subscheind_buf[MAX_LINE_SIZE];
+	char subscheind_buf[128];
 	print_array(subscheind_buf, entry->subscheind, 8);
 	formatted_append(print_buf, len, fmt, "SUBSCHEIND %s", subscheind_buf);
 }
