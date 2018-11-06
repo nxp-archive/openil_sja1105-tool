@@ -202,6 +202,7 @@ uninstall:
 
 clean:
 	rm -f $(SJA1105_BIN) $(BIN_OBJ) $(SJA1105_LIB) $(LIB_OBJ)
+	find . -name '.*.cmd' -delete
 	$(MAKE) -C $(KDIR) M=$$PWD/src/kmod clean
 
 .PHONY: clean uninstall build man pdf install install-binaries \
