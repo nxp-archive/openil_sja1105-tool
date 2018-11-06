@@ -68,8 +68,8 @@ void sja1105_xmii_params_entry_fmt_show(
 		char *fmt,
 		struct sja1105_xmii_params_entry *entry)
 {
-	char phy_mac_buf[MAX_LINE_SIZE];
-	char xmii_mode_buf[MAX_LINE_SIZE];
+	char phy_mac_buf[128];
+	char xmii_mode_buf[128];
 	print_array(phy_mac_buf, entry->phy_mac, 5);
 	print_array(xmii_mode_buf, entry->xmii_mode, 5);
 	formatted_append(print_buf, len, fmt, "PHY_MAC   %s", phy_mac_buf);

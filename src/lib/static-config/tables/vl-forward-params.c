@@ -68,7 +68,7 @@ void sja1105_vl_forwarding_params_entry_fmt_show(
 		char *fmt,
 		struct sja1105_vl_forwarding_params_entry *entry)
 {
-	char buf[MAX_LINE_SIZE];
+	char buf[128];
 
 	print_array(buf, entry->partspc, 8);
 	formatted_append(print_buf, len, fmt, "PARTSPC  %s", buf);

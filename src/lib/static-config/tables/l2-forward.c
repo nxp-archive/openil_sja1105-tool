@@ -70,7 +70,7 @@ void sja1105_l2_forwarding_entry_fmt_show(
 		char *fmt,
 		struct sja1105_l2_forwarding_entry *entry)
 {
-	char vlan_pmap_buf[MAX_LINE_SIZE];
+	char vlan_pmap_buf[128];
 
 	print_array(vlan_pmap_buf, entry->vlan_pmap, 8);
 	formatted_append(print_buf, len, fmt, "BC_DOMAIN  0x%" PRIX64, entry->bc_domain);

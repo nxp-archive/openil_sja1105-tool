@@ -137,9 +137,9 @@ sja1105_mac_config_entry_fmt_show(
 		char *fmt,
 		struct sja1105_mac_config_entry *entry)
 {
-	char    base_buf[MAX_LINE_SIZE];
-	char     top_buf[MAX_LINE_SIZE];
-	char enabled_buf[MAX_LINE_SIZE];
+	char    base_buf[128];
+	char     top_buf[128];
+	char enabled_buf[128];
 
 	print_array(base_buf,    entry->base, 8);
 	print_array(top_buf,     entry->top, 8);

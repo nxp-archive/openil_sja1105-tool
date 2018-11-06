@@ -68,7 +68,7 @@ void sja1105_l2_forwarding_params_entry_fmt_show(
 		char *fmt,
 		struct sja1105_l2_forwarding_params_entry *entry)
 {
-	char part_spc_buf[MAX_LINE_SIZE];
+	char part_spc_buf[128];
 	print_array(part_spc_buf, entry->part_spc, 8);
 	formatted_append(print_buf, len, fmt, "MAX_DYNP  0x%" PRIX64, entry->max_dynp);
 	formatted_append(print_buf, len, fmt, "PART_SPC %s", part_spc_buf);
