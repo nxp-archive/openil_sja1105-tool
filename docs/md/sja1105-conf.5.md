@@ -33,45 +33,17 @@ staging-area
 
 :   This is the filename used to store the staging, binary configuration
     employed by the command family **sja1105-tool config**. If not
-    specified, it defaults to "_/etc/sja1105/.staging_". It should be
-    specified without quotes even if spaces are present in the filename.
+    specified, it defaults to "_/lib/firmware/sja1105.bin_". This is the
+    loacation and filename from where the sja1105 kernel module tries to load
+    the configuration. It should be specified without quotes even if spaces
+    are present in the filename.
 
 device
 
-:   This is the filename used to communicate with the SJA1105. It must
-    be a character device that supports the following ioctl calls:
-    SPI_IOC_RD_MODE, SPI_IOC_WR_MODE, SPI_IOC_WR_BITS_PER_WORD,
-    SPI_IOC_RD_BITS_PER_WORD, SPI_IOC_RD_MAX_SPEED_HZ,
-    SPI_IOC_WR_MAX_SPEED_HZ, SPI_IOC_MESSAGE. If not specified, it
-    defaults to "_/dev/spidev0.1_". The same restrictions apply as
-    above.
-
-bits
-
-:   Number of bits per word for the SPI communication. Should be set to 8.
-
-delay
-
-:   Number of microseconds for how long to delay after sending the last bit
-    of this transfer before optionally deselecting the chip until the next one.
-    Defaults to zero.
-
-cs_change
-
-:   Set to 1 to deactivate Chip Select for the SPI device before starting
-    the next transfer, or 0 to keep Chip Select always active. Defaults
-    to zero.
-
-mode
-
-:   Used to describe the Clock Polarity and Clock Phase for the SPI
-    transmission. May be set to "0" or "SPI_CPHA" or "SPI_CPOL" or "SPI_CPHA |
-    SPI_CPOL". Should be set (and defaults) to SPI_CPHA.
-
-speed
-
-:   Maximum SPI clock speed, in Hz. Should be set higher than 700 Hz and
-    lower than 17.8 MHz. Defaults to 1 MHz.
+:   This is the filename used to communicate with the sja1105 kernel module.
+    It shall point to the sja1105 device in the sysfs.
+    defaults to "_/sys/bus/spi/drivers/sja1105/spi0.1_". The same restrictions
+    apply as above.
 
 dry_run
 
@@ -142,11 +114,6 @@ EXAMPLE
 [spi-setup]
 	staging-area = FILE
 	device       = FILE
-	bits         = 8
-	speed        = 1000000
-	delay        = 0
-	cs_change    = 0
-	mode         = SPI_CPHA
 	dry_run      = false
 	auto_flush   = false
 

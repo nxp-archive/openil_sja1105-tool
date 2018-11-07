@@ -1,0 +1,174 @@
+.TH "sja1105\-kmod" "1" "" "" "SJA1105\-TOOL"
+.SH NAME
+.PP
+\f[I]sja1105.ko\f[] \- Kernel driver module for NXP SJA1105
+.SH DESCRIPTION
+.PP
+\f[I]sja1105.ko\f[] is the kernel driver module (kmod) for the SJA1105
+switch chip.
+It loads the static switch configuration from user space and uploads it
+to the chip, monitors the link status of the port\[aq]s PHYs to
+reconfigure the port\[aq]s MAC speed and provides a user space interface
+to control the operation of the switch.
+.SS STATIC CONFIGURATION
+.PP
+On driver probe, the kmod loads the static configuration from user space
+(default location "\f[I]/lib/firmware/sja1105.bin\f[]") and uploads it
+to the chip.
+.SS RESET PIN HANDLING
+.PP
+If defined in device tree, the kmod controls the reset lines of the
+switch and PHY chips.
+On driver probe, it releses the switch from reset, uploads the static
+configuration, then releases the PHYs from reset.
+.SS NETWORK DEVICE INTERFACES
+.PP
+The kmod creates a network interface for each port of the switch to
+configure and monitor the PHY connected to this port.
+On a link up event, the link speed of the port\[aq]s MAC is adjusted to
+match with the PHY\[aq]s speed.
+.SS SYSFS USER SPACE INTERFACE
+.PP
+The kmod exports some sysfs attributes to control and monitor the
+switch.
+.TP
+.B config_upload
+Write \[aq]1\[aq] to the file to reload the static configuration from
+user space and upload it to the switch chip.
+.RS
+.RE
+.TP
+.B device_id
+Read the device id of the switch chip.
+Reading the file returns the device id, part number and the chip\[aq]s
+name.
+.RS
+.RE
+.TP
+.B general_status
+Read general status information from the switch.
+Reading the file returns the status information in text format.
+.RS
+.RE
+.TP
+.B port_mapping
+Get the mapping between the network interface name and port number for
+all ports.
+Reading the file returns a "\f[I]netif_name\f[] \f[I]port_number\f[]"
+pair for each port.
+.RS
+.RE
+.TP
+.B port_status
+Read status information for a specific port from the switch.
+To select a port, write either the network interface name which is
+assigned to the port or the port number to the file prior to reading.
+Consecutive reads always return the status of the same port.
+.RS
+.RE
+.TP
+.B port_status_clear
+Clear the status counters for a specific port.
+To clear the counters of a port, write either the network interface name
+which is assigned to the port or the port number to the file.
+Writing "\f[I]all\f[]" clears the counters of all ports.
+.RS
+.RE
+.TP
+.B reg_access
+Read or write a register of the switch chip.
+\f[B]Register write:\f[] Write the register address and value, separated
+by a space character to the file.
+\f[B]Register read:\f[] Write the register address to the file prior to
+reading.
+When reading the file, the register value is read from the switch and
+returned in the format "\f[I]reg_address\f[] \f[I]value\f[]".
+Consecutive reads always return the same registers value.
+.RS
+.RE
+.SH DEVICE\-TREE
+.SS BINDINGS
+.TP
+.B reset\-gpio
+GPIO connected to the reset input of the switch chip.
+.RS
+.RE
+.TP
+.B phy\-reset\-gpio
+GPIO connected to the reset input of a PHY chip.
+Can be specified for each port.
+.RS
+.RE
+.TP
+.B phy\-reset\-duration
+Length of the reset pule in milliseconds.
+.RS
+.RE
+.TP
+.B phy\-reset\-delay
+Time before the PHY is ready after reset in milliseconds.
+.RS
+.RE
+.SS DEVICE\-TREE EXAMPLE
+.IP
+.nf
+\f[C]
+&dspi0\ {
+\ \ \ \ sja1105\@1\ {
+\ \ \ \ \ \ \ \ compatible\ =\ "nxp,sja1105t";
+\ \ \ \ \ \ \ \ reg\ =\ <0x1>;
+\ \ \ \ \ \ \ \ spi\-max\-frequency\ =\ <4000000>;
+\ \ \ \ \ \ \ \ #address\-cells\ =\ <1>;
+\ \ \ \ \ \ \ \ #size\-cells\ =\ <0>;
+\ \ \ \ \ \ \ \ fsl,spi\-cs\-sck\-delay\ =\ <1000>;
+\ \ \ \ \ \ \ \ fsl,spi\-sck\-cs\-delay\ =\ <1000>;
+\ \ \ \ \ \ \ \ #reset\-gpio\ =\ <&spigpio1_1\ 0\ 1>;
+\ \ \ \ \ \ \ \ port\@0\ {
+\ \ \ \ \ \ \ \ \ \ \ \ sja1105,port\-label\ =\ "seth5";\ /*\ ETH5\ written\ on\ chassis\ */
+\ \ \ \ \ \ \ \ \ \ \ \ phy\-handle\ =\ <&rgmii_phy3>;
+\ \ \ \ \ \ \ \ \ \ \ \ phy\-mode\ =\ "rgmii";
+\ \ \ \ \ \ \ \ \ \ \ \ #phy\-reset\-gpio\ =\ <&spigpio1_1\ 1\ 1>;
+\ \ \ \ \ \ \ \ \ \ \ \ #phy\-reset\-duration\ =\ <1>;
+\ \ \ \ \ \ \ \ \ \ \ \ #phy\-reset\-delay\ =\ <120>;
+\ \ \ \ \ \ \ \ \ \ \ \ reg\ =\ <0>;
+\ \ \ \ \ \ \ \ };
+\ \ \ \ \ \ \ \ port\@1\ {
+\ \ \ \ \ \ \ \ \ \ \ \ sja1105,port\-label\ =\ "seth2";\ /*\ ETH2\ written\ on\ chassis\ */
+\ \ \ \ \ \ \ \ \ \ \ \ phy\-handle\ =\ <&rgmii_phy4>;
+\ \ \ \ \ \ \ \ \ \ \ \ phy\-mode\ =\ "rgmii";
+\ \ \ \ \ \ \ \ \ \ \ \ reg\ =\ <1>;
+\ \ \ \ \ \ \ \ };
+\ \ \ \ \ \ \ \ port\@2\ {
+\ \ \ \ \ \ \ \ \ \ \ \ sja1105,port\-label\ =\ "seth3";\ /*\ ETH3\ written\ on\ chassis\ */
+\ \ \ \ \ \ \ \ \ \ \ \ phy\-handle\ =\ <&rgmii_phy5>;
+\ \ \ \ \ \ \ \ \ \ \ \ phy\-mode\ =\ "rgmii";
+\ \ \ \ \ \ \ \ \ \ \ \ reg\ =\ <2>;
+\ \ \ \ \ \ \ \ };
+\ \ \ \ \ \ \ \ port\@3\ {
+\ \ \ \ \ \ \ \ \ \ \ \ sja1105,port\-label\ =\ "seth4";\ /*\ ETH4\ written\ on\ chassis\ */
+\ \ \ \ \ \ \ \ \ \ \ \ phy\-handle\ =\ <&rgmii_phy6>;
+\ \ \ \ \ \ \ \ \ \ \ \ phy\-mode\ =\ "rgmii";
+\ \ \ \ \ \ \ \ \ \ \ \ reg\ =\ <3>;
+\ \ \ \ \ \ \ \ };
+\ \ \ \ \ \ \ \ port\@4\ {
+\ \ \ \ \ \ \ \ \ \ \ \ sja1105,port\-label\ =\ "sethi";\ /*\ Internal\ port\ connected\ to\ eth2\ */
+\ \ \ \ \ \ \ \ \ \ \ \ phy\-mode\ =\ "rgmii";
+\ \ \ \ \ \ \ \ \ \ \ \ reg\ =\ <4>;
+\ \ \ \ \ \ \ \ \ \ \ \ fixed\-link\ {
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ speed\ =\ <1000>;
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ full\-duplex;
+\ \ \ \ \ \ \ \ \ \ \ \ };
+\ \ \ \ \ \ \ \ };
+\ \ \ \ };
+};
+\f[]
+.fi
+.SH BUGS
+.SH AUTHOR
+.PP
+sja1105\-tool was written by Vladimir Oltean <vladimir.oltean@nxp.com>
+.SH SEE ALSO
+.SH COMMENTS
+.PP
+This man page was written using pandoc (http://pandoc.org/) by the same
+author.
