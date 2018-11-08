@@ -38,8 +38,8 @@
 #include <lib/include/spi.h>
 #include <common.h>
 
-const char *default_staging_area = "/etc/sja1105/.staging";
-const char *default_device = "/dev/spidev0.1";
+const char *default_staging_area = "/lib/firmware/sja1105.bin";
+const char *default_device = "/sys/bus/spi/drivers/sja1105/spi0.1";
 const uint64_t default_device_id = SJA1105_NO_DEVICE_ID;
 /* default_device_id of SJA1105_NO_DEVICE_ID signals
  * to sja1105_spi_configure that it should attempt to read
@@ -56,11 +56,6 @@ struct fields_set {
 	int device_id;
 	int device;
 	int staging_area;
-	int mode;
-	int bits;
-	int speed;
-	int delay;
-	int cs_change;
 	int dry_run;
 	int flush;
 	int verbose;
@@ -83,11 +78,6 @@ config_set_defaults(struct sja1105_spi_setup *spi_setup,
 	SET_DEFAULT_VAL(spi_setup, device_id, default_device_id, logv, "0x%" PRIx64);
 	SET_DEFAULT_VAL(spi_setup, device, default_device, logi, "%s");
 	SET_DEFAULT_VAL(spi_setup, staging_area, default_staging_area, logi, "%s");
-	SET_DEFAULT_VAL(spi_setup, mode, SPI_CPHA, logi, "0x%x" );
-	SET_DEFAULT_VAL(spi_setup, bits, 8, logi, "%d");
-	SET_DEFAULT_VAL(spi_setup, speed, 1000000, logi, "%u");
-	SET_DEFAULT_VAL(spi_setup, delay, 0, logi, "%u");
-	SET_DEFAULT_VAL(spi_setup, cs_change, 0, logi, "%d");
 	SET_DEFAULT_VAL(spi_setup, dry_run, 0, logi, "%d");
 	SET_DEFAULT_VAL(spi_setup, flush, 0, logi, "%d");
 	SET_DEFAULT_VAL(general_conf, verbose, 0, logi, "%d");
@@ -96,25 +86,10 @@ config_set_defaults(struct sja1105_spi_setup *spi_setup,
 	SET_DEFAULT_VAL(general_conf, screen_width, 80, logi, "%d");
 }
 
-static int parse_spi_mode(struct sja1105_spi_setup *spi_setup, char *mode)
-{
-	if (strcmp(mode, "SPI_CPHA") == 0) {
-		spi_setup->mode |= SPI_CPHA;
-	} else if (strcmp(mode, "SPI_CPOL") == 0) {
-		spi_setup->mode |= SPI_CPOL;
-	} else {
-		loge("Invalid value \"%s\" for mode."
-		     "Expected SPI_CPHA or SPI_CPOL.", mode);
-		return -1;
-	}
-	return 0;
-}
-
 static inline int
 parse_spi_setup(struct sja1105_spi_setup *spi_setup, char *key, char *value,
                 struct fields_set *fields_set)
 {
-	char *mode;
 	int rc;
 	uint64_t tmp;
 
@@ -128,48 +103,6 @@ parse_spi_setup(struct sja1105_spi_setup *spi_setup, char *key, char *value,
 		}
 		spi_setup->device_id = tmp;
 		fields_set->device_id = 1;
-	} else if (strcmp(key, "bits") == 0) {
-		rc = reliable_uint64_from_string(&tmp, value, NULL);
-		if (rc < 0) {
-			goto error;
-		}
-		spi_setup->bits = tmp;
-		fields_set->bits = 1;
-	} else if (strcmp(key, "speed") == 0) {
-		rc = reliable_uint64_from_string(&tmp, value, NULL);
-		if (rc < 0) {
-			goto error;
-		}
-		spi_setup->speed = tmp;
-		fields_set->speed = 1;
-	} else if (strcmp(key, "delay") == 0) {
-		rc = reliable_uint64_from_string(&tmp, value, NULL);
-		if (rc < 0) {
-			goto error;
-		}
-		spi_setup->delay = tmp;
-		fields_set->delay = 1;
-	} else if (strcmp(key, "cs_change") == 0) {
-		rc = reliable_uint64_from_string(&tmp, value, NULL);
-		if (rc < 0) {
-			goto error;
-		}
-		spi_setup->cs_change = tmp;
-		fields_set->cs_change = 1;
-	} else if (strcmp(key, "mode") == 0) {
-		spi_setup->mode = 0;
-		mode = value;
-		while (value != NULL) {
-			strsep(&mode, "|");
-			if (mode == NULL) {
-				/* Value does not contain "|" delimiter */
-				parse_spi_mode(spi_setup, value);
-			} else {
-				parse_spi_mode(spi_setup, trimwhitespace(mode));
-			}
-			value = mode;
-		}
-		fields_set->mode = 1;
 	} else if (strcmp(key, "dry_run") == 0) {
 		if (strcmp(value, "false") == 0) {
 			spi_setup->dry_run = 0;
@@ -263,7 +196,7 @@ static inline int parse_key_val(struct sja1105_spi_setup *spi_setup,
                                 char *key, char *value, char *section_hdr,
                                 struct fields_set *fields_set)
 {
-	if (strcmp(section_hdr, "[spi_setup]") == 0) {
+	if (strcmp(section_hdr, "[setup]") == 0) {
 		parse_spi_setup(spi_setup, key, value, fields_set);
 	} else if (strcmp(section_hdr, "[general]") == 0) {
 		parse_general_config(general_conf, key, value, fields_set);

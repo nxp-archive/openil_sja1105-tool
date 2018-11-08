@@ -235,20 +235,14 @@ out_1:
 	return rc;
 }
 
-int
-staging_area_flush(struct sja1105_spi_setup *spi_setup,
-                   struct sja1105_staging_area *staging_area)
+int staging_area_flush(struct sja1105_spi_setup *spi_setup)
 {
 	int rc;
+	char value;
 
-	rc = sja1105_static_config_flush(spi_setup, &staging_area->static_config);
-	if (rc < 0) {
-		loge("static_config_flush failed");
-		goto out;
-	}
-	/* TODO: other configuration tables?
-	 */
-out:
+	value = '1';
+	rc = sysfs_write(spi_setup, "config_upload", &value, 1);
+
 	return rc;
 }
 

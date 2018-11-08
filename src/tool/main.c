@@ -153,9 +153,6 @@ void cleanup(struct sja1105_spi_setup *spi_setup)
 	    spi_setup->staging_area != default_staging_area) {
 		free((char*) spi_setup->staging_area);
 	}
-	if (spi_setup->fd) {
-		close(spi_setup->fd);
-	}
 }
 
 static int reinterpreted_return_code(int rc)

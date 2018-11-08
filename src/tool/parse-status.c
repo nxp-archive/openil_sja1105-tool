@@ -30,7 +30,10 @@
  *****************************************************************************/
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
 #include <string.h>
+#include <limits.h>
 #include "internal.h"
 #include <lib/include/status.h>
 
@@ -43,10 +46,58 @@ static void print_usage()
 	       "              Provide Port No. as argument [0-4]\n");
 }
 
+static int get_general_status(struct sja1105_spi_setup *spi_setup,
+                              char* buf, size_t len)
+{
+	int rc;
+
+	rc = sysfs_read(spi_setup, "general_status", buf, len);
+
+	return (rc > 0) ? 0 : -1;
+}
+
+static int get_port_status(struct sja1105_spi_setup *spi_setup, int port,
+                           char* buf, size_t len)
+{
+	int rc;
+	char value[2];
+
+	snprintf(value, sizeof(value), "%i", port);
+	rc = sysfs_write(spi_setup, "port_status", value, 2);
+	if (rc)
+		goto out;
+
+	rc = sysfs_read(spi_setup, "port_status", buf, len);
+	rc = (rc > 0) ? 0 : -1;;
+
+out:
+	return rc;
+}
+
+static int clear_port_status(struct sja1105_spi_setup *spi_setup, int port)
+{
+	int rc;
+	char value[8];
+
+	if (port == -1) {
+		snprintf(value, sizeof(value), "all");
+	} else if (port < 5) {
+		snprintf(value, sizeof(value), "%i", port);
+	} else {
+		loge("invalid port number %d", port);
+		rc = -1;
+		goto out;
+	}
+
+	rc = sysfs_write(spi_setup, "port_status_clear", value, strlen(value));
+
+out:
+	return rc;
+}
+
 static int status_ports(struct sja1105_spi_setup *spi_setup,
                         int port_no)
 {
-	struct sja1105_port_status status;
 	char *print_buf[5];
 	/* XXX Maybe not quite right? */
 	int   size = 10 * MAX_LINE_SIZE;
@@ -59,13 +110,11 @@ static int status_ports(struct sja1105_spi_setup *spi_setup,
 			print_buf[i] = (char*) calloc(size, sizeof(char));
 		}
 		for (i = 0; i < 5; i++) {
-			rc = sja1105_port_status_get(spi_setup, &status, i);
+			rc = get_port_status(spi_setup, i, print_buf[i], size);
 			if (rc < 0) {
 				loge("sja1105_port_status_get failed");
 				goto out;
 			}
-			sja1105_port_status_show(&status, i, print_buf[i], size,
-			                         spi_setup->device_id);
 		}
 		linewise_concat(print_buf, 5);
 
@@ -75,13 +124,11 @@ static int status_ports(struct sja1105_spi_setup *spi_setup,
 	} else {
 		/* Show for single port */
 		print_buf[0] = (char*) calloc(size, sizeof(char));
-		rc = sja1105_port_status_get(spi_setup, &status, port_no);
+		rc = get_port_status(spi_setup, port_no, print_buf[0], size);
 		if (rc < 0) {
 			loge("sja1105_port_status_get failed");
 			goto out;
 		}
-		sja1105_port_status_show(&status, port_no, print_buf[0], size,
-		                         spi_setup->device_id);
 		printf("%s\n", print_buf[0]);
 		free(print_buf[0]);
 	}
@@ -112,20 +159,11 @@ int status_parse_args(struct sja1105_spi_setup *spi_setup,
 		rc = -EINVAL;
 		goto parse_error;
 	} else if (matches(options[match], "general") == 0) {
-		struct sja1105_general_status status;
-		rc = sja1105_spi_configure(spi_setup);
-		if (rc < 0) {
-			loge("sja1105_spi_configure failed");
-			goto error;
-		}
-		rc = sja1105_general_status_get(spi_setup, &status);
-		if (rc < 0) {
+		rc = get_general_status(spi_setup, print_buf, 2048);
+		if (rc) {
 			loge("failed to get general status");
 			goto error;
 		}
-		/* Display the collected general status registers */
-		sja1105_general_status_show(&status, print_buf, sizeof(print_buf),
-		                            spi_setup->device_id);
 		printf("%s", print_buf);
 	} else if (matches(options[match], "ports") == 0) {
 		/* Consume "ports" */
@@ -150,13 +188,9 @@ int status_parse_args(struct sja1105_spi_setup *spi_setup,
 			rc = -EINVAL;
 			goto parse_error;
 		}
-		rc = sja1105_spi_configure(spi_setup);
-		if (rc < 0) {
-			loge("sja1105_spi_configure failed");
-			goto error;
-		}
+
 		if (clear) {
-			rc = sja1105_port_status_clear(spi_setup, port_no);
+			rc = clear_port_status(spi_setup, port_no);
 			if (rc < 0) {
 				loge("failed to clear port status");
 				goto error;
