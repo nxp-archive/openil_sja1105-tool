@@ -31,6 +31,14 @@
 #ifndef _SJA1105_TOOL_COMMON_H
 #define _SJA1105_TOOL_COMMON_H
 
+/* SJA1105_KMOD_BUILD shall be defined in Kbuild file for kmod build */
+
+#ifdef SJA1105_KMOD_BUILD
+ #include <linux/slab.h>
+ #include <linux/printk.h>
+ #include <linux/delay.h>
+ #include <linux/errno.h>
+#else
  #include <inttypes.h>
  #include <stdint.h>
  #include <stdlib.h>
@@ -40,6 +48,7 @@
  #include <errno.h>
  #include <stddef.h>
  #include <unistd.h>
+#endif /* SJA1105_KMOD_BUILD */
 
 /* These are our own error codes */
 #include <lib/include/errors.h>
@@ -62,31 +71,72 @@
 extern int SJA1105_DEBUG_CONDITION;
 extern int SJA1105_VERBOSE_CONDITION;
 
-#define _log(file, fmt, ...) do {                       \
+
+#ifdef SJA1105_KMOD_BUILD
+ #define calloc(n,size)	kzalloc((n*size), GFP_KERNEL)
+ #define free(ptr)     	kfree(ptr)
+ #define usleep(us)    	udelay(us)
+
+ #define PRIx8     "hhx"
+ #define PRIx16    "hx"
+ #define PRIx32    "lx"
+ #define PRIx64    "llx"
+ #define PRIX8     "hhX"
+ #define PRIX16    "hX"
+ #define PRIX32    "lX"
+ #define PRIX64    "llX"
+ #define PRIu8     "hhu"
+ #define PRIu16    "hu"
+ #define PRIu32    "lu"
+ #define PRIu64    "llu"
+
+ #define _log(level, fmt, ...) do {                \
 	if (SJA1105_DEBUG_CONDITION) {                  \
-		fprintf(file, "%s@%d: %s: " fmt "\n",   \
-		        __FILE__, __LINE__, __func__,   \
-		        ##__VA_ARGS__);                 \
+		printk(level "%s@%d: %s: " fmt "\n",         \
+		        __FILE__, __LINE__, __func__,        \
+		        ##__VA_ARGS__);                      \
 	} else {                                        \
-		fprintf(file, fmt "\n", ##__VA_ARGS__); \
+		printk(level fmt "\n", ##__VA_ARGS__);       \
 	}                                               \
-} while(0);
+ } while(0);
 
-#define logc(file, condition, ...) do {                 \
+ #define logc(level, condition, ...) do {          \
 	if (condition) {                                \
-		_log(file, __VA_ARGS__);                \
+		_log(level, __VA_ARGS__);                    \
 	}                                               \
-} while(0);
+ } while(0);
 
-#define loge(...) _log(stderr, __VA_ARGS__)
-#define logi(...) _log(stdout, __VA_ARGS__)
-#define logv(...) logc(stdout, SJA1105_VERBOSE_CONDITION, __VA_ARGS__);
+ #define loge(...) _log(KERN_ERR, __VA_ARGS__)
+ #define logi(...) _log(KERN_INFO, __VA_ARGS__)
+ #define logv(...) logc(KERN_DEBUG, SJA1105_VERBOSE_CONDITION, __VA_ARGS__);
+#else
+ #define _log(file, fmt, ...) do {                 \
+	if (SJA1105_DEBUG_CONDITION) {                  \
+		fprintf(file, "%s@%d: %s: " fmt "\n",        \
+		        __FILE__, __LINE__, __func__,        \
+		        ##__VA_ARGS__);                      \
+	} else {                                        \
+		fprintf(file, fmt "\n", ##__VA_ARGS__);      \
+	}                                               \
+ } while(0)
+
+ #define logc(file, condition, ...) do {           \
+	if (condition) {                                \
+		_log(file, __VA_ARGS__);                     \
+	}                                               \
+ } while(0)
+
+ #define loge(...) _log(stderr, __VA_ARGS__)
+ #define logi(...) _log(stdout, __VA_ARGS__)
+ #define logv(...) logc(stdout, SJA1105_VERBOSE_CONDITION, __VA_ARGS__);
+
+ #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+ #define min(x, y) (((x) < (y)) ? (x) : (y))
+#endif /* SJA1105_KMOD_BUILD */
 
 void formatted_append(char *buffer, size_t len, char *width_fmt, char *fmt, ...);
 void print_array(char *print_buf, uint64_t *array, int count);
 
-#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
-#define min(x, y) (((x) < (y)) ? (x) : (y))
 
 
 #define DEFINE_PACK_UNPACK_ACCESSORS(device, table)                                \
