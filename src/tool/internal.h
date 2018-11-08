@@ -65,9 +65,14 @@ int sja1105_staging_area_show(struct sja1105_staging_area*, char *table_name);
 
 int staging_area_load(const char*, struct sja1105_staging_area*);
 int staging_area_save(const char*, struct sja1105_staging_area*);
-int staging_area_flush(struct sja1105_spi_setup*,
-                       struct sja1105_staging_area*);
+int staging_area_flush(struct sja1105_spi_setup*);
 int staging_area_hexdump(const char*);
+
+/* From src/tool/tool-sysfs-file.c */
+int sysfs_read(struct sja1105_spi_setup *spi_setup, char* name,
+               char* buf, size_t len);
+int sysfs_write(struct sja1105_spi_setup *spi_setup, char* name,
+                char* buf, size_t len);
 
 /* From strings.c, mainly */
 char *trimwhitespace(char *str);

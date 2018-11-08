@@ -19,6 +19,60 @@ static void print_usage()
 	       "Incrementally dump registers starting at the given address\n");
 }
 
+
+static int write_register(struct sja1105_spi_setup *spi_setup,
+                         uint64_t address, uint64_t value)
+{
+	int rc;
+	int len;
+	char buf[80];
+
+	len = snprintf(buf, sizeof(buf), "0x%" PRIx64 " 0x%" PRIx64,
+	               address, value) + 1;
+	rc = sysfs_write(spi_setup, "reg_access", buf, len);
+
+	return (rc == len) ? 0 : -1;
+}
+
+static int read_register(struct sja1105_spi_setup *spi_setup,
+                         uint64_t address, uint64_t *value)
+{
+	int rc;
+	int len;
+	char buf[80];
+	char *next_ptr;
+	uint64_t read_address;
+
+	len = snprintf(buf, sizeof(buf), "0x%" PRIx64, address) + 1;
+	rc = sysfs_write(spi_setup, "reg_access", buf, len);
+	if (rc != len) {
+		rc = -1;
+		goto out;
+	}
+
+	rc = sysfs_read(spi_setup, "reg_access", buf, sizeof(buf));
+	if (rc <= 0) {
+		rc = -1;
+		goto out;
+	}
+
+	rc = reliable_uint64_from_string(&read_address, buf, &next_ptr);
+	if ((rc < 0) || (read_address != address)) {
+		logv("%s: could not read back address", __FUNCTION__);
+		goto out;
+	}
+
+	rc = reliable_uint64_from_string(value, next_ptr, NULL);
+	if (rc < 0) {
+		logv("%s: could not read value", __FUNCTION__);
+		goto out;
+	}
+
+out:
+	return rc;
+}
+
+
 int reg_parse_args(struct sja1105_spi_setup *spi_setup,
                       int argc, char **argv)
 {
@@ -26,7 +80,6 @@ int reg_parse_args(struct sja1105_spi_setup *spi_setup,
 		uint64_t address;
 		uint64_t data;
 		uint64_t count;
-		uint64_t size;
 	} reg_cmd;
 	int rc = 0;
 	uint64_t i;
@@ -36,19 +89,12 @@ int reg_parse_args(struct sja1105_spi_setup *spi_setup,
 		goto out_parse_error;
 	}
 
-	/* Make this assumption for now */
-	reg_cmd.size = 4;
 	if (matches(argv[0], "dump") == 0) {
 		/* consume the 'dump' parameter */
 		argc--; argv++;
 		if (argc != 2) {
 			loge("Please supply 2 parameters.");
 			goto out_parse_error;
-		}
-		rc = sja1105_spi_configure(spi_setup);
-		if (rc < 0) {
-			loge("sja1105_spi_configure failed");
-			goto out_spi_configure_failed;
 		}
 		rc = reliable_uint64_from_string(&reg_cmd.address,
 		                                 argv[0], NULL);
@@ -63,11 +109,8 @@ int reg_parse_args(struct sja1105_spi_setup *spi_setup,
 			goto out_parse_error;
 		}
 		for (i = 0; i < reg_cmd.count; i++) {
-			rc = sja1105_spi_send_int(spi_setup,
-			                          SPI_READ,
-			                          reg_cmd.address + i,
-			                          &reg_cmd.data,
-			                          reg_cmd.size);
+			rc = read_register(spi_setup, reg_cmd.address,
+			                   &reg_cmd.data);
 			if (rc < 0) {
 				loge("register address not read");
 				goto out_read_failed;
@@ -77,23 +120,14 @@ int reg_parse_args(struct sja1105_spi_setup *spi_setup,
 		}
 	} else if (argc == 1) {
 		// perform a read...
-		rc = sja1105_spi_configure(spi_setup);
-		if (rc < 0) {
-			loge("sja1105_spi_configure failed");
-			goto out_spi_configure_failed;
-		}
-
 		rc = reliable_uint64_from_string(&reg_cmd.address,
 		                                 argv[0], NULL);
 		if (rc < 0) {
 			loge("invalid register address at %s", argv[0]);
 			goto out_parse_error;
 		}
-		rc = sja1105_spi_send_int(spi_setup,
-		                          SPI_READ,
-		                          reg_cmd.address,
-		                          &reg_cmd.data,
-		                          reg_cmd.size);
+
+		rc = read_register(spi_setup, reg_cmd.address, &reg_cmd.data);
 		if (rc < 0) {
 			loge("Failed to read from address %" PRIx64,
 			     reg_cmd.address);
@@ -103,12 +137,6 @@ int reg_parse_args(struct sja1105_spi_setup *spi_setup,
 		       reg_cmd.address, reg_cmd.data);
 	} else if (argc == 2) {
 		// perform a write
-		rc = sja1105_spi_configure(spi_setup);
-		if (rc < 0) {
-			loge("sja1105_spi_configure failed");
-			goto out_spi_configure_failed;
-		}
-
 		rc = reliable_uint64_from_string(&reg_cmd.address,
 		                                 argv[0], NULL);
 		if (rc < 0) {
@@ -121,11 +149,7 @@ int reg_parse_args(struct sja1105_spi_setup *spi_setup,
 			loge("could not read data param %s", argv[1]);
 			goto out_parse_error;
 		}
-		rc = sja1105_spi_send_int(spi_setup,
-		                          SPI_WRITE,
-		                          reg_cmd.address,
-		                          &reg_cmd.data,
-		                          reg_cmd.size);
+		rc = write_register(spi_setup, reg_cmd.address, reg_cmd.data);
 		if (rc < 0) {
 			loge("Could not write data %" PRIx64
 			     " at address %" PRIx64,
@@ -140,7 +164,6 @@ int reg_parse_args(struct sja1105_spi_setup *spi_setup,
 
 out_parse_error:
 	print_usage();
-out_spi_configure_failed:
 out_write_failed:
 out_read_failed:
 	return rc;

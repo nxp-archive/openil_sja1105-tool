@@ -28,79 +28,77 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
-#include <stdio.h>
-#include <lib/include/reset.h>
+#include <string.h>
+#include <limits.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <unistd.h>
+#include <fcntl.h>
 #include <common.h>
-#include "internal.h"
+#include <lib/include/spi.h>
 
-/* TOOL_TODO
-static void print_usage()
-{
-	printf("Usage:\n");
-	printf(" * sja1105-tool reset core\n");
-	printf(" * sja1105-tool reset config\n");
-	printf(" * sja1105-tool reset clocking\n");
-	printf(" * sja1105-tool reset otp\n");
-	printf(" * sja1105-tool reset warm\n");
-	printf(" * sja1105-tool reset cold\n");
-	printf(" * sja1105-tool reset por\n");
-}
-*/
 
-int rgu_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv)
-{
 /*
-	const char *reset_options[] = {
-		"core",
-		"config",
-		"clocking",
-		"otp",
-		"warm",
-		"cold",
-		"por",
-	};
-	int (*sja1105_reset_fn[])(struct sja1105_spi_setup*) = {
-		sja1105_switch_core_reset,
-		sja1105_config_reset,
-		sja1105_clocking_reset,
-		sja1105_otp_reset,
-		sja1105_warm_reset,
-		sja1105_cold_reset,
-		sja1105_por_reset,
-	};
-	int match;
+ * Read data from a sysfs file.
+ * return: >0: number of bytes read, -1: failed
+ */
+int sysfs_read(struct sja1105_spi_setup *spi_setup, char* name,
+               char* buf, size_t len)
+{
 	int rc;
+	int fd;
+	char file_name[PATH_MAX];
 
-	if (argc < 1) {
-		goto out_parse_error_usage;
+	snprintf(file_name, PATH_MAX, "%s/%s",
+	         spi_setup->device, name);
+	fd = open(file_name, O_RDONLY);
+	if (fd < 0) {
+		logv("%s: could not open file %s", __FUNCTION__, file_name);
+		rc = -1;
+		goto out;
 	}
-	match = get_match(argv[0], reset_options, ARRAY_SIZE(reset_options));
-	if (match < 0) {
-		goto out_parse_error;
-	}
-	rc = sja1105_spi_configure(spi_setup);
-	if (rc < 0) {
-		loge("failed to open spi device");
-		goto out_spi_configure_failed;
-	}
-	rc = sja1105_reset_fn[match](spi_setup);
-	if (rc < 0) {
-		goto out_reset_failed;
-	}
-	goto out_ok;
 
-out_parse_error_usage:
-	print_usage();
-out_parse_error:
-	rc = -EINVAL;
-out_spi_configure_failed:
-out_reset_failed:
-out_ok:
+	rc = read(fd, buf, len);
+	if (rc <= 0) {
+		logv("%s: could not read file %s", __FUNCTION__, file_name);
+		rc = -1;
+		goto out_close;
+	}
+out_close:
+	close(fd);
+out:
 	return rc;
-*/
-	(void)spi_setup;
-	(void)argc;
-	(void)argv;
-	return -1;
 }
 
+/*
+ * Write data to a sysfs file.
+ * Return: 0: ok, -1: failed
+ */
+int sysfs_write(struct sja1105_spi_setup *spi_setup, char* name,
+                char* buf, size_t len)
+{
+	int rc;
+	int fd;
+	char file_name[PATH_MAX];
+
+	snprintf(file_name, PATH_MAX, "%s/%s",
+	         spi_setup->device, name);
+	fd = open(file_name, O_WRONLY);
+	if (fd < 0) {
+		logv("%s: could not open file %s", __FUNCTION__, file_name);
+		rc = -1;
+		goto out;
+	}
+
+	rc = write(fd, buf, len);
+	if (rc != (int)len) {
+		logv("%s: could not write file %s", __FUNCTION__, file_name);
+		rc = -1;
+		goto out_close;
+	}
+	rc = 0;
+out_close:
+	close(fd);
+out:
+	return rc;
+}

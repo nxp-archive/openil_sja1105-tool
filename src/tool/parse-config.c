@@ -98,12 +98,7 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 			goto filesystem_error;
 		}
 		if (spi_setup->flush) {
-			rc = sja1105_spi_configure(spi_setup);
-			if (rc < 0) {
-				loge("sja1105_spi_configure failed");
-				goto hardware_not_responding_error;
-			}
-			rc = staging_area_flush(spi_setup, &staging_area);
+			rc = staging_area_flush(spi_setup);
 			if (rc < 0) {
 				loge("staging_area_flush failed");
 				/* We have enough context to know that the staging
@@ -152,12 +147,7 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 			goto filesystem_error;
 		}
 		if (spi_setup->flush) {
-			rc = sja1105_spi_configure(spi_setup);
-			if (rc < 0) {
-				loge("sja1105_spi_configure failed");
-				goto hardware_not_responding_staging_area_dirty_error;
-			}
-			rc = staging_area_flush(spi_setup, &staging_area);
+			rc = staging_area_flush(spi_setup);
 			if (rc < 0) {
 				/* We have enough context to know that the staging
 				 * area is dirty, so we force this error instead of
@@ -170,16 +160,16 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 		if (argc != 0) {
 			goto parse_error;
 		}
+		/* There is no need to load the config area into RAM here since
+		 * the kernel driver directly loads it from the rootfs.
+		 * Nevertheless we load the config here to check it for
+		 * existence and validity and directly report an error.
+		 */
 		rc = staging_area_load(spi_setup->staging_area, &staging_area);
 		if (rc < 0) {
 			goto propagated_error;
 		}
-		rc = sja1105_spi_configure(spi_setup);
-		if (rc < 0) {
-			loge("sja1105_spi_configure failed");
-			goto hardware_not_responding_error;
-		}
-		rc = staging_area_flush(spi_setup, &staging_area);
+		rc = staging_area_flush(spi_setup);
 		if (rc < 0) {
 			goto propagated_error;
 		}
@@ -198,12 +188,7 @@ int config_parse_args(struct sja1105_spi_setup *spi_setup, int argc, char **argv
 			goto filesystem_error;
 		}
 		if (spi_setup->flush) {
-			rc = sja1105_spi_configure(spi_setup);
-			if (rc < 0) {
-				loge("sja1105_spi_configure failed");
-				goto hardware_not_responding_staging_area_dirty_error;
-			}
-			rc = staging_area_flush(spi_setup, &staging_area);
+			rc = staging_area_flush(spi_setup);
 			if (rc < 0) {
 				/* We have enough context to know that the staging
 				 * area is dirty, so we force this error instead of
@@ -270,12 +255,6 @@ invalid_staging_area_error:
 	return rc;
 hardware_left_floating_staging_area_dirty_error:
 	sja1105_err_remap(rc, SJA1105_ERR_UPLOAD_FAILED_HW_LEFT_FLOATING_STAGING_AREA_DIRTY);
-	return rc;
-hardware_not_responding_staging_area_dirty_error:
-	sja1105_err_remap(rc, SJA1105_ERR_HW_NOT_RESPONDING_STAGING_AREA_DIRTY);
-	return rc;
-hardware_not_responding_error:
-	sja1105_err_remap(rc, SJA1105_ERR_HW_NOT_RESPONDING);
 	return rc;
 filesystem_error:
 	sja1105_err_remap(rc, SJA1105_ERR_FILESYSTEM);
