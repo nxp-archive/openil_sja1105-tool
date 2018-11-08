@@ -99,18 +99,19 @@ DEFINE_SEPARATE_PACK_UNPACK_ACCESSORS(l2_lookup);
 /* Common functions */
 void sja1105_l2_lookup_entry_fmt_show(
 		char *print_buf,
+		size_t len,
 		char *fmt,
 		struct sja1105_l2_lookup_entry *entry)
 {
 	char mac_buf[MAC_ADDR_SIZE];
 
-	formatted_append(print_buf, fmt, "VLANID    0x%" PRIX64, entry->vlanid);
+	formatted_append(print_buf, len, fmt, "VLANID    0x%" PRIX64, entry->vlanid);
 	memset(mac_buf, 0, sizeof(mac_buf));
 	mac_addr_sprintf(mac_buf, entry->macaddr);
-	formatted_append(print_buf, fmt, "MACADDR   %s", mac_buf);
-	formatted_append(print_buf, fmt, "DESTPORTS 0x%" PRIX64, entry->destports);
-	formatted_append(print_buf, fmt, "ENFPORT   0x%" PRIX64, entry->enfport);
-	formatted_append(print_buf, fmt, "INDEX     0x%" PRIX64, entry->index);
+	formatted_append(print_buf, len, fmt, "MACADDR   %s", mac_buf);
+	formatted_append(print_buf, len, fmt, "DESTPORTS 0x%" PRIX64, entry->destports);
+	formatted_append(print_buf, len, fmt, "ENFPORT   0x%" PRIX64, entry->enfport);
+	formatted_append(print_buf, len, fmt, "INDEX     0x%" PRIX64, entry->index);
 }
 
 void sja1105_l2_lookup_entry_show(struct sja1105_l2_lookup_entry *entry)
@@ -119,7 +120,7 @@ void sja1105_l2_lookup_entry_show(struct sja1105_l2_lookup_entry *entry)
 	char *fmt = "%s\n";
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_l2_lookup_entry_fmt_show(print_buf, fmt, entry);
+	sja1105_l2_lookup_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
 	puts(print_buf);
 }
 

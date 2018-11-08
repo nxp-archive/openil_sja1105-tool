@@ -82,7 +82,7 @@ extern int SJA1105_VERBOSE_CONDITION;
 #define logi(...) _log(stdout, __VA_ARGS__)
 #define logv(...) logc(stdout, SJA1105_VERBOSE_CONDITION, __VA_ARGS__);
 
-void formatted_append(char *buffer, char *width_fmt, char *fmt, ...);
+void formatted_append(char *buffer, size_t len, char *width_fmt, char *fmt, ...);
 void print_array(char *print_buf, uint64_t *array, int count);
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))

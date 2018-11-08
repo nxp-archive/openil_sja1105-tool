@@ -62,14 +62,15 @@ DEFINE_COMMON_PACK_UNPACK_ACCESSORS(l2_policing);
 
 void sja1105_l2_policing_entry_fmt_show(
 		char *print_buf,
+		size_t len,
 		char *fmt,
 		struct sja1105_l2_policing_entry *table)
 {
-	formatted_append(print_buf, fmt, "SHARINDX  0x%" PRIX64, table->sharindx);
-	formatted_append(print_buf, fmt, "SMAX      0x%" PRIX64, table->smax);
-	formatted_append(print_buf, fmt, "RATE      0x%" PRIX64, table->rate);
-	formatted_append(print_buf, fmt, "MAXLEN    0x%" PRIX64, table->maxlen);
-	formatted_append(print_buf, fmt, "PARTITION 0x%" PRIX64, table->partition);
+	formatted_append(print_buf, len, fmt, "SHARINDX  0x%" PRIX64, table->sharindx);
+	formatted_append(print_buf, len, fmt, "SMAX      0x%" PRIX64, table->smax);
+	formatted_append(print_buf, len, fmt, "RATE      0x%" PRIX64, table->rate);
+	formatted_append(print_buf, len, fmt, "MAXLEN    0x%" PRIX64, table->maxlen);
+	formatted_append(print_buf, len, fmt, "PARTITION 0x%" PRIX64, table->partition);
 }
 
 void sja1105_l2_policing_entry_show(struct sja1105_l2_policing_entry *entry)
@@ -78,7 +79,7 @@ void sja1105_l2_policing_entry_show(struct sja1105_l2_policing_entry *entry)
 	char *fmt = "%s\n";
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_l2_policing_entry_fmt_show(print_buf, fmt, entry);
+	sja1105_l2_policing_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
 	puts(print_buf);
 }
 

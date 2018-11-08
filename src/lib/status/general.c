@@ -95,47 +95,51 @@ sja1105_general_status_unpack(void *buf, struct sja1105_general_status *status,
 }
 
 void sja1105_general_status_show(struct sja1105_general_status *status,
-                                 uint64_t device_id)
+		char *print_buf,
+		size_t len,
+		uint64_t device_id)
 {
-	printf("CONFIGS    %" PRIX64 "\n", status->configs);
-	printf("CRCCHKL    %" PRIX64 "\n", status->crcchkl);
-	printf("IDS        %" PRIX64 "\n", status->ids);
-	printf("CRCCHKG    %" PRIX64 "\n", status->crcchkg);
-	printf("NSLOT      %" PRIX64 "\n", status->nslot);
-	printf("VLIND      %" PRIX64 "\n", status->vlind);
-	printf("VLPARIND   %" PRIX64 "\n", status->vlparind);
-	printf("VLROUTES   %" PRIX64 "\n", status->vlroutes);
-	printf("VLPARTS    %" PRIX64 "\n", status->vlparts);
-	printf("MACADDL    %" PRIX64 "\n", status->macaddl);
-	printf("PORTENF    %" PRIX64 "\n", status->portenf);
-	printf("FWDS_03h   %" PRIX64 "\n", status->fwds_03h);
-	printf("MACFDS     %" PRIX64 "\n", status->macfds);
-	printf("ENFFDS     %" PRIX64 "\n", status->enffds);
-	printf("L2BUSYFDS  %" PRIX64 "\n", status->l2busyfds);
-	printf("L2BUSYS    %" PRIX64 "\n", status->l2busys);
-	printf("MACADDU    %" PRIX64 "\n", status->macaddu);
-	printf("MACADDHCL  %" PRIX64 "\n", status->macaddhcl);
-	printf("VLANIDHC   %" PRIX64 "\n", status->vlanidhc);
-	printf("HASHCONFS  %" PRIX64 "\n", status->hashconfs);
-	printf("MACADDHCU  %" PRIX64 "\n", status->macaddhcu);
-	printf("WPVLANID   %" PRIX64 "\n", status->wpvlanid);
-	printf("PORT_07h   %" PRIX64 "\n", status->port_07h);
-	printf("VLAN_BUSYS %" PRIX64 "\n", status->vlanbusys);
-	printf("WRONGPORTS %" PRIX64 "\n", status->wrongports);
-	printf("VNOTFOUNDS %" PRIX64 "\n", status->vnotfounds);
-	printf("VLID       %" PRIX64 "\n", status->vlid);
-	printf("PORTVL     %" PRIX64 "\n", status->portvl);
-	printf("VLNOTFOUND %" PRIX64 "\n", status->vlnotfound);
-	printf("EMPTYS     %" PRIX64 "\n", status->emptys);
-	printf("BUFFERS    %" PRIX64 "\n", status->buffers);
+	char *fmt = "%s\n";
+
+	formatted_append(print_buf, len, fmt, "CONFIGS    %" PRIX64, status->configs);
+	formatted_append(print_buf, len, fmt, "CRCCHKL    %" PRIX64, status->crcchkl);
+	formatted_append(print_buf, len, fmt, "IDS        %" PRIX64, status->ids);
+	formatted_append(print_buf, len, fmt, "CRCCHKG    %" PRIX64, status->crcchkg);
+	formatted_append(print_buf, len, fmt, "NSLOT      %" PRIX64, status->nslot);
+	formatted_append(print_buf, len, fmt, "VLIND      %" PRIX64, status->vlind);
+	formatted_append(print_buf, len, fmt, "VLPARIND   %" PRIX64, status->vlparind);
+	formatted_append(print_buf, len, fmt, "VLROUTES   %" PRIX64, status->vlroutes);
+	formatted_append(print_buf, len, fmt, "VLPARTS    %" PRIX64, status->vlparts);
+	formatted_append(print_buf, len, fmt, "MACADDL    %" PRIX64, status->macaddl);
+	formatted_append(print_buf, len, fmt, "PORTENF    %" PRIX64, status->portenf);
+	formatted_append(print_buf, len, fmt, "FWDS_03h   %" PRIX64, status->fwds_03h);
+	formatted_append(print_buf, len, fmt, "MACFDS     %" PRIX64, status->macfds);
+	formatted_append(print_buf, len, fmt, "ENFFDS     %" PRIX64, status->enffds);
+	formatted_append(print_buf, len, fmt, "L2BUSYFDS  %" PRIX64, status->l2busyfds);
+	formatted_append(print_buf, len, fmt, "L2BUSYS    %" PRIX64, status->l2busys);
+	formatted_append(print_buf, len, fmt, "MACADDU    %" PRIX64, status->macaddu);
+	formatted_append(print_buf, len, fmt, "MACADDHCL  %" PRIX64, status->macaddhcl);
+	formatted_append(print_buf, len, fmt, "VLANIDHC   %" PRIX64, status->vlanidhc);
+	formatted_append(print_buf, len, fmt, "HASHCONFS  %" PRIX64, status->hashconfs);
+	formatted_append(print_buf, len, fmt, "MACADDHCU  %" PRIX64, status->macaddhcu);
+	formatted_append(print_buf, len, fmt, "WPVLANID   %" PRIX64, status->wpvlanid);
+	formatted_append(print_buf, len, fmt, "PORT_07h   %" PRIX64, status->port_07h);
+	formatted_append(print_buf, len, fmt, "VLAN_BUSYS %" PRIX64, status->vlanbusys);
+	formatted_append(print_buf, len, fmt, "WRONGPORTS %" PRIX64, status->wrongports);
+	formatted_append(print_buf, len, fmt, "VNOTFOUNDS %" PRIX64, status->vnotfounds);
+	formatted_append(print_buf, len, fmt, "VLID       %" PRIX64, status->vlid);
+	formatted_append(print_buf, len, fmt, "PORTVL     %" PRIX64, status->portvl);
+	formatted_append(print_buf, len, fmt, "VLNOTFOUND %" PRIX64, status->vlnotfound);
+	formatted_append(print_buf, len, fmt, "EMPTYS     %" PRIX64, status->emptys);
+	formatted_append(print_buf, len, fmt, "BUFFERS    %" PRIX64, status->buffers);
 	if (IS_PQRS(device_id)) {
-		printf("BUFLWMARK  %" PRIX64 "\n", status->buflwmark);
+		formatted_append(print_buf, len, fmt, "BUFLWMARK  %" PRIX64, status->buflwmark);
 	}
-	printf("PORT_0Ah   %" PRIX64 "\n", status->port_0ah);
-	printf("FWDS_0Ah   %" PRIX64 "\n", status->fwds_0ah);
-	printf("PARTS      %" PRIX64 "\n", status->parts);
-	printf("RAMPARERRL %" PRIX64 "\n", status->ramparerrl);
-	printf("RAMPARERRU %" PRIX64 "\n", status->ramparerru);
+	formatted_append(print_buf, len, fmt, "PORT_0Ah   %" PRIX64, status->port_0ah);
+	formatted_append(print_buf, len, fmt, "FWDS_0Ah   %" PRIX64, status->fwds_0ah);
+	formatted_append(print_buf, len, fmt, "PARTS      %" PRIX64, status->parts);
+	formatted_append(print_buf, len, fmt, "RAMPARERRL %" PRIX64, status->ramparerrl);
+	formatted_append(print_buf, len, fmt, "RAMPARERRU %" PRIX64, status->ramparerru);
 }
 
 int sja1105_general_status_get(struct sja1105_spi_setup *spi_setup,

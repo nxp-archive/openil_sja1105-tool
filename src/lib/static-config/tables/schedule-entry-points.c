@@ -59,12 +59,13 @@ DEFINE_COMMON_PACK_UNPACK_ACCESSORS(schedule_entry_points);
 
 void sja1105_schedule_entry_points_entry_fmt_show(
 		char  *print_buf,
+		size_t len,
 		char  *fmt,
 		struct sja1105_schedule_entry_points_entry *entry)
 {
-	formatted_append(print_buf, fmt, "SUBSCHINDX 0x%" PRIX64, entry->subschindx);
-	formatted_append(print_buf, fmt, "DELTA      0x%" PRIX64, entry->delta);
-	formatted_append(print_buf, fmt, "ADDRESS    0x%" PRIX64, entry->address);
+	formatted_append(print_buf, len, fmt, "SUBSCHINDX 0x%" PRIX64, entry->subschindx);
+	formatted_append(print_buf, len, fmt, "DELTA      0x%" PRIX64, entry->delta);
+	formatted_append(print_buf, len, fmt, "ADDRESS    0x%" PRIX64, entry->address);
 }
 
 void sja1105_schedule_entry_points_entry_show(struct sja1105_schedule_entry_points_entry *entry)
@@ -73,6 +74,6 @@ void sja1105_schedule_entry_points_entry_show(struct sja1105_schedule_entry_poin
 	char *fmt = "%s\n";
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_schedule_entry_points_entry_fmt_show(print_buf, fmt, entry);
+	sja1105_schedule_entry_points_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
 	puts(print_buf);
 }

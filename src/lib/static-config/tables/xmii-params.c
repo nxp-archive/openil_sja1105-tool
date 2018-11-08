@@ -64,6 +64,7 @@ DEFINE_COMMON_PACK_UNPACK_ACCESSORS(xmii_params);
 
 void sja1105_xmii_params_entry_fmt_show(
 		char *print_buf,
+		size_t len,
 		char *fmt,
 		struct sja1105_xmii_params_entry *entry)
 {
@@ -71,8 +72,8 @@ void sja1105_xmii_params_entry_fmt_show(
 	char xmii_mode_buf[MAX_LINE_SIZE];
 	print_array(phy_mac_buf, entry->phy_mac, 5);
 	print_array(xmii_mode_buf, entry->xmii_mode, 5);
-	formatted_append(print_buf, fmt, "PHY_MAC   %s", phy_mac_buf);
-	formatted_append(print_buf, fmt, "xMII_MODE %s", xmii_mode_buf);
+	formatted_append(print_buf, len, fmt, "PHY_MAC   %s", phy_mac_buf);
+	formatted_append(print_buf, len, fmt, "xMII_MODE %s", xmii_mode_buf);
 }
 
 void sja1105_xmii_params_entry_show(struct sja1105_xmii_params_entry *entry)
@@ -81,7 +82,7 @@ void sja1105_xmii_params_entry_show(struct sja1105_xmii_params_entry *entry)
 	char *fmt = "%s\n";
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_xmii_params_entry_fmt_show(print_buf, fmt, entry);
+	sja1105_xmii_params_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
 	puts(print_buf);
 }
 

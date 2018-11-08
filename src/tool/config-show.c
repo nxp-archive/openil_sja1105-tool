@@ -74,12 +74,13 @@
 			}                                                     \
 		}                                                             \
 		for (i = start; i < end; i++) {                               \
-			formatted_append(print_bufs[i], FMT, "Entry %d:", i); \
+			formatted_append(print_bufs[i], MAX_LINE_SIZE, FMT, "Entry %d:", i); \
 			sja1105_##TABLE_NAME##_entry_fmt_show(                \
-					print_bufs[i],                        \
+					print_bufs[i],              \
+					(MAX_LINE_SIZE - i),                         \
 					FMT,                                  \
 					&config-> TABLE_NAME [i]);            \
-			formatted_append(print_bufs[i], FMT, "");             \
+			formatted_append(print_bufs[i], MAX_LINE_SIZE, FMT, "");             \
 		}                                                             \
 		show_print_bufs(print_bufs + start, end - start);             \
 		for (i = start; i < end; i++) {                               \

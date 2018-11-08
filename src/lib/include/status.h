@@ -150,9 +150,10 @@ struct sja1105_ptp_status {
 int  sja1105_general_status_get(struct sja1105_spi_setup*,
                                 struct sja1105_general_status*);
 void sja1105_general_status_show(struct sja1105_general_status*,
+                                 char*, size_t,
                                  uint64_t device_id);
 void sja1105_port_status_show(struct sja1105_port_status*,
-                              int    port, char  *print_buf,
+                              int, char*, size_t,
                               uint64_t device_id);
 int sja1105_port_status_get(struct sja1105_spi_setup*,
                             struct sja1105_port_status*,

@@ -121,39 +121,40 @@ DEFINE_SEPARATE_PACK_UNPACK_ACCESSORS(general_params);
 
 void sja1105_general_params_entry_fmt_show(
 		char *print_buf,
+		size_t len,
 		char *fmt,
 		struct sja1105_general_params_entry *entry)
 {
 	char mac_buf[MAC_ADDR_SIZE];
 
-	formatted_append(print_buf, fmt, "VLLUPFORMAT 0x%" PRIX64, entry->vllupformat);
-	formatted_append(print_buf, fmt, "MIRR_PTACU  0x%" PRIX64, entry->mirr_ptacu);
-	formatted_append(print_buf, fmt, "SWITCHID    0x%" PRIX64, entry->switchid);
-	formatted_append(print_buf, fmt, "HOSTPRIO    0x%" PRIX64, entry->hostprio);
+	formatted_append(print_buf, len, fmt, "VLLUPFORMAT 0x%" PRIX64, entry->vllupformat);
+	formatted_append(print_buf, len, fmt, "MIRR_PTACU  0x%" PRIX64, entry->mirr_ptacu);
+	formatted_append(print_buf, len, fmt, "SWITCHID    0x%" PRIX64, entry->switchid);
+	formatted_append(print_buf, len, fmt, "HOSTPRIO    0x%" PRIX64, entry->hostprio);
 	memset(mac_buf, 0, sizeof(mac_buf));
 	mac_addr_sprintf(mac_buf, entry->mac_fltres1);
-	formatted_append(print_buf, fmt, "MAC_FLTRES1 %s", mac_buf);
+	formatted_append(print_buf, len, fmt, "MAC_FLTRES1 %s", mac_buf);
 	memset(mac_buf, 0, sizeof(mac_buf));
 	mac_addr_sprintf(mac_buf, entry->mac_fltres0);
-	formatted_append(print_buf, fmt, "MAC_FLTRES0 %s", mac_buf);
+	formatted_append(print_buf, len, fmt, "MAC_FLTRES0 %s", mac_buf);
 	memset(mac_buf, 0, sizeof(mac_buf));
 	mac_addr_sprintf(mac_buf, entry->mac_flt1);
-	formatted_append(print_buf, fmt, "MAC_FLT1    %s", mac_buf);
+	formatted_append(print_buf, len, fmt, "MAC_FLT1    %s", mac_buf);
 	memset(mac_buf, 0, sizeof(mac_buf));
 	mac_addr_sprintf(mac_buf, entry->mac_flt0);
-	formatted_append(print_buf, fmt, "MAC_FLT0    %s", mac_buf);
-	formatted_append(print_buf, fmt, "INCL_SRCPT1 0x%" PRIX64, entry->incl_srcpt1);
-	formatted_append(print_buf, fmt, "INCL_SRCPT0 0x%" PRIX64, entry->incl_srcpt0);
-	formatted_append(print_buf, fmt, "SEND_META1  0x%" PRIX64, entry->send_meta1);
-	formatted_append(print_buf, fmt, "SEND_META0  0x%" PRIX64, entry->send_meta0);
-	formatted_append(print_buf, fmt, "CASC_PORT   0x%" PRIX64, entry->casc_port);
-	formatted_append(print_buf, fmt, "HOST_PORT   0x%" PRIX64, entry->host_port);
-	formatted_append(print_buf, fmt, "MIRR_PORT   0x%" PRIX64, entry->mirr_port);
-	formatted_append(print_buf, fmt, "VLMARKER    0x%" PRIX64, entry->vlmarker);
-	formatted_append(print_buf, fmt, "VLMASK      0x%" PRIX64, entry->vlmask);
-	formatted_append(print_buf, fmt, "TPID        0x%" PRIX64, entry->tpid);
-	formatted_append(print_buf, fmt, "IGNORE2STF  0x%" PRIX64, entry->ignore2stf);
-	formatted_append(print_buf, fmt, "TPID2       0x%" PRIX64, entry->tpid2);
+	formatted_append(print_buf, len, fmt, "MAC_FLT0    %s", mac_buf);
+	formatted_append(print_buf, len, fmt, "INCL_SRCPT1 0x%" PRIX64, entry->incl_srcpt1);
+	formatted_append(print_buf, len, fmt, "INCL_SRCPT0 0x%" PRIX64, entry->incl_srcpt0);
+	formatted_append(print_buf, len, fmt, "SEND_META1  0x%" PRIX64, entry->send_meta1);
+	formatted_append(print_buf, len, fmt, "SEND_META0  0x%" PRIX64, entry->send_meta0);
+	formatted_append(print_buf, len, fmt, "CASC_PORT   0x%" PRIX64, entry->casc_port);
+	formatted_append(print_buf, len, fmt, "HOST_PORT   0x%" PRIX64, entry->host_port);
+	formatted_append(print_buf, len, fmt, "MIRR_PORT   0x%" PRIX64, entry->mirr_port);
+	formatted_append(print_buf, len, fmt, "VLMARKER    0x%" PRIX64, entry->vlmarker);
+	formatted_append(print_buf, len, fmt, "VLMASK      0x%" PRIX64, entry->vlmask);
+	formatted_append(print_buf, len, fmt, "TPID        0x%" PRIX64, entry->tpid);
+	formatted_append(print_buf, len, fmt, "IGNORE2STF  0x%" PRIX64, entry->ignore2stf);
+	formatted_append(print_buf, len, fmt, "TPID2       0x%" PRIX64, entry->tpid2);
 }
 
 void sja1105_general_params_entry_show(struct sja1105_general_params_entry *entry)
@@ -162,6 +163,6 @@ void sja1105_general_params_entry_show(struct sja1105_general_params_entry *entr
 	char *fmt = "%s\n";
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_general_params_entry_fmt_show(print_buf, fmt, entry);
+	sja1105_general_params_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
 	puts(print_buf);
 }

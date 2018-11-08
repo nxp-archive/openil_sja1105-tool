@@ -64,18 +64,22 @@ static void sja1105_schedule_entry_access(
  */
 DEFINE_COMMON_PACK_UNPACK_ACCESSORS(schedule);
 
-void sja1105_schedule_entry_fmt_show(char *print_buf, char *fmt, struct sja1105_schedule_entry *entry)
+void sja1105_schedule_entry_fmt_show(
+		char *print_buf,
+		size_t len,
+		char *fmt,
+		struct sja1105_schedule_entry *entry)
 {
-	formatted_append(print_buf, fmt, "WINSTINDEX  0x%" PRIX64, entry->winstindex);
-	formatted_append(print_buf, fmt, "WINEND      0x%" PRIX64, entry->winend);
-	formatted_append(print_buf, fmt, "WINST       0x%" PRIX64, entry->winst);
-	formatted_append(print_buf, fmt, "DESTPORTS   0x%" PRIX64, entry->destports);
-	formatted_append(print_buf, fmt, "SETVALID    0x%" PRIX64, entry->setvalid);
-	formatted_append(print_buf, fmt, "TXEN        0x%" PRIX64, entry->txen);
-	formatted_append(print_buf, fmt, "RESMEDIA_EN 0x%" PRIX64, entry->resmedia_en);
-	formatted_append(print_buf, fmt, "RESMEDIA    0x%" PRIX64, entry->resmedia);
-	formatted_append(print_buf, fmt, "VLINDEX     0x%" PRIX64, entry->vlindex);
-	formatted_append(print_buf, fmt, "DELTA       0x%" PRIX64, entry->delta);
+	formatted_append(print_buf, len, fmt, "WINSTINDEX  0x%" PRIX64, entry->winstindex);
+	formatted_append(print_buf, len, fmt, "WINEND      0x%" PRIX64, entry->winend);
+	formatted_append(print_buf, len, fmt, "WINST       0x%" PRIX64, entry->winst);
+	formatted_append(print_buf, len, fmt, "DESTPORTS   0x%" PRIX64, entry->destports);
+	formatted_append(print_buf, len, fmt, "SETVALID    0x%" PRIX64, entry->setvalid);
+	formatted_append(print_buf, len, fmt, "TXEN        0x%" PRIX64, entry->txen);
+	formatted_append(print_buf, len, fmt, "RESMEDIA_EN 0x%" PRIX64, entry->resmedia_en);
+	formatted_append(print_buf, len, fmt, "RESMEDIA    0x%" PRIX64, entry->resmedia);
+	formatted_append(print_buf, len, fmt, "VLINDEX     0x%" PRIX64, entry->vlindex);
+	formatted_append(print_buf, len, fmt, "DELTA       0x%" PRIX64, entry->delta);
 }
 
 void sja1105_schedule_entry_show(struct sja1105_schedule_entry *entry)
@@ -84,6 +88,6 @@ void sja1105_schedule_entry_show(struct sja1105_schedule_entry *entry)
 	char *fmt = "%s\n";
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_schedule_entry_fmt_show(print_buf, fmt, entry);
+	sja1105_schedule_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
 	puts(print_buf);
 }
