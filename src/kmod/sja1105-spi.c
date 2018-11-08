@@ -1,33 +1,9 @@
-/******************************************************************************
- * Copyright (c) 2016, NXP Semiconductors
- * All rights reserved.
+/*
+ * SPDX-License-Identifier: GPL-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *
- * 3. Neither the name of the copyright holder nor the names of its
- * contributors may be used to endorse or promote products derived from this
- * software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *****************************************************************************/
+ * Copyright (c) 2016-2018, NXP Semiconductors
+ * Copyright (c) 2018, Sensor-Technik Wiedemann GmbH
+ */
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/spi/spi.h>
@@ -38,20 +14,18 @@
 #include <common.h>
 #include "sja1105.h"
 
-
-#define SPI_TRANSFER_SIZE_MAX      (SIZE_SPI_MSG_HEADER + SIZE_SPI_MSG_MAXLEN)
-
+#define SPI_TRANSFER_SIZE_MAX  (SIZE_SPI_MSG_HEADER + SIZE_SPI_MSG_MAXLEN)
 
 static int sja1105_spi_transfer(const struct sja1105_spi_setup *spi_setup,
-                         const void *tx, void *rx, int size)
+                                const void *tx, void *rx, int size)
 {
 	struct sja1105_spi_private *priv = container_of(spi_setup,
 	                         struct sja1105_spi_private, spi_setup);
 	struct spi_device *spi = priv->spi_dev;
 	struct spi_transfer transfer = {
-	   .tx_buf = tx,
-	   .rx_buf = rx,
-	   .len = size,
+		.tx_buf = tx,
+		.rx_buf = rx,
+		.len = size,
 	};
 	struct spi_message msg;
 	int rc;
@@ -93,16 +67,10 @@ static void sja1105_spi_message_access(void  *buf,
 	pack_or_unpack(buf, &msg->read_count, 30, 25, size);
 	pack_or_unpack(buf, &msg->address,    24,  4, size);
 }
-
-void sja1105_spi_message_unpack(void *buf, struct sja1105_spi_message *msg)
-{
-	sja1105_spi_message_access(buf, msg, 0);
-}
-
-void sja1105_spi_message_pack(void *buf, struct sja1105_spi_message *msg)
-{
-	sja1105_spi_message_access(buf, msg, 1);
-}
+#define sja1105_spi_message_unpack(buf, msg) \
+	sja1105_spi_message_access(buf, msg, 0)
+#define sja1105_spi_message_pack(buf, msg) \
+	sja1105_spi_message_access(buf, msg, 1)
 
 /* If read_or_write is:
  *     * SPI_WRITE: creates and sends an SPI write message at absolute
@@ -117,8 +85,7 @@ void sja1105_spi_message_pack(void *buf, struct sja1105_spi_message *msg)
 inline int
 sja1105_spi_send_packed_buf(struct sja1105_spi_setup *spi_setup,
                             enum sja1105_spi_access_mode read_or_write,
-                            uint64_t reg_addr,
-                            void    *packed_buf,
+                            uint64_t reg_addr, void *packed_buf,
                             uint64_t size_bytes)
 {
 	const int MSG_LEN = size_bytes + SIZE_SPI_MSG_HEADER;
@@ -175,28 +142,21 @@ out:
 inline int
 sja1105_spi_send_int(struct sja1105_spi_setup *spi_setup,
                      enum sja1105_spi_access_mode read_or_write,
-                     uint64_t reg_addr,
-                     uint64_t *value,
-                     uint64_t size_bytes)
+                     uint64_t reg_addr, uint64_t *value, uint64_t size_bytes)
 {
 	uint8_t packed_buf[size_bytes];
 	int rc;
 
-	if (read_or_write == SPI_WRITE) {
-		gtable_pack(packed_buf,
-		            value, 8 * size_bytes - 1, 0,
+	if (read_or_write == SPI_WRITE)
+		gtable_pack(packed_buf, value, 8 * size_bytes - 1, 0,
 		            size_bytes);
-	}
-	rc = sja1105_spi_send_packed_buf(spi_setup,
-	                                 read_or_write,
-	                                 reg_addr,
-	                                 packed_buf,
-	                                 size_bytes);
-	if (read_or_write == SPI_READ) {
-		gtable_unpack(packed_buf,
-		              value, 8 * size_bytes - 1, 0,
+
+	rc = sja1105_spi_send_packed_buf(spi_setup, read_or_write, reg_addr,
+	                                 packed_buf, size_bytes);
+	if (read_or_write == SPI_READ)
+		gtable_unpack(packed_buf, value, 8 * size_bytes - 1, 0,
 		              size_bytes);
-	}
+
 	return rc;
 }
 
@@ -207,8 +167,7 @@ sja1105_spi_send_int(struct sja1105_spi_setup *spi_setup,
  */
 int sja1105_spi_send_long_packed_buf(struct sja1105_spi_setup *spi_setup,
                                      enum sja1105_spi_access_mode read_or_write,
-                                     uint64_t base_addr,
-                                     char    *packed_buf,
+                                     uint64_t base_addr, char *packed_buf,
                                      uint64_t buf_len)
 {
 	struct chunk {
@@ -225,8 +184,7 @@ int sja1105_spi_send_long_packed_buf(struct sja1105_spi_setup *spi_setup,
 	chunk.len = min((int)buf_len, SIZE_SPI_MSG_MAXLEN);
 
 	while (chunk.len) {
-		rc = sja1105_spi_send_packed_buf(spi_setup,
-		                                 read_or_write,
+		rc = sja1105_spi_send_packed_buf(spi_setup, read_or_write,
 		                                 chunk.spi_address,
 		                                 chunk.buf_ptr,
 		                                 chunk.len);

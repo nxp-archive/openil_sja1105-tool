@@ -1,1 +1,45 @@
-obj-m = sja1105.o
+obj-m := sja1105.o
+sja1105-y := sja1105-kmod.o \
+             sja1105-sysfs.o \
+             sja1105-netdev.o \
+             sja1105-spi.o \
+             ../common.o \
+             ../lib/helpers.o \
+             ../lib/control/port.o \
+             ../lib/reset/rgu.o \
+             ../lib/clock/agu.o \
+             ../lib/clock/cgu.o \
+             ../lib/clock/idiv.o \
+             ../lib/clock/mii-clk.o \
+             ../lib/clock/mii.o \
+             ../lib/clock/pll.o \
+             ../lib/clock/rgmii.o \
+             ../lib/clock/rmii.o \
+             ../lib/clock/sgmii.o \
+             ../lib/gtable/gtable.o \
+             ../lib/status/general.o \
+             ../lib/status/port.o \
+             ../lib/static-config/static-config.o \
+             ../lib/static-config/tables/avb-params.o \
+             ../lib/static-config/tables/general-params.o \
+             ../lib/static-config/tables/l2-forward-params.o \
+             ../lib/static-config/tables/l2-forward.o \
+             ../lib/static-config/tables/l2-lookup-params.o \
+             ../lib/static-config/tables/l2-lookup.o \
+             ../lib/static-config/tables/l2-policing.o \
+             ../lib/static-config/tables/mac-config.o \
+             ../lib/static-config/tables/schedule-entry-points-params.o \
+             ../lib/static-config/tables/schedule-entry-points.o \
+             ../lib/static-config/tables/schedule-params.o \
+             ../lib/static-config/tables/schedule.o \
+             ../lib/static-config/tables/sgmii.o \
+             ../lib/static-config/tables/table-header.o \
+             ../lib/static-config/tables/vl-forward-params.o \
+             ../lib/static-config/tables/vl-forward.o \
+             ../lib/static-config/tables/vl-lookup.o \
+             ../lib/static-config/tables/vl-policing.o \
+             ../lib/static-config/tables/vlan-lookup.o \
+             ../lib/static-config/tables/xmii-params.o \
+             ../lib/dynamic-config/mac-config.o
+
+ccflags-y := -DSJA1105_KMOD_BUILD -I${M}/../
