@@ -101,15 +101,16 @@ DEFINE_SEPARATE_PACK_UNPACK_ACCESSORS(l2_lookup_params);
 
 void sja1105_l2_lookup_params_entry_fmt_show(
 		char *print_buf,
+		size_t len,
 		char *fmt,
 		struct sja1105_l2_lookup_params_entry *entry)
 {
-	formatted_append(print_buf, fmt, "MAXAGE         0x%" PRIX64, entry->maxage);
-	formatted_append(print_buf, fmt, "DYN_TBSZ       0x%" PRIX64, entry->dyn_tbsz);
-	formatted_append(print_buf, fmt, "POLY           0x%" PRIX64, entry->poly);
-	formatted_append(print_buf, fmt, "SHARED_LEARN   0x%" PRIX64, entry->shared_learn);
-	formatted_append(print_buf, fmt, "NO_ENF_HOSTPRT 0x%" PRIX64, entry->no_enf_hostprt);
-	formatted_append(print_buf, fmt, "NO_MGMT_LEARN  0x%" PRIX64, entry->no_mgmt_learn);
+	formatted_append(print_buf, len, fmt, "MAXAGE         0x%" PRIX64, entry->maxage);
+	formatted_append(print_buf, len, fmt, "DYN_TBSZ       0x%" PRIX64, entry->dyn_tbsz);
+	formatted_append(print_buf, len, fmt, "POLY           0x%" PRIX64, entry->poly);
+	formatted_append(print_buf, len, fmt, "SHARED_LEARN   0x%" PRIX64, entry->shared_learn);
+	formatted_append(print_buf, len, fmt, "NO_ENF_HOSTPRT 0x%" PRIX64, entry->no_enf_hostprt);
+	formatted_append(print_buf, len, fmt, "NO_MGMT_LEARN  0x%" PRIX64, entry->no_mgmt_learn);
 }
 
 void sja1105_l2_lookup_params_entry_show(struct sja1105_l2_lookup_params_entry *entry)
@@ -118,7 +119,7 @@ void sja1105_l2_lookup_params_entry_show(struct sja1105_l2_lookup_params_entry *
 	char *fmt = "%s\n";
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_l2_lookup_params_entry_fmt_show(print_buf, fmt, entry);
+	sja1105_l2_lookup_params_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
 	puts(print_buf);
 }
 

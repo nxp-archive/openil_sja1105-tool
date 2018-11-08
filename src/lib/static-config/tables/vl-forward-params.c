@@ -64,14 +64,15 @@ DEFINE_COMMON_PACK_UNPACK_ACCESSORS(vl_forwarding_params);
 
 void sja1105_vl_forwarding_params_entry_fmt_show(
 		char *print_buf,
+		size_t len,
 		char *fmt,
 		struct sja1105_vl_forwarding_params_entry *entry)
 {
 	char buf[MAX_LINE_SIZE];
 
 	print_array(buf, entry->partspc, 8);
-	formatted_append(print_buf, fmt, "PARTSPC  %s", buf);
-	formatted_append(print_buf, fmt, "DEBUGEN  0x%" PRIX64, entry->debugen);
+	formatted_append(print_buf, len, fmt, "PARTSPC  %s", buf);
+	formatted_append(print_buf, len, fmt, "DEBUGEN  0x%" PRIX64, entry->debugen);
 }
 
 void sja1105_vl_forwarding_params_entry_show(struct sja1105_vl_forwarding_params_entry *entry)
@@ -80,7 +81,7 @@ void sja1105_vl_forwarding_params_entry_show(struct sja1105_vl_forwarding_params
 	char *fmt = "%s\n";
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_vl_forwarding_params_entry_fmt_show(print_buf, fmt, entry);
+	sja1105_vl_forwarding_params_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
 	puts(print_buf);
 }
 

@@ -58,11 +58,12 @@ DEFINE_COMMON_PACK_UNPACK_ACCESSORS(schedule_entry_points_params);
 
 void sja1105_schedule_entry_points_params_entry_fmt_show(
 		char *print_buf,
+		size_t len,
 		char *fmt,
 		struct sja1105_schedule_entry_points_params_entry *entry)
 {
-	formatted_append(print_buf, fmt, "CLKSRC    0x%" PRIX64, entry->clksrc);
-	formatted_append(print_buf, fmt, "ACTSUBSCH 0x%" PRIX64, entry->actsubsch);
+	formatted_append(print_buf, len, fmt, "CLKSRC    0x%" PRIX64, entry->clksrc);
+	formatted_append(print_buf, len, fmt, "ACTSUBSCH 0x%" PRIX64, entry->actsubsch);
 }
 
 void sja1105_schedule_entry_points_params_entry_show(struct sja1105_schedule_entry_points_params_entry *entry)
@@ -71,7 +72,7 @@ void sja1105_schedule_entry_points_params_entry_show(struct sja1105_schedule_ent
 	char *fmt = "%s\n";
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_schedule_entry_points_params_entry_fmt_show(print_buf, fmt, entry);
+	sja1105_schedule_entry_points_params_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
 	puts(print_buf);
 }
 

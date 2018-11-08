@@ -63,15 +63,16 @@ DEFINE_COMMON_PACK_UNPACK_ACCESSORS(vl_policing);
 
 void sja1105_vl_policing_entry_fmt_show(
 		char *print_buf,
+		size_t len,
 		char *fmt,
 		struct sja1105_vl_policing_entry *entry)
 {
-	formatted_append(print_buf, fmt, "TYPE      0x%" PRIX64, entry->type);
-	formatted_append(print_buf, fmt, "MAXLEN    0x%" PRIX64, entry->maxlen);
-	formatted_append(print_buf, fmt, "SHARINDX  0x%" PRIX64, entry->sharindx);
+	formatted_append(print_buf, len, fmt, "TYPE      0x%" PRIX64, entry->type);
+	formatted_append(print_buf, len, fmt, "MAXLEN    0x%" PRIX64, entry->maxlen);
+	formatted_append(print_buf, len, fmt, "SHARINDX  0x%" PRIX64, entry->sharindx);
 	if (entry->type == 0) {
-		formatted_append(print_buf, fmt, "BAG       0x%" PRIX64, entry->bag);
-		formatted_append(print_buf, fmt, "JITTER    0x%" PRIX64, entry->jitter);
+		formatted_append(print_buf, len, fmt, "BAG       0x%" PRIX64, entry->bag);
+		formatted_append(print_buf, len, fmt, "JITTER    0x%" PRIX64, entry->jitter);
 	}
 }
 
@@ -81,7 +82,7 @@ void sja1105_vl_policing_entry_show(struct sja1105_vl_policing_entry *entry)
 	char *fmt = "%s\n";
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_vl_policing_entry_fmt_show(print_buf, fmt, entry);
+	sja1105_vl_policing_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
 	puts(print_buf);
 }
 

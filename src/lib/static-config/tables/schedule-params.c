@@ -63,12 +63,13 @@ DEFINE_COMMON_PACK_UNPACK_ACCESSORS(schedule_params);
 
 void sja1105_schedule_params_entry_fmt_show(
 		char *print_buf,
+		size_t len,
 		char *fmt,
 		struct sja1105_schedule_params_entry *entry)
 {
 	char subscheind_buf[MAX_LINE_SIZE];
 	print_array(subscheind_buf, entry->subscheind, 8);
-	formatted_append(print_buf, fmt, "SUBSCHEIND %s", subscheind_buf);
+	formatted_append(print_buf, len, fmt, "SUBSCHEIND %s", subscheind_buf);
 }
 
 void sja1105_schedule_params_entry_show(struct sja1105_schedule_params_entry *entry)
@@ -77,7 +78,7 @@ void sja1105_schedule_params_entry_show(struct sja1105_schedule_params_entry *en
 	char *fmt = "%s\n";
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_schedule_params_entry_fmt_show(print_buf, fmt, entry);
+	sja1105_schedule_params_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
 	puts(print_buf);
 }
 

@@ -73,6 +73,7 @@ DEFINE_COMMON_PACK_UNPACK_ACCESSORS(vl_lookup);
 
 void sja1105_vl_lookup_entry_fmt_show(
 		char *print_buf,
+		size_t len,
 		char *fmt,
 		struct sja1105_vl_lookup_entry *entry)
 {
@@ -82,18 +83,18 @@ void sja1105_vl_lookup_entry_fmt_show(
 		logv("Interpreting vllupformat as 0");
 		memset(mac_buf, 0, sizeof(mac_buf));
 		mac_addr_sprintf(mac_buf, entry->macaddr);
-		formatted_append(print_buf, fmt, "DESTPORTS  0x%" PRIX64, entry->destports);
-		formatted_append(print_buf, fmt, "ISCRITICAL 0x%" PRIX64, entry->iscritical);
-		formatted_append(print_buf, fmt, "MACADDR    %s", mac_buf);
-		formatted_append(print_buf, fmt, "VLANID     0x%" PRIX64, entry->vlanid);
-		formatted_append(print_buf, fmt, "PORT       0x%" PRIX64, entry->port);
-		formatted_append(print_buf, fmt, "VLANPRIOR  0x%" PRIX64, entry->vlanprior);
+		formatted_append(print_buf, len, fmt, "DESTPORTS  0x%" PRIX64, entry->destports);
+		formatted_append(print_buf, len, fmt, "ISCRITICAL 0x%" PRIX64, entry->iscritical);
+		formatted_append(print_buf, len, fmt, "MACADDR    %s", mac_buf);
+		formatted_append(print_buf, len, fmt, "VLANID     0x%" PRIX64, entry->vlanid);
+		formatted_append(print_buf, len, fmt, "PORT       0x%" PRIX64, entry->port);
+		formatted_append(print_buf, len, fmt, "VLANPRIOR  0x%" PRIX64, entry->vlanprior);
 	} else {
 		logv("Interpreting vllupformat as 1");
-		formatted_append(print_buf, fmt, "EGRMIRR    0x%" PRIX64, entry->egrmirr);
-		formatted_append(print_buf, fmt, "INGRMIRR   0x%" PRIX64, entry->ingrmirr);
-		formatted_append(print_buf, fmt, "VLID       0x%" PRIX64, entry->vlid);
-		formatted_append(print_buf, fmt, "PORT       0x%" PRIX64, entry->port);
+		formatted_append(print_buf, len, fmt, "EGRMIRR    0x%" PRIX64, entry->egrmirr);
+		formatted_append(print_buf, len, fmt, "INGRMIRR   0x%" PRIX64, entry->ingrmirr);
+		formatted_append(print_buf, len, fmt, "VLID       0x%" PRIX64, entry->vlid);
+		formatted_append(print_buf, len, fmt, "PORT       0x%" PRIX64, entry->port);
 	}
 }
 
@@ -103,7 +104,7 @@ void sja1105_vl_lookup_entry_show(struct sja1105_vl_lookup_entry *entry)
 	char *fmt = "%s\n";
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_vl_lookup_entry_fmt_show(print_buf, fmt, entry);
+	sja1105_vl_lookup_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
 	puts(print_buf);
 }
 

@@ -63,15 +63,16 @@ DEFINE_COMMON_PACK_UNPACK_ACCESSORS(vlan_lookup);
 
 void sja1105_vlan_lookup_entry_fmt_show(
 		char *print_buf,
+		size_t len,
 		char *fmt,
 		struct sja1105_vlan_lookup_entry *entry)
 {
-	formatted_append(print_buf, fmt, "VING_MIRR  0x%" PRIX64, entry->ving_mirr);
-	formatted_append(print_buf, fmt, "VEGR_MIRR  0x%" PRIX64, entry->vegr_mirr);
-	formatted_append(print_buf, fmt, "VMEMB_PORT 0x%" PRIX64, entry->vmemb_port);
-	formatted_append(print_buf, fmt, "VLAN_BC    0x%" PRIX64, entry->vlan_bc);
-	formatted_append(print_buf, fmt, "TAG_PORT   0x%" PRIX64, entry->tag_port);
-	formatted_append(print_buf, fmt, "VLANID     0x%" PRIX64, entry->vlanid);
+	formatted_append(print_buf, len, fmt, "VING_MIRR  0x%" PRIX64, entry->ving_mirr);
+	formatted_append(print_buf, len, fmt, "VEGR_MIRR  0x%" PRIX64, entry->vegr_mirr);
+	formatted_append(print_buf, len, fmt, "VMEMB_PORT 0x%" PRIX64, entry->vmemb_port);
+	formatted_append(print_buf, len, fmt, "VLAN_BC    0x%" PRIX64, entry->vlan_bc);
+	formatted_append(print_buf, len, fmt, "TAG_PORT   0x%" PRIX64, entry->tag_port);
+	formatted_append(print_buf, len, fmt, "VLANID     0x%" PRIX64, entry->vlanid);
 }
 
 void sja1105_vlan_lookup_entry_show(struct sja1105_vlan_lookup_entry *entry)
@@ -80,7 +81,7 @@ void sja1105_vlan_lookup_entry_show(struct sja1105_vlan_lookup_entry *entry)
 	char *fmt = "%s\n";
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_vlan_lookup_entry_fmt_show(print_buf, fmt, entry);
+	sja1105_vlan_lookup_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
 	puts(print_buf);
 }
 

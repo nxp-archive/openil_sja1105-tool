@@ -82,6 +82,7 @@ DEFINE_SEPARATE_PACK_UNPACK_ACCESSORS(avb_params);
 
 void sja1105_avb_params_entry_fmt_show(
 		char *print_buf,
+		size_t len,
 		char *fmt,
 		struct sja1105_avb_params_entry *entry)
 {
@@ -89,10 +90,10 @@ void sja1105_avb_params_entry_fmt_show(
 
 	memset(mac_buf, 0, sizeof(mac_buf));
 	mac_addr_sprintf(mac_buf, entry->destmeta);
-	formatted_append(print_buf, fmt, "DESTMETA %s", mac_buf);
+	formatted_append(print_buf, len,fmt, "DESTMETA %s", mac_buf);
 	memset(mac_buf, 0, sizeof(mac_buf));
 	mac_addr_sprintf(mac_buf, entry->srcmeta);
-	formatted_append(print_buf, fmt, "SRCMETA  %s", mac_buf);
+	formatted_append(print_buf, len, fmt, "SRCMETA  %s", mac_buf);
 }
 
 void sja1105_avb_params_entry_show(struct sja1105_avb_params_entry *entry)
@@ -101,6 +102,6 @@ void sja1105_avb_params_entry_show(struct sja1105_avb_params_entry *entry)
 	char *fmt = "%s\n";
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_avb_params_entry_fmt_show(print_buf, fmt, entry);
+	sja1105_avb_params_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
 	puts(print_buf);
 }

@@ -457,7 +457,7 @@ struct sja1105_static_config {
 
 #define DEFINE_HEADERS_FOR_CONFIG_TABLE(device, table)                                         \
 	void sja1105_##table##_entry_show(struct sja1105_##table##_entry*);                    \
-	void sja1105_##table##_entry_fmt_show(char*, char*, struct sja1105_##table##_entry*);  \
+	void sja1105_##table##_entry_fmt_show(char*, size_t, char*, struct sja1105_##table##_entry*);  \
 	void sja1105##device##_##table##_entry_pack(void*, struct sja1105_##table##_entry*);   \
 	void sja1105##device##_##table##_entry_unpack(void*, struct sja1105_##table##_entry*); \
 

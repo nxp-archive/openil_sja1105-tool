@@ -96,17 +96,18 @@ DEFINE_COMMON_PACK_UNPACK_ACCESSORS(sgmii);
 
 void
 sja1105_sgmii_entry_fmt_show(char *print_buf,
-                             char *fmt,
-                             struct sja1105_sgmii_entry *entry)
+		size_t len,
+		char *fmt,
+		struct sja1105_sgmii_entry *entry)
 {
-	formatted_append(print_buf, fmt, "DIGITAL_ERROR_CNT 0x%" PRIX64, entry->digital_error_cnt);
-	formatted_append(print_buf, fmt, "DIGITAL_CONTROL_2 0x%" PRIX64, entry->digital_control_2);
-	formatted_append(print_buf, fmt, "DEBUG_CONTROL     0x%" PRIX64, entry->debug_control);
-	formatted_append(print_buf, fmt, "TEST_CONTROL      0x%" PRIX64, entry->test_control);
-	formatted_append(print_buf, fmt, "AUTONEG_CONTROL   0x%" PRIX64, entry->autoneg_control);
-	formatted_append(print_buf, fmt, "DIGITAL_CONTROL_1 0x%" PRIX64, entry->digital_control_1);
-	formatted_append(print_buf, fmt, "AUTONEG_ADV       0x%" PRIX64, entry->autoneg_adv);
-	formatted_append(print_buf, fmt, "BASIC_CONTROL     0x%" PRIX64, entry->basic_control);
+	formatted_append(print_buf, len, fmt, "DIGITAL_ERROR_CNT 0x%" PRIX64, entry->digital_error_cnt);
+	formatted_append(print_buf, len, fmt, "DIGITAL_CONTROL_2 0x%" PRIX64, entry->digital_control_2);
+	formatted_append(print_buf, len, fmt, "DEBUG_CONTROL     0x%" PRIX64, entry->debug_control);
+	formatted_append(print_buf, len, fmt, "TEST_CONTROL      0x%" PRIX64, entry->test_control);
+	formatted_append(print_buf, len, fmt, "AUTONEG_CONTROL   0x%" PRIX64, entry->autoneg_control);
+	formatted_append(print_buf, len, fmt, "DIGITAL_CONTROL_1 0x%" PRIX64, entry->digital_control_1);
+	formatted_append(print_buf, len, fmt, "AUTONEG_ADV       0x%" PRIX64, entry->autoneg_adv);
+	formatted_append(print_buf, len, fmt, "BASIC_CONTROL     0x%" PRIX64, entry->basic_control);
 }
 
 void sja1105_sgmii_entry_show(struct sja1105_sgmii_entry *entry)
@@ -115,7 +116,7 @@ void sja1105_sgmii_entry_show(struct sja1105_sgmii_entry *entry)
 	char *fmt = "%s\n";
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_sgmii_entry_fmt_show(print_buf, fmt, entry);
+	sja1105_sgmii_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
 	puts(print_buf);
 }
 

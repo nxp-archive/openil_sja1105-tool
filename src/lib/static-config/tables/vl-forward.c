@@ -60,13 +60,14 @@ DEFINE_COMMON_PACK_UNPACK_ACCESSORS(vl_forwarding);
 
 void sja1105_vl_forwarding_entry_fmt_show(
 		char *print_buf,
+		size_t len,
 		char *fmt,
 		struct sja1105_vl_forwarding_entry *entry)
 {
-	formatted_append(print_buf, fmt, "TYPE      0x%" PRIX64, entry->type);
-	formatted_append(print_buf, fmt, "PRIORITY  0x%" PRIX64, entry->priority);
-	formatted_append(print_buf, fmt, "PARTITION 0x%" PRIX64, entry->partition);
-	formatted_append(print_buf, fmt, "DESTPORTS 0x%" PRIX64, entry->destports);
+	formatted_append(print_buf, len, fmt, "TYPE      0x%" PRIX64, entry->type);
+	formatted_append(print_buf, len, fmt, "PRIORITY  0x%" PRIX64, entry->priority);
+	formatted_append(print_buf, len, fmt, "PARTITION 0x%" PRIX64, entry->partition);
+	formatted_append(print_buf, len, fmt, "DESTPORTS 0x%" PRIX64, entry->destports);
 }
 
 void sja1105_vl_forwarding_entry_show(struct sja1105_vl_forwarding_entry *entry)
@@ -75,7 +76,7 @@ void sja1105_vl_forwarding_entry_show(struct sja1105_vl_forwarding_entry *entry)
 	char *fmt = "%s\n";
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_vl_forwarding_entry_fmt_show(print_buf, fmt, entry);
+	sja1105_vl_forwarding_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
 	puts(print_buf);
 }
 

@@ -131,9 +131,11 @@ sja1105pqrs_mac_config_entry_access(void *buf,
 DEFINE_SEPARATE_PACK_UNPACK_ACCESSORS(mac_config);
 
 void
-sja1105_mac_config_entry_fmt_show(char *print_buf,
-                                  char *fmt,
-                                  struct sja1105_mac_config_entry *entry)
+sja1105_mac_config_entry_fmt_show(
+		char *print_buf,
+		size_t len,
+		char *fmt,
+		struct sja1105_mac_config_entry *entry)
 {
 	char    base_buf[MAX_LINE_SIZE];
 	char     top_buf[MAX_LINE_SIZE];
@@ -147,32 +149,32 @@ sja1105_mac_config_entry_fmt_show(char *print_buf,
 	 * extra zero-valued fields on the E/T rather than not see the values at
 	 * all on the P/Q/R/S.
 	 */
-	formatted_append(print_buf, fmt, "BASE      %s", base_buf);
-	formatted_append(print_buf, fmt, "TOP       %s", top_buf);
-	formatted_append(print_buf, fmt, "ENABLED   %s", enabled_buf);
-	formatted_append(print_buf, fmt, "IFG        0x%" PRIX64, entry->ifg);
-	formatted_append(print_buf, fmt, "SPEED      0x%" PRIX64, entry->speed);
-	formatted_append(print_buf, fmt, "TP_DELIN   0x%" PRIX64, entry->tp_delin);
-	formatted_append(print_buf, fmt, "TP_DELOUT  0x%" PRIX64, entry->tp_delout);
-	formatted_append(print_buf, fmt, "MAXAGE     0x%" PRIX64, entry->maxage);
-	formatted_append(print_buf, fmt, "VLANPRIO   0x%" PRIX64, entry->vlanprio);
-	formatted_append(print_buf, fmt, "VLANID     0x%" PRIX64, entry->vlanid);
-	formatted_append(print_buf, fmt, "ING_MIRR   0x%" PRIX64, entry->ing_mirr);
-	formatted_append(print_buf, fmt, "EGR_MIRR   0x%" PRIX64, entry->egr_mirr);
-	formatted_append(print_buf, fmt, "DRPNONA664 0x%" PRIX64, entry->drpnona664);
-	formatted_append(print_buf, fmt, "DRPDTAG    0x%" PRIX64, entry->drpdtag);
-	formatted_append(print_buf, fmt, "DRPUNTAG   0x%" PRIX64, entry->drpuntag);
-	formatted_append(print_buf, fmt, "DRPSOTAG   0x%" PRIX64, entry->drpsotag);
-	formatted_append(print_buf, fmt, "DRPSITAG   0x%" PRIX64, entry->drpsitag);
-	formatted_append(print_buf, fmt, "RETAG      0x%" PRIX64, entry->retag);
-	formatted_append(print_buf, fmt, "DYN_LEARN  0x%" PRIX64, entry->dyn_learn);
-	formatted_append(print_buf, fmt, "EGRESS     0x%" PRIX64, entry->egress);
-	formatted_append(print_buf, fmt, "INGRESS    0x%" PRIX64, entry->ingress);
-	formatted_append(print_buf, fmt, "MIRRCIE    0x%" PRIX64, entry->mirrcie);
-	formatted_append(print_buf, fmt, "MIRRCETAG  0x%" PRIX64, entry->mirrcetag);
-	formatted_append(print_buf, fmt, "INGMIRRVID 0x%" PRIX64, entry->ingmirrvid);
-	formatted_append(print_buf, fmt, "INGMIRRPCP 0x%" PRIX64, entry->ingmirrpcp);
-	formatted_append(print_buf, fmt, "INGMIRRDEI 0x%" PRIX64, entry->ingmirrdei);
+	formatted_append(print_buf, len, fmt, "BASE      %s", base_buf);
+	formatted_append(print_buf, len, fmt, "TOP       %s", top_buf);
+	formatted_append(print_buf, len, fmt, "ENABLED   %s", enabled_buf);
+	formatted_append(print_buf, len, fmt, "IFG        0x%" PRIX64, entry->ifg);
+	formatted_append(print_buf, len, fmt, "SPEED      0x%" PRIX64, entry->speed);
+	formatted_append(print_buf, len, fmt, "TP_DELIN   0x%" PRIX64, entry->tp_delin);
+	formatted_append(print_buf, len, fmt, "TP_DELOUT  0x%" PRIX64, entry->tp_delout);
+	formatted_append(print_buf, len, fmt, "MAXAGE     0x%" PRIX64, entry->maxage);
+	formatted_append(print_buf, len, fmt, "VLANPRIO   0x%" PRIX64, entry->vlanprio);
+	formatted_append(print_buf, len, fmt, "VLANID     0x%" PRIX64, entry->vlanid);
+	formatted_append(print_buf, len, fmt, "ING_MIRR   0x%" PRIX64, entry->ing_mirr);
+	formatted_append(print_buf, len, fmt, "EGR_MIRR   0x%" PRIX64, entry->egr_mirr);
+	formatted_append(print_buf, len, fmt, "DRPNONA664 0x%" PRIX64, entry->drpnona664);
+	formatted_append(print_buf, len, fmt, "DRPDTAG    0x%" PRIX64, entry->drpdtag);
+	formatted_append(print_buf, len, fmt, "DRPUNTAG   0x%" PRIX64, entry->drpuntag);
+	formatted_append(print_buf, len, fmt, "DRPSOTAG   0x%" PRIX64, entry->drpsotag);
+	formatted_append(print_buf, len, fmt, "DRPSITAG   0x%" PRIX64, entry->drpsitag);
+	formatted_append(print_buf, len, fmt, "RETAG      0x%" PRIX64, entry->retag);
+	formatted_append(print_buf, len, fmt, "DYN_LEARN  0x%" PRIX64, entry->dyn_learn);
+	formatted_append(print_buf, len, fmt, "EGRESS     0x%" PRIX64, entry->egress);
+	formatted_append(print_buf, len, fmt, "INGRESS    0x%" PRIX64, entry->ingress);
+	formatted_append(print_buf, len, fmt, "MIRRCIE    0x%" PRIX64, entry->mirrcie);
+	formatted_append(print_buf, len, fmt, "MIRRCETAG  0x%" PRIX64, entry->mirrcetag);
+	formatted_append(print_buf, len, fmt, "INGMIRRVID 0x%" PRIX64, entry->ingmirrvid);
+	formatted_append(print_buf, len, fmt, "INGMIRRPCP 0x%" PRIX64, entry->ingmirrpcp);
+	formatted_append(print_buf, len, fmt, "INGMIRRDEI 0x%" PRIX64, entry->ingmirrdei);
 }
 
 void sja1105_mac_config_entry_show(struct sja1105_mac_config_entry *entry)
@@ -181,7 +183,7 @@ void sja1105_mac_config_entry_show(struct sja1105_mac_config_entry *entry)
 	char *fmt = "%s\n";
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_mac_config_entry_fmt_show(print_buf, fmt, entry);
+	sja1105_mac_config_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
 	puts(print_buf);
 }
 

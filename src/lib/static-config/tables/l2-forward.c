@@ -66,16 +66,17 @@ DEFINE_COMMON_PACK_UNPACK_ACCESSORS(l2_forwarding);
 
 void sja1105_l2_forwarding_entry_fmt_show(
 		char *print_buf,
+		size_t len,
 		char *fmt,
 		struct sja1105_l2_forwarding_entry *entry)
 {
 	char vlan_pmap_buf[MAX_LINE_SIZE];
 
 	print_array(vlan_pmap_buf, entry->vlan_pmap, 8);
-	formatted_append(print_buf, fmt, "BC_DOMAIN  0x%" PRIX64, entry->bc_domain);
-	formatted_append(print_buf, fmt, "REACH_PORT 0x%" PRIX64, entry->reach_port);
-	formatted_append(print_buf, fmt, "FL_DOMAIN  0x%" PRIX64, entry->fl_domain);
-	formatted_append(print_buf, fmt, "VLAN_PMAP %s", vlan_pmap_buf);
+	formatted_append(print_buf, len, fmt, "BC_DOMAIN  0x%" PRIX64, entry->bc_domain);
+	formatted_append(print_buf, len, fmt, "REACH_PORT 0x%" PRIX64, entry->reach_port);
+	formatted_append(print_buf, len, fmt, "FL_DOMAIN  0x%" PRIX64, entry->fl_domain);
+	formatted_append(print_buf, len, fmt, "VLAN_PMAP %s", vlan_pmap_buf);
 }
 
 void sja1105_l2_forwarding_entry_show(struct sja1105_l2_forwarding_entry *entry)
@@ -84,7 +85,7 @@ void sja1105_l2_forwarding_entry_show(struct sja1105_l2_forwarding_entry *entry)
 	char *fmt = "%s\n";
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_l2_forwarding_entry_fmt_show(print_buf, fmt, entry);
+	sja1105_l2_forwarding_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
 	puts(print_buf);
 }
 

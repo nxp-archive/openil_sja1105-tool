@@ -35,66 +35,66 @@
 #include <common.h>
 
 void sja1105_port_status_show(struct sja1105_port_status *status,
-                              int    port, char  *print_buf,
+                              int port, char *print_buf, size_t len,
                               uint64_t device_id)
 {
 	char *fmt = "%-30s\n";
 	int i;
-	formatted_append(print_buf, fmt, "Port %d",          port);
-	formatted_append(print_buf, fmt, "");
-	formatted_append(print_buf, fmt, "MAC-Level Diagnostic Counters");
-	formatted_append(print_buf, fmt, "N_RUNT          %" PRIu64, status->n_runt);
-	formatted_append(print_buf, fmt, "N_SOFERR        %" PRIu64, status->n_soferr);
-	formatted_append(print_buf, fmt, "N_ALIGNERR      %" PRIu64, status->n_alignerr);
-	formatted_append(print_buf, fmt, "N_MIIERR        %" PRIu64, status->n_miierr);
-	formatted_append(print_buf, fmt, "");
-	formatted_append(print_buf, fmt, "MAC-Level Diagnostic Flags");
-	formatted_append(print_buf, fmt, "TYPEERR         %" PRIX64, status->typeerr);
-	formatted_append(print_buf, fmt, "SIZEERR         %" PRIX64, status->sizeerr);
-	formatted_append(print_buf, fmt, "TCTIMEOUT       %" PRIX64, status->tctimeout);
-	formatted_append(print_buf, fmt, "PRIORERR        %" PRIX64, status->priorerr);
-	formatted_append(print_buf, fmt, "NOMASTER        %" PRIX64, status->nomaster);
-	formatted_append(print_buf, fmt, "MEMOV           %" PRIX64, status->memov);
-	formatted_append(print_buf, fmt, "MEMERR          %" PRIX64, status->memerr);
-	formatted_append(print_buf, fmt, "INVTYP          %" PRIX64, status->invtyp);
-	formatted_append(print_buf, fmt, "INTCYOV         %" PRIX64, status->intcyov);
-	formatted_append(print_buf, fmt, "DOMERR          %" PRIX64, status->domerr);
-	formatted_append(print_buf, fmt, "PCFBAGDROP      %" PRIX64, status->pcfbagdrop);
-	formatted_append(print_buf, fmt, "SPCPRIOR        %" PRIX64, status->spcprior);
-	formatted_append(print_buf, fmt, "AGEPRIOR        %" PRIX64, status->ageprior);
-	formatted_append(print_buf, fmt, "PORTDROP        %" PRIX64, status->portdrop);
-	formatted_append(print_buf, fmt, "LENDROP         %" PRIX64, status->lendrop);
-	formatted_append(print_buf, fmt, "BAGDROP         %" PRIX64, status->bagdrop);
-	formatted_append(print_buf, fmt, "POLICEERR       %" PRIX64, status->policeerr);
-	formatted_append(print_buf, fmt, "DRPNON664ERR    %" PRIX64, status->drpnona664err);
-	formatted_append(print_buf, fmt, "SPCERR          %" PRIX64, status->spcerr);
-	formatted_append(print_buf, fmt, "AGEDRP          %" PRIX64, status->agedrp);
-	formatted_append(print_buf, fmt, "");
-	formatted_append(print_buf, fmt, "High-Level Diagnostic Counters");
-	formatted_append(print_buf, fmt, "N_N664ERR       %" PRIu64, status->n_n664err);
-	formatted_append(print_buf, fmt, "N_VLANERR       %" PRIu64, status->n_vlanerr);
-	formatted_append(print_buf, fmt, "N_UNRELEASED    %" PRIu64, status->n_unreleased);
-	formatted_append(print_buf, fmt, "N_SIZERR        %" PRIu64, status->n_sizerr);
-	formatted_append(print_buf, fmt, "N_CRCERR        %" PRIu64, status->n_crcerr);
-	formatted_append(print_buf, fmt, "N_VLNOTFOUND    %" PRIu64, status->n_vlnotfound);
-	formatted_append(print_buf, fmt, "N_BEPOLERR      %" PRIu64, status->n_bepolerr);
-	formatted_append(print_buf, fmt, "N_POLERR        %" PRIu64, status->n_polerr);
-	formatted_append(print_buf, fmt, "N_RXFRM         %" PRIu64, status->n_rxfrm);
-	formatted_append(print_buf, fmt, "N_RXBYTE        %" PRIu64, status->n_rxbyte);
-	formatted_append(print_buf, fmt, "N_TXFRM         %" PRIu64, status->n_txfrm);
-	formatted_append(print_buf, fmt, "N_TXBYTE        %" PRIu64, status->n_txbyte);
-	formatted_append(print_buf, fmt, "N_QFULL         %" PRIu64, status->n_qfull);
-	formatted_append(print_buf, fmt, "N_PART_DROP     %" PRIu64, status->n_part_drop);
-	formatted_append(print_buf, fmt, "N_EGR_DISABLED  %" PRIu64, status->n_egr_disabled);
-	formatted_append(print_buf, fmt, "N_NOT_REACH     %" PRIu64, status->n_not_reach);
-	formatted_append(print_buf, fmt, "");
+	formatted_append(print_buf, len, fmt, "Port %d",          port);
+	formatted_append(print_buf, len, fmt, "");
+	formatted_append(print_buf, len, fmt, "MAC-Level Diagnostic Counters");
+	formatted_append(print_buf, len, fmt, "N_RUNT          %" PRIu64, status->n_runt);
+	formatted_append(print_buf, len, fmt, "N_SOFERR        %" PRIu64, status->n_soferr);
+	formatted_append(print_buf, len, fmt, "N_ALIGNERR      %" PRIu64, status->n_alignerr);
+	formatted_append(print_buf, len, fmt, "N_MIIERR        %" PRIu64, status->n_miierr);
+	formatted_append(print_buf, len, fmt, "");
+	formatted_append(print_buf, len, fmt, "MAC-Level Diagnostic Flags");
+	formatted_append(print_buf, len, fmt, "TYPEERR         %" PRIX64, status->typeerr);
+	formatted_append(print_buf, len, fmt, "SIZEERR         %" PRIX64, status->sizeerr);
+	formatted_append(print_buf, len, fmt, "TCTIMEOUT       %" PRIX64, status->tctimeout);
+	formatted_append(print_buf, len, fmt, "PRIORERR        %" PRIX64, status->priorerr);
+	formatted_append(print_buf, len, fmt, "NOMASTER        %" PRIX64, status->nomaster);
+	formatted_append(print_buf, len, fmt, "MEMOV           %" PRIX64, status->memov);
+	formatted_append(print_buf, len, fmt, "MEMERR          %" PRIX64, status->memerr);
+	formatted_append(print_buf, len, fmt, "INVTYP          %" PRIX64, status->invtyp);
+	formatted_append(print_buf, len, fmt, "INTCYOV         %" PRIX64, status->intcyov);
+	formatted_append(print_buf, len, fmt, "DOMERR          %" PRIX64, status->domerr);
+	formatted_append(print_buf, len, fmt, "PCFBAGDROP      %" PRIX64, status->pcfbagdrop);
+	formatted_append(print_buf, len, fmt, "SPCPRIOR        %" PRIX64, status->spcprior);
+	formatted_append(print_buf, len, fmt, "AGEPRIOR        %" PRIX64, status->ageprior);
+	formatted_append(print_buf, len, fmt, "PORTDROP        %" PRIX64, status->portdrop);
+	formatted_append(print_buf, len, fmt, "LENDROP         %" PRIX64, status->lendrop);
+	formatted_append(print_buf, len, fmt, "BAGDROP         %" PRIX64, status->bagdrop);
+	formatted_append(print_buf, len, fmt, "POLICEERR       %" PRIX64, status->policeerr);
+	formatted_append(print_buf, len, fmt, "DRPNON664ERR    %" PRIX64, status->drpnona664err);
+	formatted_append(print_buf, len, fmt, "SPCERR          %" PRIX64, status->spcerr);
+	formatted_append(print_buf, len, fmt, "AGEDRP          %" PRIX64, status->agedrp);
+	formatted_append(print_buf, len, fmt, "");
+	formatted_append(print_buf, len, fmt, "High-Level Diagnostic Counters");
+	formatted_append(print_buf, len, fmt, "N_N664ERR       %" PRIu64, status->n_n664err);
+	formatted_append(print_buf, len, fmt, "N_VLANERR       %" PRIu64, status->n_vlanerr);
+	formatted_append(print_buf, len, fmt, "N_UNRELEASED    %" PRIu64, status->n_unreleased);
+	formatted_append(print_buf, len, fmt, "N_SIZERR        %" PRIu64, status->n_sizerr);
+	formatted_append(print_buf, len, fmt, "N_CRCERR        %" PRIu64, status->n_crcerr);
+	formatted_append(print_buf, len, fmt, "N_VLNOTFOUND    %" PRIu64, status->n_vlnotfound);
+	formatted_append(print_buf, len, fmt, "N_BEPOLERR      %" PRIu64, status->n_bepolerr);
+	formatted_append(print_buf, len, fmt, "N_POLERR        %" PRIu64, status->n_polerr);
+	formatted_append(print_buf, len, fmt, "N_RXFRM         %" PRIu64, status->n_rxfrm);
+	formatted_append(print_buf, len, fmt, "N_RXBYTE        %" PRIu64, status->n_rxbyte);
+	formatted_append(print_buf, len, fmt, "N_TXFRM         %" PRIu64, status->n_txfrm);
+	formatted_append(print_buf, len, fmt, "N_TXBYTE        %" PRIu64, status->n_txbyte);
+	formatted_append(print_buf, len, fmt, "N_QFULL         %" PRIu64, status->n_qfull);
+	formatted_append(print_buf, len, fmt, "N_PART_DROP     %" PRIu64, status->n_part_drop);
+	formatted_append(print_buf, len, fmt, "N_EGR_DISABLED  %" PRIu64, status->n_egr_disabled);
+	formatted_append(print_buf, len, fmt, "N_NOT_REACH     %" PRIu64, status->n_not_reach);
+	formatted_append(print_buf, len, fmt, "");
 	if (IS_PQRS(device_id)) {
-		formatted_append(print_buf, fmt, "Queue Levels");
+		formatted_append(print_buf, len, fmt, "Queue Levels");
 		for (i = 0; i < 8; i++) {
-			formatted_append(print_buf, fmt, "QLEVEL_HWM_%d   %" PRIu64, i, status->qlevel_hwm[i]);
-			formatted_append(print_buf, fmt, "QLEVEL_%d       %" PRIu64, i, status->qlevel[i]);
+			formatted_append(print_buf, len, fmt, "QLEVEL_HWM_%d   %" PRIu64, i, status->qlevel_hwm[i]);
+			formatted_append(print_buf, len, fmt, "QLEVEL_%d       %" PRIu64, i, status->qlevel[i]);
 		}
-		formatted_append(print_buf, fmt, "");
+		formatted_append(print_buf, len, fmt, "");
 	}
 }
 
