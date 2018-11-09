@@ -326,7 +326,7 @@ int sja1105_port_status_clear(struct sja1105_spi_setup *spi_setup,
 
 	gtable_pack(packed_buf, &clearport, 4, 0, BUF_LEN);
 	rc = sja1105_spi_send_packed_buf(spi_setup,
-	                                 SPI_READ,
+	                                 SPI_WRITE,
 	                                 CORE_ADDR + PORT_STATUS_CTRL_ADDR,
 	                                 packed_buf,
 	                                 BUF_LEN);
