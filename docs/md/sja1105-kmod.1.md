@@ -92,6 +92,11 @@ DEVICE-TREE
 BINDINGS
 --------
 
+sja1105,staging-area
+
+:   Location relative to the /lib/firmware directory where the static
+    configuration held by userspace (staging area) is held.
+
 reset-gpio
 
 :   GPIO connected to the reset input of the switch chip.
@@ -124,6 +129,7 @@ DEVICE-TREE EXAMPLE
 		fsl,spi-cs-sck-delay = <1000>;
 		fsl,spi-sck-cs-delay = <1000>;
 		#reset-gpio = <&spigpio1_1 0 1>;
+		sja1105,staging-area = "sja1105.bin";
 		port@0 {
 			sja1105,port-label = "seth5"; /* ETH5 written on chassis */
 			phy-handle = <&rgmii_phy3>;

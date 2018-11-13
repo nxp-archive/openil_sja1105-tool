@@ -62,12 +62,12 @@ int sja1105_load_firmware(struct sja1105_spi_private *priv)
 	void* buf;
 	struct device *dev = &priv->spi_dev->dev;
 	const struct firmware *fw_entry;
-	const char fw_name[] = FIRMWARE_FILENAME;
 
 	/* Load firmware from user space (rootfs) and unpack it */
-	rc = request_firmware(&fw_entry, fw_name, dev);
+	rc = request_firmware(&fw_entry, priv->staging_area, dev);
 	if (rc) {
-		dev_err(dev, "Error requesting firmware %s\n", fw_name);
+		dev_err(dev, "Error requesting firmware file %s\n",
+		        priv->staging_area);
 		goto err_out;
 	}
 
@@ -200,8 +200,9 @@ err_out:
 }
 
 /*
- * It is assumed that the static configuration is already loaded
- * into the driver private data struct.
+ * This function also performs the firmware request to userspace once
+ * it parses the path to the staging area from the DTS. The static
+ * configuration is then loaded into the driver private data struct.
  */
 static int sja1105_parse_dt(struct sja1105_spi_private *priv)
 {
@@ -214,6 +215,18 @@ static int sja1105_parse_dt(struct sja1105_spi_private *priv)
 	u32 port_index;
 	u64 speed;
 	int rc;
+
+	rc = of_property_read_string(switch_node, "sja1105,staging-area",
+	                             &priv->staging_area);
+	if (rc) {
+		dev_err(dev, "Staging area node not present in device tree!\n");
+		goto err_out;
+	}
+
+	/* Load firmware from user space (rootfs) and unpack it */
+	rc = sja1105_load_firmware(priv);
+	if (rc)
+		goto err_out;
 
 	for_each_child_of_node(switch_node, child) {
 		rc = of_property_read_string(child, "sja1105,port-label",
@@ -317,19 +330,7 @@ static int sja1105_probe(struct spi_device *spi)
 		goto err_out;
 	chip_name = sja1105_device_id_string_get(priv->spi_setup.device_id,
 	                                         priv->spi_setup.part_nr);
-	dev_info(dev, "Probed switch chip: %s\n", chip_name);
-
-	/* Load firmware from user space (rootfs) and unpack it */
-	rc = sja1105_load_firmware(priv);
-	if (rc)
-		goto out_error;
-
-	/* Upload static configuration */
-	rc = sja1105_static_config_flush(&priv->spi_setup,
-	                                  &priv->static_config);
-	if (rc < 0)
-		goto out_error;
-	dev_info(dev, "Uploaded static configuration to device\n");
+	dev_dbg(dev, "Probed switch chip: %s\n", chip_name);
 
 	rc = sja1105_sysfs_init(priv);
 	if (rc) {
@@ -342,11 +343,18 @@ static int sja1105_probe(struct spi_device *spi)
 	rc = sja1105_parse_dt(priv);
 	mutex_unlock(&priv->lock);
 	if (rc < 0)
-		goto out_error;
+		goto err_out;
+
+	/* Upload static configuration */
+	rc = sja1105_static_config_flush(&priv->spi_setup,
+	                                 &priv->static_config);
+	if (rc < 0)
+		goto err_out;
+	dev_dbg(dev, "Uploaded static configuration to device\n");
 
 	return 0;
 
-out_error:
+err_out:
 	sja1105_cleanup(priv);
 	return rc;
 }

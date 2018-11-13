@@ -18,10 +18,6 @@
 #include <lib/include/static-config.h>
 #include <lib/include/spi.h>
 
-
-#define FIRMWARE_FILENAME          "sja1105.bin"
-
-
 struct sja1105_port {
 	struct device_node *node;
 	struct device_node *phy_node;
@@ -52,8 +48,9 @@ struct sja1105_spi_private {
 
 	struct sja1105_port *selected_port; /* port to read status from */
 	u64 reg_addr; /* register address to read from */
-};
 
+	const char *staging_area;
+};
 
 /* sja1105-kmod.c */
 int sja1105_load_firmware(struct sja1105_spi_private *priv);
