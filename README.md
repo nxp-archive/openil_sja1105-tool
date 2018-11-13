@@ -4,13 +4,18 @@ SJA1105 Tool
 Supported Platforms
 -------------------
 
-* LS1021ATSN
+* SJA1105E (Gen. 1, No TT-Ethernet)
+* SJA1105T (Gen. 1, TT-Ethernet)
+* SJA1105P (Gen. 2, No SGMII, No TT-Ethernet)
+* SJA1105Q (Gen. 2, No SGMII, TT-Ethernet)
+* SJA1105R (Gen. 2, SGMII, No TT-Ethernet)
+* SJA1105S (Gen. 2, SGMII, TT-Ethernet)
 
 Features
 --------
 
 The sja1105-tool is a Linux userspace application for configuring the NXP
-SJA1105 Automotive Ethernet L2 switch. The tool supports:
+SJA1105 family of Automotive Ethernet L2 switches. The tool supports:
 * Importing a configuration for the SJA1105 switch from an XML file
 * Exporting the current SJA1105 configuration as an XML file
 * Uploading the current SJA1105 configuration to the switch through its
@@ -131,37 +136,10 @@ man -l ./sja1105-conf.5                # File format for sja1105-tool configurat
 man -l ./sja1105-tool-config-format.5  # File format for XML switch configuration tables
 ```
 
-Port numbering on the NXP LS1021ATSN board
-------------------------------------------
-
-| Chassis port label | Switch port number | PHY ID |
-|--------------------|--------------------|--------|
-|        ETH2        |       RGMII 1      |    3   |
-|        ETH3        |       RGMII 2      |    4   |
-|        ETH4        |       RGMII 3      |    5   |
-|        ETH5        |       RGMII 0      |    6   |
-|      Internal      |       RGMII 4      |    -   |
-
 Known issues
 ------------
 
-1. Link speed autonegotiation is not supported.
-
-In the default LS1021ATSN configuration, link speed on all ports is set to 1000Mbps.
-
-The 5 ports of the SJA1105 switch do not have a Linux kernel driver.
-As such, the PHY chip (BCM5464R) attached to the 4 externally connected ports
-of the LS1021ATSN board (ETH2, ETH3, ETH4, ETH5) is not controlled by the
-Linux kernel either.
-
-There is a workaround for this issue, that is to disable auto-negotiation on the
-PHY and keep the link speeds manually in sync between the PHY and the switch
-ports. The init script that does this is `etc/sja1105-link-speed-fixup`,
-and is deployed in OpenIL at `/etc/init.d/S46sja1105-link-speed-fixup`.
-Link speeds should be set at their desired values in this init script.
-
-
-2. Clock synchronization via TTEthernet (SAE AS6802) is not supported.
+1. Clock synchronization via TTEthernet (SAE AS6802) is not supported.
 
 
 Reporting issues
