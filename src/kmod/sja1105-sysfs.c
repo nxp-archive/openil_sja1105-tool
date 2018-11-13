@@ -98,8 +98,6 @@ static DEVICE_ATTR(device_id,         S_IRUGO,
                    sja1105_sysfs_rd,  NULL);
 static DEVICE_ATTR(general_status,    S_IRUGO,
                    sja1105_sysfs_rd,  NULL);
-static DEVICE_ATTR(port_status,       S_IRUGO | S_IWUSR,
-                   sja1105_sysfs_rd,  sja1105_sysfs_wr);
 static DEVICE_ATTR(port_status_clear, S_IWUSR,
                    NULL,              sja1105_sysfs_wr);
 static DEVICE_ATTR(port_mapping,      S_IRUGO,
@@ -147,13 +145,6 @@ static ssize_t sja1105_sysfs_wr(struct device *dev,
 		}
 		/* TODO: Resetting / Reinit of PHYs required ? */
 		rc = count;
-	} else if (attr == &dev_attr_port_status) {
-		rc = -ENOENT;
-		port = sja1105_parse_port(priv, buf);
-		if (port) {
-			priv->selected_port = port;
-			rc = count;
-		}
 	} else if (attr == &dev_attr_port_status_clear) {
 		if (sysfs_streq(buf, "all")) {
 			port_no = -1;
@@ -206,10 +197,8 @@ static ssize_t sja1105_sysfs_rd(struct device *dev,
 	struct spi_device *spi = to_spi_device(dev);
 	struct sja1105_spi_private *priv = spi_get_drvdata(spi);
 	struct sja1105_general_status gen_status;
-	struct sja1105_port_status port_status;
 	struct list_head *pos, *q;
 	struct sja1105_port *port = NULL;
-	int port_index;
 	u64 value;
 
 	if (attr == &dev_attr_device_id) {
@@ -234,23 +223,6 @@ static ssize_t sja1105_sysfs_rd(struct device *dev,
 		}
 		sja1105_general_status_show(&gen_status, buf, PAGE_SIZE,
 		                            priv->spi_setup.device_id);
-		rc = strlen(buf);
-	} else if (attr == &dev_attr_port_status) {
-		if (!priv->selected_port) {
-			rc = -ENOENT;
-			goto err_out;
-		}
-		port_index = priv->selected_port->index;
-		mutex_lock(&priv->lock);
-		rc = sja1105_port_status_get(&priv->spi_setup, &port_status,
-		                              port_index);
-		mutex_unlock(&priv->lock);
-		if (rc) {
-			rc = -EIO;
-			goto err_out;
-		}
-		sja1105_port_status_show(&port_status, port_index, buf,
-		                         PAGE_SIZE, priv->spi_setup.device_id);
 		rc = strlen(buf);
 	} else if (attr == &dev_attr_port_mapping) {
 		list_for_each_safe(pos, q, &(priv->port_list_head.list)) {
@@ -283,7 +255,6 @@ int sja1105_sysfs_init(struct sja1105_spi_private *priv)
 
 	rc  = device_create_file(dev, &dev_attr_device_id);
 	rc |= device_create_file(dev, &dev_attr_general_status);
-	rc |= device_create_file(dev, &dev_attr_port_status);
 	rc |= device_create_file(dev, &dev_attr_port_status_clear);
 	rc |= device_create_file(dev, &dev_attr_port_mapping);
 	rc |= device_create_file(dev, &dev_attr_reg_access);
@@ -298,7 +269,6 @@ void sja1105_sysfs_remove(struct sja1105_spi_private *priv)
 
 	device_remove_file(dev, &dev_attr_device_id);
 	device_remove_file(dev, &dev_attr_general_status);
-	device_remove_file(dev, &dev_attr_port_status);
 	device_remove_file(dev, &dev_attr_port_status_clear);
 	device_remove_file(dev, &dev_attr_port_mapping);
 	device_remove_file(dev, &dev_attr_reg_access);

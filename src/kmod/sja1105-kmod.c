@@ -183,6 +183,7 @@ static int sja1105_connect_phy(struct sja1105_port *port,
 		port->phy_dev = of_phy_connect(net_dev, port->phy_node,
 		                               sja1105_netdev_adjust_link,
 		                               0 /* flags */, port->phy_mode);
+		port->net_dev->phydev = port->phy_dev;
 		/* Regardless of error status, decrement refcount now
 		 * (of_parse_phandle)
 		 */

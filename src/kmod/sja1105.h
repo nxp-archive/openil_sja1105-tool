@@ -46,7 +46,6 @@ struct sja1105_spi_private {
 	struct sja1105_spi_setup spi_setup;
 	struct gpio_desc *reset_gpio;
 
-	struct sja1105_port *selected_port; /* port to read status from */
 	u64 reg_addr; /* register address to read from */
 
 	const char *staging_area;

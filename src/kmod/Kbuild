@@ -2,6 +2,7 @@ obj-m := sja1105.o
 sja1105-y := sja1105-kmod.o \
              sja1105-sysfs.o \
              sja1105-netdev.o \
+             sja1105-ethtool.o \
              sja1105-spi.o \
              ../common.o \
              ../lib/helpers.o \
@@ -48,7 +49,7 @@ cmd-files := \
 
 clean-files := $(sja1105-y) $(cmd-files)
 
-ccflags-y := -DSJA1105_KMOD_BUILD -I${M}/../
+ccflags-y := -DSJA1105_KMOD_BUILD -DVERSION=\"${VERSION}\" -I${M}/../
 ifeq ($(ARCH),arm)
 ccflags-y += -mlong-calls
 endif

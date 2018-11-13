@@ -262,6 +262,9 @@ const struct net_device_ops sja1105_netdev_ops = {
 	.ndo_start_xmit       = sja1105_xmit,
 };
 
+/* sja1105-ethtool.c */
+extern const struct ethtool_ops sja1105_ethtool_ops;
+
 struct sja1105_port*
 sja1105_netdev_create_port(struct sja1105_spi_private *priv,
                            const char* port_name)
@@ -312,7 +315,8 @@ sja1105_netdev_create_port(struct sja1105_spi_private *priv,
 	 */
 	SET_NETDEV_DEV(net_dev, dev);
 
-	net_dev->netdev_ops = &sja1105_netdev_ops;
+	net_dev->netdev_ops  = &sja1105_netdev_ops;
+	net_dev->ethtool_ops = &sja1105_ethtool_ops;
 	/* Don't allow explicit Tx on switch ports from Linux */
 	netif_tx_stop_all_queues(net_dev);
 	rc = register_netdev(net_dev);

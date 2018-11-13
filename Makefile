@@ -120,7 +120,7 @@ KMOD_SRC := $(patsubst %.o, %.c, $(addprefix src/kmod/, $(sja1105-y)))
 
 $(SJA1105_KMOD): $(KMOD_SRC)
 	@mkdir -p $(dir $@)
-	$(MAKE) -C $(KDIR) M=$$PWD/src/kmod
+	$(MAKE) -C $(KDIR) M=$$PWD/src/kmod VERSION=$(VERSION)
 
 $(O)src/common.o: src/common.c
 	@mkdir -p $(dir $@)
