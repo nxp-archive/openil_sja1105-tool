@@ -190,7 +190,6 @@ install: install-binaries install-configs install-manpages install-headers
 install-binaries: $(O)$(SJA1105_LIB) $(O)$(SJA1105_BIN)
 	install -m 0755 -D $(O)$(SJA1105_LIB) $(DESTDIR)${libdir}/$(notdir $(O)$(SJA1105_LIB))
 	install -m 0755 -D $(O)$(SJA1105_BIN) $(DESTDIR)${bindir}/$(notdir $(O)$(SJA1105_BIN))
-	install -m 0755 -D etc/etsec_mdio $(DESTDIR)${bindir}/etsec_mdio
 
 install-configs: etc/sja1105-init etc/sja1105.conf
 	install -m 0644 -D etc/sja1105.conf $(DESTDIR)${sysconfdir}/sja1105/sja1105.conf
@@ -213,8 +212,6 @@ uninstall:
 		rm -rf $(call get_header_destination,$(header));)
 	rm -rf $(DESTDIR)${libdir}/libsja1105.so
 	rm -rf $(DESTDIR)${bindir}/sja1105-tool
-	rm -rf $(DESTDIR)${bindir}/etsec_mdio
-	rm -rf $(DESTDIR)${sysconfdir}/init.d/S46sja1105-link-speed-fixup
 	rm -rf $(DESTDIR)${sysconfdir}/init.d/S45sja1105
 	rm -rf $(DESTDIR)${sysconfdir}/sja1105/sja1105.conf
 
