@@ -53,7 +53,11 @@ void formatted_append(char *buffer, size_t len, char *width_fmt, char *fmt, ...)
 	va_list args;
 
 	/* Allocate temp_buf from heap to save stack size on kmod build */
+#ifdef SJA1105_KMOD_BUILD
+	temp_buf = kzalloc(MAX_LINE_SIZE, GFP_KERNEL);
+#else
 	temp_buf = calloc(1, MAX_LINE_SIZE);
+#endif
 	if (!temp_buf)
 		return;
 
@@ -67,6 +71,10 @@ void formatted_append(char *buffer, size_t len, char *width_fmt, char *fmt, ...)
 
 	va_end(args);
 
+#ifdef SJA1105_KMOD_BUILD
+	kfree(temp_buf);
+#else
 	free(temp_buf);
+#endif
 }
 

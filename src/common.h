@@ -73,10 +73,6 @@ extern int SJA1105_VERBOSE_CONDITION;
 
 
 #ifdef SJA1105_KMOD_BUILD
- #define calloc(n,size)	kzalloc((n*size), GFP_KERNEL)
- #define free(ptr)     	kfree(ptr)
- #define usleep(us)    	udelay(us)
-
  #define PRIx8     "hhx"
  #define PRIx16    "hx"
  #define PRIx32    "lx"
