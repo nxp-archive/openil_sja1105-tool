@@ -173,9 +173,9 @@ endef
 
 install: install-binaries install-configs install-manpages install-headers
 
-install-binaries: $(SJA1105_LIB) $(SJA1105_BIN)
-	install -m 0755 -D $(SJA1105_LIB) $(DESTDIR)${libdir}/$(notdir $(SJA1105_LIB))
-	install -m 0755 -D $(SJA1105_BIN) $(DESTDIR)${bindir}/$(notdir $(SJA1105_BIN))
+install-binaries: $(O)$(SJA1105_LIB) $(O)$(SJA1105_BIN)
+	install -m 0755 -D $(O)$(SJA1105_LIB) $(DESTDIR)${libdir}/$(notdir $(O)$(SJA1105_LIB))
+	install -m 0755 -D $(O)$(SJA1105_BIN) $(DESTDIR)${bindir}/$(notdir $(O)$(SJA1105_BIN))
 	install -m 0755 -D etc/etsec_mdio $(DESTDIR)${bindir}/etsec_mdio
 
 install-configs: etc/sja1105-init etc/sja1105.conf
@@ -205,7 +205,7 @@ uninstall:
 	rm -rf $(DESTDIR)${sysconfdir}/sja1105/sja1105.conf
 
 clean:
-	rm -f $(SJA1105_BIN) $(BIN_OBJ) $(SJA1105_LIB) $(LIB_OBJ)
+	rm -f $(O)$(SJA1105_BIN) $(BIN_OBJ) $(O)$(SJA1105_LIB) $(LIB_OBJ)
 	$(MAKE) -C $(KDIR) M=$$PWD/src/kmod clean
 
 .PHONY: clean uninstall build man pdf install install-binaries \
