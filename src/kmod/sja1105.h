@@ -14,9 +14,15 @@
 #include <linux/spi/spi.h>
 #include <linux/gpio/consumer.h>
 #include <linux/ratelimit.h>
+#include <linux/ptp_clock_kernel.h>
 
 #include <lib/include/static-config.h>
 #include <lib/include/spi.h>
+
+enum sja1105_ptp_clk_add_mode {
+	PTP_SET_MODE = 0,
+	PTP_ADD_MODE,
+};
 
 struct sja1105_port {
 	struct device_node *node;
@@ -49,6 +55,10 @@ struct sja1105_spi_private {
 	u64 reg_addr; /* register address to read from */
 
 	const char *staging_area;
+
+	struct ptp_clock *clock;
+	struct ptp_clock_info ptp_caps;
+	enum sja1105_ptp_clk_add_mode ptp_add_mode;
 };
 
 /* sja1105-kmod.c */
@@ -64,5 +74,9 @@ struct sja1105_port* sja1105_netdev_create_port(
 void sja1105_netdev_remove_port(struct sja1105_port *port);
 
 void sja1105_netdev_adjust_link(struct net_device *net_dev);
+
+/* sja1105-ptp.c */
+int  sja1105_ptp_clock_register(struct sja1105_spi_private *priv);
+void sja1105_ptp_clock_unregister(struct sja1105_spi_private *priv);
 
 #endif

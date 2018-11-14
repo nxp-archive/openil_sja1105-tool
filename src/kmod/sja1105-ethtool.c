@@ -5,6 +5,7 @@
  */
 #include <linux/ethtool.h>
 #include <linux/etherdevice.h>
+#include <linux/net_tstamp.h>
 #include <lib/include/status.h>
 #include "sja1105.h"
 
@@ -261,6 +262,24 @@ sja1105_get_regs(struct net_device *net_dev, struct ethtool_regs *regs,
 	buf[k++] = cpu_to_be32((u32) status.ramparerru);
 }
 
+static int sja1105_get_ts_info(struct net_device *net_dev,
+                               struct ethtool_ts_info *info)
+{
+	struct sja1105_port *port = netdev_priv(net_dev);
+	struct spi_device *spi = port->spi_dev;
+	struct sja1105_spi_private *priv = spi_get_drvdata(spi);
+
+	info->so_timestamping = SOF_TIMESTAMPING_TX_HARDWARE |
+	                        SOF_TIMESTAMPING_RX_HARDWARE |
+	                        SOF_TIMESTAMPING_RAW_HARDWARE;
+	info->tx_types = (1 << HWTSTAMP_TX_OFF) |
+	                 (1 << HWTSTAMP_TX_ON);
+	info->rx_filters = (1 << HWTSTAMP_FILTER_NONE) |
+	                   (1 << HWTSTAMP_FILTER_ALL);
+	info->phc_index = ptp_clock_index(priv->clock);
+	return 0;
+}
+
 const struct ethtool_ops sja1105_ethtool_ops = {
 	.get_drvinfo        = sja1105_get_drvinfo,
 	.get_link           = ethtool_op_get_link,
@@ -271,4 +290,5 @@ const struct ethtool_ops sja1105_ethtool_ops = {
 	.get_strings        = sja1105_get_strings,
 	.get_regs_len       = sja1105_get_regs_len,
 	.get_regs           = sja1105_get_regs,
+	.get_ts_info        = sja1105_get_ts_info,
 };

@@ -102,6 +102,7 @@ static void sja1105_cleanup(struct sja1105_spi_private *priv)
 	struct sja1105_port *port;
 
 	sja1105_sysfs_remove(priv);
+	sja1105_ptp_clock_unregister(priv);
 
 	list_for_each_safe(pos, q, &(priv->port_list_head.list)) {
 		port = list_entry(pos, struct sja1105_port, list);
@@ -353,8 +354,11 @@ static int sja1105_probe(struct spi_device *spi)
 		goto err_out;
 	dev_dbg(dev, "Uploaded static configuration to device\n");
 
-	return 0;
+	rc = sja1105_ptp_clock_register(priv);
+	if (rc < 0)
+		goto err_out;
 
+	return 0;
 err_out:
 	sja1105_cleanup(priv);
 	return rc;
