@@ -255,11 +255,20 @@ static netdev_tx_t sja1105_xmit(struct sk_buff *skb,
 	return NETDEV_TX_OK;
 }
 
+static int sja1105_ioctl(struct net_device *net_dev, struct ifreq *rq, int cmd)
+{
+	if (!net_dev->phydev)
+		return -ENODEV;
+
+	return phy_mii_ioctl(net_dev->phydev, rq, cmd);
+}
+
 const struct net_device_ops sja1105_netdev_ops = {
 	.ndo_get_stats64      = sja1105_get_stats,
 	.ndo_open             = sja1105_open,
 	.ndo_stop             = sja1105_close,
 	.ndo_start_xmit       = sja1105_xmit,
+	.ndo_do_ioctl         = sja1105_ioctl,
 };
 
 /* sja1105-ethtool.c */
