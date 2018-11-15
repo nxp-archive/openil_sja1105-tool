@@ -6,6 +6,7 @@
 #include <linux/device.h>
 #include "sja1105.h"
 #include "common.h"
+#include <lib/include/dynamic-config.h>
 
 /*
  * Parse the string to find a specific port.
@@ -40,6 +41,40 @@ static struct sja1105_port *sja1105_parse_port(struct sja1105_spi_private *priv,
 	return port;
 }
 
+/*
+ * Read a "space" separated number of values from "buf" and copy it to the
+ * "values" array. Maximum "num" values are parsed.
+ * Return: >=0: Number of values read from buf
+ *          -1: Format error
+ */
+static int sja1105_parse_string_values(const char* buf, u64 *values, int num)
+{
+	int rc = -1;
+	int i, count = 0;
+	char *str, *curr, *next, *end;
+
+	str = kstrdup(buf, GFP_KERNEL);
+	if (!str)
+		return -1;
+
+	curr = strim(str);
+	end  = str + strlen(str);
+	for (i = 0; i < num; i++) {
+		next = strchr(curr, ' ');
+		if (next)
+			*next++ = '\0'; /* make sure curr is \0 terminated
+			                 * else kstrtou64 fails */
+		rc = kstrtou64(curr, 0, &values[i]);
+		if (rc == 0)
+			count++;
+		if ((rc < 0) || (next == NULL))
+			break;
+		curr = strim(next);
+	}
+
+	kfree(str);
+	return (rc) ? -1 : count;
+}
 
 /*
  * Parse the string written to sysfs attribute reg_access.
@@ -49,41 +84,62 @@ static struct sja1105_port *sja1105_parse_port(struct sja1105_spi_private *priv,
  *         2: got address and value
  *        -1: error
  */
-static  int sja1105_reg_access_parse_input(const char* buf,
-                                           u64 *addr, u64 *value)
+static int sja1105_reg_access_parse_input(const char* buf,
+                                          u64 *addr, u64 *value)
 {
 	int rc;
-	int count = -1;
-	char *str;
-	char *par1, *par2, *end;
+	u64 params[2];
 
-	str = kstrdup(buf, GFP_KERNEL);
-	if (!str)
-		return -1;
-
-	par1 = strim(str);
-	end  = str + strlen(str);
-	par2 = strchr(par1, ' ');
-	if (par2)
-		*par2++ = '\0'; /* make sure par1 is \0 terminated
-		                 * else kstrtou64 fails */
-	rc = kstrtou64(par1, 0, addr);
-
-	if (rc)
-		goto out_free;
-	count = 1;
-
-	if (par2 && (par2 < end)) {
-		par2 = strim(par2);
-		rc = kstrtou64(par2, 0, value);
-		if (rc)
-			goto out_free;
-		count = 2;
+	rc = sja1105_parse_string_values(buf, params, 2);
+	if (rc == 1) {
+		*addr = params[0];
+	}
+	else if (rc == 2) {
+		*addr = params[0];
+		*value = params[1];
+	}
+	else {
+		rc = -1;
 	}
 
-out_free:
-	kfree(str);
-	return count;
+	return rc;
+}
+
+/*
+ * Parse the string written to sysfs attribute vlan_lookup.
+ * Format: "vlanid" => read operation, value read on sysfs attribure read
+ *         "ving_mirr vegr_mirr vmemb_port vlan_bc tag_port vlanid valident"
+ *                  => write operation
+ * Return: 1: got a vlinaid -> read
+ *         2: got a new entry -> write
+ *        -1: error
+ */
+static int sja1105_vlan_lookup_parse_input(const char* buf,
+                                        struct sja1105_vlan_lookup_entry *entry,
+                                        int *valident)
+{
+	int rc;
+	u64 values[7];
+
+	rc = sja1105_parse_string_values(buf, values, 7);
+	if (rc == 1) {
+		entry->vlanid = values[0];
+	}
+	else if (rc == 7) {
+		entry->ving_mirr  = values[0];
+		entry->vegr_mirr  = values[1];
+		entry->vmemb_port = values[2];
+		entry->vlan_bc    = values[3];
+		entry->tag_port   = values[4];
+		entry->vlanid     = values[5];
+		*valident         = values[6];
+		rc = 2;
+	}
+	else {
+		rc = -1;
+	}
+
+	return rc;
 }
 
 static ssize_t sja1105_sysfs_rd(struct device *dev,
@@ -106,6 +162,8 @@ static DEVICE_ATTR(reg_access,        S_IRUGO | S_IWUSR,
                    sja1105_sysfs_rd,  sja1105_sysfs_wr);
 static DEVICE_ATTR(config_upload,     S_IWUSR,
                    NULL,              sja1105_sysfs_wr);
+static DEVICE_ATTR(vlan_lookup,       S_IRUGO | S_IWUSR,
+                   sja1105_sysfs_rd,  sja1105_sysfs_wr);
 
 static ssize_t sja1105_sysfs_wr(struct device *dev,
                                 struct device_attribute *attr,
@@ -184,6 +242,34 @@ static ssize_t sja1105_sysfs_wr(struct device *dev,
 			rc = -EINVAL;
 		}
 	}
+	else if (attr == &dev_attr_vlan_lookup) {
+		int valident;
+		struct sja1105_vlan_lookup_entry entry;
+
+		rc = sja1105_vlan_lookup_parse_input(buf, &entry,
+		                                     &valident);
+		if (rc == 1) {
+			/* read operation => remember the entries vid and
+			 * on sysfs read operation */
+			dev_info(dev, "Prepare reading of vlan lookup entry with vid 0x%X\n",
+			         (u32)entry.vlanid);
+			priv->vlanid = entry.vlanid;
+			rc = count;
+		}
+		else if (rc == 2) {
+			/* write operation */
+			rc = sja1105_vlan_lookup_set(&priv->spi_setup,
+			                             &entry,
+			                             valident);
+			dev_info(dev, "Writing vlan lookup entry with vid 0x%X, rc=%i\n",
+			         (u32)entry.vlanid, rc);
+			rc = (rc) ? rc : count;
+		}
+		else {
+			dev_err(dev, "Invalid parameter written to \"lookup_entry\"\n");
+			rc = -EINVAL;
+		}
+	}
 
 out_error:
 	return rc;
@@ -243,6 +329,24 @@ static ssize_t sja1105_sysfs_rd(struct device *dev,
 		rc = snprintf(buf, PAGE_SIZE, "0x%08X 0x%08X\n",
 		              (u32)priv->reg_addr, (u32)value);
 	}
+	else if (attr == &dev_attr_vlan_lookup) {
+		struct sja1105_vlan_lookup_entry entry;
+
+		/* read a vlan lookup table entry */
+		entry.vlanid = priv->vlanid;
+		rc = sja1105_vlan_lookup_get(&priv->spi_setup,
+		                             &entry);
+		dev_info(dev, "Reading vlan lookup table entry 0x%X, rc=%i\n",
+			 (u32)priv->vlanid, rc);
+		if (rc)
+			goto err_out;
+
+		// Print members in same order as in vlan lookup table
+		rc = snprintf(buf, PAGE_SIZE, "0x%X 0x%X 0x%X 0x%X 0x%X 0x%X\n",
+		              (u32)entry.ving_mirr, (u32)entry.vegr_mirr,
+		              (u32)entry.vmemb_port, (u32)entry.vlan_bc,
+		              (u32)entry.tag_port, (u32)entry.vlanid);
+	}
 
 err_out:
 	return rc;
@@ -258,6 +362,7 @@ int sja1105_sysfs_init(struct sja1105_spi_private *priv)
 	rc |= device_create_file(dev, &dev_attr_port_status_clear);
 	rc |= device_create_file(dev, &dev_attr_port_mapping);
 	rc |= device_create_file(dev, &dev_attr_reg_access);
+	rc |= device_create_file(dev, &dev_attr_vlan_lookup);
 	rc |= device_create_file(dev, &dev_attr_config_upload);
 
 	return (rc) ? -1 : 0;
@@ -272,5 +377,6 @@ void sja1105_sysfs_remove(struct sja1105_spi_private *priv)
 	device_remove_file(dev, &dev_attr_port_status_clear);
 	device_remove_file(dev, &dev_attr_port_mapping);
 	device_remove_file(dev, &dev_attr_reg_access);
+	device_remove_file(dev, &dev_attr_vlan_lookup);
 	device_remove_file(dev, &dev_attr_config_upload);
 }

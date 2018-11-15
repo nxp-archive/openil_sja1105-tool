@@ -86,6 +86,18 @@ reg_access
     switch and returned in the format "_reg\_address_ _value_". Consecutive
     reads always return the same registers value.
 
+vlan_lookup
+
+:   Read or write a VLAN lookup table entry of the switch chip.
+    **Entry write:** Write the table entry parameters, separated by a
+    space character to the file. Format: "_ving\_mirr_ _vegr\_mirr_
+    _vmemb\_port_ _vlan\_bc_ _tag\_port_ _vlanid_ _valident_"
+    **Entry read:** Write the table entry's VLAN ID to the file prior to
+    reading. When reading the file, the entry is read from the
+    switch and returned in the format "_ving\_mirr_ _vegr\_mirr_
+    _vmemb\_port_ _vlan\_bc_ _tag\_port_ _vlanid_". Consecutive
+    reads always return the same entry's value.
+
 DEVICE-TREE
 ===========
 

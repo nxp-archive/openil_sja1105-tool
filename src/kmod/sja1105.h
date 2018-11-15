@@ -53,6 +53,7 @@ struct sja1105_spi_private {
 	struct gpio_desc *reset_gpio;
 
 	u64 reg_addr; /* register address to read from */
+	u64 vlanid; /* vlan lookup entry to read */
 
 	const char *staging_area;
 
