@@ -132,6 +132,11 @@ int sja1105_mac_config_get(struct sja1105_spi_setup *spi_setup,
 int sja1105_mac_config_set(struct sja1105_spi_setup *spi_setup,
                            struct sja1105_mac_config_entry *entry,
                            int port);
+int sja1105_vlan_lookup_get(struct sja1105_spi_setup *spi_setup,
+                            struct sja1105_vlan_lookup_entry *entry);
+int sja1105_vlan_lookup_set(struct sja1105_spi_setup *spi_setup,
+                            struct sja1105_vlan_lookup_entry *entry,
+                            int valident);
 int sja1105_inhibit_tx(struct sja1105_spi_setup *spi_setup,
                        struct sja1105_egress_port_mask *port_mask);
 

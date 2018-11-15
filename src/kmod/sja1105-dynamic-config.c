@@ -396,3 +396,119 @@ out:
 #define sja1105_mgmt_route_set(spi_setup, entry, index) \
 	sja1105_mgmt_route_commit(spi_setup, entry, SPI_WRITE, index)
 
+
+struct sja1105_dyn_vlan_lookup_entry {
+	uint64_t valid;
+	uint64_t rdwrset;
+	uint64_t valident;
+	struct sja1105_vlan_lookup_entry entry;
+};
+
+/*
+ * There is a 1 register gap between VLAN Lookup table reconfiguration
+ * register 1,2 (addr 0x2d..2e) and 0 (addr 0x30). Add this offset to
+ * the entry size.
+ */
+#define SIZE_VLAN_LOOKUP_RECONFIG_ENTRY   (SIZE_VLAN_LOOKUP_ENTRY + 4)
+
+static void
+sja1105_dyn_vlan_lookup_cmd_access(void *buf,
+                                   struct sja1105_dyn_vlan_lookup_entry *cmd,
+                                   int write)
+{
+	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
+	void (*vlan_entry_pack_or_unpack)(void*, struct
+	                                  sja1105_vlan_lookup_entry*);
+	uint8_t *entry_ptr = (uint8_t*) buf;
+	uint8_t *cmd_ptr   = (uint8_t*) buf + SIZE_VLAN_LOOKUP_RECONFIG_ENTRY;
+
+	if (write == 0) {
+		vlan_entry_pack_or_unpack = sja1105_vlan_lookup_entry_unpack;
+		pack_or_unpack = gtable_unpack;
+		memset(cmd, 0, sizeof(*cmd));
+	} else {
+		vlan_entry_pack_or_unpack = sja1105_vlan_lookup_entry_pack;
+		pack_or_unpack = gtable_pack;
+		memset(buf, 0, SIZE_VLAN_LOOKUP_RECONFIG_ENTRY);
+	}
+	pack_or_unpack(cmd_ptr, &cmd->valid,     31, 31, 4);
+	pack_or_unpack(cmd_ptr, &cmd->rdwrset,   30, 30, 4);
+	pack_or_unpack(cmd_ptr, &cmd->valident,  27, 27, 4);
+	vlan_entry_pack_or_unpack(entry_ptr, &cmd->entry);
+}
+#define sja1105_dyn_vlan_lookup_cmd_pack(buf, cmd) \
+	sja1105_dyn_vlan_lookup_cmd_access(buf, cmd, 1)
+#define sja1105_dyn_vlan_lookup_cmd_unpack(buf, cmd) \
+	sja1105_dyn_vlan_lookup_cmd_access(buf, cmd, 0)
+
+static int sja1105_vlan_lookup_commit(struct sja1105_spi_setup *spi_setup,
+                                      struct sja1105_vlan_lookup_entry *entry,
+                                      int read_or_write,
+                                      int valident)
+{
+	/* MAC configuration table reconfiguration register */
+	const int ENTRY_ADDR = 0x2D;
+	const int BUF_LEN = 4 + SIZE_VLAN_LOOKUP_RECONFIG_ENTRY;
+	/* SPI payload buffer */
+	uint8_t packed_buf[BUF_LEN];
+	/* Structure to hold command we are constructing */
+	struct sja1105_dyn_vlan_lookup_entry cmd;
+	int rc;
+
+	memset(&cmd, 0, sizeof(cmd));
+	cmd.valid     = 1;
+	cmd.rdwrset   = (read_or_write == SPI_WRITE);
+	cmd.valident  = valident;
+	/* Put the argument into the SPI payload (for read and write,
+	 * for read only entry.vlanid is evaluated by chip) */
+	memcpy(&cmd.entry, entry, sizeof(*entry));
+
+	sja1105_dyn_vlan_lookup_cmd_pack(packed_buf, &cmd);
+
+	/* Send SPI write operation: "read/write vlan lookup table entry" */
+	rc = sja1105_spi_send_packed_buf(spi_setup,
+	                                 SPI_WRITE,
+	                                 ENTRY_ADDR,
+	                                 packed_buf,
+	                                 BUF_LEN);
+	if (rc < 0) {
+		loge("failed to read from spi");
+		goto out;
+	}
+
+	if (read_or_write == SPI_READ) {
+		/* If previous operation was a read, retrieve its result:
+		 * the mac config table entry requested for */
+		memset(packed_buf, 0, BUF_LEN);
+		rc = sja1105_spi_send_packed_buf(spi_setup,
+		                                 SPI_READ,
+		                                 ENTRY_ADDR,
+		                                 packed_buf,
+		                                 BUF_LEN);
+		if (rc < 0) {
+			loge("failed to read from spi");
+			goto out;
+		}
+		sja1105_dyn_vlan_lookup_cmd_unpack(packed_buf, &cmd);
+		memcpy(entry, &cmd.entry, sizeof(*entry));
+	}
+out:
+	return rc;
+}
+
+int sja1105_vlan_lookup_get(struct sja1105_spi_setup *spi_setup,
+                            struct sja1105_vlan_lookup_entry *entry)
+{
+	return sja1105_vlan_lookup_commit(spi_setup, entry, SPI_READ, 0);
+}
+
+int sja1105_vlan_lookup_set(struct sja1105_spi_setup *spi_setup,
+                            struct sja1105_vlan_lookup_entry *entry,
+                            int valident)
+{
+	if (IS_ET(spi_setup->device_id))
+		logi("Parameter VALIDENT is ignored on E/T!\n");
+
+	return sja1105_vlan_lookup_commit(spi_setup, entry,
+	                                  SPI_WRITE, valident);
+}
