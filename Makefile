@@ -101,6 +101,13 @@ $(O)$(SJA1105_BIN): $(BIN_DEPS) $(O)$(SJA1105_LIB)
 	@echo "  LD [tool]   $@"
 	@$(CC) $(BIN_OBJ) -o $@ $(BIN_LDFLAGS)
 
+# Force MAKECMDGOALS to contain the default "build" target when
+# running "make" with no arguments, so it will properly fail if
+# the required KDIR environment variable is not set.
+ifeq ($(MAKECMDGOALS),)
+    override MAKECMDGOALS := build
+endif
+
 ifneq (,$(filter $(SJA1105_KMOD) clean build,$(MAKECMDGOALS)))
   ifeq ($(KDIR),)
     $(error Please set KDIR variable to point to a kernel source tree.)
