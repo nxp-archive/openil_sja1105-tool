@@ -219,7 +219,12 @@ uninstall:
 	rm -rf $(DESTDIR)${sysconfdir}/sja1105/sja1105.conf
 
 clean:
-	rm -f $(O)$(SJA1105_BIN) $(BIN_OBJ) $(O)$(SJA1105_LIB) $(LIB_OBJ)
+	@$(foreach file, $(O)$(SJA1105_BIN) $(BIN_OBJ), \
+		echo "  CLEAN [tool]   $(file)"; \
+		rm -f $(file);)
+	@$(foreach file, $(O)$(SJA1105_LIB) $(LIB_OBJ), \
+		echo "  CLEAN [lib]    $(file)"; \
+		rm -f $(file);)
 ifneq ($(KDIR),)
 	$(MAKE) -C $(KDIR) M=$$PWD/src/kmod clean
 else
