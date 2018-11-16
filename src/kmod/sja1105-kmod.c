@@ -204,7 +204,8 @@ err_out:
 /*
  * This function also performs the firmware request to userspace once
  * it parses the path to the staging area from the DTS. The static
- * configuration is then loaded into the driver private data struct.
+ * configuration is then loaded into the driver private data struct
+ * and uploaded to the chip.
  */
 static int sja1105_parse_dt(struct sja1105_spi_private *priv)
 {
@@ -229,6 +230,13 @@ static int sja1105_parse_dt(struct sja1105_spi_private *priv)
 	rc = sja1105_load_firmware(priv);
 	if (rc)
 		goto err_out;
+
+	/* Upload static configuration */
+	rc = sja1105_static_config_flush(&priv->spi_setup,
+	                                 &priv->static_config);
+	if (rc < 0)
+		goto err_out;
+	dev_dbg(dev, "Uploaded static configuration to device\n");
 
 	for_each_child_of_node(switch_node, child) {
 		rc = of_property_read_string(child, "sja1105,port-label",
@@ -340,19 +348,12 @@ static int sja1105_probe(struct spi_device *spi)
 		goto err_out;
 	}
 
-	/* Parse device tree and bring up PHYs */
+	/* Parse device tree, upload stacic configuration and bring up PHYs */
 	mutex_lock(&priv->lock);
 	rc = sja1105_parse_dt(priv);
 	mutex_unlock(&priv->lock);
 	if (rc < 0)
 		goto err_out;
-
-	/* Upload static configuration */
-	rc = sja1105_static_config_flush(&priv->spi_setup,
-	                                 &priv->static_config);
-	if (rc < 0)
-		goto err_out;
-	dev_dbg(dev, "Uploaded static configuration to device\n");
 
 	rc = sja1105_ptp_clock_register(priv);
 	if (rc < 0)
