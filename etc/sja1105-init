@@ -7,6 +7,7 @@ set -e -u -o pipefail
 SJA1105_TOOL=/usr/bin/sja1105-tool
 SJA1105_CONF=/etc/sja1105/sja1105.conf
 SJA1105_DEFAULT_STAGING_AREA=ls1021atsn
+SJA1105_KMOD=/root/sja1105.ko
 
 # Make sure the sja1105-tool program exists
 for file in ${SJA1105_TOOL} ${SJA1105_CONF}; do
@@ -34,13 +35,22 @@ start() {
 		echo "Creating new switch configuration at ${staging_area}."
 		mkdir -p "$(dirname $staging_area)"
 		${SJA1105_TOOL} config default ${SJA1105_DEFAULT_STAGING_AREA}
+		# Make sure staging area has been committed to disk
+		sync
 	fi
-	${SJA1105_TOOL} config upload
+
+	insmod ${SJA1105_KMOD}
+
+	sja1105_sysfs_node=$(cat ${SJA1105_CONF} | awk '/device/ { print $3 }')
+	for eth in ${sja1105_sysfs_node}/net/*; do
+		ip link set dev $(basename "${eth}") up
+	done
+
 	[[ $? ]] && echo "OK" || echo "FAIL"
 }
 stop() {
 	printf "Stopping SJA1105 TSN switch: "
-	${SJA1105_TOOL} reset cold
+	rmmod ${SJA1105_KMOD}
 	[[ $? ]] && echo "OK" || echo "FAIL"
 }
 restart() {
@@ -53,7 +63,7 @@ status() {
 	${SJA1105_TOOL} status port
 }
 
-case "$1" in
+case "${1:-x}" in
 start)
 	start
 	;;
@@ -66,7 +76,7 @@ status)
 restart|reload)
 	restart
 	;;
-  *)
+*)
 	echo "Usage: $0 {start|stop|restart}"
 	exit 1
 esac
