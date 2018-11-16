@@ -108,7 +108,7 @@ ifeq ($(MAKECMDGOALS),)
     override MAKECMDGOALS := build
 endif
 
-ifneq (,$(filter $(SJA1105_KMOD) clean build,$(MAKECMDGOALS)))
+ifneq (,$(filter $(SJA1105_KMOD) build,$(MAKECMDGOALS)))
   ifeq ($(KDIR),)
     $(error Please set KDIR variable to point to a kernel source tree.)
   endif
@@ -220,7 +220,11 @@ uninstall:
 
 clean:
 	rm -f $(O)$(SJA1105_BIN) $(BIN_OBJ) $(O)$(SJA1105_LIB) $(LIB_OBJ)
+ifneq ($(KDIR),)
 	$(MAKE) -C $(KDIR) M=$$PWD/src/kmod clean
+else
+	$(info Not cleaning kmod since KDIR variable not set.)
+endif
 
 .PHONY: clean uninstall build man pdf install install-binaries \
 	install-configs install-headers install-manpages
