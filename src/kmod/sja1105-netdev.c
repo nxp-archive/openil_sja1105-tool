@@ -223,7 +223,7 @@ static int sja1105_open(struct net_device *net_dev)
 	struct sja1105_port *port = netdev_priv(net_dev);
 	struct device *dev = &port->spi_dev->dev;
 
-	dev_err(dev, "%s called on port %s\n", __func__, net_dev->name);
+	dev_dbg(dev, "%s called on port %s\n", __func__, net_dev->name);
 	if (port->phy_dev)
 		phy_start(port->phy_dev);
 
