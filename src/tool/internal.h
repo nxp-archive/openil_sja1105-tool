@@ -32,9 +32,32 @@
 #define _SJA1105_TOOL_INTERNAL
 
 #include <common.h>
-#include <lib/include/staging-area.h>
 #include <lib/include/static-config.h>
 #include <lib/include/gtable.h>
+
+/* Since remapping is used internally, and many checks
+ * search for a negative return code, we do that here.
+ * The sign is flipped again when returning the error
+ * to userspace.
+ */
+#define sja1105_err_remap(old_err, new_err)           \
+	do {                                          \
+		logv("Remapping error code %d to %d", \
+		    (old_err), (new_err));            \
+		old_err = -new_err;                   \
+	} while (0);
+
+struct sja1105_staging_area {
+	struct sja1105_static_config static_config;
+	/* More configuration tables? TBD */
+};
+
+enum sja1105_default_staging_area {
+	LS1021ATSN = 0,
+};
+
+int sja1105_default_staging_area(struct sja1105_staging_area*,
+                                 enum sja1105_default_staging_area);
 
 struct general_config {
 	char *staging_area;
