@@ -256,7 +256,7 @@ int sja1105_static_config_flush(struct sja1105_spi_private *priv)
 	}
 	/* Workaround for PHY jabbering during switch reset */
 	memset(&port_mask, 0, sizeof(port_mask));
-	for (i = 0; i < SJA1105T_NUM_PORTS; i++) {
+	for (i = 0; i < SJA1105_NUM_PORTS; i++) {
 		port_mask.inhibit_tx[i] = 1;
 	}
 	rc = sja1105_inhibit_tx(priv, &port_mask);

@@ -43,7 +43,7 @@ int sja1105_inhibit_tx(struct sja1105_spi_private *priv,
 	uint8_t packed_buf[BUF_LEN];
 	int i;
 
-	for (i = 0; i < SJA1105T_NUM_PORTS; i++)
+	for (i = 0; i < SJA1105_NUM_PORTS; i++)
 		gtable_pack(packed_buf, &port_mask->inhibit_tx[i], i, i, 4);
 
 	return sja1105_spi_send_packed_buf(priv, SPI_WRITE,

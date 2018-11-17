@@ -111,7 +111,7 @@ void sja1105_ptp_clock_unregister(struct sja1105_spi_private *priv);
 
 /* sja1105-dynamic-config.c */
 
-#define SJA1105T_NUM_PORTS 5
+#define SJA1105_NUM_PORTS 5
 
 struct sja1105_cbs {
 	/* UM10944.pdf Table 62. Credit-based shaping block
@@ -130,7 +130,7 @@ struct sja1105_cbs {
 };
 
 struct sja1105_egress_port_mask {
-	uint64_t inhibit_tx[SJA1105T_NUM_PORTS];
+	uint64_t inhibit_tx[SJA1105_NUM_PORTS];
 };
 int sja1105_mac_config_get(struct sja1105_spi_private *priv,
                            struct sja1105_mac_config_entry *entry,
