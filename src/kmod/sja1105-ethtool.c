@@ -94,8 +94,7 @@ sja1105_get_ethtool_stats(struct net_device *net_dev,
 	int rc;
 
 	mutex_lock(&priv->lock);
-	rc = sja1105_port_status_get(&priv->spi_setup, &status,
-	                             port->index);
+	rc = sja1105_port_status_get(priv, &status, port->index);
 	mutex_unlock(&priv->lock);
 	if (rc) {
 		rc = -EIO;
@@ -143,7 +142,7 @@ sja1105_get_ethtool_stats(struct net_device *net_dev,
 	data[k++] = status.hl2.n_egr_disabled;
 	data[k++] = status.hl2.n_not_reach;
 
-	if (!IS_PQRS(priv->spi_setup.device_id))
+	if (!IS_PQRS(priv->device_id))
 		goto out;
 
 	memset(data + k, 0, ARRAY_SIZE(sja1105pqrs_extra_port_stats) * sizeof(u64));
@@ -170,7 +169,7 @@ static void sja1105_get_strings(struct net_device *net_dev, u32 stringset,
 			strlcpy(p, sja1105_port_stats[i], ETH_GSTRING_LEN);
 			p += ETH_GSTRING_LEN;
 		}
-		if (!IS_PQRS(priv->spi_setup.device_id))
+		if (!IS_PQRS(priv->device_id))
 			return;
 		for (i = 0; i < ARRAY_SIZE(sja1105pqrs_extra_port_stats); i++) {
 			strlcpy(p, sja1105pqrs_extra_port_stats[i], ETH_GSTRING_LEN);
@@ -186,7 +185,7 @@ static int sja1105_get_sset_count(struct net_device *net_dev, int sset)
 	struct spi_device *spi = port->spi_dev;
 	struct sja1105_spi_private *priv = spi_get_drvdata(spi);
 
-	if (IS_PQRS(priv->spi_setup.device_id))
+	if (IS_PQRS(priv->device_id))
 		return ARRAY_SIZE(sja1105_port_stats) +
 		       ARRAY_SIZE(sja1105pqrs_extra_port_stats);
 	else
@@ -217,7 +216,7 @@ sja1105_get_regs(struct net_device *net_dev, struct ethtool_regs *regs,
 	int    rc, k = 0;
 
 	mutex_lock(&priv->lock);
-	rc = sja1105_general_status_get(&priv->spi_setup, &status);
+	rc = sja1105_general_status_get(priv, &status);
 	mutex_unlock(&priv->lock);
 	if (rc)
 		return;

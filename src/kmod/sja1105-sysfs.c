@@ -187,8 +187,7 @@ static ssize_t sja1105_sysfs_wr(struct device *dev,
 
 		/* Upload static configuration */
 		mutex_lock(&priv->lock);
-		rc = sja1105_static_config_flush(&priv->spi_setup,
-		                                 &priv->static_config);
+		rc = sja1105_static_config_flush(priv);
 		mutex_unlock(&priv->lock);
 		if (rc < 0)
 			goto out_error;
@@ -216,7 +215,7 @@ static ssize_t sja1105_sysfs_wr(struct device *dev,
 		}
 
 		if (rc == 0) {
-			rc = sja1105_port_status_clear(&priv->spi_setup,
+			rc = sja1105_port_status_clear(priv,
 							port_no);
 			rc = (rc) ? -EIO : count;
 		}
@@ -231,7 +230,7 @@ static ssize_t sja1105_sysfs_wr(struct device *dev,
 			rc = count;
 		} else if (rc == 2) {
 			/* write operation */
-			rc = sja1105_spi_send_int(&priv->spi_setup, SPI_WRITE,
+			rc = sja1105_spi_send_int(priv, SPI_WRITE,
 			                           addr, &value, 4);
 			dev_info(dev, "Writing value 0x%08X to register 0x%08X, rc=%i\n",
 			         (u32)value, (u32)addr, rc);
@@ -257,7 +256,7 @@ static ssize_t sja1105_sysfs_wr(struct device *dev,
 		}
 		else if (rc == 2) {
 			/* write operation */
-			rc = sja1105_vlan_lookup_set(&priv->spi_setup,
+			rc = sja1105_vlan_lookup_set(priv,
 			                             &entry,
 			                             valident);
 			dev_info(dev, "Writing vlan lookup entry with vid 0x%X, rc=%i\n",
@@ -289,25 +288,25 @@ static ssize_t sja1105_sysfs_rd(struct device *dev,
 	if (attr == &dev_attr_device_id) {
 		const char *name;
 
-		name = sja1105_device_id_string_get(priv->spi_setup.device_id,
-		                                    priv->spi_setup.part_nr);
+		name = sja1105_device_id_string_get(priv->device_id,
+		                                    priv->part_nr);
 		rc = snprintf(buf, PAGE_SIZE,
 		              "device id:   0x%08X\n"
 		              "part number: 0x%08X\n"
 		              "name:        %s\n",
-		              (u32)priv->spi_setup.device_id,
-		              (u32)priv->spi_setup.part_nr,
+		              (u32)priv->device_id,
+		              (u32)priv->part_nr,
 		              name);
 	} else if (attr == &dev_attr_general_status) {
 		mutex_lock(&priv->lock);
-		rc = sja1105_general_status_get(&priv->spi_setup, &gen_status);
+		rc = sja1105_general_status_get(priv, &gen_status);
 		mutex_unlock(&priv->lock);
 		if (rc) {
 			rc = -EIO;
 			goto err_out;
 		}
 		sja1105_general_status_show(&gen_status, buf, PAGE_SIZE,
-		                            priv->spi_setup.device_id);
+		                            priv->device_id);
 		rc = strlen(buf);
 	} else if (attr == &dev_attr_port_mapping) {
 		list_for_each_safe(pos, q, &(priv->port_list_head.list)) {
@@ -318,7 +317,7 @@ static ssize_t sja1105_sysfs_rd(struct device *dev,
 		rc = strlen(buf);
 	} else if (attr == &dev_attr_reg_access) {
 		/* read a register value and return in format "address value" */
-		rc = sja1105_spi_send_int(&priv->spi_setup, SPI_READ,
+		rc = sja1105_spi_send_int(priv, SPI_READ,
 		                          priv->reg_addr, &value, 4);
 		dev_info(dev, "Reading register 0x%08X 0x%08X, rc=%i\n",
 			 (u32)priv->reg_addr, (u32)value, rc);
@@ -333,7 +332,7 @@ static ssize_t sja1105_sysfs_rd(struct device *dev,
 
 		/* read a vlan lookup table entry */
 		entry.vlanid = priv->vlanid;
-		rc = sja1105_vlan_lookup_get(&priv->spi_setup,
+		rc = sja1105_vlan_lookup_get(priv,
 		                             &entry);
 		dev_info(dev, "Reading vlan lookup table entry 0x%X, rc=%i\n",
 			 (u32)priv->vlanid, rc);

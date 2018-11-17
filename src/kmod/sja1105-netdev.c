@@ -8,7 +8,6 @@
 #include <linux/version.h>
 #include <linux/etherdevice.h>
 #include "sja1105.h"
-#include <lib/include/spi.h>
 
 /* Convert mac speed from sja1105 mac config table value to mbps */
 static int sja1105_get_speed_mbps(unsigned int speed_cfg)
@@ -88,12 +87,12 @@ static int sja1105_adjust_port_speed(struct sja1105_port *port, int speed_mbps)
 	}
 
 	/* Read, modify and write MAC config table */
-	if (IS_PQRS(priv->spi_setup.device_id)) {
+	if (IS_PQRS(priv->device_id)) {
 		/*
 		 * We can read from the device via the MAC
 		 * reconfiguration tables. In fact we do just that.
 		 */
-		rc = sja1105_mac_config_get(&priv->spi_setup, &mac_entry, port->index);
+		rc = sja1105_mac_config_get(priv, &mac_entry, port->index);
 		if (rc < 0) {
 			dev_err(dev, "%s: MAC configuration read from device failed\n",
 			        port->net_dev->name);
@@ -110,7 +109,7 @@ static int sja1105_adjust_port_speed(struct sja1105_port *port, int speed_mbps)
 	}
 
 	mac_entry.speed = speed;
-	rc = sja1105_mac_config_set(&priv->spi_setup, &mac_entry, port->index);
+	rc = sja1105_mac_config_set(priv, &mac_entry, port->index);
 	if (rc < 0) {
 		dev_err(dev, "%s: MAC configuration write to device failed\n",
 		        port->net_dev->name);
@@ -121,7 +120,7 @@ static int sja1105_adjust_port_speed(struct sja1105_port *port, int speed_mbps)
 	priv->static_config.mac_config[port->index].speed = speed;
 
 	/* Configure the CGU (PHY link modes and speeds) */
-	rc = sja1105_clocking_setup_port(&priv->spi_setup, port->index,
+	rc = sja1105_clocking_setup_port(priv, port->index,
 	                                 &priv->static_config.xmii_params[0],
 	                                 &mac_entry);
 	if (rc < 0) {
@@ -187,7 +186,7 @@ sja1105_get_stats(struct net_device *net_dev,
 
 	/* Time to read stats from switch */
 	mutex_lock(&priv->lock);
-	rc = sja1105_port_status_get_hl1(&priv->spi_setup, &status, port->index);
+	rc = sja1105_port_status_get_hl1(priv, &status, port->index);
 	mutex_unlock(&priv->lock);
 	if (rc) {
 		dev_err(dev, "%s: Could not read status\n", net_dev->name);

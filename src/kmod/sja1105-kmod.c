@@ -229,8 +229,7 @@ static int sja1105_parse_dt(struct sja1105_spi_private *priv)
 		goto err_out;
 
 	/* Upload static configuration */
-	rc = sja1105_static_config_flush(&priv->spi_setup,
-	                                 &priv->static_config);
+	rc = sja1105_static_config_flush(priv);
 	if (rc < 0)
 		goto err_out;
 	dev_dbg(dev, "Uploaded static configuration to device\n");
@@ -294,7 +293,6 @@ static int sja1105_probe(struct spi_device *spi)
 	int rc;
 	struct device *dev = &spi->dev;
 	struct sja1105_spi_private *priv;
-	const char *chip_name;
 
 	if (!dev->of_node) {
 		dev_err(dev, "No DTS bindings for SJA1105 driver\n");
@@ -330,14 +328,11 @@ static int sja1105_probe(struct spi_device *spi)
 		sja1105_hw_reset_chip(priv->reset_gpio, 1, 1);
 
 	/* Probe device */
-	rc = sja1105_device_id_get(&priv->spi_setup,
-	                           &priv->spi_setup.device_id,
-	                           &priv->spi_setup.part_nr);
+	rc = sja1105_device_id_get(priv);
 	if (rc < 0)
 		goto err_out;
-	chip_name = sja1105_device_id_string_get(priv->spi_setup.device_id,
-	                                         priv->spi_setup.part_nr);
-	dev_dbg(dev, "Probed switch chip: %s\n", chip_name);
+	dev_dbg(dev, "Probed switch chip: %s\n", sja1105_device_id_string_get(
+	        priv->device_id, priv->part_nr));
 
 	rc = sja1105_sysfs_init(priv);
 	if (rc) {

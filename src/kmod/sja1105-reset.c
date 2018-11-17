@@ -3,11 +3,8 @@
  *
  * Copyright (c) 2016-2018, NXP Semiconductors
  */
-#include <lib/include/static-config.h>
-#include <lib/include/gtable.h>
-#include <lib/include/spi.h>
-#include <common.h>
 #include "sja1105.h"
+#include <lib/include/gtable.h>
 
 /* RGU */
 #define RGU_ADDR    0x100440
@@ -79,7 +76,7 @@ void sja1105_reset_cmd_show(struct sja1105_reset_cmd *reset)
 		logv("Power-on reset requested");
 }
 
-int sja1105_reset_cmd_commit(struct sja1105_spi_setup *spi_setup,
+int sja1105_reset_cmd_commit(struct sja1105_spi_private *priv,
                              struct sja1105_reset_cmd *reset)
 {
 	const int BUF_LEN = 4;
@@ -87,7 +84,7 @@ int sja1105_reset_cmd_commit(struct sja1105_spi_setup *spi_setup,
 	int rc;
 
 	sja1105_reset_cmd_show(reset);
-	if (IS_ET(spi_setup->device_id) &&
+	if (IS_ET(priv->device_id) &&
 	    (reset->switch_rst ||
 	     reset->cfg_rst ||
 	     reset->car_rst ||
@@ -97,67 +94,67 @@ int sja1105_reset_cmd_commit(struct sja1105_spi_setup *spi_setup,
 		rc = -EINVAL;
 		goto out;
 	}
-	sja1105_reset_cmd_pack(packed_buf, reset, spi_setup->device_id);
+	sja1105_reset_cmd_pack(packed_buf, reset, priv->device_id);
 
-	rc = sja1105_spi_send_packed_buf(spi_setup, SPI_WRITE, RGU_ADDR,
+	rc = sja1105_spi_send_packed_buf(priv, SPI_WRITE, RGU_ADDR,
 	                                 packed_buf, BUF_LEN);
 out:
 	return rc;
 }
 
-int sja1105_switch_core_reset(struct sja1105_spi_setup *spi_setup)
+int sja1105_switch_core_reset(struct sja1105_spi_private *priv)
 {
 	struct sja1105_reset_cmd reset = {0};
 
 	reset.switch_rst = 1;
-	return sja1105_reset_cmd_commit(spi_setup, &reset);
+	return sja1105_reset_cmd_commit(priv, &reset);
 }
 
-int sja1105_config_reset(struct sja1105_spi_setup *spi_setup)
+int sja1105_config_reset(struct sja1105_spi_private *priv)
 {
 	struct sja1105_reset_cmd reset = {0};
 
 	reset.cfg_rst = 1;
-	return sja1105_reset_cmd_commit(spi_setup, &reset);
+	return sja1105_reset_cmd_commit(priv, &reset);
 }
 
-int sja1105_clocking_reset(struct sja1105_spi_setup *spi_setup)
+int sja1105_clocking_reset(struct sja1105_spi_private *priv)
 {
 	struct sja1105_reset_cmd reset = {0};
 
 	reset.car_rst = 1;
-	return sja1105_reset_cmd_commit(spi_setup, &reset);
+	return sja1105_reset_cmd_commit(priv, &reset);
 }
 
-int sja1105_otp_reset(struct sja1105_spi_setup *spi_setup)
+int sja1105_otp_reset(struct sja1105_spi_private *priv)
 {
 	struct sja1105_reset_cmd reset = {0};
 
 	reset.otp_rst = 1;
-	return sja1105_reset_cmd_commit(spi_setup, &reset);
+	return sja1105_reset_cmd_commit(priv, &reset);
 }
 
-int sja1105_warm_reset(struct sja1105_spi_setup *spi_setup)
+int sja1105_warm_reset(struct sja1105_spi_private *priv)
 {
 	struct sja1105_reset_cmd reset = {0};
 
 	reset.warm_rst = 1;
-	return sja1105_reset_cmd_commit(spi_setup, &reset);
+	return sja1105_reset_cmd_commit(priv, &reset);
 }
 
-int sja1105_cold_reset(struct sja1105_spi_setup *spi_setup)
+int sja1105_cold_reset(struct sja1105_spi_private *priv)
 {
 	struct sja1105_reset_cmd reset = {0};
 
 	reset.cold_rst = 1;
-	return sja1105_reset_cmd_commit(spi_setup, &reset);
+	return sja1105_reset_cmd_commit(priv, &reset);
 }
 
-int sja1105_por_reset(struct sja1105_spi_setup *spi_setup)
+int sja1105_por_reset(struct sja1105_spi_private *priv)
 {
 	struct sja1105_reset_cmd reset = {0};
 
 	reset.por_rst = 1;
-	return sja1105_reset_cmd_commit(spi_setup, &reset);
+	return sja1105_reset_cmd_commit(priv, &reset);
 }
 

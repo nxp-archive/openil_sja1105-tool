@@ -35,7 +35,7 @@ struct sja1105_dyn_l2_lookup_cmd {
 	union sja1105_dyn_l2_lookup_entry entry;
 };
 
-int sja1105_inhibit_tx(struct sja1105_spi_setup *spi_setup,
+int sja1105_inhibit_tx(struct sja1105_spi_private *priv,
                        struct sja1105_egress_port_mask *port_mask)
 {
 	const int ETH_PORT_CONTROL_ADDR = 0x11;
@@ -46,7 +46,7 @@ int sja1105_inhibit_tx(struct sja1105_spi_setup *spi_setup,
 	for (i = 0; i < SJA1105T_NUM_PORTS; i++)
 		gtable_pack(packed_buf, &port_mask->inhibit_tx[i], i, i, 4);
 
-	return sja1105_spi_send_packed_buf(spi_setup, SPI_WRITE,
+	return sja1105_spi_send_packed_buf(priv, SPI_WRITE,
 	                                   CORE_ADDR + ETH_PORT_CONTROL_ADDR,
 	                                   packed_buf, 4);
 }
@@ -85,7 +85,7 @@ sja1105_cbs_cmd_access(void *buf,
 #define sja1105_cbs_cmd_unpack(buf, cbs) sja1105_cbs_cmd_access(buf, cbs, 0)
 
 /* Wrapper around sja1105_spi_send_packed_buf() */
-int sja1105_cbs_commit(struct sja1105_spi_setup *spi_setup,
+int sja1105_cbs_commit(struct sja1105_spi_private *priv,
                        struct sja1105_cbs *cbs)
 {
 	const int CBS_CONTROL_ADDR = 0x30;
@@ -103,7 +103,7 @@ int sja1105_cbs_commit(struct sja1105_spi_setup *spi_setup,
 	gtable_pack(p + 1, &cbs->send_slope, 31, 0, 4);
 	gtable_pack(p + 2, &cbs->credit_hi,  31, 0, 4);
 	gtable_pack(p + 3, &cbs->credit_lo,  31, 0, 4);
-	rc = sja1105_spi_send_packed_buf(spi_setup, SPI_WRITE,
+	rc = sja1105_spi_send_packed_buf(priv, SPI_WRITE,
 	                                 CORE_ADDR + CBS_DATA_ADDR,
 	                                 p, BUF_LEN);
 	if (rc < 0) {
@@ -112,7 +112,7 @@ int sja1105_cbs_commit(struct sja1105_spi_setup *spi_setup,
 	}
 	/* Command portion of transaction */
 	sja1105_cbs_cmd_pack(packed_buf, cbs);
-	rc = sja1105_spi_send_packed_buf(spi_setup, SPI_WRITE,
+	rc = sja1105_spi_send_packed_buf(priv, SPI_WRITE,
 	                                 CORE_ADDR + CBS_CONTROL_ADDR,
 	                                 packed_buf, 4);
 	if (rc < 0) {
@@ -201,7 +201,7 @@ sja1105pqrs_dyn_mac_reconfig_entry_access(void *buf, struct
  */
 DEFINE_SEPARATE_PACK_UNPACK_ACCESSORS(dyn_mac_reconfig);
 
-static int sja1105et_mac_config_commit(struct sja1105_spi_setup *spi_setup,
+static int sja1105et_mac_config_commit(struct sja1105_spi_private *priv,
                                        struct sja1105_mac_config_entry *entry,
                                        int port)
 {
@@ -223,7 +223,7 @@ static int sja1105et_mac_config_commit(struct sja1105_spi_setup *spi_setup,
 	sja1105et_dyn_mac_reconfig_entry_pack(packed_buf, &cmd);
 
 	/* Send SPI write operation: "write mac reconfig table entry" */
-	rc = sja1105_spi_send_packed_buf(spi_setup, SPI_WRITE, ENTRY_ADDR,
+	rc = sja1105_spi_send_packed_buf(priv, SPI_WRITE, ENTRY_ADDR,
 	                                 packed_buf, BUF_LEN);
 	if (rc < 0) {
 		loge("failed to read from spi");
@@ -233,7 +233,7 @@ out:
 	return rc;
 }
 
-static int sja1105pqrs_mac_config_commit(struct sja1105_spi_setup *spi_setup,
+static int sja1105pqrs_mac_config_commit(struct sja1105_spi_private *priv,
                                          struct sja1105_mac_config_entry *entry,
                                          int read_or_write, int portidx)
 {
@@ -257,7 +257,7 @@ static int sja1105pqrs_mac_config_commit(struct sja1105_spi_setup *spi_setup,
 	sja1105pqrs_dyn_mac_reconfig_entry_pack(packed_buf, &cmd);
 
 	/* Send SPI write operation: "read/write mac config table entry" */
-	rc = sja1105_spi_send_packed_buf(spi_setup, SPI_WRITE, ENTRY_ADDR,
+	rc = sja1105_spi_send_packed_buf(priv, SPI_WRITE, ENTRY_ADDR,
 	                                 packed_buf, BUF_LEN);
 	if (rc < 0) {
 		loge("failed to read from spi");
@@ -268,7 +268,7 @@ static int sja1105pqrs_mac_config_commit(struct sja1105_spi_setup *spi_setup,
 		/* If previous operation was a read, retrieve its result:
 		 * the mac config table entry requested for */
 		memset(packed_buf, 0, BUF_LEN);
-		rc = sja1105_spi_send_packed_buf(spi_setup, SPI_READ, ENTRY_ADDR,
+		rc = sja1105_spi_send_packed_buf(priv, SPI_READ, ENTRY_ADDR,
 		                                 packed_buf, BUF_LEN);
 		if (rc < 0) {
 			loge("failed to read from spi");
@@ -281,27 +281,27 @@ out:
 	return rc;
 }
 
-int sja1105_mac_config_get(struct sja1105_spi_setup *spi_setup,
+int sja1105_mac_config_get(struct sja1105_spi_private *priv,
                            struct sja1105_mac_config_entry *entry,
                            int port)
 {
-	if (IS_ET(spi_setup->device_id)) {
+	if (IS_ET(priv->device_id)) {
 		loge("Reading MAC reconfiguration table not supported on E/T!\n");
 		return -EINVAL;
 	}
-	return sja1105pqrs_mac_config_commit(spi_setup, entry,
+	return sja1105pqrs_mac_config_commit(priv, entry,
 	                                     SPI_READ, port);
 }
 
-int sja1105_mac_config_set(struct sja1105_spi_setup *spi_setup,
+int sja1105_mac_config_set(struct sja1105_spi_private *priv,
                            struct sja1105_mac_config_entry *entry, int port)
 {
 	int rc;
 
-	if (IS_ET(spi_setup->device_id))
-		rc = sja1105et_mac_config_commit(spi_setup, entry, port);
+	if (IS_ET(priv->device_id))
+		rc = sja1105et_mac_config_commit(priv, entry, port);
 	else
-		rc = sja1105pqrs_mac_config_commit(spi_setup, entry,
+		rc = sja1105pqrs_mac_config_commit(priv, entry,
 		                                   SPI_WRITE, port);
 	return rc;
 }
@@ -362,7 +362,7 @@ sja1105_dyn_l2_lookup_cmd_access(void *buf,
 	sja1105_dyn_l2_lookup_cmd_access(buf, cmd, 0)
 
 static inline int
-sja1105_mgmt_route_commit(struct sja1105_spi_setup *spi_setup,
+sja1105_mgmt_route_commit(struct sja1105_spi_private *priv,
                           struct sja1105_mgmt_entry *entry,
                           int read_or_write, int index)
 {
@@ -392,7 +392,7 @@ sja1105_mgmt_route_commit(struct sja1105_spi_setup *spi_setup,
 	sja1105_dyn_l2_lookup_cmd_pack(packed_buf, &cmd);
 
 	/* Send SPI write operation: "read/write mgmt table entry" */
-	rc = sja1105_spi_send_packed_buf(spi_setup, SPI_WRITE, ENTRY_ADDR,
+	rc = sja1105_spi_send_packed_buf(priv, SPI_WRITE, ENTRY_ADDR,
 	                                 packed_buf, BUF_LEN);
 	if (rc < 0) {
 		loge("failed to read from spi");
@@ -403,7 +403,7 @@ sja1105_mgmt_route_commit(struct sja1105_spi_setup *spi_setup,
 		/* If previous operation was a read, retrieve its result:
 		 * the mgmt table entry requested for */
 		memset(packed_buf, 0, BUF_LEN);
-		rc = sja1105_spi_send_packed_buf(spi_setup, SPI_READ, ENTRY_ADDR,
+		rc = sja1105_spi_send_packed_buf(priv, SPI_READ, ENTRY_ADDR,
 		                                 packed_buf, BUF_LEN);
 		if (rc < 0) {
 			loge("failed to read from spi");
@@ -415,10 +415,10 @@ sja1105_mgmt_route_commit(struct sja1105_spi_setup *spi_setup,
 out:
 	return rc;
 }
-#define sja1105_mgmt_route_get(spi_setup, entry, index) \
-	sja1105_mgmt_route_commit(spi_setup, entry, SPI_READ, index)
-#define sja1105_mgmt_route_set(spi_setup, entry, index) \
-	sja1105_mgmt_route_commit(spi_setup, entry, SPI_WRITE, index)
+#define sja1105_mgmt_route_get(priv, entry, index) \
+	sja1105_mgmt_route_commit(priv, entry, SPI_READ, index)
+#define sja1105_mgmt_route_set(priv, entry, index) \
+	sja1105_mgmt_route_commit(priv, entry, SPI_WRITE, index)
 
 
 struct sja1105_dyn_vlan_lookup_entry {
@@ -465,7 +465,7 @@ sja1105_dyn_vlan_lookup_cmd_access(void *buf,
 #define sja1105_dyn_vlan_lookup_cmd_unpack(buf, cmd) \
 	sja1105_dyn_vlan_lookup_cmd_access(buf, cmd, 0)
 
-static int sja1105_vlan_lookup_commit(struct sja1105_spi_setup *spi_setup,
+static int sja1105_vlan_lookup_commit(struct sja1105_spi_private *priv,
                                       struct sja1105_vlan_lookup_entry *entry,
                                       int read_or_write,
                                       int valident)
@@ -490,7 +490,7 @@ static int sja1105_vlan_lookup_commit(struct sja1105_spi_setup *spi_setup,
 	sja1105_dyn_vlan_lookup_cmd_pack(packed_buf, &cmd);
 
 	/* Send SPI write operation: "read/write vlan lookup table entry" */
-	rc = sja1105_spi_send_packed_buf(spi_setup,
+	rc = sja1105_spi_send_packed_buf(priv,
 	                                 SPI_WRITE,
 	                                 ENTRY_ADDR,
 	                                 packed_buf,
@@ -504,7 +504,7 @@ static int sja1105_vlan_lookup_commit(struct sja1105_spi_setup *spi_setup,
 		/* If previous operation was a read, retrieve its result:
 		 * the mac config table entry requested for */
 		memset(packed_buf, 0, BUF_LEN);
-		rc = sja1105_spi_send_packed_buf(spi_setup,
+		rc = sja1105_spi_send_packed_buf(priv,
 		                                 SPI_READ,
 		                                 ENTRY_ADDR,
 		                                 packed_buf,
@@ -520,19 +520,19 @@ out:
 	return rc;
 }
 
-int sja1105_vlan_lookup_get(struct sja1105_spi_setup *spi_setup,
+int sja1105_vlan_lookup_get(struct sja1105_spi_private *priv,
                             struct sja1105_vlan_lookup_entry *entry)
 {
-	return sja1105_vlan_lookup_commit(spi_setup, entry, SPI_READ, 0);
+	return sja1105_vlan_lookup_commit(priv, entry, SPI_READ, 0);
 }
 
-int sja1105_vlan_lookup_set(struct sja1105_spi_setup *spi_setup,
+int sja1105_vlan_lookup_set(struct sja1105_spi_private *priv,
                             struct sja1105_vlan_lookup_entry *entry,
                             int valident)
 {
-	if (IS_ET(spi_setup->device_id))
+	if (IS_ET(priv->device_id))
 		logi("Parameter VALIDENT is ignored on E/T!\n");
 
-	return sja1105_vlan_lookup_commit(spi_setup, entry,
+	return sja1105_vlan_lookup_commit(priv, entry,
 	                                  SPI_WRITE, valident);
 }

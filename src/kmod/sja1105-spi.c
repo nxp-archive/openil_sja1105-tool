@@ -10,17 +10,13 @@
 #include <linux/netdevice.h>
 #include <lib/include/static-config.h>
 #include <lib/include/gtable.h>
-#include <lib/include/spi.h>
-#include <common.h>
 #include "sja1105.h"
 
 #define SPI_TRANSFER_SIZE_MAX  (SIZE_SPI_MSG_HEADER + SIZE_SPI_MSG_MAXLEN)
 
-static int sja1105_spi_transfer(const struct sja1105_spi_setup *spi_setup,
+static int sja1105_spi_transfer(const struct sja1105_spi_private *priv,
                                 const void *tx, void *rx, int size)
 {
-	struct sja1105_spi_private *priv = container_of(spi_setup,
-	                         struct sja1105_spi_private, spi_setup);
 	struct spi_device *spi = priv->spi_dev;
 	struct spi_transfer transfer = {
 		.tx_buf = tx,
@@ -83,7 +79,7 @@ static void sja1105_spi_message_access(void  *buf,
  * are chunked in smaller pieces by sja1105_spi_send_long_packed_buf below.
  */
 inline int
-sja1105_spi_send_packed_buf(struct sja1105_spi_setup *spi_setup,
+sja1105_spi_send_packed_buf(struct sja1105_spi_private *priv,
                             enum sja1105_spi_access_mode read_or_write,
                             uint64_t reg_addr, void *packed_buf,
                             uint64_t size_bytes)
@@ -113,7 +109,7 @@ sja1105_spi_send_packed_buf(struct sja1105_spi_setup *spi_setup,
 		goto out;
 	}
 
-	rc = sja1105_spi_transfer(spi_setup, tx_buf, rx_buf, MSG_LEN);
+	rc = sja1105_spi_transfer(priv, tx_buf, rx_buf, MSG_LEN);
 	if (rc < 0) {
 		loge("sja1105_spi_transfer failed");
 		goto out;
@@ -140,7 +136,7 @@ out:
  *
  */
 inline int
-sja1105_spi_send_int(struct sja1105_spi_setup *spi_setup,
+sja1105_spi_send_int(struct sja1105_spi_private *priv,
                      enum sja1105_spi_access_mode read_or_write,
                      uint64_t reg_addr, uint64_t *value, uint64_t size_bytes)
 {
@@ -151,7 +147,7 @@ sja1105_spi_send_int(struct sja1105_spi_setup *spi_setup,
 		gtable_pack(packed_buf, value, 8 * size_bytes - 1, 0,
 		            size_bytes);
 
-	rc = sja1105_spi_send_packed_buf(spi_setup, read_or_write, reg_addr,
+	rc = sja1105_spi_send_packed_buf(priv, read_or_write, reg_addr,
 	                                 packed_buf, size_bytes);
 	if (read_or_write == SPI_READ)
 		gtable_unpack(packed_buf, value, 8 * size_bytes - 1, 0,
@@ -165,7 +161,7 @@ sja1105_spi_send_int(struct sja1105_spi_setup *spi_setup,
  * sent/received. Splitting the buffer into chunks and assembling those
  * into SPI messages is done automatically by this function.
  */
-int sja1105_spi_send_long_packed_buf(struct sja1105_spi_setup *spi_setup,
+int sja1105_spi_send_long_packed_buf(struct sja1105_spi_private *priv,
                                      enum sja1105_spi_access_mode read_or_write,
                                      uint64_t base_addr, char *packed_buf,
                                      uint64_t buf_len)
@@ -184,7 +180,7 @@ int sja1105_spi_send_long_packed_buf(struct sja1105_spi_setup *spi_setup,
 	chunk.len = min((int)buf_len, SIZE_SPI_MSG_MAXLEN);
 
 	while (chunk.len) {
-		rc = sja1105_spi_send_packed_buf(spi_setup, read_or_write,
+		rc = sja1105_spi_send_packed_buf(priv, read_or_write,
 		                                 chunk.spi_address,
 		                                 chunk.buf_ptr,
 		                                 chunk.len);
@@ -204,7 +200,7 @@ out_send_failed:
 
 
 static int
-static_config_upload(struct sja1105_spi_setup *spi_setup,
+static_config_upload(struct sja1105_spi_private *priv,
                      struct sja1105_static_config *config)
 {
 	struct   sja1105_table_header final_header;
@@ -238,7 +234,7 @@ static_config_upload(struct sja1105_spi_setup *spi_setup,
 	/* Rewrite */
 	sja1105_table_header_pack(final_header_ptr, &final_header);
 
-	rc = sja1105_spi_send_long_packed_buf(spi_setup, SPI_WRITE, CONFIG_ADDR,
+	rc = sja1105_spi_send_long_packed_buf(priv, SPI_WRITE, CONFIG_ADDR,
 	                                      config_buf, config_buf_len);
 out_free:
 	kfree(config_buf);
@@ -246,11 +242,11 @@ out:
 	return rc;
 }
 
-int sja1105_static_config_flush(struct sja1105_spi_setup *spi_setup,
-                                struct sja1105_static_config *config)
+int sja1105_static_config_flush(struct sja1105_spi_private *priv)
 {
-	struct sja1105_general_status status;
+	struct sja1105_static_config *config = &priv->static_config;
 	struct sja1105_egress_port_mask port_mask;
+	struct sja1105_general_status status;
 	int i, rc;
 
 	rc = sja1105_static_config_check_valid(config);
@@ -263,7 +259,7 @@ int sja1105_static_config_flush(struct sja1105_spi_setup *spi_setup,
 	for (i = 0; i < SJA1105T_NUM_PORTS; i++) {
 		port_mask.inhibit_tx[i] = 1;
 	}
-	rc = sja1105_inhibit_tx(spi_setup, &port_mask);
+	rc = sja1105_inhibit_tx(priv, &port_mask);
 	if (rc < 0) {
 		loge("sja1105_set_egress_port_mask failed");
 		goto hardware_not_responding_error;
@@ -274,32 +270,32 @@ int sja1105_static_config_flush(struct sja1105_spi_setup *spi_setup,
 	 */
 	udelay(1000);
 	/* Put the SJA1105 in programming mode */
-	rc = sja1105_cold_reset(spi_setup);
+	rc = sja1105_cold_reset(priv);
 	if (rc < 0) {
 		loge("sja1105_reset failed");
 		goto hardware_left_floating_error;
 	}
-	rc = static_config_upload(spi_setup, config);
+	rc = static_config_upload(priv, config);
 	if (rc < 0) {
 		loge("static_config_upload failed");
 		goto hardware_left_floating_error;
 	}
 	/* Configure the CGU (PHY link modes and speeds) */
-	rc = sja1105_clocking_setup(spi_setup, &config->xmii_params[0],
+	rc = sja1105_clocking_setup(priv, &config->xmii_params[0],
 	                           &config->mac_config[0]);
 	if (rc < 0) {
 		loge("sja1105_clocking_setup failed");
 		goto hardware_left_floating_error;
 	}
 	/* Check that SJA1105 responded well to the config upload */
-	rc = sja1105_general_status_get(spi_setup, &status);
+	rc = sja1105_general_status_get(priv, &status);
 	if (rc < 0)
 		goto hardware_left_floating_error;
 
 	if (status.ids == 1) {
 		loge("Mismatch between hardware and staging area "
 		     "device id. Wrote 0x%" PRIx64 ", wants 0x%" PRIx64,
-		     config->device_id, spi_setup->device_id);
+		     config->device_id, priv->device_id);
 		goto hardware_left_floating_error;
 	}
 	if (status.crcchkl == 1) {

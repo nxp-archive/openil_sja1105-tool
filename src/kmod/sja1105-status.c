@@ -3,14 +3,11 @@
  *
  * Copyright (c) 2016-2018, NXP Semiconductors
  */
-#include <lib/include/static-config.h>
-#include <lib/include/gtable.h>
-#include <lib/include/spi.h>
-#include <common.h>
 #include "sja1105.h"
+#include <lib/include/gtable.h>
 
-int sja1105_device_id_get(struct sja1105_spi_setup *spi_setup,
-                          uint64_t *device_id, uint64_t *part_nr)
+/* Populates priv structures device_id and part_nr */
+int sja1105_device_id_get(struct sja1105_spi_private *priv)
 {
 	uint64_t compatible_device_ids[] = {
 		SJA1105E_DEVICE_ID,
@@ -23,38 +20,38 @@ int sja1105_device_id_get(struct sja1105_spi_setup *spi_setup,
 	unsigned int i;
 	int rc;
 
-	rc = sja1105_spi_send_int(spi_setup, SPI_READ,CORE_ADDR + 0x00,
+	rc = sja1105_spi_send_int(priv, SPI_READ,CORE_ADDR + 0x00,
 	                          &tmp_device_id, SIZE_SJA1105_DEVICE_ID);
 	if (rc < 0) {
 		loge("sja1105_spi_send_int failed");
 		goto out;
 	}
-	*device_id = SJA1105_NO_DEVICE_ID;
+	priv->device_id = SJA1105_NO_DEVICE_ID;
 	for (i = 0; i < ARRAY_SIZE(compatible_device_ids); i++) {
 		if (tmp_device_id == compatible_device_ids[i]) {
-			*device_id = compatible_device_ids[i];
+			priv->device_id = compatible_device_ids[i];
 			break;
 		}
 	}
-	if (*device_id == SJA1105_NO_DEVICE_ID) {
+	if (priv->device_id == SJA1105_NO_DEVICE_ID) {
 		loge("Unrecognized Device ID 0x%08" PRIx64, tmp_device_id);
 		rc = -EINVAL;
 		goto out;
 	}
-	if (IS_PQRS(*device_id)) {
+	if (IS_PQRS(priv->device_id)) {
 		/* 0x100BC3 relative to 0x100800 */
 		const int PROD_ID_ADDR = 0x3C3;
-		rc = sja1105_spi_send_int(spi_setup, SPI_READ,
+		rc = sja1105_spi_send_int(priv, SPI_READ,
 		                          ACU_ADDR + PROD_ID_ADDR,
 		                          &tmp_part_nr, 4);
 		if (rc < 0) {
 			loge("sja1105_spi_send_int failed");
 			goto out;
 		}
-		gtable_unpack(&tmp_part_nr, part_nr, 19, 4, 4);
+		gtable_unpack(&tmp_part_nr, &priv->part_nr, 19, 4, 4);
 	}
 	logv("%s Device ID detected.",
-	     sja1105_device_id_string_get(*device_id, *part_nr));
+	     sja1105_device_id_string_get(priv->device_id, priv->part_nr));
 out:
 	return rc;
 }
@@ -167,10 +164,10 @@ void sja1105_general_status_show(struct sja1105_general_status *status,
 	formatted_append(print_buf, len, fmt, "RAMPARERRU %" PRIX64, status->ramparerru);
 }
 
-int sja1105_general_status_get(struct sja1105_spi_setup *spi_setup,
+int sja1105_general_status_get(struct sja1105_spi_private *priv,
                                struct sja1105_general_status *status)
 {
-	const int SIZE_GENERAL_STATUS = IS_ET(spi_setup->device_id) ?
+	const int SIZE_GENERAL_STATUS = IS_ET(priv->device_id) ?
 	                                0x0C * 4 : /* 0x01 to 0x0C */
 	                                0x0D * 4;  /* 0x01 to 0x0D */
 	uint8_t packed_buf[SIZE_GENERAL_STATUS];
@@ -178,13 +175,13 @@ int sja1105_general_status_get(struct sja1105_spi_setup *spi_setup,
 
 	/* The base address is off-by-1 compared to UM10944,
 	 * because we are skipping device_id from the readout. */
-	rc = sja1105_spi_send_packed_buf(spi_setup, SPI_READ, CORE_ADDR + 0x01,
+	rc = sja1105_spi_send_packed_buf(priv, SPI_READ, CORE_ADDR + 0x01,
 	                                 packed_buf, SIZE_GENERAL_STATUS);
 	if (rc < 0) {
 		loge("spi read failed");
 		goto out;
 	}
-	sja1105_general_status_unpack(packed_buf, status, spi_setup->device_id);
+	sja1105_general_status_unpack(packed_buf, status, priv->device_id);
 out:
 	return rc;
 }
@@ -275,7 +272,7 @@ sja1105pqrs_port_status_qlevel_unpack(void *buf, struct
 	}
 }
 
-int sja1105_port_status_get_mac(struct sja1105_spi_setup *spi_setup,
+int sja1105_port_status_get_mac(struct sja1105_spi_private *priv,
                                 struct sja1105_port_status_mac *status,
                                 int port)
 {
@@ -287,7 +284,7 @@ int sja1105_port_status_get_mac(struct sja1105_spi_setup *spi_setup,
 	memset(status, 0, sizeof(*status));
 
 	/* MAC area */
-	rc = sja1105_spi_send_packed_buf(spi_setup, SPI_READ,
+	rc = sja1105_spi_send_packed_buf(priv, SPI_READ,
 	                                 CORE_ADDR + mac_base_addr[port],
 	                                 packed_buf, SIZE_MAC_AREA);
 	if (rc < 0) {
@@ -299,7 +296,7 @@ out:
 	return rc;
 }
 
-int sja1105_port_status_get_hl1(struct sja1105_spi_setup *spi_setup,
+int sja1105_port_status_get_hl1(struct sja1105_spi_private *priv,
                                 struct sja1105_port_status_hl1 *status,
                                 int port)
 {
@@ -310,7 +307,7 @@ int sja1105_port_status_get_hl1(struct sja1105_spi_setup *spi_setup,
 
 	memset(status, 0, sizeof(*status));
 
-	rc = sja1105_spi_send_packed_buf(spi_setup, SPI_READ,
+	rc = sja1105_spi_send_packed_buf(priv, SPI_READ,
 	                                 CORE_ADDR + high_level_1_base_addr[port],
 	                                 packed_buf, SIZE_HL1_AREA);
 	if (rc < 0) {
@@ -322,7 +319,7 @@ out:
 	return rc;
 }
 
-int sja1105_port_status_get_hl2(struct sja1105_spi_setup *spi_setup,
+int sja1105_port_status_get_hl2(struct sja1105_spi_private *priv,
                                 struct sja1105_port_status_hl2 *status,
                                 int port)
 {
@@ -335,7 +332,7 @@ int sja1105_port_status_get_hl2(struct sja1105_spi_setup *spi_setup,
 
 	memset(status, 0, sizeof(*status));
 
-	rc = sja1105_spi_send_packed_buf(spi_setup, SPI_READ,
+	rc = sja1105_spi_send_packed_buf(priv, SPI_READ,
 	                                 CORE_ADDR + high_level_2_base_addr[port],
 	                                 packed_buf, SIZE_HL2_AREA);
 	if (rc < 0) {
@@ -344,11 +341,11 @@ int sja1105_port_status_get_hl2(struct sja1105_spi_setup *spi_setup,
 	}
 	sja1105_port_status_hl2_unpack(packed_buf, status);
 
-	if (IS_ET(spi_setup->device_id))
+	if (IS_ET(priv->device_id))
 		/* Code below is strictly P/Q/R/S specific. */
 		goto out;
 
-	rc = sja1105_spi_send_packed_buf(spi_setup, SPI_READ,
+	rc = sja1105_spi_send_packed_buf(priv, SPI_READ,
 	                                 CORE_ADDR + qlevel_base_addr[port],
 	                                 packed_buf, SIZE_QLEVEL_AREA);
 	if (rc < 0) {
@@ -360,21 +357,21 @@ out:
 	return rc;
 }
 
-int sja1105_port_status_get(struct sja1105_spi_setup *spi_setup,
+int sja1105_port_status_get(struct sja1105_spi_private *priv,
                             struct sja1105_port_status *status,
                             int port)
 {
 	int rc;
 
-	rc = sja1105_port_status_get_mac(spi_setup, &status->mac, port);
+	rc = sja1105_port_status_get_mac(priv, &status->mac, port);
 	if (rc < 0)
 		goto out;
 
-	rc = sja1105_port_status_get_hl1(spi_setup, &status->hl1, port);
+	rc = sja1105_port_status_get_hl1(priv, &status->hl1, port);
 	if (rc < 0)
 		goto out;
 
-	rc = sja1105_port_status_get_hl2(spi_setup, &status->hl2, port);
+	rc = sja1105_port_status_get_hl2(priv, &status->hl2, port);
 	if (rc < 0)
 		goto out;
 
@@ -382,10 +379,10 @@ out:
 	return rc;
 }
 
-int sja1105_port_status_clear(struct sja1105_spi_setup *spi_setup,
+int sja1105_port_status_clear(struct sja1105_spi_private *priv,
                               int port)
 {
-	const int PORT_STATUS_CTRL_ADDR = IS_ET(spi_setup->device_id) ?
+	const int PORT_STATUS_CTRL_ADDR = IS_ET(priv->device_id) ?
 	                                  0xf : 0x10;
 	const int BUF_LEN = 4;
 	uint8_t   packed_buf[BUF_LEN];
@@ -405,7 +402,7 @@ int sja1105_port_status_clear(struct sja1105_spi_setup *spi_setup,
 	memset(packed_buf, 0, BUF_LEN);
 
 	gtable_pack(packed_buf, &clearport, 4, 0, BUF_LEN);
-	rc = sja1105_spi_send_packed_buf(spi_setup, SPI_WRITE,
+	rc = sja1105_spi_send_packed_buf(priv, SPI_WRITE,
 	                                 CORE_ADDR + PORT_STATUS_CTRL_ADDR,
 	                                 packed_buf, BUF_LEN);
 	if (rc < 0) {

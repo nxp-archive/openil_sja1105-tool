@@ -15,9 +15,7 @@
 #include <linux/gpio/consumer.h>
 #include <linux/ratelimit.h>
 #include <linux/ptp_clock_kernel.h>
-
 #include <lib/include/static-config.h>
-#include <lib/include/spi.h>
 
 enum sja1105_ptp_clk_add_mode {
 	PTP_SET_MODE = 0,
@@ -49,12 +47,13 @@ struct sja1105_spi_private {
 	struct mutex lock; /* SPI device lock */
 
 	struct sja1105_static_config static_config;
-	struct sja1105_spi_setup spi_setup;
 	struct gpio_desc *reset_gpio;
 
 	u64 reg_addr; /* register address to read from */
 	u64 vlanid; /* vlan lookup entry to read */
 
+	u64 device_id;
+	u64 part_nr; /* Needed for P/R distinction (same switch core) */
 	const char *staging_area;
 
 	struct ptp_clock *clock;
@@ -73,13 +72,13 @@ enum sja1105_spi_access_mode {
 	SPI_WRITE = 1,
 };
 
-int sja1105_spi_send_packed_buf(struct sja1105_spi_setup*,
+int sja1105_spi_send_packed_buf(struct sja1105_spi_private*,
                                 enum sja1105_spi_access_mode,
                                 uint64_t, void*, uint64_t);
-int sja1105_spi_send_int(struct sja1105_spi_setup*,
+int sja1105_spi_send_int(struct sja1105_spi_private*,
                          enum sja1105_spi_access_mode,
                          uint64_t, uint64_t*, uint64_t);
-int sja1105_spi_send_long_packed_buf(struct sja1105_spi_setup*,
+int sja1105_spi_send_long_packed_buf(struct sja1105_spi_private*,
                                      enum sja1105_spi_access_mode,
                                      uint64_t, char *, uint64_t);
 
@@ -127,38 +126,36 @@ struct sja1105_cbs {
 struct sja1105_egress_port_mask {
 	uint64_t inhibit_tx[SJA1105T_NUM_PORTS];
 };
-int sja1105_mac_config_get(struct sja1105_spi_setup *spi_setup,
+int sja1105_mac_config_get(struct sja1105_spi_private *priv,
                            struct sja1105_mac_config_entry *entry,
                            int port);
-int sja1105_mac_config_set(struct sja1105_spi_setup *spi_setup,
+int sja1105_mac_config_set(struct sja1105_spi_private *priv,
                            struct sja1105_mac_config_entry *entry,
                            int port);
-int sja1105_vlan_lookup_get(struct sja1105_spi_setup *spi_setup,
+int sja1105_vlan_lookup_get(struct sja1105_spi_private *priv,
                             struct sja1105_vlan_lookup_entry *entry);
-int sja1105_vlan_lookup_set(struct sja1105_spi_setup *spi_setup,
+int sja1105_vlan_lookup_set(struct sja1105_spi_private *priv,
                             struct sja1105_vlan_lookup_entry *entry,
                             int valident);
-int sja1105_inhibit_tx(struct sja1105_spi_setup *spi_setup,
+int sja1105_inhibit_tx(struct sja1105_spi_private *priv,
                        struct sja1105_egress_port_mask *port_mask);
 
 /* sja1105-clocking.c */
-int sja1105_clocking_setup_port(struct sja1105_spi_setup *spi_setup, int port,
+int sja1105_clocking_setup_port(struct sja1105_spi_private *priv, int port,
                                 struct sja1105_xmii_params_entry *params,
                                 struct sja1105_mac_config_entry  *mac_config);
-int sja1105_clocking_setup(struct sja1105_spi_setup *spi_setup,
+int sja1105_clocking_setup(struct sja1105_spi_private *priv,
                            struct sja1105_xmii_params_entry *params,
                            struct sja1105_mac_config_entry  *mac_configs);
 
 /* sja1105-status.c */
-int sja1105_device_id_get(struct sja1105_spi_setup *spi_setup,
-                          uint64_t *device_id, uint64_t *part_nr);
+int sja1105_device_id_get(struct sja1105_spi_private *priv);
 
 /* sja1105-reset.c */
-int sja1105_cold_reset(struct sja1105_spi_setup *spi_setup);
+int sja1105_cold_reset(struct sja1105_spi_private *priv);
 
 /* sja1105-spi.c */
-int sja1105_static_config_flush(struct sja1105_spi_setup *spi_setup,
-                                struct sja1105_static_config *config);
+int sja1105_static_config_flush(struct sja1105_spi_private *priv);
 
 /* sja1105-status.c */
 
@@ -286,14 +283,14 @@ struct sja1105_ptp_status {
 	uint64_t timer;
 	uint64_t clock;
 };
-int sja1105_port_status_clear(struct sja1105_spi_setup*, int);
-int sja1105_port_status_get_hl1(struct sja1105_spi_setup *spi_setup,
+int sja1105_port_status_clear(struct sja1105_spi_private*, int);
+int sja1105_port_status_get_hl1(struct sja1105_spi_private *priv,
                                 struct sja1105_port_status_hl1 *status,
                                 int port);
-int sja1105_port_status_get(struct sja1105_spi_setup*,
+int sja1105_port_status_get(struct sja1105_spi_private*,
                             struct sja1105_port_status*,
                             int port);
-int  sja1105_general_status_get(struct sja1105_spi_setup*,
+int  sja1105_general_status_get(struct sja1105_spi_private*,
                                 struct sja1105_general_status*);
 void sja1105_general_status_show(struct sja1105_general_status*,
                                  char*, size_t,

@@ -10,7 +10,6 @@
 
 #include <lib/include/static-config.h>
 #include <lib/include/gtable.h>
-#include <lib/include/spi.h>
 
 #define SJA1105PQRS_PTPSYNCTS_ADDR  0x1F
 #define SJA1105QS_PTPCLKCORP_ADDR   0x1E
@@ -109,7 +108,7 @@ sja1105_ptp_cmd_access(void *buf, struct sja1105_ptp_cmd *cmd,
 static int sja1105_ptp_cmd_commit(struct sja1105_spi_private *priv,
                                   struct sja1105_ptp_cmd *cmd)
 {
-	u64 device_id = priv->spi_setup.device_id;
+	u64 device_id = priv->device_id;
 	const int BUF_LEN = 4;
 	u8 packed_buf[BUF_LEN];
 	int ptp_control_addr;
@@ -125,7 +124,7 @@ static int sja1105_ptp_cmd_commit(struct sja1105_spi_private *priv,
 		ptp_control_addr = 0x18;
 
 	sja1105_ptp_cmd_pack(packed_buf, cmd, device_id);
-	return sja1105_spi_send_packed_buf(&priv->spi_setup, SPI_WRITE,
+	return sja1105_spi_send_packed_buf(priv, SPI_WRITE,
 	                                   CORE_ADDR + ptp_control_addr,
 	                                   packed_buf, BUF_LEN);
 }
@@ -134,12 +133,10 @@ static int sja1105_ptp_cmd_commit(struct sja1105_spi_private *priv,
  * at CORE_ADDR + reg_offset */
 static inline int
 sja1105_ptp_read_reg(struct sja1105_spi_private *priv,
-                     u64 reg_offset, u64 *value,
-                     u64 size_bytes)
+                     u64 reg_offset, u64 *value, u64 size_bytes)
 {
-	return sja1105_spi_send_int(&priv->spi_setup, SPI_READ,
-	                            CORE_ADDR + PTP_ADDR + reg_offset,
-	                            value, size_bytes);
+	return sja1105_spi_send_int(priv, SPI_READ, CORE_ADDR + PTP_ADDR +
+	                            reg_offset, value, size_bytes);
 }
 
 /* Wrapper around sja1105_spi_send_int() using SPI_WRITE
@@ -148,9 +145,8 @@ static inline int
 sja1105_ptp_write_reg(struct sja1105_spi_private *priv, u64 reg_offset,
                       u64 *value, u64 size_bytes)
 {
-	return sja1105_spi_send_int(&priv->spi_setup, SPI_WRITE,
-	                            CORE_ADDR + PTP_ADDR + reg_offset,
-	                            value, size_bytes);
+	return sja1105_spi_send_int(priv, SPI_WRITE, CORE_ADDR + PTP_ADDR +
+	                            reg_offset, value, size_bytes);
 }
 
 static void
@@ -171,7 +167,7 @@ sja1105_ptp_time_to_timespec(struct timespec64 *ts, u64 ptp_time)
 
 int sja1105_ptp_is_schedule_running(struct sja1105_spi_private *priv)
 {
-	u64 device_id = priv->spi_setup.device_id;
+	u64 device_id = priv->device_id;
 	struct  sja1105_ptp_cmd cmd;
 	const int BUF_LEN = 4;
 	u8 packed_buf[BUF_LEN];
@@ -190,7 +186,7 @@ int sja1105_ptp_is_schedule_running(struct sja1105_spi_private *priv)
 		/* Only T will enter here */
 		ptp_control_addr = 0x17;
 
-	rc = sja1105_spi_send_packed_buf(&priv->spi_setup, SPI_READ,
+	rc = sja1105_spi_send_packed_buf(priv, SPI_READ,
 	                                 CORE_ADDR + ptp_control_addr,
 	                                 packed_buf, BUF_LEN);
 	if (rc < 0) {
@@ -253,7 +249,7 @@ int sja1105_ptp_pin_toggle_stop(struct sja1105_spi_private *priv)
 int sja1105_ptp_pin_start_time_set(struct sja1105_spi_private *priv,
                                    const struct timespec64 *ts)
 {
-	u64 device_id = priv->spi_setup.device_id;
+	u64 device_id = priv->device_id;
 	u64 ptppinst_addr;
 	u64 pinst;
 
@@ -270,7 +266,7 @@ int sja1105_ptp_pin_start_time_set(struct sja1105_spi_private *priv,
 int sja1105_ptp_pin_duration_set(struct sja1105_spi_private *priv,
                                  const struct timespec64 *ts)
 {
-	u64 device_id = priv->spi_setup.device_id;
+	u64 device_id = priv->device_id;
 	u64 ptppindur_addr;
 	u64 pindur;
 	int rc;
@@ -296,7 +292,7 @@ int
 sja1105_ptp_schedule_correction_period_set(struct sja1105_spi_private *priv,
                                            const struct timespec64 *ts)
 {
-	u64 device_id = priv->spi_setup.device_id;
+	u64 device_id = priv->device_id;
 	u64 ptpclkcorp_addr;
 	u64 ptpclkcorp;
 	int rc;
@@ -328,7 +324,7 @@ out:
 int sja1105_ptp_schedule_start_time_set(struct sja1105_spi_private *priv,
                                         const struct timespec64 *ts)
 {
-	u64 device_id = priv->spi_setup.device_id;
+	u64 device_id = priv->device_id;
 	u64 ptpschtm_addr;
 	u64 ptpschtm;
 
@@ -364,7 +360,7 @@ int sja1105_ptpegr_ts_poll(struct sja1105_spi_private *priv,
 	const int ts_reg_index = 2 * port + ts_regid;
 	const int SIZE_PTPEGR_TS = 4;
 	u8  packed_buf[SIZE_PTPEGR_TS];
-	u64 device_id = priv->spi_setup.device_id;
+	u64 device_id = priv->device_id;
 	u64 ptpegr_ts_reconstructed;
 	u64 ptpegr_ts_partial;
 	u64 ptpegr_ts_mask;
@@ -388,7 +384,7 @@ int sja1105_ptpegr_ts_poll(struct sja1105_spi_private *priv,
 		rc = -EINVAL;
 		goto out;
 	}
-	rc = sja1105_spi_send_packed_buf(&priv->spi_setup, SPI_READ,
+	rc = sja1105_spi_send_packed_buf(priv, SPI_READ,
 	                                 CORE_ADDR + 0xC0 + ts_reg_index,
 	                                 packed_buf, SIZE_PTPEGR_TS);
 	if (rc < 0) {
@@ -439,7 +435,7 @@ out:
 int sja1105_ptp_ts_clk_get(struct sja1105_spi_private *priv,
                            struct timespec64 *ts)
 {
-	u64 device_id = priv->spi_setup.device_id;
+	u64 device_id = priv->device_id;
 	u64 ptptsclk_addr;
 	u64 ptptsclk;
 	int rc;
@@ -493,7 +489,7 @@ static inline int
 sja1105_ptp_clk_write(struct sja1105_spi_private *priv,
                       const struct timespec64 *ts)
 {
-	u64 device_id = priv->spi_setup.device_id;
+	u64 device_id = priv->device_id;
 	u64 ptpclkval_addr;
 	u64 ptpclkval;
 
@@ -512,7 +508,7 @@ static int sja1105_ptp_gettime(struct ptp_clock_info *ptp,
 {
 	struct sja1105_spi_private *priv = container_of(ptp, struct
 	                                   sja1105_spi_private, ptp_caps);
-	u64 device_id = priv->spi_setup.device_id;
+	u64 device_id = priv->device_id;
 	u64 ptpclkval_addr;
 	u64 ptpclkval;
 	int rc;
@@ -561,7 +557,7 @@ static int sja1105_ptp_adjfine(struct ptp_clock_info *ptp, long scaled_ppm)
 {
 	struct sja1105_spi_private *priv = container_of(ptp, struct
 	                                   sja1105_spi_private, ptp_caps);
-	u64 device_id = priv->spi_setup.device_id;
+	u64 device_id = priv->device_id;
 	u64 ptpclkrate_addr;
 	u64 ptpclkrate;
 

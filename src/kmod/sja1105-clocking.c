@@ -3,11 +3,8 @@
  *
  * Copyright (c) 2016-2018, NXP Semiconductors
  */
-#include <lib/include/static-config.h>
-#include <lib/include/gtable.h>
-#include <lib/include/spi.h>
-#include <common.h>
 #include "sja1105.h"
+#include <lib/include/gtable.h>
 
 /* AGU */
 #define AGU_ADDR    0x100800
@@ -120,7 +117,7 @@ static void sja1105_cgu_idiv_access(void *buf, struct sja1105_cgu_idiv *idiv,
 #define sja1105_cgu_idiv_pack(buf, idiv) sja1105_cgu_idiv_access(buf, idiv, 1)
 #define sja1105_cgu_idiv_unpack(buf, idiv) sja1105_cgu_idiv_access(buf, idiv, 0)
 
-static int sja1105_cgu_idiv_config(struct sja1105_spi_setup *spi_setup,
+static int sja1105_cgu_idiv_config(struct sja1105_spi_private *priv,
                                    int port, int enabled, int factor)
 {
 	const int BUF_LEN = 4;
@@ -145,7 +142,7 @@ static int sja1105_cgu_idiv_config(struct sja1105_spi_setup *spi_setup,
 	idiv.pd        = enabled ? 0 : 1; /* Power down? */
 	sja1105_cgu_idiv_pack(packed_buf, &idiv);
 
-	return sja1105_spi_send_packed_buf(spi_setup, SPI_WRITE,
+	return sja1105_spi_send_packed_buf(priv, SPI_WRITE,
 	                                   CGU_ADDR + idiv_offsets[port],
 	                                   packed_buf, BUF_LEN);
 }
@@ -173,7 +170,7 @@ sja1105_cgu_mii_control_access(void *buf, struct sja1105_cgu_mii_control
 #define sja1105_cgu_mii_control_unpack(buf, mii_control) \
 	sja1105_cgu_mii_control_access(buf, mii_control, 0)
 
-static int sja1105_cgu_mii_tx_clk_config(struct sja1105_spi_setup *spi_setup,
+static int sja1105_cgu_mii_tx_clk_config(struct sja1105_spi_private *priv,
                                          int port, int mii_mode)
 {
 	const int BUF_LEN = 4;
@@ -201,7 +198,7 @@ static int sja1105_cgu_mii_tx_clk_config(struct sja1105_spi_setup *spi_setup,
 	int clksrc;
 
 	/* E/T and P/Q/R/S compatibility */
-	mii_tx_clk_offsets = IS_ET(spi_setup->device_id) ?
+	mii_tx_clk_offsets = IS_ET(priv->device_id) ?
 	                     mii_tx_clk_offsets_et :
 	                     mii_tx_clk_offsets_pqrs;
 
@@ -216,13 +213,13 @@ static int sja1105_cgu_mii_tx_clk_config(struct sja1105_spi_setup *spi_setup,
 	mii_tx_clk.pd        = 0;  /* Power Down off => enabled */
 	sja1105_cgu_mii_control_pack(packed_buf, &mii_tx_clk);
 
-	return sja1105_spi_send_packed_buf(spi_setup, SPI_WRITE,
+	return sja1105_spi_send_packed_buf(priv, SPI_WRITE,
 	                                   CGU_ADDR + mii_tx_clk_offsets[port],
 	                                   packed_buf, BUF_LEN);
 }
 
 static int
-sja1105_cgu_mii_rx_clk_config(struct sja1105_spi_setup *spi_setup, int port)
+sja1105_cgu_mii_rx_clk_config(struct sja1105_spi_private *priv, int port)
 {
 	const int BUF_LEN = 4;
 	uint8_t packed_buf[BUF_LEN];
@@ -241,7 +238,7 @@ sja1105_cgu_mii_rx_clk_config(struct sja1105_spi_setup *spi_setup, int port)
 	};
 
 	/* E/T and P/Q/R/S compatibility */
-	mii_rx_clk_offsets = IS_ET(spi_setup->device_id) ?
+	mii_rx_clk_offsets = IS_ET(priv->device_id) ?
 	                     mii_rx_clk_offsets_et :
 	                     mii_rx_clk_offsets_pqrs;
 
@@ -251,13 +248,13 @@ sja1105_cgu_mii_rx_clk_config(struct sja1105_spi_setup *spi_setup, int port)
 	mii_rx_clk.pd        = 0;  /* Power Down off => enabled */
 	sja1105_cgu_mii_control_pack(packed_buf, &mii_rx_clk);
 
-	return sja1105_spi_send_packed_buf(spi_setup, SPI_WRITE,
+	return sja1105_spi_send_packed_buf(priv, SPI_WRITE,
 	                                   CGU_ADDR + mii_rx_clk_offsets[port],
 	                                   packed_buf, BUF_LEN);
 }
 
 static int
-sja1105_cgu_mii_ext_tx_clk_config(struct sja1105_spi_setup *spi_setup, int port)
+sja1105_cgu_mii_ext_tx_clk_config(struct sja1105_spi_private *priv, int port)
 {
 	const int BUF_LEN = 4;
 	uint8_t packed_buf[BUF_LEN];
@@ -276,7 +273,7 @@ sja1105_cgu_mii_ext_tx_clk_config(struct sja1105_spi_setup *spi_setup, int port)
 	};
 
 	/* E/T and P/Q/R/S compatibility */
-	mii_ext_tx_clk_offsets = IS_ET(spi_setup->device_id) ?
+	mii_ext_tx_clk_offsets = IS_ET(priv->device_id) ?
 	                         mii_ext_tx_clk_offsets_et :
 	                         mii_ext_tx_clk_offsets_pqrs;
 
@@ -286,13 +283,13 @@ sja1105_cgu_mii_ext_tx_clk_config(struct sja1105_spi_setup *spi_setup, int port)
 	mii_ext_tx_clk.pd        = 0; /* Power Down off => enabled */
 	sja1105_cgu_mii_control_pack(packed_buf, &mii_ext_tx_clk);
 
-	return sja1105_spi_send_packed_buf(spi_setup, SPI_WRITE,
+	return sja1105_spi_send_packed_buf(priv, SPI_WRITE,
 	                                   CGU_ADDR + mii_ext_tx_clk_offsets[port],
 	                                   packed_buf, BUF_LEN);
 }
 
 static int
-sja1105_cgu_mii_ext_rx_clk_config(struct sja1105_spi_setup *spi_setup, int port)
+sja1105_cgu_mii_ext_rx_clk_config(struct sja1105_spi_private *priv, int port)
 {
 	const int BUF_LEN = 4;
 	uint8_t packed_buf[BUF_LEN];
@@ -311,7 +308,7 @@ sja1105_cgu_mii_ext_rx_clk_config(struct sja1105_spi_setup *spi_setup, int port)
 	};
 
 	/* E/T and P/Q/R/S compatibility */
-	mii_ext_rx_clk_offsets = IS_ET(spi_setup->device_id) ?
+	mii_ext_rx_clk_offsets = IS_ET(priv->device_id) ?
 	                         mii_ext_rx_clk_offsets_et :
 	                         mii_ext_rx_clk_offsets_pqrs;
 
@@ -321,13 +318,13 @@ sja1105_cgu_mii_ext_rx_clk_config(struct sja1105_spi_setup *spi_setup, int port)
 	mii_ext_rx_clk.pd        = 0; /* Power Down off => enabled */
 	sja1105_cgu_mii_control_pack(packed_buf, &mii_ext_rx_clk);
 
-	return sja1105_spi_send_packed_buf(spi_setup, SPI_WRITE,
+	return sja1105_spi_send_packed_buf(priv, SPI_WRITE,
 	                                   CGU_ADDR + mii_ext_rx_clk_offsets[port],
 	                                   packed_buf, BUF_LEN);
 }
 
 static int
-mii_clocking_setup(struct sja1105_spi_setup *spi_setup, int port, int mii_mode)
+mii_clocking_setup(struct sja1105_spi_private *priv, int port, int mii_mode)
 {
 	int rc;
 
@@ -339,7 +336,7 @@ mii_clocking_setup(struct sja1105_spi_setup *spi_setup, int port, int mii_mode)
 	/*   * If mii_mode is MAC, disable IDIV
 	 *   * If mii_mode is PHY, enable IDIV and configure for 1/1 divider
 	 */
-	rc = sja1105_cgu_idiv_config(spi_setup, port,
+	rc = sja1105_cgu_idiv_config(priv, port,
 	                            (mii_mode == XMII_MODE_PHY), 1);
 	if (rc < 0)
 		goto error;
@@ -348,14 +345,14 @@ mii_clocking_setup(struct sja1105_spi_setup *spi_setup, int port, int mii_mode)
 	 *   * If mii_mode is MAC, select TX_CLK_n
 	 *   * If mii_mode is PHY, select IDIV_n
 	 */
-	rc = sja1105_cgu_mii_tx_clk_config(spi_setup, port, mii_mode);
+	rc = sja1105_cgu_mii_tx_clk_config(priv, port, mii_mode);
 	if (rc < 0)
 		goto error;
 
 	/* Configure CLKSRC of MII_RX_CLK_n
 	 * Select RX_CLK_n
 	 */
-	rc = sja1105_cgu_mii_rx_clk_config(spi_setup, port);
+	rc = sja1105_cgu_mii_rx_clk_config(priv, port);
 	if (rc < 0)
 		goto error;
 
@@ -365,14 +362,14 @@ mii_clocking_setup(struct sja1105_spi_setup *spi_setup, int port, int mii_mode)
 		/* Configure CLKSRC of EXT_TX_CLK_n
 		 * Select IDIV_n
 		 */
-		rc = sja1105_cgu_mii_ext_tx_clk_config(spi_setup, port);
+		rc = sja1105_cgu_mii_ext_tx_clk_config(priv, port);
 		if (rc < 0)
 			goto error;
 
 		/* Configure CLKSRC of EXT_RX_CLK_n
 		 * Select IDIV_n
 		 */
-		rc = sja1105_cgu_mii_ext_rx_clk_config(spi_setup, port);
+		rc = sja1105_cgu_mii_ext_rx_clk_config(priv, port);
 		if (rc < 0)
 			goto error;
 	}
@@ -414,7 +411,7 @@ sja1105_cgu_pll_control_access(void *buf, struct sja1105_cgu_pll_control
 	sja1105_cgu_pll_control_access(buf, pll_control, 0, device_id)
 
 static int
-sja1105_cgu_rgmii_tx_clk_config(struct sja1105_spi_setup *spi_setup, int port,
+sja1105_cgu_rgmii_tx_clk_config(struct sja1105_spi_private *priv, int port,
                                 int speed_mbps)
 {
 	int clksrc;
@@ -428,7 +425,7 @@ sja1105_cgu_rgmii_tx_clk_config(struct sja1105_spi_setup *spi_setup, int port,
 	struct  sja1105_cgu_mii_control txc;
 
 	/* E/T and P/Q/R/S compatibility */
-	txc_offsets = IS_ET(spi_setup->device_id) ?
+	txc_offsets = IS_ET(priv->device_id) ?
 	                     txc_offsets_et :
 	                     txc_offsets_pqrs;
 
@@ -447,7 +444,7 @@ sja1105_cgu_rgmii_tx_clk_config(struct sja1105_spi_setup *spi_setup, int port,
 	txc.pd        = 0;      /* Power Down off => enabled */
 	sja1105_cgu_mii_control_pack(packed_buf, &txc);
 
-	return sja1105_spi_send_packed_buf(spi_setup,SPI_WRITE,
+	return sja1105_spi_send_packed_buf(priv,SPI_WRITE,
 	                                   CGU_ADDR + txc_offsets[port],
 	                                   packed_buf, BUF_LEN);
 }
@@ -483,7 +480,7 @@ sja1105_cfg_pad_mii_tx_access(void *buf, struct sja1105_cfg_pad_mii_tx
 	sja1105_cfg_pad_mii_tx_access(buf, pad_mii_tx, 0)
 
 static int
-sja1105_rgmii_cfg_pad_tx_config(struct sja1105_spi_setup *spi_setup, int port)
+sja1105_rgmii_cfg_pad_tx_config(struct sja1105_spi_private *priv, int port)
 {
 	const int BUF_LEN = 4;
 	uint8_t packed_buf[BUF_LEN];
@@ -507,12 +504,12 @@ sja1105_rgmii_cfg_pad_tx_config(struct sja1105_spi_setup *spi_setup, int port)
 	pad_mii_tx.clk_ipud  = 2; /* TX_CLK input stage (default) */
 	sja1105_cfg_pad_mii_tx_pack(packed_buf, &pad_mii_tx);
 
-	return sja1105_spi_send_packed_buf(spi_setup, SPI_WRITE,
+	return sja1105_spi_send_packed_buf(priv, SPI_WRITE,
 	                                   AGU_ADDR + pad_mii_tx_offsets[port],
 	                                   packed_buf, BUF_LEN);
 }
 
-static int rgmii_clocking_setup(struct sja1105_spi_setup *spi_setup,
+static int rgmii_clocking_setup(struct sja1105_spi_private *priv,
                                 int port, int speed_mbps)
 {
 	int rc = 0;
@@ -521,24 +518,24 @@ static int rgmii_clocking_setup(struct sja1105_spi_setup *spi_setup,
 	     port, speed_mbps);
 	if (speed_mbps == 1000)
 		/* 1000Mbps, IDIV disabled, divide by 1 */
-		rc = sja1105_cgu_idiv_config(spi_setup, port, 0, 1);
+		rc = sja1105_cgu_idiv_config(priv, port, 0, 1);
 	else if (speed_mbps == 100)
 		/* 100Mbps, IDIV enabled, divide by 1 */
-		rc = sja1105_cgu_idiv_config(spi_setup, port, 1, 1);
+		rc = sja1105_cgu_idiv_config(priv, port, 1, 1);
 	else if (speed_mbps == 10)
 		/* 10Mbps, IDIV enabled, divide by 10 */
-		rc = sja1105_cgu_idiv_config(spi_setup, port, 1, 10);
+		rc = sja1105_cgu_idiv_config(priv, port, 1, 10);
 
 	if (rc < 0) {
 		loge("configuring idiv failed");
 		goto out;
 	}
-	rc = sja1105_cgu_rgmii_tx_clk_config(spi_setup, port, speed_mbps);
+	rc = sja1105_cgu_rgmii_tx_clk_config(priv, port, speed_mbps);
 	if (rc < 0) {
 		loge("configuring rgmii tx clock failed");
 		goto out;
 	}
-	rc = sja1105_rgmii_cfg_pad_tx_config(spi_setup, port);
+	rc = sja1105_rgmii_cfg_pad_tx_config(priv, port);
 	if (rc < 0) {
 		loge("configuring tx pad registers failed");
 		goto out;
@@ -548,7 +545,7 @@ out:
 }
 
 static int
-sja1105_cgu_rmii_ref_clk_config(struct sja1105_spi_setup *spi_setup, int port)
+sja1105_cgu_rmii_ref_clk_config(struct sja1105_spi_private *priv, int port)
 {
 	const int BUF_LEN = 4;
 	struct  sja1105_cgu_mii_control ref_clk;
@@ -567,7 +564,7 @@ sja1105_cgu_rmii_ref_clk_config(struct sja1105_spi_setup *spi_setup, int port)
 	};
 
 	/* E/T and P/Q/R/S compatibility */
-	ref_clk_offsets = IS_ET(spi_setup->device_id) ?
+	ref_clk_offsets = IS_ET(priv->device_id) ?
 	                  ref_clk_offsets_et : ref_clk_offsets_pqrs;
 
 	/* Payload for packed_buf */
@@ -576,13 +573,13 @@ sja1105_cgu_rmii_ref_clk_config(struct sja1105_spi_setup *spi_setup, int port)
 	ref_clk.pd        = 0;      /* Power Down off => enabled */
 	sja1105_cgu_mii_control_pack(packed_buf, &ref_clk);
 
-	return sja1105_spi_send_packed_buf(spi_setup, SPI_WRITE,
+	return sja1105_spi_send_packed_buf(priv, SPI_WRITE,
 	                                   CGU_ADDR + ref_clk_offsets[port],
 	                                   packed_buf, BUF_LEN);
 }
 
 static int
-sja1105_cgu_rmii_ext_tx_clk_config(struct sja1105_spi_setup *spi_setup,
+sja1105_cgu_rmii_ext_tx_clk_config(struct sja1105_spi_private *priv,
                                    int    port)
 {
 	const int BUF_LEN = 4;
@@ -595,7 +592,7 @@ sja1105_cgu_rmii_ext_tx_clk_config(struct sja1105_spi_setup *spi_setup,
 	const int *ext_tx_clk_offsets;
 
 	/* E/T and P/Q/R/S compatibility */
-	ext_tx_clk_offsets = IS_ET(spi_setup->device_id) ?
+	ext_tx_clk_offsets = IS_ET(priv->device_id) ?
 	                     ext_tx_clk_offsets_et :
 	                     ext_tx_clk_offsets_pqrs;
 
@@ -605,12 +602,12 @@ sja1105_cgu_rmii_ext_tx_clk_config(struct sja1105_spi_setup *spi_setup,
 	ext_tx_clk.pd        = 0;   /* Power Down off => enabled */
 	sja1105_cgu_mii_control_pack(packed_buf, &ext_tx_clk);
 
-	return sja1105_spi_send_packed_buf(spi_setup, SPI_WRITE,
+	return sja1105_spi_send_packed_buf(priv, SPI_WRITE,
 	                                   CGU_ADDR + ext_tx_clk_offsets[port],
 	                                   packed_buf, BUF_LEN);
 }
 
-static int sja1105_cgu_rmii_pll_config(struct sja1105_spi_setup *spi_setup)
+static int sja1105_cgu_rmii_pll_config(struct sja1105_spi_private *priv)
 {
 	const int BUF_LEN = 4;
 	const int PLL1_OFFSET = 0x0A;
@@ -636,8 +633,8 @@ static int sja1105_cgu_rmii_pll_config(struct sja1105_spi_setup *spi_setup)
 	pll.nsel      = 0x0; /* PLL pre-divider is 1 (nsel + 1) */
 	pll.p23en     = 0x0; /* disable 120 and 240 degree phase PLL outputs */
 
-	sja1105_cgu_pll_control_pack(packed_buf, &pll, spi_setup->device_id);
-	rc = sja1105_spi_send_packed_buf(spi_setup, SPI_WRITE,
+	sja1105_cgu_pll_control_pack(packed_buf, &pll, priv->device_id);
+	rc = sja1105_spi_send_packed_buf(priv, SPI_WRITE,
 	                                 CGU_ADDR + PLL1_OFFSET,
 	                                 packed_buf, BUF_LEN);
 	if (rc < 0) {
@@ -648,8 +645,8 @@ static int sja1105_cgu_rmii_pll_config(struct sja1105_spi_setup *spi_setup)
 	/* Step 2: Enable PLL1 */
 	pll.pd        = 0x0;
 
-	sja1105_cgu_pll_control_pack(packed_buf, &pll, spi_setup->device_id);
-	rc = sja1105_spi_send_packed_buf(spi_setup, SPI_WRITE,
+	sja1105_cgu_pll_control_pack(packed_buf, &pll, priv->device_id);
+	rc = sja1105_spi_send_packed_buf(priv, SPI_WRITE,
 	                                 CGU_ADDR + PLL1_OFFSET,
 	                                 packed_buf, BUF_LEN);
 	if (rc < 0) {
@@ -660,7 +657,7 @@ out:
 	return rc;
 }
 
-static int rmii_clocking_setup(struct sja1105_spi_setup *spi_setup, int port,
+static int rmii_clocking_setup(struct sja1105_spi_private *priv, int port,
                                int rmii_mode)
 {
 	int rc;
@@ -675,20 +672,20 @@ static int rmii_clocking_setup(struct sja1105_spi_setup *spi_setup, int port,
 	/* AH1601.pdf chapter 2.5.1. Sources */
 	if (rmii_mode == XMII_MODE_MAC) {
 		/* Configure and enable PLL1 for 50Mhz output */
-		rc = sja1105_cgu_rmii_pll_config(spi_setup);
+		rc = sja1105_cgu_rmii_pll_config(priv);
 		if (rc < 0)
 			goto out;
 	}
 	/* Disable IDIV for this port */
-	rc = sja1105_cgu_idiv_config(spi_setup, port, 0, 1);
+	rc = sja1105_cgu_idiv_config(priv, port, 0, 1);
 	if (rc < 0)
 		goto out;
 	/* Source to sink mappings */
-	rc = sja1105_cgu_rmii_ref_clk_config(spi_setup, port);
+	rc = sja1105_cgu_rmii_ref_clk_config(priv, port);
 	if (rc < 0)
 		goto out;
 	if (rmii_mode == XMII_MODE_MAC) {
-		rc = sja1105_cgu_rmii_ext_tx_clk_config(spi_setup, port);
+		rc = sja1105_cgu_rmii_ext_tx_clk_config(priv, port);
 		if (rc < 0)
 			goto out;
 	}
@@ -706,14 +703,14 @@ out:
  * might as well be added here.
  */
 static int
-sgmii_clocking_setup(struct sja1105_spi_setup *spi_setup, int port, int speed_mbps)
+sgmii_clocking_setup(struct sja1105_spi_private *priv, int port, int speed_mbps)
 {
 	logv("TODO: Configure SGMII clocking for port %d speed %dMbps.",
 	     port, speed_mbps);
 	return 0;
 }
 
-int sja1105_clocking_setup_port(struct sja1105_spi_setup *spi_setup, int port,
+int sja1105_clocking_setup_port(struct sja1105_spi_private *priv, int port,
                                 struct sja1105_xmii_params_entry *params,
                                 struct sja1105_mac_config_entry  *mac_config)
 {
@@ -730,17 +727,17 @@ int sja1105_clocking_setup_port(struct sja1105_spi_setup *spi_setup, int port,
 	default: loge("invalid speed setting"); return -1;
 	}
 	if (params->xmii_mode[port] == XMII_SPEED_MII)
-		mii_clocking_setup(spi_setup, port, params->phy_mac[port]);
+		mii_clocking_setup(priv, port, params->phy_mac[port]);
 	else if (params->xmii_mode[port] == XMII_SPEED_RMII)
-		rmii_clocking_setup(spi_setup, port, params->phy_mac[port]);
+		rmii_clocking_setup(priv, port, params->phy_mac[port]);
 	else if (params->xmii_mode[port] == XMII_SPEED_RGMII)
-		rgmii_clocking_setup(spi_setup, port, speed_mbps);
+		rgmii_clocking_setup(priv, port, speed_mbps);
 	else if (params->xmii_mode[port] == XMII_SPEED_SGMII &&
-	         IS_PQRS(spi_setup->device_id)) {
+	         IS_PQRS(priv->device_id)) {
 
-		if ((port == 4) && (IS_R(spi_setup->device_id, spi_setup->part_nr) ||
-		                    IS_S(spi_setup->device_id, spi_setup->part_nr)))
-			sgmii_clocking_setup(spi_setup, port, speed_mbps);
+		if ((port == 4) && (IS_R(priv->device_id, priv->part_nr) ||
+		                    IS_S(priv->device_id, priv->part_nr)))
+			sgmii_clocking_setup(priv, port, speed_mbps);
 		else
 			logv("Port %d is tri-stated", port);
 
@@ -754,7 +751,7 @@ out:
 	return rc;
 }
 
-int sja1105_clocking_setup(struct sja1105_spi_setup *spi_setup,
+int sja1105_clocking_setup(struct sja1105_spi_private *priv,
                            struct sja1105_xmii_params_entry *params,
                            struct sja1105_mac_config_entry  *mac_configs)
 {
@@ -762,7 +759,7 @@ int sja1105_clocking_setup(struct sja1105_spi_setup *spi_setup,
 	int i;
 
 	for (i = 0; i < 5; i++) {
-		rc = sja1105_clocking_setup_port(spi_setup, i, params, &mac_configs[i]);
+		rc = sja1105_clocking_setup_port(priv, i, params, &mac_configs[i]);
 		if (rc != 0) {
 			break;
 		}
