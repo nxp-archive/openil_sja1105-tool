@@ -35,7 +35,6 @@ struct sja1105_port {
 	u32 reset_duration;
 	u32 reset_delay;
 	int index; /* switch port index */
-	int auto_speed;
 	int running; /* 1 if port is openend */
 	struct ratelimit_state get_stats_ratelimit;
 	struct rtnl_link_stats64 stats;
@@ -98,6 +97,8 @@ struct sja1105_port* sja1105_netdev_create_port(
 void sja1105_netdev_remove_port(struct sja1105_port *port);
 
 void sja1105_netdev_adjust_link(struct net_device *net_dev);
+
+int sja1105_get_speed_cfg(unsigned int speed_mbps);
 
 /* sja1105-ptp.c */
 int  sja1105_ptp_clock_register(struct sja1105_spi_private *priv);

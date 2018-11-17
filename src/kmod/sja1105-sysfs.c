@@ -172,8 +172,7 @@ static ssize_t sja1105_sysfs_wr(struct device *dev,
 	struct spi_device *spi = to_spi_device(dev);
 	struct sja1105_spi_private *priv = spi_get_drvdata(spi);
 	struct sja1105_port *port = NULL;
-	struct list_head *pos, *q;
-	u64 speed, addr, value;
+	u64 addr, value;
 	int port_no;
 
 	mutex_lock(&priv->lock);
@@ -193,12 +192,6 @@ static ssize_t sja1105_sysfs_wr(struct device *dev,
 			goto out_error;
 		dev_info(dev, "Uploaded static configuration to device\n");
 
-		/* Update auto-speed property according to static config */
-		list_for_each_safe(pos, q, &(priv->port_list_head.list)) {
-			port = list_entry(pos, struct sja1105_port, list);
-			speed = priv->static_config.mac_config[port->index].speed;
-			port->auto_speed = (speed == 0) ? 1 : 0;
-		}
 		/* TODO: Resetting / Reinit of PHYs required ? */
 		rc = count;
 	} else if (attr == &dev_attr_port_status_clear) {

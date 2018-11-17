@@ -35,7 +35,7 @@ static int sja1105_get_speed_mbps(unsigned int speed_cfg)
 }
 
 /* Convert mac speed from mbps to sja1105 mac config table value */
-static int sja1105_get_speed_cfg(unsigned int speed_mbps)
+int sja1105_get_speed_cfg(unsigned int speed_mbps)
 {
 	int speed_cfg;
 
@@ -58,11 +58,12 @@ static int sja1105_get_speed_cfg(unsigned int speed_mbps)
 /* Set link speed in the sja1105's mac configuration for a specific port */
 static int sja1105_adjust_port_speed(struct sja1105_port *port, int speed_mbps)
 {
-	int rc;
-	int speed;
 	struct device *dev = &port->spi_dev->dev;
 	struct sja1105_spi_private *priv = spi_get_drvdata(port->spi_dev);
 	struct sja1105_mac_config_entry mac_entry;
+	int static_config_speed;
+	int speed;
+	int rc;
 
 	speed = sja1105_get_speed_cfg(speed_mbps);
 	if (speed < 0) {
@@ -77,12 +78,12 @@ static int sja1105_adjust_port_speed(struct sja1105_port *port, int speed_mbps)
 		goto err_ok;
 
 	/* Check if speed in static_config is 0 */
-	if (!port->auto_speed) {
-		int old_speed_cfg = priv->static_config.mac_config[port->index].speed;
-		int old_speed_mbps = sja1105_get_speed_mbps(old_speed_cfg);
-		rc = -EINVAL;
+	static_config_speed = priv->static_config.mac_config[port->index].speed;
+	if (static_config_speed != SJA1105_SPEED_AUTO) {
 		dev_err(dev, "%s: Speed is fixed at %iMbps, cannot set to %iMbps\n",
-		        port->net_dev->name, old_speed_mbps, speed_mbps);
+		        port->net_dev->name, sja1105_get_speed_mbps(static_config_speed),
+		        speed_mbps);
+		rc = -EINVAL;
 		goto err_out;
 	}
 
@@ -116,10 +117,7 @@ static int sja1105_adjust_port_speed(struct sja1105_port *port, int speed_mbps)
 		goto err_out;
 	}
 
-	/* Write back speed configuration to static_config */
-	priv->static_config.mac_config[port->index].speed = speed;
-
-	/* Configure the CGU (PHY link modes and speeds) */
+	/* Reconfigure the CGU (PHY link modes and speeds) */
 	rc = sja1105_clocking_setup_port(priv, port->index,
 	                                 &priv->static_config.xmii_params[0],
 	                                 &mac_entry);
