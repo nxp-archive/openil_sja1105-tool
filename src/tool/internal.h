@@ -74,6 +74,22 @@ int sysfs_write(struct sja1105_spi_setup *spi_setup, char* name,
                 char* buf, size_t len);
 
 /* From strings.c, mainly */
+
+/* Error codes returned to external userspace applications.
+ */
+#define SJA1105_ERR_OK                                                0
+#define SJA1105_ERR_USAGE                                             1
+#define SJA1105_ERR_CMDLINE_PARSE                                     2
+#define SJA1105_ERR_HW_NOT_RESPONDING                                 3
+#define SJA1105_ERR_HW_NOT_RESPONDING_STAGING_AREA_DIRTY              4
+#define SJA1105_ERR_UPLOAD_FAILED_HW_LEFT_FLOATING                    5
+#define SJA1105_ERR_UPLOAD_FAILED_HW_LEFT_FLOATING_STAGING_AREA_DIRTY 6
+#define SJA1105_ERR_STAGING_AREA_INVALID                              7
+#define SJA1105_ERR_INVALID_XML                                       8
+#define SJA1105_ERR_FILESYSTEM                                        9
+
+const char *sja1105_err_code_to_string(int rc);
+
 char *trimwhitespace(char *str);
 int   matches(const char*, const char*);
 int   get_match(const char*, const char**, int);

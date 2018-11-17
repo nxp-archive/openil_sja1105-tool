@@ -318,14 +318,11 @@ int sja1105_static_config_flush(struct sja1105_spi_setup *spi_setup,
 			goto hardware_left_floating_error;
 		}
 	}
-	return SJA1105_ERR_OK;
+	return 0;
 staging_area_invalid_error:
-	sja1105_err_remap(rc, SJA1105_ERR_STAGING_AREA_INVALID);
-	return rc;
+	return -EINVAL;
 hardware_left_floating_error:
-	sja1105_err_remap(rc, SJA1105_ERR_UPLOAD_FAILED_HW_LEFT_FLOATING);
-	return rc;
+	return -EIO;
 hardware_not_responding_error:
-	sja1105_err_remap(rc, SJA1105_ERR_HW_NOT_RESPONDING);
-	return rc;
+	return -ENODEV;
 }

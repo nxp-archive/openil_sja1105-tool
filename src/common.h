@@ -52,9 +52,6 @@
  #include <unistd.h>
 #endif /* SJA1105_KMOD_BUILD */
 
-/* These are our own error codes */
-#include <lib/include/errors.h>
-
 /* Since remapping is used internally, and many checks
  * search for a negative return code, we do that here.
  * The sign is flipped again when returning the error

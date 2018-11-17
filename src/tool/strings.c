@@ -39,6 +39,34 @@
 #include <common.h>
 #include "internal.h"
 
+const char *sja1105_err_code_to_string(int rc)
+{
+	switch (rc) {
+	case SJA1105_ERR_OK:
+		return "SJA1105_ERR_OK";
+	case SJA1105_ERR_USAGE:
+		return "SJA1105_ERR_USAGE";
+	case SJA1105_ERR_CMDLINE_PARSE:
+		return "SJA1105_ERR_CMDLINE_PARSE";
+	case SJA1105_ERR_HW_NOT_RESPONDING:
+		return "SJA1105_ERR_HW_NOT_RESPONDING";
+	case SJA1105_ERR_HW_NOT_RESPONDING_STAGING_AREA_DIRTY:
+		return "SJA1105_ERR_HW_NOT_RESPONDING_STAGING_AREA_DIRTY";
+	case SJA1105_ERR_UPLOAD_FAILED_HW_LEFT_FLOATING_STAGING_AREA_DIRTY:
+		return "SJA1105_ERR_UPLOAD_FAILED_HW_LEFT_FLOATING_STAGING_AREA_DIRTY";
+	case SJA1105_ERR_UPLOAD_FAILED_HW_LEFT_FLOATING:
+		return "SJA1105_ERR_UPLOAD_FAILED_HW_LEFT_FLOATING";
+	case SJA1105_ERR_STAGING_AREA_INVALID:
+		return "SJA1105_ERR_STAGING_AREA_INVALID";
+	case SJA1105_ERR_INVALID_XML:
+		return "SJA1105_ERR_INVALID_XML";
+	case SJA1105_ERR_FILESYSTEM:
+		return "SJA1105_ERR_FILESYSTEM";
+	default:
+		return "unknown error code";
+	}
+}
+
 int matches(const char *cmd, const char *pattern)
 {
 	if (strlen(cmd) > strlen(pattern))
