@@ -35,8 +35,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <common.h>
-#include <lib/include/spi.h>
-
+#include "internal.h"
 
 /*
  * Read data from a sysfs file.
