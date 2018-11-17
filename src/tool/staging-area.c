@@ -82,47 +82,53 @@ staging_area_hexdump(const char *staging_area_file)
 	struct stat stat;
 	unsigned int len;
 	char *buf;
-	int fd;
-	int rc;
+	int rc = 0, fd;
 
 	fd = open(staging_area_file, O_RDONLY);
 	if (fd < 0) {
 		loge("Staging area %s does not exist!", staging_area_file);
-		rc = fd;
-		goto filesystem_error1;
+		sja1105_err_remap(rc, SJA1105_ERR_FILESYSTEM);
+		goto out;
 	}
+
 	rc = fstat(fd, &stat);
 	if (rc < 0) {
 		loge("could not read file size");
-		goto filesystem_error2;
+		sja1105_err_remap(rc, SJA1105_ERR_FILESYSTEM);
+		goto out_close;
 	}
+
 	len = stat.st_size;
 	buf = (char*) malloc(len * sizeof(char));
 	if (!buf) {
 		loge("malloc failed");
-		goto filesystem_error2;
+		sja1105_err_remap(rc, SJA1105_ERR_FILESYSTEM);
+		goto out_free_close;
 	}
+
 	rc = reliable_read(fd, buf, len);
 	if (rc < 0) {
-		goto filesystem_error3;
+		sja1105_err_remap(rc, SJA1105_ERR_FILESYSTEM);
+		goto out_free_close;
 	}
+
 	printf("Static configuration:\n");
+
 	/* Returns number of bytes dumped */
 	rc = sja1105_static_config_hexdump(buf);
 	if (rc < 0) {
 		loge("error while interpreting config");
-		goto invalid_staging_area_error;
+		sja1105_err_remap(rc, SJA1105_ERR_STAGING_AREA_INVALID);
+		goto out;
 	}
+
 	logi("static config: dumped %d bytes", rc);
-filesystem_error3:
+
+out_free_close:
 	free(buf);
-filesystem_error2:
+out_close:
 	close(fd);
-filesystem_error1:
-	sja1105_err_remap(rc, SJA1105_ERR_FILESYSTEM);
-	return rc;
-invalid_staging_area_error:
-	sja1105_err_remap(rc, SJA1105_ERR_STAGING_AREA_INVALID);
+out:
 	return rc;
 }
 
