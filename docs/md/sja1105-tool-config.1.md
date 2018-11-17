@@ -38,8 +38,7 @@ _`TABLE-NAME`_ := { schedule-table | schedule-entry-points-table | vl-lookup-tab
                       schedule-entry-points-parameters-table | vl-forwarding-parameters-table |
                       l2-address-lookup-parameters-table | l2-address-lookup-parameters-table |
                       l2-forwarding-parameters-table | clock-synchronization-parameters-table |
-                      avb-parameters-table | general-parameters-table | retagging-table |
-                      xmii-mode-parameters-table }
+                      avb-parameters-table | general-parameters-table | retagging-table }
 
 DESCRIPTION
 ===========

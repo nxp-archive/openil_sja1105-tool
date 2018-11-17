@@ -101,8 +101,6 @@ DECLARE_TABLE_SHOW_FN(schedule_entry_points_params, MAX_SCHEDULE_ENTRY_POINTS_PA
 DECLARE_TABLE_SHOW_FN(l2_lookup_params, MAX_L2_LOOKUP_PARAMS_COUNT, "L2 Address Lookup Parameters Table", "%-30s\n")
 DECLARE_TABLE_SHOW_FN(l2_forwarding_params, MAX_L2_FORWARDING_PARAMS_COUNT, "L2 Forwarding Parameters Table", "%-50s\n")
 DECLARE_TABLE_SHOW_FN(general_params, MAX_GENERAL_PARAMS_COUNT, "General Parameters Table", "%-30s\n")
-DECLARE_TABLE_SHOW_FN(xmii_params, MAX_XMII_PARAMS_COUNT, "xMII Mode Parameters Table", "%-35s\n")
-DECLARE_TABLE_SHOW_FN(sgmii, MAX_SGMII_COUNT, "SGMII Table", "%-35s\n")
 DECLARE_TABLE_SHOW_FN(vl_lookup, MAX_VL_LOOKUP_COUNT, "Virtual Link Address Lookup Table:", "%-35s\n")
 DECLARE_TABLE_SHOW_FN(vl_policing, MAX_VL_POLICING_COUNT, "Virtual Link Policing Table:", "%-35s\n")
 DECLARE_TABLE_SHOW_FN(vl_forwarding, MAX_VL_FORWARDING_COUNT, "Virtual Link Forwarding Table", "%-35s\n")
@@ -149,8 +147,6 @@ sja1105_staging_area_show(struct sja1105_staging_area *staging_area,
 		"avb-parameters-table",
 		"general-parameters-table",
 		"retagging-table",
-		"xmii-mode-parameters-table",
-		"sgmii-table",
 	};
 	int (*next_config_table_show[])(struct sja1105_static_config *, int) = {
 		schedule_table_show,
@@ -172,8 +168,6 @@ sja1105_staging_area_show(struct sja1105_staging_area *staging_area,
 		avb_params_table_show,
 		general_params_table_show,
 		retagging_table_show,
-		xmii_params_table_show,
-		sgmii_table_show,
 	};
 	struct sja1105_static_config *static_config;
 	char *index_ptr;

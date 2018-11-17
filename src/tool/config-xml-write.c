@@ -99,8 +99,6 @@ static_config_write(xmlTextWriterPtr writer,
 		"avb-parameters-table",
 		"general-parameters-table",
 		"retagging-table",
-		"xmii-mode-parameters-table",
-		"sgmii-table",
 	};
 	int (*next_write_config_table[])(xmlTextWriterPtr,
 	                                 struct sja1105_static_config *) = {
@@ -123,8 +121,6 @@ static_config_write(xmlTextWriterPtr writer,
 		avb_parameters_table_write,
 		general_parameters_table_write,
 		retagging_table_write,
-		xmii_mode_parameters_table_write,
-		sgmii_table_write,
 	};
 	int rc = 0;
 	unsigned int i;

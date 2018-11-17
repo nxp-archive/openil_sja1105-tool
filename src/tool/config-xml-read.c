@@ -137,8 +137,6 @@ parse_config_table(xmlNode *node, struct sja1105_static_config *config)
 		"avb-parameters-table",
 		"general-parameters-table",
 		"retagging-table",
-		"xmii-mode-parameters-table",
-		"sgmii-table",
 	};
 	int (*next_parse_config_table[])(xmlNode *, struct
 	                                 sja1105_static_config *) = {
@@ -161,13 +159,14 @@ parse_config_table(xmlNode *node, struct sja1105_static_config *config)
 		avb_parameters_table_parse,
 		general_parameters_table_parse,
 		retagging_table_parse,
-		xmii_mode_parameters_table_parse,
-		sgmii_table_parse,
 	};
 	int rc;
 	table_name = (char*) node->name;
 	rc = get_match(table_name, options, ARRAY_SIZE(options));
 	if (rc < 0) {
+		/* FIXME: Remove after migration period is over */
+		loge("ignoring XML entry %s", table_name);
+		rc = 0;
 		goto out;
 	}
 	rc = next_parse_config_table[rc](node, config);

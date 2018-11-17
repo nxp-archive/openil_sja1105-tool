@@ -61,8 +61,6 @@ int avb_parameters_table_parse(xmlNode*, struct sja1105_static_config*);
 int clock_synchronization_parameters_table_parse(xmlNode*, struct sja1105_static_config*);
 int general_parameters_table_parse(xmlNode*, struct sja1105_static_config*);
 int retagging_table_parse(xmlNode*, struct sja1105_static_config*);
-int xmii_mode_parameters_table_parse(xmlNode*, struct sja1105_static_config*);
-int sgmii_table_parse(xmlNode*, struct sja1105_static_config*);
 int xml_read_field(void*, char*, xmlNode*);
 int xml_read_array(void*, int, char*, xmlNode*);
 

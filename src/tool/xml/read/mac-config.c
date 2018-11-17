@@ -43,7 +43,6 @@ static int entry_get(xmlNode *node, struct sja1105_mac_config_entry *entry)
 		goto out;
 	}
 	rc  = xml_read_field(&entry->ifg, "ifg", node);
-	rc |= xml_read_field(&entry->speed, "speed", node);
 	rc |= xml_read_field(&entry->tp_delin, "tp_delin", node);
 	rc |= xml_read_field(&entry->tp_delout, "tp_delout", node);
 	rc |= xml_read_field(&entry->maxage, "maxage", node);

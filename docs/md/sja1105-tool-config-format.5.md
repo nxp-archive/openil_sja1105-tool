@@ -82,7 +82,6 @@ well:
 * number of entries in l2-forwarding-table must be 13
 * number of entries in l2-forwarding-parameters-table must be 1
 * number of entries in general-parameters-table must be 1
-* number of entries in xmii-mode-parameters-table must be 1
 * sum of all l2-forwarding-parameters-table.part_spc array elements plus
   sum of all vl-forwarding-parameters-table.partspc array elements
   should not be larger than 929 or 910, if retagging is used.
@@ -115,7 +114,6 @@ Possible table names:
 * "avb-parameters-table"
 * "general-parameters-table"
 * "retagging-table"
-* "xmii-mode-parameters-table"
 
 SCHEDULE TABLE
 --------------
@@ -278,7 +276,6 @@ following children:
 * "base", bits 214-206, ..., 81-73
 * "enabled", bits 205-205, ..., 72-72
 * "ifg", bits 71-67
-* "speed", bits 66-65
 * "tp_delin", bits 64-49
 * "tp_delout", bits 48-33
 * "maxage", bits 32-25
@@ -293,6 +290,10 @@ following children:
 * "dyn_learn", bits 3-3
 * "egress", bits 2-2
 * "ingress", bits 1-1
+
+Note that the "speed" field is hidden and not configurable from the
+tool, since the kernel module determines it automatically from the DTS
+bindings.
 
 SCHEDULE PARAMETERS TABLE
 -------------------------
@@ -393,12 +394,9 @@ Differences from UM10944.pdf:
 XMII MODE PARAMETERS TABLE
 --------------------------
 
-Table name "xmii-mode-parameters-table" refers to "Chapter 4.2.20 xMII
-Mode Parameters" in UM10944.pdf. It contains 1 entry with the following
-children:
-
-* "phy_mac", bits 31, 28, 25, 22, 19
-* "xmii_mode", bits 30-29, 27-26, 24-23, 21-20, 18-17
+This table is deliberately hidden from the user and not configurable
+from the tool, since the kernel module determines MII parameters
+automatically from the DTS bindings.
 
 EXAMPLES
 ========

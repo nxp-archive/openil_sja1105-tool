@@ -45,7 +45,6 @@ mac_configuration_table_write(xmlTextWriterPtr writer,
 		rc |= xml_write_array(writer, "base", config->mac_config[i].base, 8);
 		rc |= xml_write_array(writer, "enabled", config->mac_config[i].enabled, 8);
 		rc |= xml_write_field(writer, "ifg", config->mac_config[i].ifg);
-		rc |= xml_write_field(writer, "speed", config->mac_config[i].speed);
 		rc |= xml_write_field(writer, "tp_delin", config->mac_config[i].tp_delin);
 		rc |= xml_write_field(writer, "tp_delout", config->mac_config[i].tp_delout);
 		rc |= xml_write_field(writer, "maxage", config->mac_config[i].maxage);
