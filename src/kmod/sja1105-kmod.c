@@ -130,7 +130,7 @@ static int sja1105_connect_phy(struct sja1105_port *port,
 {
 	struct device *dev = &port->spi_dev->dev;
 	struct net_device *net_dev = port->net_dev;
-
+	struct device_node *phy_node;
 
 	/* Configure reset pin and bring up PHY */
 	port->reset_gpio =
@@ -162,8 +162,8 @@ static int sja1105_connect_phy(struct sja1105_port *port,
 		                      port->reset_delay);
 	}
 
-	port->phy_node = of_parse_phandle(port->node, "phy-handle", 0);
-	if (IS_ERR_OR_NULL(port->phy_node)) {
+	phy_node = of_parse_phandle(port->node, "phy-handle", 0);
+	if (IS_ERR_OR_NULL(phy_node)) {
 		if (!of_phy_is_fixed_link(port->node)) {
 			dev_err(dev, "%s: phy-handle or fixed-link properties missing!\n",
 			        port_name);
@@ -177,20 +177,22 @@ static int sja1105_connect_phy(struct sja1105_port *port,
 			        port_name);
 			goto err_out;
 		}
-	} else {
-		port->phy_dev = of_phy_connect(net_dev, port->phy_node,
-		                               sja1105_netdev_adjust_link,
-		                               0 /* flags */, port->phy_mode);
-		port->net_dev->phydev = port->phy_dev;
-		/* Regardless of error status, decrement refcount now
-		 * (of_parse_phandle)
+		/* In the case of a fixed PHY, the DT node associated
+		 * to the PHY is the Ethernet MAC DT node.
 		 */
-		of_node_put(port->phy_node);
-		if (IS_ERR_OR_NULL(port->phy_dev)) {
-			dev_err(dev, "%s: Could not connect to PHY\n",
-			        port_name);
-			goto err_out;
-		}
+		phy_node = of_node_get(port->node);
+	}
+	port->phy_dev = of_phy_connect(net_dev, phy_node,
+	                               sja1105_netdev_adjust_link,
+	                               0 /* flags */, port->phy_mode);
+	port->net_dev->phydev = port->phy_dev;
+	/* Regardless of error status, decrement refcount now
+	 * (of_parse_phandle)
+	 */
+	of_node_put(phy_node);
+	if (IS_ERR_OR_NULL(port->phy_dev)) {
+		dev_err(dev, "%s: Could not connect to PHY\n", port_name);
+		goto err_out;
 	}
 	return 0;
 
@@ -274,7 +276,7 @@ static int sja1105_parse_dt(struct sja1105_spi_private *priv)
 			sja1105_netdev_remove_port(port);
 			goto err_out;
 		}
-		if (IS_ERR_OR_NULL(port->phy_node))
+		if (of_phy_is_fixed_link(port->node))
 			dev_dbg(dev, "Probed %s as fixed link\n", port_name);
 		else
 			dev_dbg(dev, "Probed %s: %s\n",
