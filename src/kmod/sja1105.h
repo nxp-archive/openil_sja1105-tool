@@ -24,6 +24,7 @@ enum sja1105_ptp_clk_add_mode {
 
 struct sja1105_port {
 	struct device_node *node;
+	struct device_node *phy_node; /* For delayed phy_connect during probe */
 	struct phy_device  *phy_dev;
 	struct net_device  *net_dev;
 	struct spi_device  *spi_dev;

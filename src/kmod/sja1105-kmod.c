@@ -124,87 +124,10 @@ static void sja1105_cleanup(struct sja1105_spi_private *priv)
 	kfree(priv);
 }
 
-
-static int sja1105_connect_phy(struct sja1105_port *port,
-                               const char *port_name)
-{
-	struct device *dev = &port->spi_dev->dev;
-	struct net_device *net_dev = port->net_dev;
-	struct device_node *phy_node;
-
-	/* Configure reset pin and bring up PHY */
-	port->reset_gpio =
-#if KERNEL_VERSION(4, 10, 0) <= LINUX_VERSION_CODE
-		devm_fwnode_get_gpiod_from_child(dev, "phy-reset",
-		                                &port->node->fwnode,
-		                                GPIOD_OUT_HIGH,
-		                                port->node->name);
-#elif KERNEL_VERSION(4, 9, 0) <= LINUX_VERSION_CODE
-		devm_get_gpiod_from_child(dev, "phy-reset",
-		                          &port->node->fwnode);
-#else
-		/* TODO there are kernel versions where we are still
-		 * incompatible with GPIOD API */
-		devm_get_gpiod_from_child(dev, "phy-reset", NULL,
-		                          &port->node->fwnode);
-#endif
-	if (IS_ERR(port->reset_gpio)) {
-		dev_dbg(dev, "%s: reset-gpios (PHY reset pin) not defined, ignoring...\n",
-		        port_name);
-	} else {
-		port->reset_duration = 1;  /* preset with default value */
-		port->reset_delay = 10;    /* preset with default value */
-		of_property_read_u32(port->node, "phy-reset-duration",
-		                     &port->reset_duration);
-		of_property_read_u32(port->node, "phy-reset-delay",
-		                     &port->reset_delay);
-		sja1105_hw_reset_chip(port->reset_gpio, port->reset_duration,
-		                      port->reset_delay);
-	}
-
-	phy_node = of_parse_phandle(port->node, "phy-handle", 0);
-	if (IS_ERR_OR_NULL(phy_node)) {
-		if (!of_phy_is_fixed_link(port->node)) {
-			dev_err(dev, "%s: phy-handle or fixed-link properties missing!\n",
-			        port_name);
-			goto err_out;
-		}
-		/* phy-handle is missing, but fixed-link isn't.
-		 * So it's a fixed link.
-		 */
-		if (of_phy_register_fixed_link(port->node) != 0) {
-			dev_err(dev, "Failed to register %s as fixed link!\n",
-			        port_name);
-			goto err_out;
-		}
-		/* In the case of a fixed PHY, the DT node associated
-		 * to the PHY is the Ethernet MAC DT node.
-		 */
-		phy_node = of_node_get(port->node);
-	}
-	port->phy_dev = of_phy_connect(net_dev, phy_node,
-	                               sja1105_netdev_adjust_link,
-	                               0 /* flags */, port->phy_mode);
-	port->net_dev->phydev = port->phy_dev;
-	/* Regardless of error status, decrement refcount now
-	 * (of_parse_phandle)
-	 */
-	of_node_put(phy_node);
-	if (IS_ERR_OR_NULL(port->phy_dev)) {
-		dev_err(dev, "%s: Could not connect to PHY\n", port_name);
-		goto err_out;
-	}
-	return 0;
-
-err_out:
-	return -ENODEV;
-}
-
 /*
  * This function also performs the firmware request to userspace once
  * it parses the path to the staging area from the DTS. The static
- * configuration is then loaded into the driver private data struct
- * and uploaded to the chip.
+ * configuration is then loaded into the driver private data struct.
  */
 static int sja1105_parse_dt(struct sja1105_spi_private *priv)
 {
@@ -215,7 +138,6 @@ static int sja1105_parse_dt(struct sja1105_spi_private *priv)
 	struct sja1105_port *port;
 	phy_interface_t     phy_mode;
 	u32 port_index;
-	u64 speed;
 	int rc;
 
 	rc = of_property_read_string(switch_node, "sja1105,staging-area",
@@ -229,12 +151,6 @@ static int sja1105_parse_dt(struct sja1105_spi_private *priv)
 	rc = sja1105_load_firmware(priv);
 	if (rc)
 		goto err_out;
-
-	/* Upload static configuration */
-	rc = sja1105_static_config_flush(priv);
-	if (rc < 0)
-		goto err_out;
-	dev_dbg(dev, "Uploaded static configuration to device\n");
 
 	for_each_child_of_node(switch_node, child) {
 		rc = of_property_read_string(child, "sja1105,port-label",
@@ -265,22 +181,59 @@ static int sja1105_parse_dt(struct sja1105_spi_private *priv)
 			goto err_out;
 
 		port->index = port_index;
-		speed = priv->static_config.mac_config[port->index].speed;
-		port->auto_speed = (speed == 0) ? 1 : 0;
 		port->node = child;
 		port->phy_mode = phy_mode;
 
-		/* Connect PHY */
-		rc = sja1105_connect_phy(port, port_name);
-		if (rc) {
-			sja1105_netdev_remove_port(port);
-			goto err_out;
+		/* Configure reset pin and bring up PHY */
+		port->reset_gpio =
+#if KERNEL_VERSION(4, 10, 0) <= LINUX_VERSION_CODE
+			devm_fwnode_get_gpiod_from_child(dev, "phy-reset",
+			                                &port->node->fwnode,
+			                                GPIOD_OUT_HIGH,
+			                                port->node->name);
+#elif KERNEL_VERSION(4, 9, 0) <= LINUX_VERSION_CODE
+			devm_get_gpiod_from_child(dev, "phy-reset",
+			                          &port->node->fwnode);
+#else
+			/* TODO there are kernel versions where we are still
+			 * incompatible with GPIOD API */
+			devm_get_gpiod_from_child(dev, "phy-reset", NULL,
+			                          &port->node->fwnode);
+#endif
+		if (IS_ERR(port->reset_gpio)) {
+			dev_dbg(dev, "%s: reset-gpios (PHY reset pin) not defined, ignoring...\n",
+			        port_name);
+		} else {
+			port->reset_duration = 1; /* preset with default value */
+			port->reset_delay = 10;   /* preset with default value */
+			of_property_read_u32(port->node, "phy-reset-duration",
+			                     &port->reset_duration);
+			of_property_read_u32(port->node, "phy-reset-delay",
+			                     &port->reset_delay);
+			sja1105_hw_reset_chip(port->reset_gpio, port->reset_duration,
+			                      port->reset_delay);
 		}
-		if (of_phy_is_fixed_link(port->node))
-			dev_dbg(dev, "Probed %s as fixed link\n", port_name);
-		else
-			dev_dbg(dev, "Probed %s: %s\n",
-			        port_name, port->phy_dev->drv->name);
+		port->phy_node = of_parse_phandle(port->node, "phy-handle", 0);
+		if (IS_ERR_OR_NULL(port->phy_node)) {
+			if (!of_phy_is_fixed_link(port->node)) {
+				dev_err(dev, "%s: phy-handle or fixed-link properties missing!\n",
+				        port_name);
+				goto err_out;
+			}
+			/* phy-handle is missing, but fixed-link isn't.
+			 * So it's a fixed link.
+			 */
+			if (of_phy_register_fixed_link(port->node) != 0) {
+				dev_err(dev, "Failed to register %s as fixed link!\n",
+				        port_name);
+				goto err_out;
+			}
+			/* In the case of a fixed PHY, the DT node associated
+			 * to the PHY is the Ethernet MAC DT node.
+			 */
+			port->phy_node = of_node_get(port->node);
+		}
+
 		list_add_tail(&(port->list), &(priv->port_list_head.list));
 	}
 
@@ -288,6 +241,45 @@ static int sja1105_parse_dt(struct sja1105_spi_private *priv)
 
 err_out:
 	return -ENODEV;
+}
+
+static int sja1105_connect_phy(struct sja1105_spi_private *priv)
+{
+	struct device *dev = &priv->spi_dev->dev;
+	struct net_device *net_dev;
+	struct sja1105_port *port;
+	struct list_head *pos, *q;
+	int rc = 0;
+
+	list_for_each_safe(pos, q, &(priv->port_list_head.list)) {
+		port = list_entry(pos, struct sja1105_port, list);
+		net_dev = port->net_dev;
+
+		port->phy_dev = of_phy_connect(net_dev, port->phy_node,
+		                               sja1105_netdev_adjust_link,
+		                               0 /* flags */, port->phy_mode);
+		net_dev->phydev = port->phy_dev;
+		/* Regardless of error status, decrement refcount now
+		 * (of_parse_phandle)
+		 */
+		of_node_put(port->phy_node);
+		/* Never use phy_node again after of_phy_connect complete */
+		port->phy_node = NULL;
+		if (IS_ERR_OR_NULL(port->phy_dev)) {
+			dev_err(dev, "%s: Could not connect to PHY\n",
+			        net_dev->name);
+			sja1105_netdev_remove_port(port);
+			rc = -ENODEV;
+			goto out;
+		}
+		if (of_phy_is_fixed_link(port->node))
+			dev_dbg(dev, "Probed %s as fixed link\n", net_dev->name);
+		else
+			dev_dbg(dev, "Probed %s: %s\n", net_dev->name,
+			        port->phy_dev->drv->name);
+	}
+out:
+	return rc;
 }
 
 static int sja1105_probe(struct spi_device *spi)
@@ -343,9 +335,20 @@ static int sja1105_probe(struct spi_device *spi)
 		goto err_out;
 	}
 
-	/* Parse device tree, upload stacic configuration and bring up PHYs */
+	/* Parse device tree */
 	rc = sja1105_parse_dt(priv);
 	if (rc < 0)
+		goto err_out;
+
+	/* Upload static configuration */
+	rc = sja1105_static_config_flush(priv);
+	if (rc < 0)
+		goto err_out;
+	dev_dbg(dev, "Uploaded static configuration to device\n");
+
+	/* Connect and bring up PHYs */
+	rc = sja1105_connect_phy(priv);
+	if (rc)
 		goto err_out;
 
 	rc = sja1105_ptp_clock_register(priv);
