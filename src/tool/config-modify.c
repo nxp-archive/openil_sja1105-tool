@@ -34,7 +34,6 @@
 #include <stdio.h>
 #include "internal.h"
 /* From libsja1105 */
-#include <lib/include/staging-area.h>
 #include <common.h>
 
 static void print_usage(const char *prog)

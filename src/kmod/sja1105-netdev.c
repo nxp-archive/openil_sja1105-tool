@@ -9,8 +9,6 @@
 #include <linux/etherdevice.h>
 #include "sja1105.h"
 #include <lib/include/spi.h>
-#include <lib/include/status.h>
-#include <lib/include/dynamic-config.h>
 
 /* Convert mac speed from sja1105 mac config table value to mbps */
 static int sja1105_get_speed_mbps(unsigned int speed_cfg)

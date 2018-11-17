@@ -6,7 +6,6 @@
 #include <linux/device.h>
 #include "sja1105.h"
 #include "common.h"
-#include <lib/include/dynamic-config.h>
 
 /*
  * Parse the string to find a specific port.

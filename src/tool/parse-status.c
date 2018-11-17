@@ -35,7 +35,6 @@
 #include <string.h>
 #include <limits.h>
 #include "internal.h"
-#include <lib/include/status.h>
 
 static void print_usage()
 {

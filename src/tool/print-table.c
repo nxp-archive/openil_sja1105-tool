@@ -32,203 +32,32 @@
 #include <lib/helpers.h>
 #include <tool/internal.h>
 
-
-void sja1105_xmii_params_entry_show(struct sja1105_xmii_params_entry *entry)
+static void gtable_hexdump(void *table, int len)
 {
-	char print_buf[MAX_LINE_SIZE];
-	char *fmt = "%s\n";
+	uint8_t *p = (uint8_t*) table;
+	int i;
 
-	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_xmii_params_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
-	puts(print_buf);
+	for (i = 0; i < len; i++) {
+		if (i && (i % 4 == 0)) {
+			printf(" ");
+		}
+		if (i % 8 == 0) {
+			if (i) {
+				printf("\n");
+			}
+			printf("(%.4X): ", i);
+		}
+		printf("%.2X ", p[i]);
+	}
+	printf("\n");
 }
 
-void sja1105_vlan_lookup_entry_show(struct sja1105_vlan_lookup_entry *entry)
-{
-	char print_buf[MAX_LINE_SIZE];
-	char *fmt = "%s\n";
-
-	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_vlan_lookup_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
-	puts(print_buf);
-}
-
-void sja1105_vl_policing_entry_show(struct sja1105_vl_policing_entry *entry)
-{
-	char print_buf[MAX_LINE_SIZE];
-	char *fmt = "%s\n";
-
-	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_vl_policing_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
-	puts(print_buf);
-}
-
-void sja1105_vl_lookup_entry_show(struct sja1105_vl_lookup_entry *entry)
-{
-	char print_buf[MAX_LINE_SIZE];
-	char *fmt = "%s\n";
-
-	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_vl_lookup_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
-	puts(print_buf);
-}
-
-void sja1105_vl_forwarding_entry_show(struct sja1105_vl_forwarding_entry *entry)
-{
-	char print_buf[MAX_LINE_SIZE];
-	char *fmt = "%s\n";
-
-	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_vl_forwarding_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
-	puts(print_buf);
-}
-
-void sja1105_vl_forwarding_params_entry_show(struct sja1105_vl_forwarding_params_entry *entry)
-{
-	char print_buf[MAX_LINE_SIZE];
-	char *fmt = "%s\n";
-
-	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_vl_forwarding_params_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
-	puts(print_buf);
-}
-
-void sja1105_table_header_show(struct sja1105_table_header *hdr)
+static void sja1105_table_header_show(struct sja1105_table_header *hdr)
 {
 	char print_buf[MAX_LINE_SIZE];
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
 	sja1105_table_header_fmt_show(print_buf, MAX_LINE_SIZE, hdr);
-	puts(print_buf);
-}
-
-void sja1105_sgmii_entry_show(struct sja1105_sgmii_entry *entry)
-{
-	char print_buf[MAX_LINE_SIZE];
-	char *fmt = "%s\n";
-
-	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_sgmii_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
-	puts(print_buf);
-}
-
-void sja1105_schedule_entry_show(struct sja1105_schedule_entry *entry)
-{
-	char print_buf[MAX_LINE_SIZE];
-	char *fmt = "%s\n";
-
-	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_schedule_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
-	puts(print_buf);
-}
-
-void sja1105_schedule_params_entry_show(struct sja1105_schedule_params_entry *entry)
-{
-	char print_buf[MAX_LINE_SIZE];
-	char *fmt = "%s\n";
-
-	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_schedule_params_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
-	puts(print_buf);
-}
-
-void sja1105_schedule_entry_points_entry_show(struct sja1105_schedule_entry_points_entry *entry)
-{
-	char print_buf[MAX_LINE_SIZE];
-	char *fmt = "%s\n";
-
-	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_schedule_entry_points_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
-	puts(print_buf);
-}
-
-void sja1105_schedule_entry_points_params_entry_show(struct sja1105_schedule_entry_points_params_entry *entry)
-{
-	char print_buf[MAX_LINE_SIZE];
-	char *fmt = "%s\n";
-
-	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_schedule_entry_points_params_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
-	puts(print_buf);
-}
-
-void sja1105_mac_config_entry_show(struct sja1105_mac_config_entry *entry)
-{
-	char print_buf[MAX_LINE_SIZE];
-	char *fmt = "%s\n";
-
-	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_mac_config_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
-	puts(print_buf);
-}
-
-void sja1105_l2_policing_entry_show(struct sja1105_l2_policing_entry *entry)
-{
-	char print_buf[MAX_LINE_SIZE];
-	char *fmt = "%s\n";
-
-	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_l2_policing_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
-	puts(print_buf);
-}
-
-void sja1105_l2_lookup_entry_show(struct sja1105_l2_lookup_entry *entry)
-{
-	char print_buf[MAX_LINE_SIZE];
-	char *fmt = "%s\n";
-
-	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_l2_lookup_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
-	puts(print_buf);
-}
-
-void sja1105_l2_lookup_params_entry_show(struct sja1105_l2_lookup_params_entry *entry)
-{
-	char print_buf[MAX_LINE_SIZE];
-	char *fmt = "%s\n";
-
-	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_l2_lookup_params_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
-	puts(print_buf);
-}
-
-void sja1105_l2_forwarding_entry_show(struct sja1105_l2_forwarding_entry *entry)
-{
-	char print_buf[MAX_LINE_SIZE];
-	char *fmt = "%s\n";
-
-	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_l2_forwarding_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
-	puts(print_buf);
-}
-
-void sja1105_l2_forwarding_params_entry_show(struct sja1105_l2_forwarding_params_entry *entry)
-{
-	char print_buf[MAX_LINE_SIZE];
-	char *fmt = "%s\n";
-
-	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_l2_forwarding_params_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
-	puts(print_buf);
-}
-
-void sja1105_general_params_entry_show(struct sja1105_general_params_entry *entry)
-{
-	char print_buf[MAX_LINE_SIZE];
-	char *fmt = "%s\n";
-
-	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_general_params_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
-	puts(print_buf);
-}
-
-void sja1105_avb_params_entry_show(struct sja1105_avb_params_entry *entry)
-{
-	char print_buf[MAX_LINE_SIZE];
-	char *fmt = "%s\n";
-
-	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_avb_params_entry_fmt_show(print_buf, MAX_LINE_SIZE, fmt, entry);
 	puts(print_buf);
 }
 
@@ -286,47 +115,4 @@ int sja1105_static_config_hexdump(void *buf)
 	return ((ptrdiff_t) (p - (char*) buf)) * sizeof(*buf);
 error:
 	return -1;
-}
-
-void gtable_hexdump(void *table, int len)
-{
-	uint8_t *p = (uint8_t*) table;
-	int i;
-
-	for (i = 0; i < len; i++) {
-		if (i && (i % 4 == 0)) {
-			printf(" ");
-		}
-		if (i % 8 == 0) {
-			if (i) {
-				printf("\n");
-			}
-			printf("(%.4X): ", i);
-		}
-		printf("%.2X ", p[i]);
-	}
-	printf("\n");
-}
-
-void gtable_bitdump(void *table, int len)
-{
-	uint8_t *p = (uint8_t*) table;
-	int i, bit;
-
-	for (i = 0; i < len; i++) {
-		if (i && (i % 4 == 0)) {
-			printf(" ");
-		}
-		if (i % 8 == 0) {
-			if (i) {
-				printf("\n");
-			}
-			printf("(%.4X): ", i);
-		}
-		for (bit = 7; bit >= 0; bit--) {
-			printf("%d", (p[i] & (1 << bit)) >> bit);
-		}
-		printf(" ");
-	}
-	printf("\n");
 }

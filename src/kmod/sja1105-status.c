@@ -4,7 +4,6 @@
  * Copyright (c) 2016-2018, NXP Semiconductors
  */
 #include <lib/include/static-config.h>
-#include <lib/include/status.h>
 #include <lib/include/gtable.h>
 #include <lib/include/spi.h>
 #include <common.h>

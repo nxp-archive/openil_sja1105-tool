@@ -4,12 +4,36 @@
  * Copyright (c) 2016-2018, NXP Semiconductors
  */
 #include <lib/include/gtable.h>
-#include <lib/include/dynamic-config.h>
 #include <lib/include/static-config.h>
 #include <lib/include/gtable.h>
-#include <lib/include/spi.h>
 #include <common.h>
 #include "sja1105.h"
+
+#define SJA1105_MGMT_ROUTE_COUNT 4
+
+struct sja1105_mgmt_entry {
+	uint64_t ts_regid;
+	uint64_t egr_ts;
+	uint64_t macaddr;
+	uint64_t destports;
+	uint64_t enfport;
+	uint64_t index;
+};
+
+union sja1105_dyn_l2_lookup_entry {
+	struct sja1105_l2_lookup_entry l2;
+	struct sja1105_mgmt_entry mgmt;
+};
+
+struct sja1105_dyn_l2_lookup_cmd {
+	uint64_t valid;
+	uint64_t rdwrset;
+	uint64_t errors;
+	uint64_t lockeds;
+	uint64_t valident;
+	uint64_t mgmtroute;
+	union sja1105_dyn_l2_lookup_entry entry;
+};
 
 int sja1105_inhibit_tx(struct sja1105_spi_setup *spi_setup,
                        struct sja1105_egress_port_mask *port_mask)

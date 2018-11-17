@@ -35,7 +35,6 @@
 #include "internal.h"
 /* From libsja1105 */
 #include <lib/include/static-config.h>
-#include <lib/include/spi.h>
 #include <common.h>
 
 const char *default_staging_area = "/lib/firmware/sja1105.bin";

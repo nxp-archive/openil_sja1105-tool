@@ -9,6 +9,25 @@
 #include <common.h>
 #include "sja1105.h"
 
+/* RGU */
+#define RGU_ADDR    0x100440
+
+/* Back-ported structure from UM11040 Table 112.
+ * Reset control register (addr. 100440h)
+ * In the SJA1105 E/T, only warm_rst and cold_rst are
+ * supported (exposed in UM10944 as rst_ctrl), but the bit
+ * offsets of warm_rst and cold_rst are actually reversed.
+ */
+struct sja1105_reset_cmd {
+	uint64_t switch_rst;
+	uint64_t cfg_rst;
+	uint64_t car_rst;
+	uint64_t otp_rst;
+	uint64_t warm_rst;
+	uint64_t cold_rst;
+	uint64_t por_rst;
+};
+
 static void
 sja1105_reset_cmd_access(void *buf, struct sja1105_reset_cmd *reset,
                          int write, uint64_t device_id)

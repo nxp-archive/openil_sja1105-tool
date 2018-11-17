@@ -31,7 +31,6 @@
 #ifndef _CONFIG_XML_WRITE_EXTERNAL
 #define _CONFIG_XML_WRITE_EXTERNAL
 
-#include <lib/include/staging-area.h>
 #include "internal.h"
 
 int sja1105_staging_area_to_xml(char*, struct sja1105_staging_area*);

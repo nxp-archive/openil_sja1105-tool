@@ -31,7 +31,6 @@
 #ifndef _CONFIG_XML_READ_EXTERNAL_H
 #define _CONFIG_XML_READ_EXTERNAL_H
 
-#include <lib/include/staging-area.h>
 #include "internal.h"
 
 int sja1105_staging_area_from_xml(const char*, struct sja1105_staging_area*);

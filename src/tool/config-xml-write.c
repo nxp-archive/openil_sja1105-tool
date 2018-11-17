@@ -30,7 +30,6 @@
  *****************************************************************************/
 #include <string.h>
 #include "xml/write/external.h"
-#include <lib/include/staging-area.h>
 #include <common.h>
 #include "internal.h"
 

@@ -33,9 +33,7 @@
 
 #include <common.h>
 #include <lib/include/staging-area.h>
-#include <lib/include/spi.h>
 #include <lib/include/static-config.h>
-#include <lib/include/dynamic-config.h>
 #include <lib/include/gtable.h>
 
 struct general_config {
@@ -44,6 +42,15 @@ struct general_config {
 	int   entries_per_line;
 	int   verbose;
 	int   debug;
+};
+
+struct sja1105_spi_setup {
+	uint64_t    device_id;
+	uint64_t    part_nr; /* Needed for P/R distinction (same switch core) */
+	const char *device;
+	int         dry_run;
+	const char *staging_area;
+	int         flush;
 };
 
 /* defined in src/tool/sja1105-config.c */
@@ -127,17 +134,7 @@ TOOL_DEFINE_HEADERS_FOR_CONFIG_TABLE(mac_config);
 TOOL_DEFINE_HEADERS_FOR_CONFIG_TABLE(l2_lookup);
 TOOL_DEFINE_HEADERS_FOR_CONFIG_TABLE(l2_lookup_params);
 
-void sja1105_table_header_show(struct sja1105_table_header *hdr);
-void sja1105_mgmt_entry_show(struct sja1105_mgmt_entry *entry);
-void sja1105_dyn_l2_lookup_cmd_show(struct sja1105_dyn_l2_lookup_cmd *cmd);
-void sja1105_cgu_pll_control_show(struct sja1105_cgu_pll_control *pll_control,
-                                  uint64_t device_id);
-void sja1105_cgu_mii_control_show(struct sja1105_cgu_mii_control *mii_control);
-void sja1105_cgu_idiv_show(struct sja1105_cgu_idiv *idiv);
-void sja1105_cfg_pad_mii_tx_show(struct sja1105_cfg_pad_mii_tx *pad_mii_tx);
 int sja1105_static_config_hexdump(void *buf);
-void gtable_hexdump(void *table, int len);
-void gtable_bitdump(void *table, int len);
 
 #define SJA1105_NETCONF_ROOT "sja1105"
 #define SJA1105_NETCONF_NS   "http://nxp.com/ns/yang/tsn/sja1105"

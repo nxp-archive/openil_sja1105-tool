@@ -29,7 +29,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 #include "xml/read/external.h"
-#include <lib/include/staging-area.h>
 #include <common.h>
 #include <inttypes.h>
 #include "internal.h"

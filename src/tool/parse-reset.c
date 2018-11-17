@@ -29,7 +29,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 #include <stdio.h>
-#include <lib/include/reset.h>
 #include <common.h>
 #include "internal.h"
 

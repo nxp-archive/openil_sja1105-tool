@@ -10,7 +10,6 @@
 
 #include <lib/include/static-config.h>
 #include <lib/include/gtable.h>
-#include <lib/include/status.h>
 #include <lib/include/spi.h>
 
 #define SJA1105PQRS_PTPSYNCTS_ADDR  0x1F

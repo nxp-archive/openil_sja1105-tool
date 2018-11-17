@@ -32,7 +32,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <lib/include/spi.h>
 #include <lib/include/static-config.h>
 #include <lib/include/gtable.h>
 #include <common.h>

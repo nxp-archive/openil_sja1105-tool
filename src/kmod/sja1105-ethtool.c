@@ -6,7 +6,6 @@
 #include <linux/ethtool.h>
 #include <linux/etherdevice.h>
 #include <linux/net_tstamp.h>
-#include <lib/include/status.h>
 #include "sja1105.h"
 
 static void sja1105_get_drvinfo(struct net_device *net_dev,

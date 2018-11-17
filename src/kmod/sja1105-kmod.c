@@ -22,9 +22,6 @@
 #include <linux/gpio/consumer.h>
 #include "sja1105.h"
 #include <lib/include/static-config.h>
-#include <lib/include/staging-area.h>
-#include <lib/include/dynamic-config.h>
-#include <lib/include/spi.h>
 
 MODULE_AUTHOR("Vladimir Oltean <vladimir.oltean@nxp.com>");
 MODULE_AUTHOR("Georg Waibel <georg.waibel@sensor-technik.de>");

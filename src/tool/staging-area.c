@@ -39,12 +39,7 @@
 #include "internal.h"
 /* From libsja1105 */
 #include <lib/include/static-config.h>
-#include <lib/include/staging-area.h>
 #include <lib/include/gtable.h>
-#include <lib/include/spi.h>
-#include <lib/include/status.h>
-#include <lib/include/reset.h>
-#include <lib/include/clock.h>
 #include <common.h>
 
 static int reliable_write(int fd, char *buf, int len)

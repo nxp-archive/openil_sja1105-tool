@@ -451,10 +451,6 @@ struct sja1105_static_config {
 	STATIC_CONFIG_MEMBER(sgmii, MAX_SGMII_COUNT);
 };
 
-#include "clock.h"
-#include "reset.h"
-#include "status.h"
-
 #define DEFINE_HEADERS_FOR_CONFIG_TABLE(device, table)                                         \
 	void sja1105_##table##_entry_fmt_show(char*, size_t, char*, struct sja1105_##table##_entry*);  \
 	void sja1105##device##_##table##_entry_pack(void*, struct sja1105_##table##_entry*);   \
@@ -503,10 +499,9 @@ int  sja1105_static_config_check_valid(struct sja1105_static_config*);
 int  sja1105_static_config_pack(void*, struct sja1105_static_config*);
 int  sja1105_static_config_unpack(void*, ssize_t, struct sja1105_static_config*);
 
+const char *sja1105_device_id_string_get(uint64_t device_id, uint64_t part_nr);
+
 void sja1105_lib_get_build_date(char *buf);
 void sja1105_lib_get_version(char *buf);
-
-int sja1105_static_config_flush(struct sja1105_spi_setup *spi_setup,
-                                struct sja1105_static_config *config);
 
 #endif

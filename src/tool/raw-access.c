@@ -6,8 +6,6 @@
  */
 #include "internal.h"
 #include <string.h>
-#include <lib/include/status.h>
-#include <lib/include/spi.h>
 #include <inttypes.h>
 
 static void print_usage()
