@@ -89,13 +89,6 @@ struct sja1105_cgu_mii_control {
 	uint64_t pd;
 };
 
-#define XMII_MODE_MAC    0ull
-#define XMII_MODE_PHY    1ull
-#define XMII_SPEED_MII   0ull
-#define XMII_SPEED_RMII  1ull
-#define XMII_SPEED_RGMII 2ull
-#define XMII_SPEED_SGMII 3ull /* Only available for port 4 on R/S */
-
 static void sja1105_cgu_idiv_access(void *buf, struct sja1105_cgu_idiv *idiv,
                                     int write)
 {
@@ -202,7 +195,7 @@ static int sja1105_cgu_mii_tx_clk_config(struct sja1105_spi_private *priv,
 	                     mii_tx_clk_offsets_et :
 	                     mii_tx_clk_offsets_pqrs;
 
-	if (mii_mode == XMII_MODE_MAC)
+	if (mii_mode == XMII_MAC)
 		clksrc = mac_clk_sources[port];
 	else
 		clksrc = phy_clk_sources[port];
@@ -328,16 +321,15 @@ mii_clocking_setup(struct sja1105_spi_private *priv, int port, int mii_mode)
 {
 	int rc;
 
-	if (mii_mode != XMII_MODE_MAC && mii_mode != XMII_MODE_PHY) {
+	if (mii_mode != XMII_MAC && mii_mode != XMII_PHY)
 		goto error;
-	}
+
 	logv("Configuring MII-%s clocking for port %d",
-	    (mii_mode == XMII_MODE_MAC) ? "MAC" : "PHY", port);
+	    (mii_mode == XMII_MAC) ? "MAC" : "PHY", port);
 	/*   * If mii_mode is MAC, disable IDIV
 	 *   * If mii_mode is PHY, enable IDIV and configure for 1/1 divider
 	 */
-	rc = sja1105_cgu_idiv_config(priv, port,
-	                            (mii_mode == XMII_MODE_PHY), 1);
+	rc = sja1105_cgu_idiv_config(priv, port, (mii_mode == XMII_PHY), 1);
 	if (rc < 0)
 		goto error;
 
@@ -356,7 +348,7 @@ mii_clocking_setup(struct sja1105_spi_private *priv, int port, int mii_mode)
 	if (rc < 0)
 		goto error;
 
-	if (mii_mode == XMII_MODE_PHY) {
+	if (mii_mode == XMII_PHY) {
 		/* In MII mode the PHY (which is us) drives the TX_CLK pin */
 
 		/* Configure CLKSRC of EXT_TX_CLK_n
@@ -662,15 +654,15 @@ static int rmii_clocking_setup(struct sja1105_spi_private *priv, int port,
 {
 	int rc;
 
-	if (rmii_mode != XMII_MODE_MAC && rmii_mode != XMII_MODE_PHY) {
+	if (rmii_mode != XMII_MAC && rmii_mode != XMII_PHY) {
 		loge("RMII mode must either be MAC or PHY");
 		rc = -EINVAL;
 		goto out;
 	}
 	logv("Configuring RMII-%s clocking for port %d",
-	    (rmii_mode == XMII_MODE_MAC) ? "MAC" : "PHY", port);
+	    (rmii_mode == XMII_MAC) ? "MAC" : "PHY", port);
 	/* AH1601.pdf chapter 2.5.1. Sources */
-	if (rmii_mode == XMII_MODE_MAC) {
+	if (rmii_mode == XMII_MAC) {
 		/* Configure and enable PLL1 for 50Mhz output */
 		rc = sja1105_cgu_rmii_pll_config(priv);
 		if (rc < 0)
@@ -684,7 +676,7 @@ static int rmii_clocking_setup(struct sja1105_spi_private *priv, int port,
 	rc = sja1105_cgu_rmii_ref_clk_config(priv, port);
 	if (rc < 0)
 		goto out;
-	if (rmii_mode == XMII_MODE_MAC) {
+	if (rmii_mode == XMII_MAC) {
 		rc = sja1105_cgu_rmii_ext_tx_clk_config(priv, port);
 		if (rc < 0)
 			goto out;
@@ -726,13 +718,13 @@ int sja1105_clocking_setup_port(struct sja1105_spi_private *priv, int port,
 	case 3: speed_mbps = 10;   break;
 	default: loge("invalid speed setting"); return -1;
 	}
-	if (params->xmii_mode[port] == XMII_SPEED_MII)
+	if (params->xmii_mode[port] == XMII_MODE_MII)
 		mii_clocking_setup(priv, port, params->phy_mac[port]);
-	else if (params->xmii_mode[port] == XMII_SPEED_RMII)
+	else if (params->xmii_mode[port] == XMII_MODE_RMII)
 		rmii_clocking_setup(priv, port, params->phy_mac[port]);
-	else if (params->xmii_mode[port] == XMII_SPEED_RGMII)
+	else if (params->xmii_mode[port] == XMII_MODE_RGMII)
 		rgmii_clocking_setup(priv, port, speed_mbps);
-	else if (params->xmii_mode[port] == XMII_SPEED_SGMII &&
+	else if (params->xmii_mode[port] == XMII_MODE_SGMII &&
 	         IS_PQRS(priv->device_id)) {
 
 		if ((port == 4) && (IS_R(priv->device_id, priv->part_nr) ||

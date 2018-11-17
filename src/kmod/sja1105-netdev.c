@@ -15,16 +15,16 @@ static int sja1105_get_speed_mbps(unsigned int speed_cfg)
 	int speed_mbps;
 
 	switch (speed_cfg) {
-	case 3:
+	case SJA1105_SPEED_10MBPS:
 		speed_mbps = 10;
 		break;
-	case 2:
+	case SJA1105_SPEED_100MBPS:
 		speed_mbps = 100;
 		break;
-	case 1:
+	case SJA1105_SPEED_1000MBPS:
 		speed_mbps = 1000;
 		break;
-	case 0:
+	case SJA1105_SPEED_AUTO:
 		/* Dynamic speed configuration */
 		speed_mbps = 0;
 		break;
@@ -41,13 +41,13 @@ static int sja1105_get_speed_cfg(unsigned int speed_mbps)
 
 	switch (speed_mbps) {
 	case 10:
-		speed_cfg = 3;
+		speed_cfg = SJA1105_SPEED_10MBPS;
 		break;
 	case 100:
-		speed_cfg = 2;
+		speed_cfg = SJA1105_SPEED_100MBPS;
 		break;
 	case 1000:
-		speed_cfg = 1;
+		speed_cfg = SJA1105_SPEED_1000MBPS;
 		break;
 	default:
 		speed_cfg = -1;

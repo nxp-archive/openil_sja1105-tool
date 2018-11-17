@@ -146,6 +146,20 @@ int sja1105_inhibit_tx(struct sja1105_spi_private *priv,
                        struct sja1105_egress_port_mask *port_mask);
 
 /* sja1105-clocking.c */
+
+#define XMII_MAC               0ull
+#define XMII_PHY               1ull
+#define XMII_MODE_MII          0ull
+#define XMII_MODE_RMII         1ull
+#define XMII_MODE_RGMII        2ull
+#define XMII_MODE_SGMII        3ull /* Only available for port 4 on R/S */
+#define XMII_MODE_TRISTATE     3ull
+
+#define SJA1105_SPEED_10MBPS   3ull
+#define SJA1105_SPEED_100MBPS  2ull
+#define SJA1105_SPEED_1000MBPS 1ull
+#define SJA1105_SPEED_AUTO     0ull
+
 int sja1105_clocking_setup_port(struct sja1105_spi_private *priv, int port,
                                 struct sja1105_xmii_params_entry *params,
                                 struct sja1105_mac_config_entry  *mac_config);
