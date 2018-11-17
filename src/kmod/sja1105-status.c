@@ -23,17 +23,11 @@ int sja1105_device_id_get(struct sja1105_spi_setup *spi_setup,
 	unsigned int i;
 	int rc;
 
-	if (spi_setup->dry_run) {
-		/* These checks simply cannot pass (and do not even
-		 * make sense to have) if we are in dry run mode */
-		rc = 0;
-		goto out_found;
-	}
 	rc = sja1105_spi_send_int(spi_setup, SPI_READ,CORE_ADDR + 0x00,
 	                          &tmp_device_id, SIZE_SJA1105_DEVICE_ID);
 	if (rc < 0) {
 		loge("sja1105_spi_send_int failed");
-		goto out_error;
+		goto out;
 	}
 	*device_id = SJA1105_NO_DEVICE_ID;
 	for (i = 0; i < ARRAY_SIZE(compatible_device_ids); i++) {
@@ -45,7 +39,7 @@ int sja1105_device_id_get(struct sja1105_spi_setup *spi_setup,
 	if (*device_id == SJA1105_NO_DEVICE_ID) {
 		loge("Unrecognized Device ID 0x%08" PRIx64, tmp_device_id);
 		rc = -EINVAL;
-		goto out_error;
+		goto out;
 	}
 	if (IS_PQRS(*device_id)) {
 		/* 0x100BC3 relative to 0x100800 */
@@ -55,14 +49,13 @@ int sja1105_device_id_get(struct sja1105_spi_setup *spi_setup,
 		                          &tmp_part_nr, 4);
 		if (rc < 0) {
 			loge("sja1105_spi_send_int failed");
-			goto out_error;
+			goto out;
 		}
 		gtable_unpack(&tmp_part_nr, part_nr, 19, 4, 4);
 	}
 	logv("%s Device ID detected.",
 	     sja1105_device_id_string_get(*device_id, *part_nr));
-out_error:
-out_found:
+out:
 	return rc;
 }
 

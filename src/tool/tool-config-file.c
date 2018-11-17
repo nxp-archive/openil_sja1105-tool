@@ -55,7 +55,6 @@ struct fields_set {
 	int device_id;
 	int device;
 	int staging_area;
-	int dry_run;
 	int flush;
 	int verbose;
 	int debug;
@@ -77,7 +76,6 @@ config_set_defaults(struct sja1105_spi_setup *spi_setup,
 	SET_DEFAULT_VAL(spi_setup, device_id, default_device_id, logv, "0x%" PRIx64);
 	SET_DEFAULT_VAL(spi_setup, device, default_device, logi, "%s");
 	SET_DEFAULT_VAL(spi_setup, staging_area, default_staging_area, logi, "%s");
-	SET_DEFAULT_VAL(spi_setup, dry_run, 0, logi, "%d");
 	SET_DEFAULT_VAL(spi_setup, flush, 0, logi, "%d");
 	SET_DEFAULT_VAL(general_conf, verbose, 0, logi, "%d");
 	SET_DEFAULT_VAL(general_conf, debug, 0, logi, "%d");
@@ -102,17 +100,6 @@ parse_spi_setup(struct sja1105_spi_setup *spi_setup, char *key, char *value,
 		}
 		spi_setup->device_id = tmp;
 		fields_set->device_id = 1;
-	} else if (strcmp(key, "dry_run") == 0) {
-		if (strcmp(value, "false") == 0) {
-			spi_setup->dry_run = 0;
-		} else if (strcmp(value, "true") == 0) {
-			spi_setup->dry_run = 1;
-		} else {
-			loge("Invalid value \"%s\" for dry_run. "
-			     "Expected true or false.", value);
-			return -1;
-		}
-		fields_set->dry_run = 1;
 	} else if (strcmp(key, "auto_flush") == 0) {
 		if (strcmp(value, "false") == 0) {
 			spi_setup->flush = 0;

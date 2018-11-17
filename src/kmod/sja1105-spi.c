@@ -292,31 +292,27 @@ int sja1105_static_config_flush(struct sja1105_spi_setup *spi_setup,
 		goto hardware_left_floating_error;
 	}
 	/* Check that SJA1105 responded well to the config upload */
-	if (spi_setup->dry_run == 0) {
-		/* These checks simply cannot pass (and do not even
-		 * make sense to have) if we are in dry run mode */
-		rc = sja1105_general_status_get(spi_setup, &status);
-		if (rc < 0)
-			goto hardware_left_floating_error;
+	rc = sja1105_general_status_get(spi_setup, &status);
+	if (rc < 0)
+		goto hardware_left_floating_error;
 
-		if (status.ids == 1) {
-			loge("Mismatch between hardware and staging area "
-			     "device id. Wrote 0x%" PRIx64 ", wants 0x%" PRIx64,
-			     config->device_id, spi_setup->device_id);
-			goto hardware_left_floating_error;
-		}
-		if (status.crcchkl == 1) {
-			loge("local crc failed while uploading config");
-			goto hardware_left_floating_error;
-		}
-		if (status.crcchkg == 1) {
-			loge("global crc failed while uploading config");
-			goto hardware_left_floating_error;
-		}
-		if (status.configs == 0) {
-			loge("configuration is invalid");
-			goto hardware_left_floating_error;
-		}
+	if (status.ids == 1) {
+		loge("Mismatch between hardware and staging area "
+		     "device id. Wrote 0x%" PRIx64 ", wants 0x%" PRIx64,
+		     config->device_id, spi_setup->device_id);
+		goto hardware_left_floating_error;
+	}
+	if (status.crcchkl == 1) {
+		loge("local crc failed while uploading config");
+		goto hardware_left_floating_error;
+	}
+	if (status.crcchkg == 1) {
+		loge("global crc failed while uploading config");
+		goto hardware_left_floating_error;
+	}
+	if (status.configs == 0) {
+		loge("configuration is invalid");
+		goto hardware_left_floating_error;
 	}
 	return 0;
 staging_area_invalid_error:

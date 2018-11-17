@@ -45,13 +45,6 @@ device
     defaults to "_/sys/bus/spi/drivers/sja1105/spi0.1_". The same restrictions
     apply as above.
 
-dry_run
-
-:   If set to "true" then instead of sending a SPI_IOC_MESSAGE ioctl to
-    the SPI character device, commands such as "**sja1105-tool config upload**"
-    just print the SPI messages as a hexdump to stdout. No communication
-    is performed over SPI.
-
 auto_flush
 
 : - Sets the flush condition to true for some of the sja1105-tool commands
@@ -114,7 +107,6 @@ EXAMPLE
 [spi-setup]
 	staging-area = FILE
 	device       = FILE
-	dry_run      = false
 	auto_flush   = false
 
 [general]

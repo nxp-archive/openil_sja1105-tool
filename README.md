@@ -155,10 +155,3 @@ To get an XML configuration:
 sja1105-tool config save bug.xml
 ```
 
-To get an SPI dump:
-
-```bash
-# Modify /etc/sja1105/sja1105.conf:
-# dry_run = false
-sja1105-tool config upload > spi_dump.log
-```

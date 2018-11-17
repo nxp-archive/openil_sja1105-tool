@@ -112,11 +112,6 @@ upload
       after each modification brought to the staging area through the
       sja1105-tool. See sja1105-conf(5) for more details.
 
-    - If the "dry_run" option is set to true in /etc/sja1105/sja1105.conf,
-      then no write operation will actually be performed to SPI,
-      regardless of the flush condition value. Instead, a hexdump of the
-      SPI messages will be printed to stdout. Also see sja1105-conf(5).
-
 save _`XML_FILE`_
 
 :   - Read the configuration stored in the staging area and export it in a
