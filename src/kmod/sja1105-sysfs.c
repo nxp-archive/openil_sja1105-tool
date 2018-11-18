@@ -172,6 +172,7 @@ static ssize_t sja1105_sysfs_wr(struct device *dev,
 	struct spi_device *spi = to_spi_device(dev);
 	struct sja1105_spi_private *priv = spi_get_drvdata(spi);
 	struct sja1105_port *port = NULL;
+	struct list_head *pos, *q;
 	u64 addr, value;
 	int port_no;
 
@@ -192,7 +193,15 @@ static ssize_t sja1105_sysfs_wr(struct device *dev,
 			goto out_error;
 		dev_info(dev, "Uploaded static configuration to device\n");
 
-		/* TODO: Resetting / Reinit of PHYs required ? */
+		/* Reinitialize PHYs so they can pick up a MAC config change */
+		list_for_each_safe(pos, q, &(priv->port_list_head.list)) {
+			port = list_entry(pos, struct sja1105_port, list);
+			if (!port->phy_dev)
+				continue;
+			phy_stop(port->phy_dev);
+			phy_start(port->phy_dev);
+		}
+
 		rc = count;
 	} else if (attr == &dev_attr_port_status_clear) {
 		if (sysfs_streq(buf, "all")) {
