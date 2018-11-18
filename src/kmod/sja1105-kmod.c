@@ -265,7 +265,7 @@ static int sja1105_parse_dt(struct sja1105_spi_private *priv)
 			                          &port->node->fwnode);
 #endif
 		if (IS_ERR(port->reset_gpio)) {
-			dev_dbg(dev, "%s: reset-gpios (PHY reset pin) not defined, ignoring...\n",
+			dev_dbg(dev, "%s: phy-reset-gpios not defined, ignoring...\n",
 			        port_name);
 		} else {
 			port->reset_duration = 1; /* preset with default value */
