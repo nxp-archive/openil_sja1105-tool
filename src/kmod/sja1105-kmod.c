@@ -198,11 +198,6 @@ static void sja1105_cleanup(struct sja1105_spi_private *priv)
 	kfree(priv);
 }
 
-/*
- * This function also performs the firmware request to userspace once
- * it parses the path to the staging area from the DTS. The static
- * configuration is then loaded into the driver private data struct.
- */
 static int sja1105_parse_dt(struct sja1105_spi_private *priv)
 {
 	struct device       *dev = &priv->spi_dev->dev;
@@ -220,11 +215,6 @@ static int sja1105_parse_dt(struct sja1105_spi_private *priv)
 		dev_err(dev, "Staging area node not present in device tree!\n");
 		goto err_out;
 	}
-
-	/* Load firmware from user space (rootfs) and unpack it */
-	rc = sja1105_load_firmware(priv);
-	if (rc)
-		goto err_out;
 
 	for_each_child_of_node(switch_node, child) {
 		rc = of_property_read_string(child, "sja1105,port-label",
@@ -412,6 +402,11 @@ static int sja1105_probe(struct spi_device *spi)
 	/* Parse device tree */
 	rc = sja1105_parse_dt(priv);
 	if (rc < 0)
+		goto err_out;
+
+	/* Load firmware from user space (rootfs) and unpack it */
+	rc = sja1105_load_firmware(priv);
+	if (rc)
 		goto err_out;
 
 	/* Upload static configuration */
