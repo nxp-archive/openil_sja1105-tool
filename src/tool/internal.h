@@ -81,8 +81,6 @@ extern int SJA1105_VERBOSE_CONDITION;
 extern int SJA1105_DEBUG_CONDITION;
 
 int read_config_file(char*, struct sja1105_spi_setup*, struct general_config*);
-int rgu_parse_args(struct sja1105_spi_setup*, int argc, char **argv);
-int ptp_parse_args(struct sja1105_spi_setup*, int argc, char **argv);
 int config_parse_args(struct sja1105_spi_setup*, int argc, char **argv);
 int status_parse_args(struct sja1105_spi_setup*, int argc, char **argv);
 int reg_parse_args(struct sja1105_spi_setup*, int argc, char **argv);
