@@ -273,8 +273,6 @@ static int sja1105_parse_dt(struct sja1105_spi_private *priv)
 			                     &port->reset_duration);
 			of_property_read_u32(port->node, "phy-reset-delay",
 			                     &port->reset_delay);
-			sja1105_hw_reset_chip(port->reset_gpio, port->reset_duration,
-			                      port->reset_delay);
 		}
 		port->phy_node = of_parse_phandle(port->node, "phy-handle", 0);
 		if (IS_ERR_OR_NULL(port->phy_node)) {
@@ -317,6 +315,12 @@ static int sja1105_connect_phy(struct sja1105_spi_private *priv)
 	list_for_each_safe(pos, q, &(priv->port_list_head.list)) {
 		port = list_entry(pos, struct sja1105_port, list);
 		net_dev = port->net_dev;
+
+		/* Release the PHY's hardware reset line */
+		if (!IS_ERR(port->reset_gpio))
+			sja1105_hw_reset_chip(port->reset_gpio,
+			                      port->reset_duration,
+			                      port->reset_delay);
 
 		port->phy_dev = of_phy_connect(net_dev, port->phy_node,
 		                               sja1105_netdev_adjust_link,
