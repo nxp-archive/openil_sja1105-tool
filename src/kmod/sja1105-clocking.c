@@ -110,9 +110,11 @@ static void sja1105_cgu_idiv_access(void *buf, struct sja1105_cgu_idiv *idiv,
 #define sja1105_cgu_idiv_pack(buf, idiv) sja1105_cgu_idiv_access(buf, idiv, 1)
 #define sja1105_cgu_idiv_unpack(buf, idiv) sja1105_cgu_idiv_access(buf, idiv, 0)
 
-static int sja1105_cgu_idiv_config(struct sja1105_spi_private *priv,
-                                   int port, int enabled, int factor)
+static int
+sja1105_cgu_idiv_config(struct sja1105_port *port, int enabled, int factor)
 {
+	struct sja1105_spi_private *priv = spi_get_drvdata(port->spi_dev);
+	struct device *dev = &port->spi_dev->dev;
 	const int BUF_LEN = 4;
 	/* UM10944.pdf, Table 78, CGU Register overview */
 	const int idiv_offsets[] = {0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
@@ -120,12 +122,12 @@ static int sja1105_cgu_idiv_config(struct sja1105_spi_private *priv,
 	struct sja1105_cgu_idiv idiv;
 
 	if (enabled != 0 && enabled != 1) {
-		loge("idiv enabled must be true or false");
-		return -1;
+		dev_err(dev, "idiv enabled must be true or false\n");
+		return -ERANGE;
 	}
 	if (enabled == 1 && factor != 1 && factor != 10) {
-		loge("idiv factor must be 1 or 10");
-		return -1;
+		dev_err(dev, "idiv factor must be 1 or 10\n");
+		return -ERANGE;
 	}
 
 	/* Payload for packed_buf */
@@ -136,7 +138,7 @@ static int sja1105_cgu_idiv_config(struct sja1105_spi_private *priv,
 	sja1105_cgu_idiv_pack(packed_buf, &idiv);
 
 	return sja1105_spi_send_packed_buf(priv, SPI_WRITE,
-	                                   CGU_ADDR + idiv_offsets[port],
+	                                   CGU_ADDR + idiv_offsets[port->index],
 	                                   packed_buf, BUF_LEN);
 }
 
@@ -163,9 +165,10 @@ sja1105_cgu_mii_control_access(void *buf, struct sja1105_cgu_mii_control
 #define sja1105_cgu_mii_control_unpack(buf, mii_control) \
 	sja1105_cgu_mii_control_access(buf, mii_control, 0)
 
-static int sja1105_cgu_mii_tx_clk_config(struct sja1105_spi_private *priv,
-                                         int port, int mii_mode)
+static int
+sja1105_cgu_mii_tx_clk_config(struct sja1105_port *port, int mii_mode)
 {
+	struct sja1105_spi_private *priv = spi_get_drvdata(port->spi_dev);
 	const int BUF_LEN = 4;
 	uint8_t packed_buf[BUF_LEN];
 	struct  sja1105_cgu_mii_control mii_tx_clk;
@@ -196,9 +199,9 @@ static int sja1105_cgu_mii_tx_clk_config(struct sja1105_spi_private *priv,
 	                     mii_tx_clk_offsets_pqrs;
 
 	if (mii_mode == XMII_MAC)
-		clksrc = mac_clk_sources[port];
+		clksrc = mac_clk_sources[port->index];
 	else
-		clksrc = phy_clk_sources[port];
+		clksrc = phy_clk_sources[port->index];
 
 	/* Payload for packed_buf */
 	mii_tx_clk.clksrc    = clksrc;
@@ -206,14 +209,15 @@ static int sja1105_cgu_mii_tx_clk_config(struct sja1105_spi_private *priv,
 	mii_tx_clk.pd        = 0;  /* Power Down off => enabled */
 	sja1105_cgu_mii_control_pack(packed_buf, &mii_tx_clk);
 
-	return sja1105_spi_send_packed_buf(priv, SPI_WRITE,
-	                                   CGU_ADDR + mii_tx_clk_offsets[port],
+	return sja1105_spi_send_packed_buf(priv, SPI_WRITE, CGU_ADDR +
+	                                   mii_tx_clk_offsets[port->index],
 	                                   packed_buf, BUF_LEN);
 }
 
 static int
-sja1105_cgu_mii_rx_clk_config(struct sja1105_spi_private *priv, int port)
+sja1105_cgu_mii_rx_clk_config(struct sja1105_port *port)
 {
+	struct sja1105_spi_private *priv = spi_get_drvdata(port->spi_dev);
 	const int BUF_LEN = 4;
 	uint8_t packed_buf[BUF_LEN];
 	struct  sja1105_cgu_mii_control mii_rx_clk;
@@ -236,19 +240,20 @@ sja1105_cgu_mii_rx_clk_config(struct sja1105_spi_private *priv, int port)
 	                     mii_rx_clk_offsets_pqrs;
 
 	/* Payload for packed_buf */
-	mii_rx_clk.clksrc    = clk_sources[port];
+	mii_rx_clk.clksrc    = clk_sources[port->index];
 	mii_rx_clk.autoblock = 1;  /* Autoblock clk while changing clksrc */
 	mii_rx_clk.pd        = 0;  /* Power Down off => enabled */
 	sja1105_cgu_mii_control_pack(packed_buf, &mii_rx_clk);
 
-	return sja1105_spi_send_packed_buf(priv, SPI_WRITE,
-	                                   CGU_ADDR + mii_rx_clk_offsets[port],
+	return sja1105_spi_send_packed_buf(priv, SPI_WRITE, CGU_ADDR +
+	                                   mii_rx_clk_offsets[port->index],
 	                                   packed_buf, BUF_LEN);
 }
 
 static int
-sja1105_cgu_mii_ext_tx_clk_config(struct sja1105_spi_private *priv, int port)
+sja1105_cgu_mii_ext_tx_clk_config(struct sja1105_port *port)
 {
+	struct sja1105_spi_private *priv = spi_get_drvdata(port->spi_dev);
 	const int BUF_LEN = 4;
 	uint8_t packed_buf[BUF_LEN];
 	struct  sja1105_cgu_mii_control mii_ext_tx_clk;
@@ -271,19 +276,20 @@ sja1105_cgu_mii_ext_tx_clk_config(struct sja1105_spi_private *priv, int port)
 	                         mii_ext_tx_clk_offsets_pqrs;
 
 	/* Payload for packed_buf */
-	mii_ext_tx_clk.clksrc    = clk_sources[port];
+	mii_ext_tx_clk.clksrc    = clk_sources[port->index];
 	mii_ext_tx_clk.autoblock = 1; /* Autoblock clk while changing clksrc */
 	mii_ext_tx_clk.pd        = 0; /* Power Down off => enabled */
 	sja1105_cgu_mii_control_pack(packed_buf, &mii_ext_tx_clk);
 
-	return sja1105_spi_send_packed_buf(priv, SPI_WRITE,
-	                                   CGU_ADDR + mii_ext_tx_clk_offsets[port],
+	return sja1105_spi_send_packed_buf(priv, SPI_WRITE, CGU_ADDR +
+	                                   mii_ext_tx_clk_offsets[port->index],
 	                                   packed_buf, BUF_LEN);
 }
 
 static int
-sja1105_cgu_mii_ext_rx_clk_config(struct sja1105_spi_private *priv, int port)
+sja1105_cgu_mii_ext_rx_clk_config(struct sja1105_port *port)
 {
+	struct sja1105_spi_private *priv = spi_get_drvdata(port->spi_dev);
 	const int BUF_LEN = 4;
 	uint8_t packed_buf[BUF_LEN];
 	struct  sja1105_cgu_mii_control mii_ext_rx_clk;
@@ -306,30 +312,31 @@ sja1105_cgu_mii_ext_rx_clk_config(struct sja1105_spi_private *priv, int port)
 	                         mii_ext_rx_clk_offsets_pqrs;
 
 	/* Payload for packed_buf */
-	mii_ext_rx_clk.clksrc    = clk_sources[port];
+	mii_ext_rx_clk.clksrc    = clk_sources[port->index];
 	mii_ext_rx_clk.autoblock = 1; /* Autoblock clk while changing clksrc */
 	mii_ext_rx_clk.pd        = 0; /* Power Down off => enabled */
 	sja1105_cgu_mii_control_pack(packed_buf, &mii_ext_rx_clk);
 
-	return sja1105_spi_send_packed_buf(priv, SPI_WRITE,
-	                                   CGU_ADDR + mii_ext_rx_clk_offsets[port],
+	return sja1105_spi_send_packed_buf(priv, SPI_WRITE, CGU_ADDR +
+	                                   mii_ext_rx_clk_offsets[port->index],
 	                                   packed_buf, BUF_LEN);
 }
 
 static int
-mii_clocking_setup(struct sja1105_spi_private *priv, int port, int mii_mode)
+mii_clocking_setup(struct sja1105_port *port, int mii_mode)
 {
+	struct device *dev = &port->spi_dev->dev;
 	int rc;
 
 	if (mii_mode != XMII_MAC && mii_mode != XMII_PHY)
 		goto error;
 
-	logv("Configuring MII-%s clocking for port %d",
-	    (mii_mode == XMII_MAC) ? "MAC" : "PHY", port);
+	dev_dbg(dev, "Configuring MII-%s clocking for port %s\n",
+	       (mii_mode == XMII_MAC) ? "MAC" : "PHY", port->net_dev->name);
 	/*   * If mii_mode is MAC, disable IDIV
 	 *   * If mii_mode is PHY, enable IDIV and configure for 1/1 divider
 	 */
-	rc = sja1105_cgu_idiv_config(priv, port, (mii_mode == XMII_PHY), 1);
+	rc = sja1105_cgu_idiv_config(port, (mii_mode == XMII_PHY), 1);
 	if (rc < 0)
 		goto error;
 
@@ -337,14 +344,14 @@ mii_clocking_setup(struct sja1105_spi_private *priv, int port, int mii_mode)
 	 *   * If mii_mode is MAC, select TX_CLK_n
 	 *   * If mii_mode is PHY, select IDIV_n
 	 */
-	rc = sja1105_cgu_mii_tx_clk_config(priv, port, mii_mode);
+	rc = sja1105_cgu_mii_tx_clk_config(port, mii_mode);
 	if (rc < 0)
 		goto error;
 
 	/* Configure CLKSRC of MII_RX_CLK_n
 	 * Select RX_CLK_n
 	 */
-	rc = sja1105_cgu_mii_rx_clk_config(priv, port);
+	rc = sja1105_cgu_mii_rx_clk_config(port);
 	if (rc < 0)
 		goto error;
 
@@ -354,14 +361,14 @@ mii_clocking_setup(struct sja1105_spi_private *priv, int port, int mii_mode)
 		/* Configure CLKSRC of EXT_TX_CLK_n
 		 * Select IDIV_n
 		 */
-		rc = sja1105_cgu_mii_ext_tx_clk_config(priv, port);
+		rc = sja1105_cgu_mii_ext_tx_clk_config(port);
 		if (rc < 0)
 			goto error;
 
 		/* Configure CLKSRC of EXT_RX_CLK_n
 		 * Select IDIV_n
 		 */
-		rc = sja1105_cgu_mii_ext_rx_clk_config(priv, port);
+		rc = sja1105_cgu_mii_ext_rx_clk_config(port);
 		if (rc < 0)
 			goto error;
 	}
@@ -403,9 +410,9 @@ sja1105_cgu_pll_control_access(void *buf, struct sja1105_cgu_pll_control
 	sja1105_cgu_pll_control_access(buf, pll_control, 0, device_id)
 
 static int
-sja1105_cgu_rgmii_tx_clk_config(struct sja1105_spi_private *priv, int port,
-                                int speed_mbps)
+sja1105_cgu_rgmii_tx_clk_config(struct sja1105_port *port, int speed_mbps)
 {
+	struct sja1105_spi_private *priv = spi_get_drvdata(port->spi_dev);
 	int clksrc;
 	const int BUF_LEN = 4;
 	/* UM10944.pdf, Table 78, CGU Register overview */
@@ -426,7 +433,7 @@ sja1105_cgu_rgmii_tx_clk_config(struct sja1105_spi_private *priv, int port,
 	else {
 		int clk_sources[] = {CLKSRC_IDIV0, CLKSRC_IDIV1, CLKSRC_IDIV2,
 		                     CLKSRC_IDIV3, CLKSRC_IDIV4};
-		clksrc = clk_sources[port];
+		clksrc = clk_sources[port->index];
 	}
 
 	/* Payload */
@@ -437,7 +444,7 @@ sja1105_cgu_rgmii_tx_clk_config(struct sja1105_spi_private *priv, int port,
 	sja1105_cgu_mii_control_pack(packed_buf, &txc);
 
 	return sja1105_spi_send_packed_buf(priv,SPI_WRITE,
-	                                   CGU_ADDR + txc_offsets[port],
+	                                   CGU_ADDR + txc_offsets[port->index],
 	                                   packed_buf, BUF_LEN);
 }
 
@@ -472,8 +479,9 @@ sja1105_cfg_pad_mii_tx_access(void *buf, struct sja1105_cfg_pad_mii_tx
 	sja1105_cfg_pad_mii_tx_access(buf, pad_mii_tx, 0)
 
 static int
-sja1105_rgmii_cfg_pad_tx_config(struct sja1105_spi_private *priv, int port)
+sja1105_rgmii_cfg_pad_tx_config(struct sja1105_port *port)
 {
+	struct sja1105_spi_private *priv = spi_get_drvdata(port->spi_dev);
 	const int BUF_LEN = 4;
 	uint8_t packed_buf[BUF_LEN];
 	/* UM10944.pdf, Table 86, ACU Register overview */
@@ -496,40 +504,50 @@ sja1105_rgmii_cfg_pad_tx_config(struct sja1105_spi_private *priv, int port)
 	pad_mii_tx.clk_ipud  = 2; /* TX_CLK input stage (default) */
 	sja1105_cfg_pad_mii_tx_pack(packed_buf, &pad_mii_tx);
 
-	return sja1105_spi_send_packed_buf(priv, SPI_WRITE,
-	                                   AGU_ADDR + pad_mii_tx_offsets[port],
+	return sja1105_spi_send_packed_buf(priv, SPI_WRITE, AGU_ADDR +
+	                                   pad_mii_tx_offsets[port->index],
 	                                   packed_buf, BUF_LEN);
 }
 
-static int rgmii_clocking_setup(struct sja1105_spi_private *priv,
-                                int port, int speed_mbps)
+static int
+rgmii_clocking_setup(struct sja1105_port *port)
 {
+	int speed_mbps = sja1105_port_get_speed(port);
+	struct device *dev = &port->spi_dev->dev;
 	int rc = 0;
 
-	logv("Configuring RGMII clocking for port %d, speed %dMbps",
-	     port, speed_mbps);
-	if (speed_mbps == 1000)
+	dev_dbg(dev, "Configuring RGMII clocking for port %s, speed %dMbps\n",
+	        port->net_dev->name, speed_mbps);
+
+	switch (speed_mbps) {
+	case 1000:
 		/* 1000Mbps, IDIV disabled, divide by 1 */
-		rc = sja1105_cgu_idiv_config(priv, port, 0, 1);
-	else if (speed_mbps == 100)
+		rc = sja1105_cgu_idiv_config(port, 0, 1);
+		break;
+	case 100:
 		/* 100Mbps, IDIV enabled, divide by 1 */
-		rc = sja1105_cgu_idiv_config(priv, port, 1, 1);
-	else if (speed_mbps == 10)
+		rc = sja1105_cgu_idiv_config(port, 1, 1);
+		break;
+	case 10:
 		/* 10Mbps, IDIV enabled, divide by 10 */
-		rc = sja1105_cgu_idiv_config(priv, port, 1, 10);
+		rc = sja1105_cgu_idiv_config(port, 1, 10);
+		break;
+	default:
+		rc = -EINVAL;
+	}
 
 	if (rc < 0) {
-		loge("configuring idiv failed");
+		dev_err(dev, "configuring idiv failed\n");
 		goto out;
 	}
-	rc = sja1105_cgu_rgmii_tx_clk_config(priv, port, speed_mbps);
+	rc = sja1105_cgu_rgmii_tx_clk_config(port, speed_mbps);
 	if (rc < 0) {
-		loge("configuring rgmii tx clock failed");
+		dev_err(dev, "configuring rgmii tx clock failed\n");
 		goto out;
 	}
-	rc = sja1105_rgmii_cfg_pad_tx_config(priv, port);
+	rc = sja1105_rgmii_cfg_pad_tx_config(port);
 	if (rc < 0) {
-		loge("configuring tx pad registers failed");
+		dev_err(dev, "configuring tx pad registers failed\n");
 		goto out;
 	}
 out:
@@ -537,8 +555,9 @@ out:
 }
 
 static int
-sja1105_cgu_rmii_ref_clk_config(struct sja1105_spi_private *priv, int port)
+sja1105_cgu_rmii_ref_clk_config(struct sja1105_port *port)
 {
+	struct sja1105_spi_private *priv = spi_get_drvdata(port->spi_dev);
 	const int BUF_LEN = 4;
 	struct  sja1105_cgu_mii_control ref_clk;
 	uint8_t packed_buf[BUF_LEN];
@@ -560,20 +579,20 @@ sja1105_cgu_rmii_ref_clk_config(struct sja1105_spi_private *priv, int port)
 	                  ref_clk_offsets_et : ref_clk_offsets_pqrs;
 
 	/* Payload for packed_buf */
-	ref_clk.clksrc    = clk_sources[port];
+	ref_clk.clksrc    = clk_sources[port->index];
 	ref_clk.autoblock = 1;      /* Autoblock clk while changing clksrc */
 	ref_clk.pd        = 0;      /* Power Down off => enabled */
 	sja1105_cgu_mii_control_pack(packed_buf, &ref_clk);
 
-	return sja1105_spi_send_packed_buf(priv, SPI_WRITE,
-	                                   CGU_ADDR + ref_clk_offsets[port],
+	return sja1105_spi_send_packed_buf(priv, SPI_WRITE, CGU_ADDR +
+	                                   ref_clk_offsets[port->index],
 	                                   packed_buf, BUF_LEN);
 }
 
 static int
-sja1105_cgu_rmii_ext_tx_clk_config(struct sja1105_spi_private *priv,
-                                   int    port)
+sja1105_cgu_rmii_ext_tx_clk_config(struct sja1105_port *port)
 {
+	struct sja1105_spi_private *priv = spi_get_drvdata(port->spi_dev);
 	const int BUF_LEN = 4;
 	struct  sja1105_cgu_mii_control ext_tx_clk;
 	uint8_t packed_buf[BUF_LEN];
@@ -594,16 +613,17 @@ sja1105_cgu_rmii_ext_tx_clk_config(struct sja1105_spi_private *priv,
 	ext_tx_clk.pd        = 0;   /* Power Down off => enabled */
 	sja1105_cgu_mii_control_pack(packed_buf, &ext_tx_clk);
 
-	return sja1105_spi_send_packed_buf(priv, SPI_WRITE,
-	                                   CGU_ADDR + ext_tx_clk_offsets[port],
+	return sja1105_spi_send_packed_buf(priv, SPI_WRITE, CGU_ADDR +
+	                                   ext_tx_clk_offsets[port->index],
 	                                   packed_buf, BUF_LEN);
 }
 
 static int sja1105_cgu_rmii_pll_config(struct sja1105_spi_private *priv)
 {
-	const int BUF_LEN = 4;
-	const int PLL1_OFFSET = 0x0A;
+	struct device *dev = &priv->spi_dev->dev;
 	struct  sja1105_cgu_pll_control pll;
+	const int PLL1_OFFSET = 0x0A;
+	const int BUF_LEN = 4;
 	uint8_t packed_buf[BUF_LEN];
 	int     rc;
 
@@ -630,7 +650,7 @@ static int sja1105_cgu_rmii_pll_config(struct sja1105_spi_private *priv)
 	                                 CGU_ADDR + PLL1_OFFSET,
 	                                 packed_buf, BUF_LEN);
 	if (rc < 0) {
-		loge("failed to configure PLL1 for 50MHz");
+		dev_err(dev, "failed to configure PLL1 for 50MHz\n");
 		goto out;
 	}
 
@@ -642,25 +662,26 @@ static int sja1105_cgu_rmii_pll_config(struct sja1105_spi_private *priv)
 	                                 CGU_ADDR + PLL1_OFFSET,
 	                                 packed_buf, BUF_LEN);
 	if (rc < 0) {
-		loge("failed to enable PLL1");
+		dev_err(dev, "failed to enable PLL1\n");
 		goto out;
 	}
 out:
 	return rc;
 }
 
-static int rmii_clocking_setup(struct sja1105_spi_private *priv, int port,
-                               int rmii_mode)
+static int rmii_clocking_setup(struct sja1105_port *port, int rmii_mode)
 {
+	struct sja1105_spi_private *priv = spi_get_drvdata(port->spi_dev);
+	struct device *dev = &port->spi_dev->dev;
 	int rc;
 
 	if (rmii_mode != XMII_MAC && rmii_mode != XMII_PHY) {
-		loge("RMII mode must either be MAC or PHY");
+		dev_err(dev, "RMII mode must either be MAC or PHY\n");
 		rc = -EINVAL;
 		goto out;
 	}
-	logv("Configuring RMII-%s clocking for port %d",
-	    (rmii_mode == XMII_MAC) ? "MAC" : "PHY", port);
+	dev_dbg(dev, "Configuring RMII-%s clocking for port %s\n",
+	       (rmii_mode == XMII_MAC) ? "MAC" : "PHY", port->net_dev->name);
 	/* AH1601.pdf chapter 2.5.1. Sources */
 	if (rmii_mode == XMII_MAC) {
 		/* Configure and enable PLL1 for 50Mhz output */
@@ -669,15 +690,15 @@ static int rmii_clocking_setup(struct sja1105_spi_private *priv, int port,
 			goto out;
 	}
 	/* Disable IDIV for this port */
-	rc = sja1105_cgu_idiv_config(priv, port, 0, 1);
+	rc = sja1105_cgu_idiv_config(port, 0, 1);
 	if (rc < 0)
 		goto out;
 	/* Source to sink mappings */
-	rc = sja1105_cgu_rmii_ref_clk_config(priv, port);
+	rc = sja1105_cgu_rmii_ref_clk_config(port);
 	if (rc < 0)
 		goto out;
 	if (rmii_mode == XMII_MAC) {
-		rc = sja1105_cgu_rmii_ext_tx_clk_config(priv, port);
+		rc = sja1105_cgu_rmii_ext_tx_clk_config(port);
 		if (rc < 0)
 			goto out;
 	}
@@ -695,68 +716,68 @@ out:
  * might as well be added here.
  */
 static int
-sgmii_clocking_setup(struct sja1105_spi_private *priv, int port, int speed_mbps)
+sgmii_clocking_setup(struct sja1105_port *port)
 {
-	logv("TODO: Configure SGMII clocking for port %d speed %dMbps.",
-	     port, speed_mbps);
+	dev_err(&port->spi_dev->dev,
+	        "TODO: Configure SGMII clocking for port %s\n",
+	        port->net_dev->name);
 	return 0;
 }
 
-int sja1105_clocking_setup_port(struct sja1105_spi_private *priv, int port,
-                                struct sja1105_xmii_params_entry *params,
-                                struct sja1105_mac_config_entry  *mac_config)
+int sja1105_clocking_setup_port(struct sja1105_port *port)
 {
-	int speed_mbps;
+	struct sja1105_spi_private *priv = spi_get_drvdata(port->spi_dev);
+	struct sja1105_xmii_params_entry *mii;
+	struct device *dev = &port->spi_dev->dev;
 	int rc = 0;
 
-	switch (mac_config->speed) {
-	case 0: speed_mbps = 1000; break;   /* speed shall be set at runtime,
-	                                       use max speed for RGMII clocking
-	                                       setup here */
-	case 1: speed_mbps = 1000; break;
-	case 2: speed_mbps = 100;  break;
-	case 3: speed_mbps = 10;   break;
-	default: loge("invalid speed setting"); return -1;
-	}
-	if (params->xmii_mode[port] == XMII_MODE_MII)
-		mii_clocking_setup(priv, port, params->phy_mac[port]);
-	else if (params->xmii_mode[port] == XMII_MODE_RMII)
-		rmii_clocking_setup(priv, port, params->phy_mac[port]);
-	else if (params->xmii_mode[port] == XMII_MODE_RGMII)
-		rgmii_clocking_setup(priv, port, speed_mbps);
-	else if (params->xmii_mode[port] == XMII_MODE_SGMII &&
-	         IS_PQRS(priv->device_id)) {
+	mii = priv->static_config.xmii_params;
 
-		if ((port == 4) && (IS_R(priv->device_id, priv->part_nr) ||
-		                    IS_S(priv->device_id, priv->part_nr)))
-			sgmii_clocking_setup(priv, port, speed_mbps);
+	switch (mii->xmii_mode[port->index]) {
+	case XMII_MODE_MII:
+		mii_clocking_setup(port, mii->phy_mac[port->index]);
+		break;
+	case XMII_MODE_RMII:
+		rmii_clocking_setup(port, mii->phy_mac[port->index]);
+		break;
+	case XMII_MODE_RGMII:
+		rgmii_clocking_setup(port);
+		break;
+	case XMII_MODE_SGMII:
+		if (!IS_PQRS(priv->device_id)) {
+			dev_err(dev, "SGMII mode only supported on P/Q/R/S!\n");
+			rc = -EINVAL;
+			goto out;
+		}
+		if ((IS_R(priv->device_id, priv->part_nr) ||
+		     IS_S(priv->device_id, priv->part_nr)) &&
+		    (port->index == 4))
+			sgmii_clocking_setup(port);
 		else
-			logv("Port %d is tri-stated", port);
-
-	} else {
-		loge("Invalid xmii_mode for port %d specified: %" PRIu64,
-			  port, params->xmii_mode[port]);
+			dev_dbg(dev, "Port %s is tri-stated\n",
+			        port->net_dev->name);
+		break;
+	default:
+		dev_err(dev, "Invalid MII mode specified for port %s: %" PRIu64,
+		        port->net_dev->name, mii->xmii_mode[port->index]);
 		rc = -EINVAL;
-		goto out;
 	}
 out:
 	return rc;
 }
 
-int sja1105_clocking_setup(struct sja1105_spi_private *priv,
-                           struct sja1105_xmii_params_entry *params,
-                           struct sja1105_mac_config_entry  *mac_configs)
+int sja1105_clocking_setup(struct sja1105_spi_private *priv)
 {
+	struct list_head *pos, *q;
+	struct sja1105_port *port;
 	int rc = 0;
-	int i;
 
-	for (i = 0; i < 5; i++) {
-		rc = sja1105_clocking_setup_port(priv, i, params, &mac_configs[i]);
-		if (rc != 0) {
+	list_for_each_safe(pos, q, &(priv->port_list_head.list)) {
+		port = list_entry(pos, struct sja1105_port, list);
+		rc = sja1105_clocking_setup_port(port);
+		if (rc)
 			break;
-		}
 	}
-
 	return rc;
 }
 

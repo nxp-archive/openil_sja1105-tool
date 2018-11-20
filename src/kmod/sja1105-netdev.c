@@ -7,6 +7,7 @@
 #include <linux/device.h>
 #include <linux/version.h>
 #include <linux/etherdevice.h>
+#include <linux/of_mdio.h>
 #include "sja1105.h"
 
 /* Convert mac speed from sja1105 mac config table value to mbps */
@@ -53,6 +54,41 @@ int sja1105_get_speed_cfg(unsigned int speed_mbps)
 		speed_cfg = -1;
 	}
 	return speed_cfg;
+}
+
+/* This function must be called after sja1105_parse_dt.
+ * If called before sja1105_connect_phy, it will use the port->phy_node
+ * reference. When called at this time, this function will yield a correct
+ * answer only for fixed-link ports.
+ * If called after sja1105_connect_phy, the phy_node pointer is NULL'ed
+ * and the information is retrieved from the started phylib state machine
+ * (valid for both physical PHYs and fixed-links).
+ */
+int sja1105_port_get_speed(struct sja1105_port *port)
+{
+	struct phy_device *phy_dev;
+	int phy_speed;
+
+	if (port->phy_node)
+		/* Get a reference to the phy_device created with
+		 * of_phy_register_fixed_link, but which is normally
+		 * given to us only later, in of_phy_connect.  Since we
+		 * must perform this before static_config_flush, and
+		 * therefore also before of_phy_connect, we must make
+		 * use of the reference to phy_node that we still have
+		 * from of_parse_phandle in sja1105_parse_dt.
+		 */
+		phy_dev = of_phy_find_device(port->phy_node);
+	else
+		phy_dev = port->phy_dev;
+
+	phy_speed = phy_dev->speed;
+
+	if (port->phy_node)
+		/* Drop reference count from of_phy_find_device */
+		put_device(&phy_dev->mdio.dev);
+
+	return phy_speed;
 }
 
 /* Set link speed in the sja1105's mac configuration for a specific port */
@@ -118,9 +154,7 @@ static int sja1105_adjust_port_speed(struct sja1105_port *port, int speed_mbps)
 	}
 
 	/* Reconfigure the CGU (PHY link modes and speeds) */
-	rc = sja1105_clocking_setup_port(priv, port->index,
-	                                 &priv->static_config.xmii_params[0],
-	                                 &mac_entry);
+	rc = sja1105_clocking_setup_port(port);
 	if (rc < 0) {
 		dev_err(dev, "%s: Clocking setup failed\n", port->net_dev->name);
 		goto err_out;

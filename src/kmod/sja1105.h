@@ -99,6 +99,7 @@ void sja1105_netdev_remove_port(struct sja1105_port *port);
 void sja1105_netdev_adjust_link(struct net_device *net_dev);
 
 int sja1105_get_speed_cfg(unsigned int speed_mbps);
+int sja1105_port_get_speed(struct sja1105_port *port);
 
 /* sja1105-ptp.c */
 int  sja1105_ptp_clock_register(struct sja1105_spi_private *priv);
@@ -162,12 +163,8 @@ int sja1105_inhibit_tx(struct sja1105_spi_private *priv,
 #define SJA1105_SPEED_1000MBPS 1ull
 #define SJA1105_SPEED_AUTO     0ull
 
-int sja1105_clocking_setup_port(struct sja1105_spi_private *priv, int port,
-                                struct sja1105_xmii_params_entry *params,
-                                struct sja1105_mac_config_entry  *mac_config);
-int sja1105_clocking_setup(struct sja1105_spi_private *priv,
-                           struct sja1105_xmii_params_entry *params,
-                           struct sja1105_mac_config_entry  *mac_configs);
+int sja1105_clocking_setup_port(struct sja1105_port *port);
+int sja1105_clocking_setup(struct sja1105_spi_private *priv);
 
 /* sja1105-status.c */
 int sja1105_device_id_get(struct sja1105_spi_private *priv);

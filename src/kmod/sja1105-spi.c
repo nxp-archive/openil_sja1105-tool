@@ -247,7 +247,9 @@ int sja1105_static_config_flush(struct sja1105_spi_private *priv)
 	struct sja1105_static_config *config = &priv->static_config;
 	struct sja1105_egress_port_mask port_mask;
 	struct sja1105_general_status status;
-	int i, rc;
+	struct list_head *pos, *q;
+	struct sja1105_port *port;
+	int rc;
 
 	rc = sja1105_static_config_check_valid(config);
 	if (rc < 0) {
@@ -256,8 +258,9 @@ int sja1105_static_config_flush(struct sja1105_spi_private *priv)
 	}
 	/* Workaround for PHY jabbering during switch reset */
 	memset(&port_mask, 0, sizeof(port_mask));
-	for (i = 0; i < SJA1105_NUM_PORTS; i++) {
-		port_mask.inhibit_tx[i] = 1;
+	list_for_each_safe(pos, q, &(priv->port_list_head.list)) {
+		port = list_entry(pos, struct sja1105_port, list);
+		port_mask.inhibit_tx[port->index] = 1;
 	}
 	rc = sja1105_inhibit_tx(priv, &port_mask);
 	if (rc < 0) {
@@ -281,8 +284,7 @@ int sja1105_static_config_flush(struct sja1105_spi_private *priv)
 		goto hardware_left_floating_error;
 	}
 	/* Configure the CGU (PHY link modes and speeds) */
-	rc = sja1105_clocking_setup(priv, &config->xmii_params[0],
-	                           &config->mac_config[0]);
+	rc = sja1105_clocking_setup(priv);
 	if (rc < 0) {
 		loge("sja1105_clocking_setup failed");
 		goto hardware_left_floating_error;
