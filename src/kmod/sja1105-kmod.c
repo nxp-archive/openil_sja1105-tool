@@ -175,10 +175,10 @@ static void sja1105_cleanup(struct sja1105_spi_private *priv)
 			        port->net_dev->name);
 			if (!IS_ERR(port->reset_gpio))
 				gpiod_put(port->reset_gpio);
+			if (port->phy_dev && port->phy_dev->attached_dev)
+				phy_disconnect(port->phy_dev);
 			if (of_phy_is_fixed_link(port->node))
 				of_phy_deregister_fixed_link(port->node);
-			else if (port->phy_dev && port->phy_dev->attached_dev)
-				phy_disconnect(port->phy_dev);
 			sja1105_netdev_remove_port(port);
 			list_del(pos);
 		}
