@@ -204,8 +204,10 @@ static int sja1105_parse_dt(struct sja1105_spi_private *priv)
 	rc = of_property_read_string(switch_node, "sja1105,staging-area",
 	                             &priv->staging_area);
 	if (rc) {
-		dev_err(dev, "Staging area node not present in device tree!\n");
-		goto err_out;
+		static const char def_name[] = "sja1105.bin";
+		dev_err(dev, "Staging area node not present in device tree, trying %s\n",
+		        def_name);
+		priv->staging_area = def_name;
 	}
 
 	for_each_child_of_node(switch_node, child) {
