@@ -99,6 +99,7 @@ static int sja1105_adjust_port_speed(struct sja1105_port *port, int speed_mbps)
 	struct sja1105_mac_config_entry mac_entry;
 	int static_config_speed;
 	int speed;
+	int xmii_mode;
 	int rc;
 
 	speed = sja1105_get_speed_cfg(speed_mbps);
@@ -153,11 +154,22 @@ static int sja1105_adjust_port_speed(struct sja1105_port *port, int speed_mbps)
 		goto err_out;
 	}
 
-	/* Reconfigure the CGU (PHY link modes and speeds) */
-	rc = sja1105_clocking_setup_port(port);
-	if (rc < 0) {
-		dev_err(dev, "%s: Clocking setup failed\n", port->net_dev->name);
-		goto err_out;
+	/*
+	 * Reconfigure the CGU only for RGMII and SGMII interfaces.
+	 * xmii_mode and mac_phy setting cannot change at this point, only
+	 * speed does. For MII and RMII no change of the clock setup is
+	 * required. Actually, changing the clock setup does interrupt the
+	 * clock signal for a certain time which causes trouble for all PHYs
+	 * relying on this signal.
+	 */
+	xmii_mode = priv->static_config.xmii_params[0].xmii_mode[port->index];
+	if ((xmii_mode == XMII_MODE_RGMII) || (xmii_mode == XMII_MODE_SGMII)) {
+		rc = sja1105_clocking_setup_port(port);
+		if (rc < 0) {
+			dev_err(dev, "%s: Clocking setup failed\n",
+			port->net_dev->name);
+			goto err_out;
+		}
 	}
 
 err_ok:
