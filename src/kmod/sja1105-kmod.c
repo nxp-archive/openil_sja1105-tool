@@ -53,17 +53,16 @@ static void sja1105_patch_mac_mii_settings(struct sja1105_spi_private *priv)
 {
 	struct list_head *pos, *q;
 	struct sja1105_port *port;
-	struct sja1105_xmii_params_entry *params;
+	struct sja1105_xmii_params_entry *mii;
 	struct sja1105_mac_config_entry *mac;
-	struct phy_device *phy_dev;
 	int i;
 
 	priv->static_config.xmii_params_count = 1;
-	params = &priv->static_config.xmii_params[0];
+	mii = &priv->static_config.xmii_params[0];
 	/* Initialization */
 	for (i = 0; i < SJA1105_NUM_PORTS; i++) {
-		params->xmii_mode[i] = XMII_MODE_TRISTATE;
-		params->phy_mac[i]   = XMII_MAC;
+		mii->xmii_mode[i] = XMII_MODE_TRISTATE;
+		mii->phy_mac[i]   = XMII_MAC;
 	}
 
 	list_for_each_safe(pos, q, &(priv->port_list_head.list)) {
@@ -71,19 +70,19 @@ static void sja1105_patch_mac_mii_settings(struct sja1105_spi_private *priv)
 
 		switch (port->phy_mode) {
 		case PHY_INTERFACE_MODE_MII:
-			params->xmii_mode[port->index] = XMII_MODE_MII;
+			mii->xmii_mode[port->index] = XMII_MODE_MII;
 			break;
 		case PHY_INTERFACE_MODE_RMII:
-			params->xmii_mode[port->index] = XMII_MODE_RMII;
+			mii->xmii_mode[port->index] = XMII_MODE_RMII;
 			break;
 		case PHY_INTERFACE_MODE_RGMII:
 		case PHY_INTERFACE_MODE_RGMII_ID:
 		case PHY_INTERFACE_MODE_RGMII_RXID:
 		case PHY_INTERFACE_MODE_RGMII_TXID:
-			params->xmii_mode[port->index] = XMII_MODE_RGMII;
+			mii->xmii_mode[port->index] = XMII_MODE_RGMII;
 			break;
 		case PHY_INTERFACE_MODE_SGMII:
-			params->xmii_mode[port->index] = XMII_MODE_SGMII;
+			mii->xmii_mode[port->index] = XMII_MODE_SGMII;
 			break;
 		default:
 			dev_err(&priv->spi_dev->dev,
@@ -92,29 +91,22 @@ static void sja1105_patch_mac_mii_settings(struct sja1105_spi_private *priv)
 		}
 
 		mac = &priv->static_config.mac_config[port->index];
+		mii->phy_mac[port->index] = port->dt_xmii_mode;
 
 		if (of_phy_is_fixed_link(port->node)) {
-			params->phy_mac[port->index] = XMII_PHY;
-			if (port->phy_node)
-				/* Get a reference to the phy_device created with
-				 * of_phy_register_fixed_link, but which is normally
-				 * given to us only later, in of_phy_connect.  Since we
-				 * must perform this before static_config_flush, and
-				 * therefore also before of_phy_connect, we must make
-				 * use of the reference to phy_node that we still have
-				 * from of_parse_phandle in sja1105_parse_dt.
-				 */
-				phy_dev = of_phy_find_device(port->phy_node);
-			else
-				phy_dev = port->phy_dev;
+			/* Default to PHY mode */
+			if (port->dt_xmii_mode == -1)
+				mii->phy_mac[port->index] = XMII_PHY;
 
-			mac->speed = sja1105_get_speed_cfg(phy_dev->speed);
-
-			if (port->phy_node)
-				/* Drop reference count from of_phy_find_device */
-				put_device(&phy_dev->mdio.dev);
+			/* Retrieve static speed from fixed-link property */
+			mac->speed = sja1105_get_speed_cfg(
+			             sja1105_port_get_speed(port));
 		} else {
-			params->phy_mac[port->index] = XMII_MAC;
+			/* phy-handle present => put port in MAC mode */
+			if (port->dt_xmii_mode == -1)
+				mii->phy_mac[port->index] = XMII_MAC;
+
+			/* to be adjusted in sja1105_netdev_adjust_link */
 			mac->speed = SJA1105_SPEED_AUTO;
 		}
 	}
@@ -247,6 +239,13 @@ static int sja1105_parse_dt(struct sja1105_spi_private *priv)
 		port->index = port_index;
 		port->node = child;
 		port->phy_mode = phy_mode;
+
+		if (of_property_read_bool(child, "sja1105,mac-mode"))
+			port->dt_xmii_mode = XMII_MAC;
+		else if (of_property_read_bool(child, "sja1105,phy-mode"))
+			port->dt_xmii_mode = XMII_PHY;
+		else
+			port->dt_xmii_mode = -1;
 
 		/* Configure reset pin and bring up PHY */
 		port->reset_gpio =

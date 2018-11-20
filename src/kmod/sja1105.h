@@ -36,6 +36,7 @@ struct sja1105_port {
 	u32 reset_delay;
 	int index; /* switch port index */
 	int running; /* 1 if port is openend */
+	int dt_xmii_mode;
 	struct ratelimit_state get_stats_ratelimit;
 	struct rtnl_link_stats64 stats;
 };
