@@ -187,8 +187,8 @@ sja1105_get_stats(struct net_device *net_dev,
 	/* Time to read stats from switch */
 	mutex_lock(&priv->lock);
 	rc = sja1105_port_status_get_hl1(priv, &status, port->index);
-	mutex_unlock(&priv->lock);
 	if (rc) {
+		mutex_unlock(&priv->lock);
 		dev_err(dev, "%s: Could not read status\n", net_dev->name);
 		goto out;
 	}
@@ -204,7 +204,7 @@ sja1105_get_stats(struct net_device *net_dev,
 	port->stats.rx_errors        = errcnt;
 	port->stats.rx_length_errors = status.n_sizerr;
 	port->stats.rx_crc_errors    = status.n_crcerr;
-
+	mutex_unlock(&priv->lock);
 out:
 	*storage = port->stats;
 err_out:

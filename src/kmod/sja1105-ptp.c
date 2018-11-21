@@ -560,6 +560,7 @@ static int sja1105_ptp_adjfine(struct ptp_clock_info *ptp, long scaled_ppm)
 	u64 device_id = priv->device_id;
 	u64 ptpclkrate_addr;
 	u64 ptpclkrate;
+	int rc;
 
 	if (IS_ET(device_id))
 		ptpclkrate_addr = SJA1105ET_PTPCLKRATE_ADDR;
@@ -571,7 +572,8 @@ static int sja1105_ptp_adjfine(struct ptp_clock_info *ptp, long scaled_ppm)
 	else
 		ptpclkrate = (1ull << 31) | scaled_ppm;
 
-	return sja1105_ptp_write_reg(priv, ptpclkrate_addr, &ptpclkrate, 4);
+	rc = sja1105_ptp_write_reg(priv, ptpclkrate_addr, &ptpclkrate, 4);
+	return rc;
 }
 
 #if KERNEL_VERSION(4, 9, 0) >= LINUX_VERSION_CODE
@@ -618,8 +620,10 @@ static int sja1105_ptp_enable(struct ptp_clock_info *ptp,
 	struct sja1105_spi_private *priv = container_of(ptp, struct
 	                                   sja1105_spi_private, ptp_caps);
 	struct timespec64 now;
+	int rc;
 
-	if (sja1105_ptp_reset(priv) < 0)
+	rc = sja1105_ptp_reset(priv);
+	if (rc < 0)
 		return -EIO;
 	getnstimeofday64(&now);
 	return sja1105_ptp_settime(&priv->ptp_caps, &now);

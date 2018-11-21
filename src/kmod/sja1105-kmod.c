@@ -305,6 +305,7 @@ static int sja1105_probe(struct spi_device *spi)
 
 	INIT_LIST_HEAD(&(priv->port_list_head.list));
 	mutex_init(&priv->lock);
+	mutex_lock(&priv->lock); /* Lock mutex until end of initialization */
 
 	/* Populate our driver private structure (priv) based on
 	 * the device tree node that was probed (spi) */
@@ -341,9 +342,7 @@ static int sja1105_probe(struct spi_device *spi)
 	}
 
 	/* Parse device tree, upload stacic configuration and bring up PHYs */
-	mutex_lock(&priv->lock);
 	rc = sja1105_parse_dt(priv);
-	mutex_unlock(&priv->lock);
 	if (rc < 0)
 		goto err_out;
 
@@ -351,9 +350,11 @@ static int sja1105_probe(struct spi_device *spi)
 	if (rc < 0)
 		goto err_out;
 
+	mutex_unlock(&priv->lock);
 	return 0;
 err_out:
 	sja1105_cleanup(priv);
+	mutex_unlock(&priv->lock);
 	return rc;
 }
 
@@ -361,7 +362,9 @@ static int sja1105_remove(struct spi_device *spi)
 {
 	struct sja1105_spi_private *priv = spi_get_drvdata(spi);
 
+	mutex_lock(&priv->lock);
 	sja1105_cleanup(priv);
+	mutex_unlock(&priv->lock);
 	return 0;
 }
 

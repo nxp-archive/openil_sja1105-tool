@@ -176,6 +176,8 @@ static ssize_t sja1105_sysfs_wr(struct device *dev,
 	u64 speed, addr, value;
 	int port_no;
 
+	mutex_lock(&priv->lock);
+
 	if (attr == &dev_attr_config_upload) {
 		if (buf[0] != '1')
 			goto out_error;
@@ -186,9 +188,7 @@ static ssize_t sja1105_sysfs_wr(struct device *dev,
 			goto out_error;
 
 		/* Upload static configuration */
-		mutex_lock(&priv->lock);
 		rc = sja1105_static_config_flush(priv);
-		mutex_unlock(&priv->lock);
 		if (rc < 0)
 			goto out_error;
 		dev_info(dev, "Uploaded static configuration to device\n");
@@ -270,6 +270,7 @@ static ssize_t sja1105_sysfs_wr(struct device *dev,
 	}
 
 out_error:
+	mutex_unlock(&priv->lock);
 	return rc;
 }
 
@@ -285,6 +286,8 @@ static ssize_t sja1105_sysfs_rd(struct device *dev,
 	struct sja1105_port *port = NULL;
 	u64 value;
 
+	mutex_lock(&priv->lock);
+
 	if (attr == &dev_attr_device_id) {
 		const char *name;
 
@@ -298,9 +301,7 @@ static ssize_t sja1105_sysfs_rd(struct device *dev,
 		              (u32)priv->part_nr,
 		              name);
 	} else if (attr == &dev_attr_general_status) {
-		mutex_lock(&priv->lock);
 		rc = sja1105_general_status_get(priv, &gen_status);
-		mutex_unlock(&priv->lock);
 		if (rc) {
 			rc = -EIO;
 			goto err_out;
@@ -347,6 +348,7 @@ static ssize_t sja1105_sysfs_rd(struct device *dev,
 	}
 
 err_out:
+	mutex_unlock(&priv->lock);
 	return rc;
 }
 

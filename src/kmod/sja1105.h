@@ -44,7 +44,7 @@ struct sja1105_port {
 struct sja1105_spi_private {
 	struct spi_device  *spi_dev;
 	struct sja1105_port port_list_head;
-	struct mutex lock; /* SPI device lock */
+	struct mutex lock;
 
 	struct sja1105_static_config static_config;
 	struct gpio_desc *reset_gpio;
