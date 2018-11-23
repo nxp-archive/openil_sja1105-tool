@@ -10,31 +10,6 @@
 #include <linux/of_mdio.h>
 #include "sja1105.h"
 
-/* Convert mac speed from sja1105 mac config table value to mbps */
-static int sja1105_get_speed_mbps(unsigned int speed_cfg)
-{
-	int speed_mbps;
-
-	switch (speed_cfg) {
-	case SJA1105_SPEED_10MBPS:
-		speed_mbps = 10;
-		break;
-	case SJA1105_SPEED_100MBPS:
-		speed_mbps = 100;
-		break;
-	case SJA1105_SPEED_1000MBPS:
-		speed_mbps = 1000;
-		break;
-	case SJA1105_SPEED_AUTO:
-		/* Dynamic speed configuration */
-		speed_mbps = 0;
-		break;
-	default:
-		speed_mbps = -1;
-	}
-	return speed_mbps;
-}
-
 /* Convert mac speed from mbps to sja1105 mac config table value */
 int sja1105_get_speed_cfg(unsigned int speed_mbps)
 {
@@ -91,38 +66,27 @@ int sja1105_port_get_speed(struct sja1105_port *port)
 	return phy_speed;
 }
 
-/* Set link speed in the sja1105's mac configuration for a specific port */
-static int sja1105_adjust_port_speed(struct sja1105_port *port, int speed_mbps)
+/*
+ * Set link speed and enable/disable rx/tx in the sja1105's mac configuration
+ * for a specific port.
+ * speed_mbps=0 leaves the speed config unchanged
+ * enable=0 disables rx and tx for this port (mac_config.ingress/egress = 0)
+ * enable=1 sets the values from the static configuration for mac config table
+ * entries ingress and egress (if port is disable in static configuration, it
+ * remains disabled).
+ */
+static int sja1105_adjust_port_config(struct sja1105_port *port,
+                                      int speed_mbps, int enable)
 {
 	struct device *dev = &port->spi_dev->dev;
 	struct sja1105_spi_private *priv = spi_get_drvdata(port->spi_dev);
 	struct sja1105_mac_config_entry mac_entry;
-	int static_config_speed;
-	int speed;
+	int speed = SJA1105_SPEED_AUTO;
 	int xmii_mode;
 	int rc;
-
-	speed = sja1105_get_speed_cfg(speed_mbps);
-	if (speed < 0) {
-		rc = -EINVAL;
-		dev_err(dev, "%s: Invalid speed (%iMbps)\n",
-		        port->net_dev->name, speed_mbps);
-		goto err_out;
-	}
-
-	/* If current speed == new speed -> do nothing */
-	if (priv->static_config.mac_config[port->index].speed == speed)
-		goto err_ok;
-
-	/* Check if speed in static_config is 0 */
-	static_config_speed = priv->static_config.mac_config[port->index].speed;
-	if (static_config_speed != SJA1105_SPEED_AUTO) {
-		dev_err(dev, "%s: Speed is fixed at %iMbps, cannot set to %iMbps\n",
-		        port->net_dev->name, sja1105_get_speed_mbps(static_config_speed),
-		        speed_mbps);
-		rc = -EINVAL;
-		goto err_out;
-	}
+	char string[128] = "";
+	struct sja1105_mac_config_entry *mac_sconfig =
+	                        &priv->static_config.mac_config[port->index];
 
 	/* Read, modify and write MAC config table */
 	if (IS_PQRS(priv->device_id)) {
@@ -143,10 +107,21 @@ static int sja1105_adjust_port_speed(struct sja1105_port *port, int speed_mbps)
 		 * We'll use the static configuration tables as a
 		 * reasonable approximation.
 		 */
-		mac_entry = priv->static_config.mac_config[port->index];
+		mac_entry = *mac_sconfig;
 	}
 
-	mac_entry.speed = speed;
+	if (speed_mbps > 0) {
+		speed = sja1105_get_speed_cfg(speed_mbps);
+		if (speed < 0) {
+			rc = -EINVAL;
+			dev_err(dev, "%s: Invalid speed (%iMbps)\n",
+			        port->net_dev->name, speed_mbps);
+			goto err_out;
+		}
+		mac_entry.speed = speed;
+	}
+	mac_entry.ingress = (enable) ? mac_sconfig->ingress : 0;
+	mac_entry.egress = (enable) ? mac_sconfig->egress : 0;
 	rc = sja1105_mac_config_set(priv, &mac_entry, port->index);
 	if (rc < 0) {
 		dev_err(dev, "%s: MAC configuration write to device failed\n",
@@ -167,14 +142,19 @@ static int sja1105_adjust_port_speed(struct sja1105_port *port, int speed_mbps)
 		rc = sja1105_clocking_setup_port(port);
 		if (rc < 0) {
 			dev_err(dev, "%s: Clocking setup failed\n",
-			port->net_dev->name);
+			        port->net_dev->name);
 			goto err_out;
 		}
 	}
 
-err_ok:
-	dev_info(dev, "%s: Adjusted MAC speed to %iMbps\n",
-	         port->net_dev->name, port->phy_dev->speed);
+	if (enable)
+		snprintf(string, sizeof(string),
+		         "Adjusted MAC speed to %iMbps, ",
+		         port->phy_dev->speed);
+	dev_info(dev, "%s: %sRX %s, TX %s\n",
+	         port->net_dev->name, string,
+	         (mac_entry.ingress) ? "enabled" : "disabled",
+	         (mac_entry.egress) ? "enabled" : "disabled");
 	rc = 0;
 err_out:
 	return rc;
@@ -190,13 +170,16 @@ void sja1105_netdev_adjust_link(struct net_device *net_dev)
 		phy_print_status(phy_dev);
 
 	if (!phy_dev->link) {
+		mutex_lock(&priv->lock);
+		sja1105_adjust_port_config(port, 0, 0);
+		mutex_unlock(&priv->lock);
 		netif_carrier_off(net_dev);
 		return;
 	}
 
 	netif_carrier_on(net_dev);
 	mutex_lock(&priv->lock);
-	sja1105_adjust_port_speed(port, phy_dev->speed);
+	sja1105_adjust_port_config(port, phy_dev->speed, 1);
 	mutex_unlock(&priv->lock);
 }
 

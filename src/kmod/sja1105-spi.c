@@ -320,3 +320,32 @@ hardware_left_floating_error:
 hardware_not_responding_error:
 	return -ENODEV;
 }
+
+int sja1105_static_config_flush_ports_disabled(struct sja1105_spi_private *priv)
+{
+	u64 ingress[MAX_MAC_CONFIG_COUNT];
+	u64 egress[MAX_MAC_CONFIG_COUNT];
+	struct sja1105_mac_config_entry *mac;
+	int i, rc;
+
+	/* Patch static config to disable rx/tx for all ports */
+	for (i = 0; i < MAX_MAC_CONFIG_COUNT; i++) {
+		mac = &priv->static_config.mac_config[i];
+		ingress[i] = mac->ingress;
+		egress[i] = mac->egress;
+		mac->ingress = 0;
+		mac->egress = 0;
+	}
+
+	/* Upload static configuration */
+	rc = sja1105_static_config_flush(priv);
+
+	/* Restore static configuration */
+	for (i = 0; i < MAX_MAC_CONFIG_COUNT; i++) {
+		mac = &priv->static_config.mac_config[i];
+		mac->ingress = ingress[i];
+		mac->egress = egress[i];
+	}
+
+	return rc;
+}

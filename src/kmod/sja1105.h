@@ -175,6 +175,7 @@ int sja1105_cold_reset(struct sja1105_spi_private *priv);
 
 /* sja1105-spi.c */
 int sja1105_static_config_flush(struct sja1105_spi_private *priv);
+int sja1105_static_config_flush_ports_disabled(struct sja1105_spi_private *priv);
 
 /* sja1105-status.c */
 

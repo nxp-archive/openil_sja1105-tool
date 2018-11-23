@@ -188,7 +188,7 @@ static ssize_t sja1105_sysfs_wr(struct device *dev,
 			goto out_error;
 
 		/* Upload static configuration */
-		rc = sja1105_static_config_flush(priv);
+		rc = sja1105_static_config_flush_ports_disabled(priv);
 		if (rc < 0)
 			goto out_error;
 		dev_info(dev, "Uploaded static configuration to device\n");
