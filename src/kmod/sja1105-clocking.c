@@ -532,6 +532,13 @@ rgmii_clocking_setup(struct sja1105_port *port)
 		/* 10Mbps, IDIV enabled, divide by 10 */
 		rc = sja1105_cgu_idiv_config(port, 1, 10);
 		break;
+	case 0:
+		/* Skip CGU configuration if there is no speed available
+		 * (e.g. link is not established yet) */
+		dev_dbg(dev, "Link speed not available for port %s, skipping CGU configuration\n",
+		        port->net_dev->name);
+		rc = 0;
+		goto out;
 	default:
 		rc = -EINVAL;
 	}
