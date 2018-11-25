@@ -1,3 +1,12 @@
 tags
+*.o
+*.o.cmd
+*.ko.cmd
+*.ko
+*.so
+src/kmod/.tmp_versions/
+src/kmod/Module.symvers
+src/kmod/modules.order
+src/kmod/sja1105.mod.c
 src/helpers/sja1105.bin
 src/helpers/_build
