@@ -103,6 +103,12 @@ void sja1105_netdev_adjust_link(struct net_device *net_dev);
 int  sja1105_ptp_clock_register(struct sja1105_spi_private *priv);
 void sja1105_ptp_clock_unregister(struct sja1105_spi_private *priv);
 
+#define u64_to_timespec64(ts, val)                                   \
+	{                                                            \
+		(ts)->tv_sec = div_u64((val), NSEC_PER_SEC);         \
+		(ts)->tv_nsec = (val) - (ts)->tv_sec * NSEC_PER_SEC; \
+	};
+
 /* sja1105-dynamic-config.c */
 
 #define SJA1105T_NUM_PORTS 5

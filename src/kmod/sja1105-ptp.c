@@ -31,18 +31,14 @@
 /* Offset into CORE_ADDR */
 #define PTP_ADDR                    0x0
 
-/* From UM10944.pdf:
- * PTPCLKRATE: This field determines the speed of PTPCLKVAL. It implements a
- * fixed-point clock rate value with a single-bit integer part and a 31-bit
- * fractional part allowing for sub-ppb rate corrections. PTPCLKVAL ticks at
- * the rate of PTPTSCLK multiplied by this field. So any value having the
- * integer part set to 0 (i.e. bit 31 set to 0) will cause PTPCLKVAL to be
- * slower than PTPTSCLK. Any value having the integer part set to one will
- * cause PTPCLKVAL to be at least as fast as PTPTSCLK. E.g. a value of
- * h’90000000 will cause PTPCLKVAL to tick 1.125 = (2 0 + 2 3 ) faster than
- * PTPTSCLK. This field returns all 0s on read.
+/* At full swing, the PTPCLKVAL can either speed up to 2x PTPTSCLK (when
+ * PTPCLKRATE = 0xffffffff), or slow down to 1/2x PTPTSCLK (when PTPCLKRATE =
+ * 0x0). PTPCLKRATE is centered around 0x80000000.  This means that the
+ * hardware supports one full billion parts per billion frequency adjustments,
+ * i.e. recover 1 whole second of offset (or NSEC_PER_SEC as the ppb unit
+ * expresses it) during 1 second.
  */
-#define SJA1105_MAX_ADJ             ((1ull << 31) - 1)
+#define SJA1105_MAX_ADJ_PPB        NSEC_PER_SEC
 
 enum sja1105_ptpegr_ts_source {
 	TS_PTPTSCLK = 0,
@@ -158,9 +154,11 @@ sja1105_timespec_to_ptp_time(const struct timespec64 *ts, u64 *ptp_time)
 static void
 sja1105_ptp_time_to_timespec(struct timespec64 *ts, u64 ptp_time)
 {
-	ptp_time *= 8;
-	ts->tv_sec  = div_u64(ptp_time, NSEC_PER_SEC);
-	ts->tv_nsec = ptp_time - NSEC_PER_SEC * ts->tv_sec;
+	/* Check whether we can actually multiply by 8ns
+	 * (the hw resolution) without overflow */
+	if (ptp_time >= 0x1FFFFFFFFFFFFFFFull)
+		pr_err("Integer overflow during timespec conversion!\n");
+	u64_to_timespec64(ts, ptp_time * 8);
 }
 
 #define UINT32_MAX  0xFFFFFFFF
@@ -523,12 +521,6 @@ static int sja1105_ptp_gettime(struct ptp_clock_info *ptp,
 		dev_err(&priv->spi_dev->dev, "failed to read ptpclkval\n");
 		goto out;
 	}
-	if (ptpclkval == 0) {
-		/* XXX: Find out why this is happening */
-		dev_err(&priv->spi_dev->dev, "ptp_gettime returned zero!\n");
-		rc = -EAGAIN;
-		goto out;
-	}
 	sja1105_ptp_time_to_timespec(ts, ptpclkval);
 out:
 	return rc;
@@ -544,7 +536,7 @@ static int sja1105_ptp_settime(struct ptp_clock_info *ptp,
 
 	rc = sja1105_ptp_add_mode_set(priv, PTP_SET_MODE);
 	if (rc < 0) {
-		dev_err(&priv->spi_dev->dev, "Failed configuring set mode for ptp clk\n");
+		dev_err(&priv->spi_dev->dev, "Failed to put PTPCLK in set mode\n");
 		goto out;
 	}
 	rc = sja1105_ptp_clk_write(priv, ts);
@@ -567,15 +559,32 @@ static int sja1105_ptp_adjfine(struct ptp_clock_info *ptp, long scaled_ppm)
 	else
 		ptpclkrate_addr = SJA1105PQRS_PTPCLKRATE_ADDR;
 
-	if (scaled_ppm < 0)
-		ptpclkrate = (1ull << 31) & (-scaled_ppm);
-	else
-		ptpclkrate = (1ull << 31) | scaled_ppm;
+	/*            This range is actually +/- SJA1105_MAX_ADJ_PPB
+	 *            divided by 1000 (ppb -> ppm) and with a 16-bit
+	 *            "fractional" part (actually fixed point).
+	 *                                    |
+	 *                                    v
+	 * Convert scaled_ppm from the +/- ((10^6) << 16) range
+	 * into the +/- (1 << 31) range (which the hw supports).
+	 *
+	 *   ptpclkrate = scaled_ppm * 2^31 / (10^6 * 2^16)
+	 *   simplifies to
+	 *   ptpclkrate = scaled_ppm * 2^9 / 5^6
+	 */
+	ptpclkrate = (u64) scaled_ppm << 9;
+	ptpclkrate = div_s64(ptpclkrate, 15625);
+	/* Take a +/- value and re-center it around 2^31. */
+	ptpclkrate += 0x80000000ull;
 
 	rc = sja1105_ptp_write_reg(priv, ptpclkrate_addr, &ptpclkrate, 4);
 	return rc;
 }
 
+/* The physical significance of delta (expressed in ppb) is "how many unit
+ * parts of clock offset need to be recovered during the next full unit".
+ * In English, that means "how many nanoseconds of offset need to be recovered
+ * during the next second".
+ */
 #if KERNEL_VERSION(4, 9, 0) >= LINUX_VERSION_CODE
 static int sja1105_ptp_adjfreq(struct ptp_clock_info *ptp, s32 delta)
 {
@@ -606,7 +615,7 @@ static int sja1105_ptp_adjtime(struct ptp_clock_info *ptp, s64 delta)
 
 	rc = sja1105_ptp_add_mode_set(priv, PTP_ADD_MODE);
 	if (rc < 0) {
-		dev_err(&priv->spi_dev->dev, "failed configuring add mode for ptp clk\n");
+		dev_err(&priv->spi_dev->dev, "Failed to put PTPCLK in add mode\n");
 		goto out;
 	}
 	rc = sja1105_ptp_clk_write(priv, &ts);
@@ -614,25 +623,10 @@ out:
 	return rc;
 }
 
-static int sja1105_ptp_enable(struct ptp_clock_info *ptp,
-                              struct ptp_clock_request *rq, int on)
-{
-	struct sja1105_spi_private *priv = container_of(ptp, struct
-	                                   sja1105_spi_private, ptp_caps);
-	struct timespec64 now;
-	int rc;
-
-	rc = sja1105_ptp_reset(priv);
-	if (rc < 0)
-		return -EIO;
-	getnstimeofday64(&now);
-	return sja1105_ptp_settime(&priv->ptp_caps, &now);
-}
-
 static const struct ptp_clock_info sja1105_ptp_caps = {
 	.owner     = THIS_MODULE,
 	.name      = "SJA1105 PHC",
-	.max_adj   = SJA1105_MAX_ADJ,
+	.max_adj   = SJA1105_MAX_ADJ_PPB, /* has real physical significance */
 #if KERNEL_VERSION(4, 9, 0) >= LINUX_VERSION_CODE
 	.adjfreq   = sja1105_ptp_adjfreq,
 #else
@@ -641,16 +635,24 @@ static const struct ptp_clock_info sja1105_ptp_caps = {
 	.adjtime   = sja1105_ptp_adjtime,
 	.gettime64 = sja1105_ptp_gettime,
 	.settime64 = sja1105_ptp_settime,
-	.enable    = sja1105_ptp_enable,
 };
 
 int sja1105_ptp_clock_register(struct sja1105_spi_private *priv)
 {
+	struct timespec64 now;
+	int rc;
+
 	priv->ptp_caps = sja1105_ptp_caps;
 
 	priv->clock = ptp_clock_register(&priv->ptp_caps, &priv->spi_dev->dev);
 	if (IS_ERR_OR_NULL(priv->clock))
 		return PTR_ERR(priv->clock);
+
+	rc = sja1105_ptp_reset(priv);
+	if (rc < 0)
+		return -EIO;
+	getnstimeofday64(&now);
+	sja1105_ptp_settime(&priv->ptp_caps, &now);
 
 	return 0;
 }
