@@ -398,6 +398,10 @@ static int sja1105_probe(struct spi_device *spi)
 	dev_dbg(dev, "Probed switch chip: %s\n", sja1105_device_id_string_get(
 	        priv->device_id, priv->part_nr));
 
+	rc = sja1105_ptp_clock_register(priv);
+	if (rc < 0)
+		goto err_out;
+
 	rc = sja1105_sysfs_init(priv);
 	if (rc) {
 		dev_err(dev, "Failed to create sysfs entries\n");
@@ -423,10 +427,6 @@ static int sja1105_probe(struct spi_device *spi)
 	/* Connect and bring up PHYs */
 	rc = sja1105_connect_phy(priv);
 	if (rc)
-		goto err_out;
-
-	rc = sja1105_ptp_clock_register(priv);
-	if (rc < 0)
 		goto err_out;
 
 	mutex_unlock(&priv->lock);
