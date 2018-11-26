@@ -267,6 +267,10 @@ static int sja1105_get_ts_info(struct net_device *net_dev,
 	struct spi_device *spi = port->spi_dev;
 	struct sja1105_spi_private *priv = spi_get_drvdata(spi);
 
+	/* Called during cleanup() */
+	if (!priv->clock)
+		return -ENODEV;
+
 	info->so_timestamping = SOF_TIMESTAMPING_TX_HARDWARE |
 	                        SOF_TIMESTAMPING_RX_HARDWARE |
 	                        SOF_TIMESTAMPING_RAW_HARDWARE;

@@ -663,4 +663,5 @@ void sja1105_ptp_clock_unregister(struct sja1105_spi_private *priv)
 		return;
 
 	ptp_clock_unregister(priv->clock);
+	priv->clock = NULL;
 }
