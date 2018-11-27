@@ -269,6 +269,10 @@ sja1105_static_config_check_memory_size(struct sja1105_static_config *config)
 int sja1105_static_config_check_valid(struct sja1105_static_config *config)
 {
 	if (config->schedule_count > 0) {
+		if (!SUPPORTS_TSN(config->device_id)) {
+			loge("TTEthernet is only supported on T and Q/S!");
+			return -1;
+		}
 		if (config->schedule_entry_points_count == 0) {
 			loge("schedule-table not empty, but schedule-entry-points-table empty");
 			return -1;

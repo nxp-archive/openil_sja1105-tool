@@ -150,6 +150,27 @@ int sja1105_load_firmware(struct sja1105_spi_private *priv)
 	/* Perform fixups to the staging area loaded from userspace */
 	sja1105_patch_mac_mii_settings(priv);
 
+	/* Set some driver private data according to the newly received
+	 * configuration from userspace.
+	 */
+	if (priv->static_config.schedule_entry_points_params_count > 0 &&
+	    priv->static_config.schedule_entry_points_params[0].clksrc == 3) {
+
+		u64 i, delta = 0;
+
+		/* TTEthernet scheduling is enabled, and clock source is PTP */
+		priv->configured_for_scheduling = true;
+
+		/* Iterate through all TTEthernet timeslots to calculate
+		 * total duration of the schedule.
+		 */
+		for (i = 0; i < priv->static_config.schedule_count; i++)
+			delta += priv->static_config.schedule[i].delta;
+
+		u64_to_timespec64(&priv->tas_cycle_len, delta * 200);
+	} else
+		priv->configured_for_scheduling = false;
+
 err_mem:
 	kfree(buf);
 err_fw:
@@ -367,7 +388,9 @@ static int sja1105_probe(struct spi_device *spi)
 		return -ENOMEM;
 
 	INIT_LIST_HEAD(&(priv->port_list_head.list));
+	spin_lock_init(&priv->xmit_lock);
 	mutex_init(&priv->lock);
+
 	mutex_lock(&priv->lock); /* Lock mutex until end of initialization */
 
 	/* Populate our driver private structure (priv) based on

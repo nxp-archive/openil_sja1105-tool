@@ -62,6 +62,37 @@ struct sja1105_ptp_cmd {
 	u64 ptpclkadd;    /* enum sja1105_ptp_clk_add_mode */
 };
 
+enum ptp_op {
+	PTP_NONE,
+	PTP_CLOCKSTEP,
+	PTP_ADJUSTFREQ,
+};
+
+/* Global variable */
+static enum ptp_op sja1105_last_ptp_op;
+
+static int
+timespec_lower(const struct timespec64 *lhs, const struct timespec64 *rhs)
+{
+	if (lhs->tv_sec == rhs->tv_sec)
+		return lhs->tv_nsec < rhs->tv_nsec;
+	else
+		return lhs->tv_sec < rhs->tv_sec;
+}
+
+static void
+timespec_diff(const struct timespec64 *start, const struct timespec64 *stop,
+              struct timespec64 *result)
+{
+	if ((stop->tv_nsec - start->tv_nsec) < 0) {
+		result->tv_sec = stop->tv_sec - start->tv_sec - 1;
+		result->tv_nsec = stop->tv_nsec - start->tv_nsec + NSEC_PER_SEC;
+	} else {
+		result->tv_sec = stop->tv_sec - start->tv_sec;
+		result->tv_nsec = stop->tv_nsec - start->tv_nsec;
+	}
+}
+
 static void
 sja1105_ptp_cmd_access(void *buf, struct sja1105_ptp_cmd *cmd,
                        int write, u64 device_id)
@@ -109,11 +140,6 @@ static int sja1105_ptp_cmd_commit(struct sja1105_spi_private *priv,
 	u8 packed_buf[BUF_LEN];
 	int ptp_control_addr;
 
-	/* Cannot perform all the compatibility matrix checks
-	 * in this relatively time-critical code portion.
-	 * Relying on the caller to not access an unsupported scheduling
-	 * register on non-TTEthernet-capable devices.
-	 */
 	if (IS_ET(device_id))
 		ptp_control_addr = 0x17;
 	else
@@ -161,70 +187,6 @@ sja1105_ptp_time_to_timespec(struct timespec64 *ts, u64 ptp_time)
 	u64_to_timespec64(ts, ptp_time * 8);
 }
 
-#define UINT32_MAX  0xFFFFFFFF
-
-int sja1105_ptp_is_schedule_running(struct sja1105_spi_private *priv)
-{
-	u64 device_id = priv->device_id;
-	struct  sja1105_ptp_cmd cmd;
-	const int BUF_LEN = 4;
-	u8 packed_buf[BUF_LEN];
-	int ptp_control_addr;
-	int rc;
-
-	if (!SUPPORTS_TSN(device_id)) {
-		loge("1588 + TTEthernet is only supported on T and Q/S!");
-		rc = -EINVAL;
-		goto out;
-	}
-	if (IS_PQRS(device_id))
-		/* Only Q/S will enter here. */
-		ptp_control_addr = 0x18;
-	else
-		/* Only T will enter here */
-		ptp_control_addr = 0x17;
-
-	rc = sja1105_spi_send_packed_buf(priv, SPI_READ,
-	                                 CORE_ADDR + ptp_control_addr,
-	                                 packed_buf, BUF_LEN);
-	if (rc < 0) {
-		loge("failed to read from spi");
-		goto out;
-	}
-	sja1105_ptp_cmd_unpack(packed_buf, &cmd, device_id);
-
-	if (cmd.ptpstrtsch == 1)
-		/* Schedule successfully started */
-		rc = 0;
-	else if (cmd.ptpstopsch == 1)
-		/* Schedule is stopped */
-		rc = 1;
-	else
-		/* Schedule is probably not configured with PTP clock source */
-		rc = -EINVAL;
-
-out:
-	return rc;
-}
-
-int sja1105_ptp_schedule_start(struct sja1105_spi_private *priv)
-{
-	struct sja1105_ptp_cmd cmd;
-
-	memset(&cmd, 0, sizeof(cmd));
-	cmd.ptpstrtsch = 1;
-	return sja1105_ptp_cmd_commit(priv, &cmd);
-}
-
-int sja1105_ptp_schedule_stop(struct sja1105_spi_private *priv)
-{
-	struct sja1105_ptp_cmd cmd;
-
-	memset(&cmd, 0, sizeof(cmd));
-	cmd.ptpstopsch = 1;
-	return sja1105_ptp_cmd_commit(priv, &cmd);
-}
-
 int sja1105_ptp_pin_toggle_start(struct sja1105_spi_private *priv)
 {
 	struct sja1105_ptp_cmd cmd;
@@ -260,6 +222,8 @@ int sja1105_ptp_pin_start_time_set(struct sja1105_spi_private *priv,
 	return sja1105_ptp_write_reg(priv, ptppinst_addr, &pinst, 8);
 }
 
+#define UINT32_MAX  0xFFFFFFFF
+
 /* Write to PTPPINDUR */
 int sja1105_ptp_pin_duration_set(struct sja1105_spi_private *priv,
                                  const struct timespec64 *ts)
@@ -276,7 +240,8 @@ int sja1105_ptp_pin_duration_set(struct sja1105_spi_private *priv,
 
 	sja1105_timespec_to_ptp_time(ts, &pindur);
 	if (pindur >= UINT32_MAX) {
-		loge("%s: provided ts is too large", __func__);
+		dev_err(&priv->spi_dev->dev,
+		        "pindur: provided ts is too large\n");
 		rc = -ERANGE;
 		goto out;
 	}
@@ -285,21 +250,52 @@ out:
 	return rc;
 }
 
+static int sja1105_tas_check_running(struct sja1105_spi_private *priv)
+{
+	u64 device_id = priv->device_id;
+	struct  sja1105_ptp_cmd cmd;
+	const int BUF_LEN = 4;
+	u8 packed_buf[BUF_LEN];
+	int ptp_control_addr;
+	int rc = 0;
+
+	if (IS_PQRS(device_id))
+		/* Only Q/S will enter here. */
+		ptp_control_addr = 0x18;
+	else
+		/* Only T will enter here */
+		ptp_control_addr = 0x17;
+
+	rc = sja1105_spi_send_packed_buf(priv, SPI_READ, CORE_ADDR +
+	                                 ptp_control_addr, packed_buf, BUF_LEN);
+	if (rc < 0)
+		goto out;
+
+	sja1105_ptp_cmd_unpack(packed_buf, &cmd, device_id);
+
+	if (cmd.ptpstrtsch == 1)
+		/* Schedule successfully started */
+		priv->tas_state = TAS_STATE_RUNNING;
+	else if (cmd.ptpstopsch == 1)
+		/* Schedule is stopped */
+		priv->tas_state = TAS_STATE_DISABLED;
+	else
+		/* Schedule is probably not configured with PTP clock source */
+		rc = -EINVAL;
+out:
+	return rc;
+}
+
 /* Write to PTPCLKCORP */
-int
-sja1105_ptp_schedule_correction_period_set(struct sja1105_spi_private *priv,
-                                           const struct timespec64 *ts)
+static int
+sja1105_tas_apply_correction_period(struct sja1105_spi_private *priv,
+                                    const struct timespec64 *ts)
 {
 	u64 device_id = priv->device_id;
 	u64 ptpclkcorp_addr;
 	u64 ptpclkcorp;
 	int rc;
 
-	if (!SUPPORTS_TSN(device_id)) {
-		loge("1588 + TTEthernet is only supported on T and Q/S!");
-		rc = -EINVAL;
-		goto out;
-	}
 	if (IS_ET(device_id))
 		/* Only T will enter here */
 		ptpclkcorp_addr = SJA1105T_PTPCLKCORP_ADDR;
@@ -309,7 +305,8 @@ sja1105_ptp_schedule_correction_period_set(struct sja1105_spi_private *priv,
 
 	sja1105_timespec_to_ptp_time(ts, &ptpclkcorp);
 	if (ptpclkcorp >= UINT32_MAX) {
-		loge("%s: provided ts is too large", __func__);
+		dev_err(&priv->spi_dev->dev,
+		        "ptpclkcorp: provided ts is too large");
 		rc = -ERANGE;
 		goto out;
 	}
@@ -319,17 +316,15 @@ out:
 }
 
 /* Write to PTPSCHTM */
-int sja1105_ptp_schedule_start_time_set(struct sja1105_spi_private *priv,
-                                        const struct timespec64 *ts)
+static int
+sja1105_tas_set_start_time(struct sja1105_spi_private *priv,
+                           const struct timespec64 *ts)
 {
 	u64 device_id = priv->device_id;
 	u64 ptpschtm_addr;
 	u64 ptpschtm;
+	int rc;
 
-	if (!SUPPORTS_TSN(device_id)) {
-		loge("1588 + TTEthernet is only supported on T and Q/S!");
-		return -EINVAL;
-	}
 	if (IS_ET(device_id))
 		/* Only T enters here */
 		ptpschtm_addr = SJA1105T_PTPSCHTM_ADDR;
@@ -338,17 +333,180 @@ int sja1105_ptp_schedule_start_time_set(struct sja1105_spi_private *priv,
 		ptpschtm_addr = SJA1105QS_PTPSCHTM_ADDR;
 
 	sja1105_timespec_to_ptp_time(ts, &ptpschtm);
-	return sja1105_ptp_write_reg(priv, ptpschtm_addr, &ptpschtm, 8);
+	rc = sja1105_ptp_write_reg(priv, ptpschtm_addr, &ptpschtm, 8);
+	if (rc < 0)
+		return rc;
+
+	priv->tas_start_time = *ts;
+	return 0;
 }
 
-int sja1105_ptp_corrclk4ts_set(struct sja1105_spi_private *priv,
-                               enum sja1105_ptpegr_ts_source source)
+static int sja1105_tas_start(struct sja1105_spi_private *priv)
 {
 	struct sja1105_ptp_cmd cmd;
+	int rc;
+
+	if (priv->tas_state == TAS_STATE_ENABLED_NOT_RUNNING ||
+	    priv->tas_state == TAS_STATE_RUNNING) {
+		dev_err(&priv->spi_dev->dev, "TAS already started!\n");
+		return -EINVAL;
+	}
 
 	memset(&cmd, 0, sizeof(cmd));
-	cmd.corrclk4ts = source;
-	return sja1105_ptp_cmd_commit(priv, &cmd);
+	cmd.ptpstrtsch = 1;
+	rc = sja1105_ptp_cmd_commit(priv, &cmd);
+	if (rc < 0)
+		return rc;
+
+	priv->tas_state = TAS_STATE_ENABLED_NOT_RUNNING;
+	return 0;
+}
+
+static int sja1105_tas_stop(struct sja1105_spi_private *priv)
+{
+	struct sja1105_ptp_cmd cmd;
+	int rc;
+
+	if (priv->tas_state == TAS_STATE_DISABLED) {
+		dev_err(&priv->spi_dev->dev, "TAS already disabled!\n");
+		return -EINVAL;
+	}
+
+	memset(&cmd, 0, sizeof(cmd));
+	cmd.ptpstopsch = 1;
+	rc = sja1105_ptp_cmd_commit(priv, &cmd);
+	if (rc < 0)
+		return rc;
+
+	priv->tas_state = TAS_STATE_DISABLED;
+	return 0;
+}
+
+static int sja1105_ptp_gettime(struct ptp_clock_info *ptp,
+                               struct timespec64 *ts);
+
+void sja1105_tas_state_machine(struct work_struct *work)
+{
+	struct sja1105_spi_private *priv = container_of(work, struct
+	                                   sja1105_spi_private, tas_work);
+	struct timespec64 tas_start_time;
+	struct timespec64 ptpclk_now;
+	struct timespec64 diff;
+	u64 tas_start_time_ns;
+	u64 tas_cycle_len_ns;
+	u64 ptpclk_now_ns;
+	int rc;
+
+	switch (priv->tas_state) {
+	case TAS_STATE_DISABLED:
+
+		dev_dbg(&priv->spi_dev->dev, "TAS state: disabled\n");
+		/* Can't do anything at all if clock is still being stepped */
+		if (sja1105_last_ptp_op != PTP_ADJUSTFREQ)
+			break;
+
+		rc = sja1105_ptp_gettime(&priv->ptp_caps, &ptpclk_now);
+		if (rc < 0)
+			return;
+
+		/* Delay start time to the beginning of the first TAS cycle
+		 * that starts at least 3 seconds from now.
+		 * This should buy us some time.
+		 */
+		ptpclk_now.tv_sec += 3;
+		sja1105_timespec_to_ptp_time(&ptpclk_now, &ptpclk_now_ns);
+		sja1105_timespec_to_ptp_time(&priv->tas_cycle_len, &tas_cycle_len_ns);
+		/* Round start_time_ns to the closest cycle_len_ns multiple */
+		tas_start_time_ns = 1 + div_u64(ptpclk_now_ns, tas_cycle_len_ns);
+		tas_start_time_ns *= tas_cycle_len_ns;
+		sja1105_ptp_time_to_timespec(&tas_start_time, tas_start_time_ns);
+
+		rc = sja1105_tas_set_start_time(priv, &tas_start_time);
+		if (rc < 0)
+			return;
+
+		rc = sja1105_tas_apply_correction_period(priv, &priv->tas_cycle_len);
+		if (rc < 0)
+			return;
+
+		rc = sja1105_tas_start(priv);
+		if (rc < 0)
+			return;
+		break;
+
+	case TAS_STATE_ENABLED_NOT_RUNNING:
+		/* Check if TAS has actually started, by comparing the
+		 * scheduled start time with the SJA1105 PTP clock
+		 */
+		dev_dbg(&priv->spi_dev->dev,
+		        "TAS state: enabled but not running\n");
+
+		/* Clock was stepped.. bad news for TAS */
+		if (sja1105_last_ptp_op != PTP_ADJUSTFREQ) {
+			sja1105_tas_stop(priv);
+			break;
+		}
+
+		rc = sja1105_ptp_gettime(&priv->ptp_caps, &ptpclk_now);
+		if (rc < 0)
+			return;
+
+		if (timespec_lower(&ptpclk_now, &priv->tas_start_time)) {
+			/* TAS has not started yet */
+			timespec_diff(&ptpclk_now, &priv->tas_start_time, &diff);
+			dev_dbg(&priv->spi_dev->dev,
+			        "time to start: [%lld.%09ld]",
+			         diff.tv_sec, diff.tv_nsec);
+			break;
+		}
+
+		/* Time elapsed, what happened? */
+		rc = sja1105_tas_check_running(priv);
+		if (rc < 0)
+			return;
+
+		if (priv->tas_state == TAS_STATE_RUNNING)
+			/* TAS has started */
+			dev_dbg(&priv->spi_dev->dev,
+			        "TAS state: transitioned to running\n");
+		else
+			dev_err(&priv->spi_dev->dev,
+			        "TAS state: not started despite time elapsed\n");
+
+		break;
+
+	case TAS_STATE_RUNNING:
+		dev_dbg(&priv->spi_dev->dev, "TAS state: running\n");
+
+		/* Clock was stepped.. bad news for TAS */
+		if (sja1105_last_ptp_op != PTP_ADJUSTFREQ) {
+			sja1105_tas_stop(priv);
+			break;
+		}
+
+		rc = sja1105_tas_check_running(priv);
+		if (rc < 0)
+			return;
+
+		if (priv->tas_state != TAS_STATE_RUNNING) {
+			dev_err(&priv->spi_dev->dev, "TAS surprisingly stopped\n");
+			break;
+		}
+		rc = sja1105_ptp_gettime(&priv->ptp_caps, &ptpclk_now);
+		if (rc < 0)
+			return;
+
+		timespec_diff(&priv->tas_start_time, &ptpclk_now, &diff);
+		dev_dbg(&priv->spi_dev->dev,
+		        "Time since TAS started: [%lld.%09ld]",
+		         diff.tv_sec, diff.tv_nsec);
+		break;
+
+	default:
+		if (net_ratelimit())
+			dev_err(&priv->spi_dev->dev,
+			        "TAS in an invalid state (incorrect use of API)!\n");
+	}
 }
 
 int sja1105_ptpegr_ts_poll(struct sja1105_spi_private *priv,
@@ -540,6 +698,11 @@ static int sja1105_ptp_settime(struct ptp_clock_info *ptp,
 		goto out;
 	}
 	rc = sja1105_ptp_clk_write(priv, ts);
+
+	if (priv->configured_for_scheduling) {
+		sja1105_last_ptp_op = PTP_CLOCKSTEP;
+		schedule_work(&priv->tas_work);
+	}
 out:
 	return rc;
 }
@@ -577,6 +740,12 @@ static int sja1105_ptp_adjfine(struct ptp_clock_info *ptp, long scaled_ppm)
 	ptpclkrate += 0x80000000ull;
 
 	rc = sja1105_ptp_write_reg(priv, ptpclkrate_addr, &ptpclkrate, 4);
+
+	if (priv->configured_for_scheduling) {
+		sja1105_last_ptp_op = PTP_ADJUSTFREQ;
+		schedule_work(&priv->tas_work);
+	}
+
 	return rc;
 }
 
@@ -619,6 +788,12 @@ static int sja1105_ptp_adjtime(struct ptp_clock_info *ptp, s64 delta)
 		goto out;
 	}
 	rc = sja1105_ptp_clk_write(priv, &ts);
+
+	if (priv->configured_for_scheduling) {
+		sja1105_last_ptp_op = PTP_CLOCKSTEP;
+		schedule_work(&priv->tas_work);
+	}
+
 out:
 	return rc;
 }
@@ -642,6 +817,8 @@ int sja1105_ptp_clock_register(struct sja1105_spi_private *priv)
 	struct timespec64 now;
 	int rc;
 
+	INIT_WORK(&priv->tas_work, sja1105_tas_state_machine);
+
 	priv->ptp_caps = sja1105_ptp_caps;
 
 	priv->clock = ptp_clock_register(&priv->ptp_caps, &priv->spi_dev->dev);
@@ -653,6 +830,7 @@ int sja1105_ptp_clock_register(struct sja1105_spi_private *priv)
 		return -EIO;
 	getnstimeofday64(&now);
 	sja1105_ptp_settime(&priv->ptp_caps, &now);
+	priv->tas_state = TAS_STATE_DISABLED;
 
 	return 0;
 }
@@ -661,6 +839,8 @@ void sja1105_ptp_clock_unregister(struct sja1105_spi_private *priv)
 {
 	if (IS_ERR_OR_NULL(priv->clock))
 		return;
+
+	cancel_work_sync(&priv->tas_work);
 
 	ptp_clock_unregister(priv->clock);
 	priv->clock = NULL;

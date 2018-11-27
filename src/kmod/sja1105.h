@@ -22,6 +22,12 @@ enum sja1105_ptp_clk_add_mode {
 	PTP_ADD_MODE,
 };
 
+enum sja1105_tas_state {
+	TAS_STATE_DISABLED,
+	TAS_STATE_ENABLED_NOT_RUNNING,
+	TAS_STATE_RUNNING,
+};
+
 struct sja1105_port {
 	struct device_node *node;
 	struct device_node *phy_node; /* For delayed phy_connect during probe */
@@ -59,6 +65,11 @@ struct sja1105_spi_private {
 	struct ptp_clock *clock;
 	struct ptp_clock_info ptp_caps;
 	enum sja1105_ptp_clk_add_mode ptp_add_mode;
+	bool configured_for_scheduling;
+	enum sja1105_tas_state tas_state;
+	struct timespec64 tas_cycle_len;
+	struct timespec64 tas_start_time;
+	struct work_struct tas_work;
 };
 
 struct sja1105_spi_message {
@@ -105,6 +116,7 @@ int sja1105_port_get_speed(struct sja1105_port *port);
 /* sja1105-ptp.c */
 int  sja1105_ptp_clock_register(struct sja1105_spi_private *priv);
 void sja1105_ptp_clock_unregister(struct sja1105_spi_private *priv);
+void sja1105_tas_state_machine(struct work_struct *work);
 
 #define u64_to_timespec64(ts, val)                                   \
 	{                                                            \
