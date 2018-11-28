@@ -17,6 +17,9 @@
 #include <linux/ptp_clock_kernel.h>
 #include <lib/include/static-config.h>
 
+#define SJA1105_MGMT_ROUTE_COUNT 4
+#define SJA1105_SKB_RING_SIZE    20
+
 enum sja1105_ptp_clk_add_mode {
 	PTP_SET_MODE = 0,
 	PTP_ADD_MODE,
@@ -26,6 +29,13 @@ enum sja1105_tas_state {
 	TAS_STATE_DISABLED,
 	TAS_STATE_ENABLED_NOT_RUNNING,
 	TAS_STATE_RUNNING,
+};
+
+struct sja1105_skb_ring {
+	struct sk_buff *skb[SJA1105_SKB_RING_SIZE];
+	int count;
+	int pi; /* Producer index */
+	int ci; /* Consumer index */
 };
 
 struct sja1105_port {
@@ -43,8 +53,10 @@ struct sja1105_port {
 	int index; /* switch port index */
 	int running; /* 1 if port is openend */
 	int dt_xmii_mode;
-	struct ratelimit_state get_stats_ratelimit;
 	struct rtnl_link_stats64 stats;
+	struct work_struct xmit_work;
+	struct sja1105_skb_ring xmit_ring;
+	int mgmt_slot;
 };
 
 struct sja1105_spi_private {
@@ -70,6 +82,9 @@ struct sja1105_spi_private {
 	struct timespec64 tas_cycle_len;
 	struct timespec64 tas_start_time;
 	struct work_struct tas_work;
+
+	struct net_device *host_net_dev;
+	struct sja1105_port *switch_host_port;
 };
 
 struct sja1105_spi_message {
@@ -125,6 +140,20 @@ void sja1105_tas_state_machine(struct work_struct *work);
 	};
 
 /* sja1105-dynamic-config.c */
+
+struct sja1105_mgmt_entry {
+	uint64_t ts_regid;
+	uint64_t egr_ts;
+	uint64_t macaddr;
+	uint64_t destports;
+	uint64_t enfport;
+	uint64_t index;
+};
+
+int sja1105_mgmt_route_get(struct sja1105_spi_private *priv,
+                           struct sja1105_mgmt_entry *entry, int index);
+int sja1105_mgmt_route_set(struct sja1105_spi_private *priv,
+                           struct sja1105_mgmt_entry *entry, int index);
 
 #define SJA1105_NUM_PORTS 5
 

@@ -189,52 +189,12 @@ void
 #else
 struct rtnl_link_stats64*
 #endif
-sja1105_get_stats(struct net_device *net_dev,
-                  struct rtnl_link_stats64 *storage)
+sja1105_get_stats(struct net_device *net_dev, struct rtnl_link_stats64 *storage)
 {
 	struct sja1105_port *port = netdev_priv(net_dev);
-	struct spi_device *spi = port->spi_dev;
-	struct device *dev = &spi->dev;
-	struct sja1105_spi_private *priv = spi_get_drvdata(spi);
-	struct sja1105_port_status_hl1 status;
-	u64 errcnt;
-	int rc;
 
-	/* If net device is not up, do nothing. *storage is
-	 * zeroed by upper layer */
-	if (!port->running)
-		goto err_out;
-
-	/* Rate limit status read to once every 250ms per port
-	 * to limit SPI traffic load */
-	rc = __ratelimit(&port->get_stats_ratelimit);
-	if (!rc)
-		goto out;
-
-	/* Time to read stats from switch */
-	mutex_lock(&priv->lock);
-	rc = sja1105_port_status_get_hl1(priv, &status, port->index);
-	if (rc) {
-		mutex_unlock(&priv->lock);
-		dev_err(dev, "%s: Could not read status\n", net_dev->name);
-		goto out;
-	}
-
-	errcnt = status.n_n664err + status.n_vlanerr + status.n_unreleased +
-	         status.n_sizerr  + status.n_crcerr  + status.n_vlnotfound +
-	         status.n_polerr  + status.n_ctpolerr;
-
-	port->stats.rx_packets       = status.n_rxfrm;
-	port->stats.tx_packets       = status.n_txfrm;
-	port->stats.rx_bytes         = status.n_rxbyte;
-	port->stats.tx_bytes         = status.n_txbyte;
-	port->stats.rx_errors        = errcnt;
-	port->stats.rx_length_errors = status.n_sizerr;
-	port->stats.rx_crc_errors    = status.n_crcerr;
-	mutex_unlock(&priv->lock);
-out:
 	*storage = port->stats;
-err_out:
+
 #if KERNEL_VERSION(4, 10, 0) <= LINUX_VERSION_CODE
 	return;
 #else
@@ -242,16 +202,182 @@ err_out:
 #endif
 }
 
+static int sja1105_skb_ring_put(struct sja1105_skb_ring *ring,
+                                struct sk_buff *skb)
+{
+	int index;
+
+	if (ring->count == SJA1105_SKB_RING_SIZE)
+		return -1;
+
+	index = ring->pi;
+	ring->skb[index] = skb;
+	ring->pi = (index + 1) % SJA1105_SKB_RING_SIZE;
+	ring->count++;
+	return index;
+}
+
+static int sja1105_skb_ring_get(struct sja1105_skb_ring *ring,
+                                struct sk_buff **skb)
+{
+	int index;
+
+	if (ring->count == 0)
+		return -1;
+
+	index = ring->ci;
+	*skb = ring->skb[index];
+	ring->ci = (index + 1) % SJA1105_SKB_RING_SIZE;
+	ring->count--;
+	return index;
+}
+
+#define macaddr_to_u64(mac) \
+	(((u64) (mac[0]) << 40) | \
+	 ((u64) (mac[1]) << 32) | \
+	 ((u64) (mac[2]) << 24) | \
+	 ((u64) (mac[3]) << 16) | \
+	 ((u64) (mac[4]) <<  8) | \
+	 ((u64) (mac[5]) <<  0))
+
+/* Deferred work because setting up the management route cannot be done
+ * from atomit context (SPI transfer takes a sleepable lock on the bus)
+ */
+static void sja1105_xmit_work_handler(struct work_struct *work)
+{
+	struct sja1105_port *port = container_of(work, struct sja1105_port,
+	                                         xmit_work);
+	struct sja1105_spi_private *priv = spi_get_drvdata(port->spi_dev);
+	struct net_device *host = priv->host_net_dev;
+	struct sja1105_general_params_entry *gp;
+	struct sk_buff *skb;
+	int i, rc;
+
+	gp = &priv->static_config.general_params[0];
+
+	while ((i = sja1105_skb_ring_get(&port->xmit_ring, &skb)) >= 0) {
+
+		struct sja1105_mgmt_entry mgmt_route;
+		int slot = port->mgmt_slot;
+		struct ethhdr *hdr;
+		int timeout = 500;
+		int skb_len;
+		u64 dmac;
+
+		skb_len = skb->len;
+		hdr = eth_hdr(skb);
+		dmac = macaddr_to_u64(hdr->h_dest);
+
+		if (((dmac & gp->mac_flt0) != gp->mac_fltres0) &&
+		    ((dmac & gp->mac_flt1) != gp->mac_fltres1)) {
+			/* We must free the skb because we haven't sent
+			 * it to the host port yet
+			 */
+			dev_kfree_skb_any(skb);
+			port->net_dev->stats.tx_dropped++;
+			continue;
+		}
+		dev_dbg(&port->net_dev->dev, "%s i=%d\n", __func__, i);
+		dev_dbg(&port->net_dev->dev, "mac src %pM dst %pM\n",
+		        hdr->h_source, hdr->h_dest);
+
+		memset(&mgmt_route, 0, sizeof(struct sja1105_mgmt_entry));
+		mgmt_route.macaddr = macaddr_to_u64(hdr->h_dest);
+		mgmt_route.destports = (1 << port->index);
+		mgmt_route.ts_regid = 0;
+		mgmt_route.egr_ts = 1;
+
+		rc = sja1105_mgmt_route_set(priv, &mgmt_route, slot);
+		if (rc < 0) {
+			/* We must free the skb because we haven't sent
+			 * it to the host port yet
+			 */
+			dev_kfree_skb_any(skb);
+			port->net_dev->stats.tx_dropped++;
+			continue;
+		}
+
+		/* Transfer skb to the host port.
+		 * Only overwrite the source MAC address if the network stack
+		 * populated that with the switch netdev MAC address
+		 * (00:00:00:00:00:00) since the switch doesn't have a macaddr.
+		 * If the skb was generated using a raw socket and the source
+		 * MAC addr was populated by the application, that is kept in
+		 * place instead of replacing it.
+		 */
+		if (macaddr_to_u64(hdr->h_source) == 0)
+			memcpy(hdr->h_source, host->dev_addr, host->addr_len);
+
+		skb->dev = host;
+		dev_queue_xmit(skb);
+
+		/* Wait until the switch has processed the frame */
+		do {
+			rc = sja1105_mgmt_route_get(priv, &mgmt_route, slot);
+			if (rc < 0) {
+				port->stats.tx_errors++;
+				continue;
+			}
+
+			/* UM10944: The ENFPORT flag of the respective entry is
+			 * cleared when a match is found. The host can use this
+			 * flag as an acknowledgement.
+			 */
+			usleep_range(1000, 2000);
+		} while (mgmt_route.enfport && --timeout);
+
+		if (!timeout) {
+			dev_err(&port->net_dev->dev, "xmit timed out\n");
+			port->stats.tx_errors++;
+			continue;
+		}
+
+		port->stats.tx_packets++;
+		port->stats.tx_bytes += skb_len;
+	}
+	if (netif_queue_stopped(port->net_dev))
+		netif_wake_queue(port->net_dev);
+}
+
+static netdev_tx_t sja1105_xmit(struct sk_buff *skb, struct net_device *net_dev)
+{
+	struct sja1105_port *port = netdev_priv(net_dev);
+	struct sja1105_spi_private *priv = spi_get_drvdata(port->spi_dev);
+	struct net_device *host = priv->host_net_dev;
+
+	if (!host || !netif_running(host))
+		goto err_out;
+
+	if (sja1105_skb_ring_put(&port->xmit_ring, skb) < 0)
+		goto err_out;
+
+	if (port->xmit_ring.count == SJA1105_SKB_RING_SIZE)
+		netif_stop_queue(net_dev);
+
+	schedule_work(&port->xmit_work);
+	goto out;
+
+err_out:
+	port->stats.tx_fifo_errors++;
+	dev_kfree_skb_any(skb);
+out:
+	return NETDEV_TX_OK;
+}
+
 static int sja1105_open(struct net_device *net_dev)
 {
 	struct sja1105_port *port = netdev_priv(net_dev);
-	struct device *dev = &port->spi_dev->dev;
+	struct sja1105_spi_private *priv = spi_get_drvdata(port->spi_dev);
 
-	dev_dbg(dev, "%s called on port %s\n", __func__, net_dev->name);
+	/* Don't allow setting of management routes on the
+	 * host-facing switch port */
+	if (port == priv->switch_host_port)
+		netif_tx_stop_all_queues(net_dev);
+	else
+		INIT_WORK(&port->xmit_work, sja1105_xmit_work_handler);
+
 	if (port->phy_dev)
 		phy_start(port->phy_dev);
-
-	port->running = 1;
 
 	return 0;
 }
@@ -259,24 +385,16 @@ static int sja1105_open(struct net_device *net_dev)
 static int sja1105_close(struct net_device *net_dev)
 {
 	struct sja1105_port *port = netdev_priv(net_dev);
-	struct device *dev = &port->spi_dev->dev;
+	struct sk_buff *skb;
 
-	dev_dbg(dev, "%s called on port %s\n", __func__, net_dev->name);
 	if (port->phy_dev)
 		phy_stop(port->phy_dev);
 
-	port->running = 0;
-
+	cancel_work_sync(&port->xmit_work);
+	while (sja1105_skb_ring_get(&port->xmit_ring, &skb) >= 0) {
+		dev_kfree_skb_any(skb);
+	}
 	return 0;
-}
-
-static netdev_tx_t sja1105_xmit(struct sk_buff *skb,
-                                struct net_device *net_dev)
-{
-	/* packet I/O not supported, drop the frame */
-	dev_kfree_skb_any(skb);
-
-	return NETDEV_TX_OK;
 }
 
 static int sja1105_ioctl(struct net_device *net_dev, struct ifreq *rq, int cmd)
@@ -334,11 +452,6 @@ sja1105_netdev_create_port(struct sja1105_spi_private *priv,
 	port->running = 0;
 	/* Enable most messages by default */
 	port->msg_enable = (NETIF_MSG_IFUP << 1) - 1;
-
-	/* Limit get_stats to once every 250ms to limit SPI traffic */
-	ratelimit_state_init(&port->get_stats_ratelimit, (HZ/4), 1);
-	ratelimit_set_flags(&port->get_stats_ratelimit,
-	                    RATELIMIT_MSG_ON_RELEASE);
 	memset(&port->stats, 0, sizeof(port->stats));
 
 	/*
@@ -350,13 +463,14 @@ sja1105_netdev_create_port(struct sja1105_spi_private *priv,
 
 	net_dev->netdev_ops  = &sja1105_netdev_ops;
 	net_dev->ethtool_ops = &sja1105_ethtool_ops;
-	/* Don't allow explicit Tx on switch ports from Linux */
-	netif_tx_stop_all_queues(net_dev);
 	rc = register_netdev(net_dev);
 	if (rc < 0) {
 		dev_err(dev, "%s: Cannot register net device\n", port_name);
 		goto err_free;
 	}
+
+	/* Let the phylib set the RUNNING flag */
+	netif_carrier_off(net_dev);
 
 	return port;
 

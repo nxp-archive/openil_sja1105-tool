@@ -112,6 +112,12 @@ static void sja1105_patch_mac_mii_settings(struct sja1105_spi_private *priv)
 	}
 }
 
+static void sja1105_patch_host_port(struct sja1105_spi_private *priv)
+{
+	priv->static_config.general_params[0].host_port =
+		priv->switch_host_port->index;
+}
+
 /*
  * Load the SJA1105 static configuration from rootfs and unpack it
  * into private data.
@@ -149,6 +155,7 @@ int sja1105_load_firmware(struct sja1105_spi_private *priv)
 
 	/* Perform fixups to the staging area loaded from userspace */
 	sja1105_patch_mac_mii_settings(priv);
+	sja1105_patch_host_port(priv);
 
 	/* Set some driver private data according to the newly received
 	 * configuration from userspace.
@@ -215,12 +222,14 @@ static int sja1105_parse_dt(struct sja1105_spi_private *priv)
 {
 	struct device       *dev = &priv->spi_dev->dev;
 	struct device_node  *switch_node = dev->of_node;
+	struct device_node  *switch_host_port_node = NULL;
+	struct device_node  *host_port_node;
 	struct device_node  *child;
 	const char          *port_name;
 	struct sja1105_port *port;
 	phy_interface_t     phy_mode;
 	u32 port_index;
-	int rc;
+	int rc, k = 0;
 
 	rc = of_property_read_string(switch_node, "sja1105,staging-area",
 	                             &priv->staging_area);
@@ -229,6 +238,23 @@ static int sja1105_parse_dt(struct sja1105_spi_private *priv)
 		dev_err(dev, "Staging area node not present in device tree, trying %s\n",
 		        def_name);
 		priv->staging_area = def_name;
+	}
+
+	host_port_node = of_parse_phandle(switch_node, "sja1105,host-port-connection", 0);
+	if (host_port_node) {
+		priv->host_net_dev = of_find_net_device_by_node(host_port_node);
+		of_node_put(host_port_node);
+		if (!priv->host_net_dev) {
+			dev_err(dev, "Could not find host port by phandle!\n");
+			goto err_out;
+		}
+		switch_host_port_node = of_parse_phandle(switch_node,
+				"sja1105,host-port-connection", 1);
+		if (!switch_host_port_node) {
+			dev_err(dev, "External host netdev specified, but not "
+			        "the SJA1105 host-facing port!\n");
+			goto err_out;
+		}
 	}
 
 	for_each_child_of_node(switch_node, child) {
@@ -262,6 +288,11 @@ static int sja1105_parse_dt(struct sja1105_spi_private *priv)
 		port->index = port_index;
 		port->node = child;
 		port->phy_mode = phy_mode;
+
+		if (host_port_node && switch_host_port_node == child)
+			priv->switch_host_port = port;
+		else
+			port->mgmt_slot = k++;
 
 		if (of_property_read_bool(child, "sja1105,mac-mode"))
 			port->dt_xmii_mode = XMII_MAC;
@@ -321,9 +352,15 @@ static int sja1105_parse_dt(struct sja1105_spi_private *priv)
 		list_add_tail(&(port->list), &(priv->port_list_head.list));
 	}
 
+	if (host_port_node)
+		of_node_put(switch_host_port_node);
+
 	return 0;
 
 err_out:
+	if (host_port_node)
+		of_node_put(switch_host_port_node);
+
 	return -ENODEV;
 }
 
@@ -388,7 +425,6 @@ static int sja1105_probe(struct spi_device *spi)
 		return -ENOMEM;
 
 	INIT_LIST_HEAD(&(priv->port_list_head.list));
-	spin_lock_init(&priv->xmit_lock);
 	mutex_init(&priv->lock);
 
 	mutex_lock(&priv->lock); /* Lock mutex until end of initialization */

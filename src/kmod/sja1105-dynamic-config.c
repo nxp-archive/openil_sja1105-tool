@@ -9,17 +9,6 @@
 #include <common.h>
 #include "sja1105.h"
 
-#define SJA1105_MGMT_ROUTE_COUNT 4
-
-struct sja1105_mgmt_entry {
-	uint64_t ts_regid;
-	uint64_t egr_ts;
-	uint64_t macaddr;
-	uint64_t destports;
-	uint64_t enfport;
-	uint64_t index;
-};
-
 union sja1105_dyn_l2_lookup_entry {
 	struct sja1105_l2_lookup_entry l2;
 	struct sja1105_mgmt_entry mgmt;
@@ -375,13 +364,34 @@ sja1105_mgmt_route_commit(struct sja1105_spi_private *priv,
 	/* Structure to hold command we are constructing,
 	 * and mgmt entry we are reading/writing */
 	struct sja1105_dyn_l2_lookup_cmd cmd;
+	int timeout = 50;
 	int rc;
 
 	memset(&cmd, 0, sizeof(cmd));
+	cmd.entry.mgmt.index = index;
+	sja1105_dyn_l2_lookup_cmd_pack(packed_buf, &cmd);
+	/* Poll until VALID=0 (hw will receive our command) */
+	do {
+		rc = sja1105_spi_send_packed_buf(priv, SPI_READ, ENTRY_ADDR,
+		                                 packed_buf, BUF_LEN);
+		if (rc < 0)
+			goto out;
+		sja1105_dyn_l2_lookup_cmd_unpack(packed_buf, &cmd);
+	} while (cmd.valid && --timeout);
+
+	if (!timeout) {
+		rc = -EAGAIN;
+		goto out;
+	}
+	if (cmd.errors) {
+		rc = -EIO;
+		goto out;
+	}
+
 	cmd.valid     = 1;
 	cmd.rdwrset   = (read_or_write == SPI_WRITE);
-	cmd.valident  = 1;
 	cmd.mgmtroute = 1;
+	/* cmd.valident ignored for management routes */
 	if (read_or_write == SPI_WRITE) {
 		/* Put the argument into the SPI payload,
 		 * as new mgmt entry */
@@ -396,6 +406,26 @@ sja1105_mgmt_route_commit(struct sja1105_spi_private *priv,
 	                                 packed_buf, BUF_LEN);
 	if (rc < 0) {
 		loge("failed to read from spi");
+		goto out;
+	}
+
+	/* Poll until VALID=0 (hw has processed our command) */
+	timeout = 50;
+
+	do {
+		rc = sja1105_spi_send_packed_buf(priv, SPI_READ, ENTRY_ADDR,
+		                                 packed_buf, BUF_LEN);
+		if (rc < 0)
+			goto out;
+		sja1105_dyn_l2_lookup_cmd_unpack(packed_buf, &cmd);
+	} while (cmd.valid && --timeout);
+
+	if (!timeout) {
+		rc = -EAGAIN;
+		goto out;
+	}
+	if (cmd.errors) {
+		rc = -EIO;
 		goto out;
 	}
 
@@ -415,11 +445,18 @@ sja1105_mgmt_route_commit(struct sja1105_spi_private *priv,
 out:
 	return rc;
 }
-#define sja1105_mgmt_route_get(priv, entry, index) \
-	sja1105_mgmt_route_commit(priv, entry, SPI_READ, index)
-#define sja1105_mgmt_route_set(priv, entry, index) \
-	sja1105_mgmt_route_commit(priv, entry, SPI_WRITE, index)
 
+int sja1105_mgmt_route_get(struct sja1105_spi_private *priv,
+                           struct sja1105_mgmt_entry *entry, int index)
+{
+	return sja1105_mgmt_route_commit(priv, entry, SPI_READ, index);
+}
+
+int sja1105_mgmt_route_set(struct sja1105_spi_private *priv,
+                           struct sja1105_mgmt_entry *entry, int index)
+{
+	return sja1105_mgmt_route_commit(priv, entry, SPI_WRITE, index);
+}
 
 struct sja1105_dyn_vlan_lookup_entry {
 	uint64_t valid;
