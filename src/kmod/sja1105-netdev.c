@@ -78,7 +78,7 @@ int sja1105_port_get_speed(struct sja1105_port *port)
 static int sja1105_adjust_port_config(struct sja1105_port *port,
                                       int speed_mbps, int enable)
 {
-	struct device *dev = &port->spi_dev->dev;
+	struct device *dev = &port->net_dev->dev;
 	struct sja1105_spi_private *priv = spi_get_drvdata(port->spi_dev);
 	struct sja1105_mac_config_entry mac_entry;
 	int speed = SJA1105_SPEED_AUTO;
@@ -96,8 +96,7 @@ static int sja1105_adjust_port_config(struct sja1105_port *port,
 		 */
 		rc = sja1105_mac_config_get(priv, &mac_entry, port->index);
 		if (rc < 0) {
-			dev_err(dev, "%s: MAC configuration read from device failed\n",
-			        port->net_dev->name);
+			dev_err(dev, "MAC configuration read from device failed\n");
 			goto err_out;
 		}
 	} else {
@@ -114,8 +113,7 @@ static int sja1105_adjust_port_config(struct sja1105_port *port,
 		speed = sja1105_get_speed_cfg(speed_mbps);
 		if (speed < 0) {
 			rc = -EINVAL;
-			dev_err(dev, "%s: Invalid speed (%iMbps)\n",
-			        port->net_dev->name, speed_mbps);
+			dev_err(dev, "Invalid speed (%iMbps)\n", speed_mbps);
 			goto err_out;
 		}
 		mac_entry.speed = speed;
@@ -124,8 +122,7 @@ static int sja1105_adjust_port_config(struct sja1105_port *port,
 	mac_entry.egress = (enable) ? mac_sconfig->egress : 0;
 	rc = sja1105_mac_config_set(priv, &mac_entry, port->index);
 	if (rc < 0) {
-		dev_err(dev, "%s: MAC configuration write to device failed\n",
-		        port->net_dev->name);
+		dev_err(dev, "MAC configuration write to device failed\n");
 		goto err_out;
 	}
 
@@ -141,8 +138,7 @@ static int sja1105_adjust_port_config(struct sja1105_port *port,
 	if ((xmii_mode == XMII_MODE_RGMII) || (xmii_mode == XMII_MODE_SGMII)) {
 		rc = sja1105_clocking_setup_port(port);
 		if (rc < 0) {
-			dev_err(dev, "%s: Clocking setup failed\n",
-			        port->net_dev->name);
+			dev_err(dev, "Clocking setup failed\n");
 			goto err_out;
 		}
 	}
@@ -151,8 +147,7 @@ static int sja1105_adjust_port_config(struct sja1105_port *port,
 		snprintf(string, sizeof(string),
 		         "Adjusted MAC speed to %iMbps, ",
 		         port->phy_dev->speed);
-	dev_info(dev, "%s: %sRX %s, TX %s\n",
-	         port->net_dev->name, string,
+	dev_info(dev, "%sRX %s, TX %s\n", string,
 	         (mac_entry.ingress) ? "enabled" : "disabled",
 	         (mac_entry.egress) ? "enabled" : "disabled");
 	rc = 0;
