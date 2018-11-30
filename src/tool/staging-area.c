@@ -40,7 +40,6 @@
 /* From libsja1105 */
 #include <lib/include/static-config.h>
 #include <lib/include/staging-area.h>
-#include <lib/include/port-control.h>
 #include <lib/include/gtable.h>
 #include <lib/include/spi.h>
 #include <lib/include/status.h>

@@ -60,18 +60,4 @@ struct sja1105_dyn_l2_lookup_cmd {
 	union sja1105_dyn_l2_lookup_entry entry;
 };
 
-void sja1105_dyn_l2_lookup_cmd_pack(void *buf, struct
-                                    sja1105_dyn_l2_lookup_cmd *cmd);
-void sja1105_dyn_l2_lookup_cmd_unpack(void *buf, struct
-                                      sja1105_dyn_l2_lookup_cmd *cmd);
-int sja1105_mgmt_route_get(struct sja1105_spi_setup*, struct sja1105_mgmt_entry*, int index);
-int sja1105_mgmt_route_set(struct sja1105_spi_setup*, struct sja1105_mgmt_entry*, int index);
-
-int sja1105_mac_config_get(struct sja1105_spi_setup *spi_setup,
-                           struct sja1105_mac_config_entry *entry,
-                           int port);
-int sja1105_mac_config_set(struct sja1105_spi_setup *spi_setup,
-                           struct sja1105_mac_config_entry *entry,
-                           int port);
-
 #endif

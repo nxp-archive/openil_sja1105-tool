@@ -3,24 +3,15 @@ sja1105-y := sja1105-kmod.o \
              sja1105-sysfs.o \
              sja1105-netdev.o \
              sja1105-ethtool.o \
+             sja1105-clocking.o \
+             sja1105-dynamic-config.o \
+             sja1105-status.o \
+             sja1105-reset.o \
              sja1105-ptp.o \
              sja1105-spi.o \
              ../common.o \
              ../lib/helpers.o \
-             ../lib/control/port.o \
-             ../lib/reset/rgu.o \
-             ../lib/clock/agu.o \
-             ../lib/clock/cgu.o \
-             ../lib/clock/idiv.o \
-             ../lib/clock/mii-clk.o \
-             ../lib/clock/mii.o \
-             ../lib/clock/pll.o \
-             ../lib/clock/rgmii.o \
-             ../lib/clock/rmii.o \
-             ../lib/clock/sgmii.o \
              ../lib/gtable/gtable.o \
-             ../lib/status/general.o \
-             ../lib/status/port.o \
              ../lib/static-config/static-config.o \
              ../lib/static-config/tables/avb-params.o \
              ../lib/static-config/tables/general-params.o \
@@ -42,7 +33,6 @@ sja1105-y := sja1105-kmod.o \
              ../lib/static-config/tables/vl-policing.o \
              ../lib/static-config/tables/vlan-lookup.o \
              ../lib/static-config/tables/xmii-params.o \
-             ../lib/dynamic-config/mac-config.o
 
 cmd-files := \
     $(foreach obj, $(sja1105-y), \

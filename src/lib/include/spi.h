@@ -42,35 +42,4 @@ struct sja1105_spi_setup {
 	int         flush;
 };
 
-struct sja1105_spi_message {
-	uint64_t access;
-	uint64_t read_count;
-	uint64_t address;
-};
-
-enum sja1105_spi_access_mode {
-	SPI_READ = 0,
-	SPI_WRITE = 1,
-};
-
-int sja1105_spi_send_packed_buf(struct sja1105_spi_setup *spi_setup,
-                                enum sja1105_spi_access_mode read_or_write,
-                                uint64_t reg_addr,
-                                void    *packed_buf,
-                                uint64_t size_bytes);
-int sja1105_spi_send_int(struct sja1105_spi_setup *spi_setup,
-                         enum sja1105_spi_access_mode read_or_write,
-                         uint64_t reg_offset,
-                         uint64_t *value,
-                         uint64_t size_bytes);
-int sja1105_spi_send_long_packed_buf(struct sja1105_spi_setup *spi_setup,
-                                     enum sja1105_spi_access_mode read_or_write,
-                                     uint64_t base_addr,
-                                     char    *packed_buf,
-                                     uint64_t size_bytes);
-
-#define SIZE_SJA1105_DEVICE_ID 4
-#define SIZE_SPI_MSG_HEADER    4
-#define SIZE_SPI_MSG_MAXLEN    64 * 4
-
 #endif

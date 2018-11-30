@@ -31,6 +31,8 @@
 #ifndef _SJA1105_TOOL_COMMON_H
 #define _SJA1105_TOOL_COMMON_H
 
+#define SIZE_SJA1105_DEVICE_ID 4
+
 /* SJA1105_KMOD_BUILD shall be defined in Kbuild file for kmod build */
 
 #ifdef SJA1105_KMOD_BUILD

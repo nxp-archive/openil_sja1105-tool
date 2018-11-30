@@ -52,21 +52,4 @@ struct sja1105_reset_cmd {
 	uint64_t por_rst;
 };
 
-void sja1105_reset_cmd_pack(void *buf,
-                             struct sja1105_reset_cmd *reset,
-                             uint64_t device_id);
-void sja1105_reset_cmd_unpack(void *buf,
-                               struct sja1105_reset_cmd *reset,
-                               uint64_t device_id);
-void sja1105_reset_cmd_show(struct sja1105_reset_cmd *reset);
-int sja1105_reset_cmd_commit(struct sja1105_spi_setup*,
-                             struct sja1105_reset_cmd*);
-int sja1105_switch_core_reset(struct sja1105_spi_setup *setup);
-int sja1105_config_reset(struct sja1105_spi_setup *setup);
-int sja1105_clocking_reset(struct sja1105_spi_setup *setup);
-int sja1105_otp_reset(struct sja1105_spi_setup *setup);
-int sja1105_warm_reset(struct sja1105_spi_setup *setup);
-int sja1105_cold_reset(struct sja1105_spi_setup *setup);
-int sja1105_por_reset(struct sja1105_spi_setup *setup);
-
 #endif

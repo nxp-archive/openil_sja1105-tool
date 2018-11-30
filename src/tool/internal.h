@@ -36,7 +36,6 @@
 #include <lib/include/spi.h>
 #include <lib/include/static-config.h>
 #include <lib/include/dynamic-config.h>
-#include <lib/include/port-control.h>
 #include <lib/include/gtable.h>
 
 struct general_config {
@@ -115,7 +114,6 @@ TOOL_DEFINE_HEADERS_FOR_CONFIG_TABLE(l2_lookup_params);
 void sja1105_table_header_show(struct sja1105_table_header *hdr);
 void sja1105_mgmt_entry_show(struct sja1105_mgmt_entry *entry);
 void sja1105_dyn_l2_lookup_cmd_show(struct sja1105_dyn_l2_lookup_cmd *cmd);
-void sja1105_cbs_show(struct sja1105_cbs *cbs);
 void sja1105_cgu_pll_control_show(struct sja1105_cgu_pll_control *pll_control,
                                   uint64_t device_id);
 void sja1105_cgu_mii_control_show(struct sja1105_cgu_mii_control *mii_control);
