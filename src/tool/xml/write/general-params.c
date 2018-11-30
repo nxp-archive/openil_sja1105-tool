@@ -54,7 +54,6 @@ general_parameters_table_write(xmlTextWriterPtr writer,
 		rc |= xml_write_field(writer, "send_meta1", config->general_params[i].send_meta1);
 		rc |= xml_write_field(writer, "send_meta0", config->general_params[i].send_meta0);
 		rc |= xml_write_field(writer, "casc_port", config->general_params[i].casc_port);
-		rc |= xml_write_field(writer, "host_port", config->general_params[i].host_port);
 		rc |= xml_write_field(writer, "mirr_port", config->general_params[i].mirr_port);
 		rc |= xml_write_field(writer, "vlmarker", config->general_params[i].vlmarker);
 		rc |= xml_write_field(writer, "vlmask", config->general_params[i].vlmask);

@@ -46,7 +46,6 @@ static int entry_get(xmlNode *node, struct sja1105_general_params_entry *entry)
 	rc |= xml_read_field(&entry->send_meta1,  "send_meta1", node);
 	rc |= xml_read_field(&entry->send_meta0,  "send_meta0", node);
 	rc |= xml_read_field(&entry->casc_port,   "casc_port", node);
-	rc |= xml_read_field(&entry->host_port,   "host_port", node);
 	rc |= xml_read_field(&entry->mirr_port,   "mirr_port", node);
 	rc |= xml_read_field(&entry->vlmarker,    "vlmarker", node);
 	rc |= xml_read_field(&entry->vlmask,      "vlmask", node);
