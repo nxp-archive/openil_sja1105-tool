@@ -114,8 +114,10 @@ static void sja1105_patch_mac_mii_settings(struct sja1105_spi_private *priv)
 
 static void sja1105_patch_host_port(struct sja1105_spi_private *priv)
 {
-	priv->static_config.general_params[0].host_port =
-		priv->switch_host_port->index;
+	/* Only patch host port if it has been specified in device tree */
+	if (priv->switch_host_port)
+		priv->static_config.general_params[0].host_port =
+			priv->switch_host_port->index;
 }
 
 /*
