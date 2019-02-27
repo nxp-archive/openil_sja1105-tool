@@ -109,6 +109,12 @@ sja1105,staging-area
 :   Location relative to the /lib/firmware directory where the static
     configuration held by userspace (staging area) is held.
 
+sja1105,host-port-connection
+
+:   MAC node of the host and switch port node that are connected.
+    First entry is the MAC node, second entry the switch port node,
+    e.g. sja1105,host-port-connection = <&fec2 &swp4>;
+
 reset-gpio
 
 :   GPIO connected to the reset input of the switch chip.
@@ -127,6 +133,27 @@ phy-reset-delay
 :   Time before the PHY is ready after reset in milliseconds.
 
 
+PORT BINDINGS
+-------------
+
+sja1105,port-label
+
+:   Network interface name for a port
+
+sja1105,mac-mode
+
+:   Operate port in MAC mode (optional, overrides static-config setting)
+
+sja1105,phy-mode
+
+:   Operate port in PHY mode (optional, overrides static-config setting)
+
+fixed-link
+
+:   Set constant speed and duplex mode for a port (usually used for the port
+    that is connected to the MAC of the host)
+
+
 DEVICE-TREE EXAMPLE
 -------------------
 
@@ -142,7 +169,8 @@ DEVICE-TREE EXAMPLE
 		fsl,spi-sck-cs-delay = <1000>;
 		#reset-gpio = <&spigpio1_1 0 1>;
 		sja1105,staging-area = "sja1105.bin";
-		port@0 {
+		sja1105,host-port-connection = <>
+		swp0: port@0 {
 			sja1105,port-label = "seth5"; /* ETH5 written on chassis */
 			phy-handle = <&rgmii_phy3>;
 			phy-mode = "rgmii";
@@ -151,25 +179,25 @@ DEVICE-TREE EXAMPLE
 			#phy-reset-delay = <120>;
 			reg = <0>;
 		};
-		port@1 {
+		swp1: port@1 {
 			sja1105,port-label = "seth2"; /* ETH2 written on chassis */
 			phy-handle = <&rgmii_phy4>;
 			phy-mode = "rgmii";
 			reg = <1>;
 		};
-		port@2 {
+		swp2: port@2 {
 			sja1105,port-label = "seth3"; /* ETH3 written on chassis */
 			phy-handle = <&rgmii_phy5>;
 			phy-mode = "rgmii";
 			reg = <2>;
 		};
-		port@3 {
+		swp3: port@3 {
 			sja1105,port-label = "seth4"; /* ETH4 written on chassis */
 			phy-handle = <&rgmii_phy6>;
 			phy-mode = "rgmii";
 			reg = <3>;
 		};
-		port@4 {
+		swp4: port@4 {
 			sja1105,port-label = "sethi"; /* Internal port connected to eth2 */
 			phy-mode = "rgmii";
 			reg = <4>;
