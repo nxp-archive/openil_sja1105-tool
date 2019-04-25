@@ -167,11 +167,10 @@ parse_config_table(xmlNode *node, struct sja1105_static_config *config)
 	table_name = (char*) node->name;
 	rc = get_match(table_name, options, ARRAY_SIZE(options));
 	if (rc < 0) {
-		goto out;
+		loge("Unrecognized table %s, skipping...", table_name);
+		return 0;
 	}
-	rc = next_parse_config_table[rc](node, config);
-out:
-	return rc;
+	return next_parse_config_table[rc](node, config);
 }
 
 static int
