@@ -141,9 +141,6 @@ void sja1105_table_header_show(struct sja1105_table_header *hdr)
 		case BLKID_GENERAL_PARAMS_TABLE:
 			printf("General Parameters Table");
 			break;
-		case BLKID_RETAGGING_TABLE:
-			printf("Retagging Table");
-			break;
 		case BLKID_XMII_MODE_PARAMS_TABLE:
 			printf("xMII Mode Parameters Table");
 			break;

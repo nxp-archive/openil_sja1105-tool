@@ -205,11 +205,6 @@ int sja1105_static_config_add_entry(struct sja1105_table_header *hdr, void *buf,
 			return SIZE_GENERAL_PARAMS_ENTRY_PQRS;
 		}
 	}
-	case BLKID_RETAGGING_TABLE:
-	{
-		logv("Retagging Table Unimplemented\n");
-		return SIZE_RETAGGING_ENTRY;
-	}
 	case BLKID_XMII_MODE_PARAMS_TABLE:
 	{
 		POPULATE_CONFIG_TABLE(, xmii_params, buf, MAX_XMII_PARAMS_COUNT, "xMII Parameters");
@@ -296,7 +291,6 @@ sja1105_static_config_patch_vllupformat(struct sja1105_static_config *config)
 int
 sja1105_static_config_check_memory_size(struct sja1105_static_config *config)
 {
-	int max_mem;
 	int mem = 0;
 	int i;
 
@@ -308,18 +302,13 @@ sja1105_static_config_check_memory_size(struct sja1105_static_config *config)
 			mem += config->vl_forwarding_params[0].partspc[i];
 		}
 	}
-	if (config->retagging_count > 0) {
-		max_mem = MAX_FRAME_MEMORY_RETAGGING;
-	} else {
-		max_mem = MAX_FRAME_MEMORY;
-	}
-	if (mem > max_mem) {
+	if (mem > MAX_FRAME_MEMORY) {
 		loge("Not allowed to overcommit frame memory. "
 		     "This is asking for trouble.");
 		loge("L2 memory partitions and VL memory partitions "
 		     "share the same space.");
 		loge("The sum of all 16 memory partitions is not allowed "
-		     "to be larger than %d 128-byte blocks.", max_mem);
+		     "to be larger than %d 128-byte blocks.", MAX_FRAME_MEMORY);
 		loge("Please adjust l2-forwarding-parameters-table.part_spc "
 		     "and/or vl-forwarding-parameters-table.partspc.");
 		return -1;
