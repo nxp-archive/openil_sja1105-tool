@@ -57,20 +57,11 @@ static void sja1105_schedule_entry_points_entry_access(
 	pack_or_unpack(buf, &entry->delta,      28, 11, size);
 	pack_or_unpack(buf, &entry->address,    10, 1,  size);
 }
-
-void sja1105_schedule_entry_points_entry_pack(
-		void *buf,
-		struct sja1105_schedule_entry_points_entry *entry)
-{
-	sja1105_schedule_entry_points_entry_access(buf, entry, 1);
-}
-
-void sja1105_schedule_entry_points_entry_unpack(
-		void *buf,
-		struct sja1105_schedule_entry_points_entry *entry)
-{
-	sja1105_schedule_entry_points_entry_access(buf, entry, 0);
-}
+/*
+ * sja1105_schedule_entry_points_entry_pack
+ * sja1105_schedule_entry_points_entry_unpack
+ */
+DEFINE_COMMON_PACK_UNPACK_ACCESSORS(schedule_entry_points);
 
 void sja1105_schedule_entry_points_entry_fmt_show(
 		char  *print_buf,

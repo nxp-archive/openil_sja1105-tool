@@ -53,11 +53,18 @@ static int entry_get(xmlNode *node, struct sja1105_mac_config_entry *entry)
 	rc |= xml_read_field(&entry->egr_mirr, "egr_mirr", node);
 	rc |= xml_read_field(&entry->drpnona664, "drpnona664", node);
 	rc |= xml_read_field(&entry->drpdtag, "drpdtag", node);
+	rc |= xml_read_field(&entry->drpsotag, "drpsotag", node);
+	rc |= xml_read_field(&entry->drpsitag, "drpsitag", node);
 	rc |= xml_read_field(&entry->drpuntag, "drpuntag", node);
 	rc |= xml_read_field(&entry->retag, "retag", node);
 	rc |= xml_read_field(&entry->dyn_learn, "dyn_learn", node);
 	rc |= xml_read_field(&entry->egress, "egress", node);
 	rc |= xml_read_field(&entry->ingress, "ingress", node);
+	rc |= xml_read_field(&entry->mirrcie, "mirrcie", node);
+	rc |= xml_read_field(&entry->mirrcetag, "mirrcetag", node);
+	rc |= xml_read_field(&entry->ingmirrvid, "ingmirrvid", node);
+	rc |= xml_read_field(&entry->ingmirrpcp, "ingmirrpcp", node);
+	rc |= xml_read_field(&entry->ingmirrdei, "ingmirrdei", node);
 out:
 	if (rc < 0) {
 		loge("MAC Configuration entry is incomplete!");

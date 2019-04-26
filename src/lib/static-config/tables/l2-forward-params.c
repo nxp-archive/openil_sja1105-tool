@@ -38,63 +38,54 @@
 #include <lib/include/gtable.h>
 #include <common.h>
 
-static void sja1105_l2_forwarding_params_table_access(
+static void sja1105_l2_forwarding_params_entry_access(
 		void *buf,
-		struct sja1105_l2_forwarding_params_table *table,
+		struct sja1105_l2_forwarding_params_entry *entry,
 		int write)
 {
 	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
-	int    size = SIZE_L2_FORWARDING_PARAMS_TABLE;
+	int    size = SIZE_L2_FORWARDING_PARAMS_ENTRY;
 	int    offset;
 	int    i;
 
 	if (write == 0) {
 		pack_or_unpack = gtable_unpack;
-		memset(table, 0, sizeof(*table));
+		memset(entry, 0, sizeof(*entry));
 	} else {
 		pack_or_unpack = gtable_pack;
 		memset(buf, 0, size);
 	}
-	pack_or_unpack(buf, &table->max_dynp, 95, 93, size);
+	pack_or_unpack(buf, &entry->max_dynp, 95, 93, size);
 	offset = 13;
 	for (i = 0; i < 8; i++) {
-		pack_or_unpack(buf, &table->part_spc[i], offset + 9, offset + 0, size);
+		pack_or_unpack(buf, &entry->part_spc[i], offset + 9, offset + 0, size);
 		offset += 10;
 	}
 }
+/*
+ * sja1105_l2_forwarding_params_entry_pack
+ * sja1105_l2_forwarding_params_entry_unpack
+ */
+DEFINE_COMMON_PACK_UNPACK_ACCESSORS(l2_forwarding_params);
 
-void sja1105_l2_forwarding_params_table_pack(
-		void *buf,
-		struct sja1105_l2_forwarding_params_table *table)
-{
-	sja1105_l2_forwarding_params_table_access(buf, table, 1);
-}
-
-void sja1105_l2_forwarding_params_table_unpack(
-		void *buf,
-		struct sja1105_l2_forwarding_params_table *table)
-{
-	sja1105_l2_forwarding_params_table_access(buf, table, 0);
-}
-
-void sja1105_l2_forwarding_params_table_fmt_show(
+void sja1105_l2_forwarding_params_entry_fmt_show(
 		char *print_buf,
 		char *fmt,
-		struct sja1105_l2_forwarding_params_table *table)
+		struct sja1105_l2_forwarding_params_entry *entry)
 {
 	char part_spc_buf[MAX_LINE_SIZE];
-	print_array(part_spc_buf, table->part_spc, 8);
-	formatted_append(print_buf, fmt, "MAX_DYNP  0x%" PRIX64, table->max_dynp);
+	print_array(part_spc_buf, entry->part_spc, 8);
+	formatted_append(print_buf, fmt, "MAX_DYNP  0x%" PRIX64, entry->max_dynp);
 	formatted_append(print_buf, fmt, "PART_SPC %s", part_spc_buf);
 }
 
-void sja1105_l2_forwarding_params_table_show(struct sja1105_l2_forwarding_params_table *table)
+void sja1105_l2_forwarding_params_entry_show(struct sja1105_l2_forwarding_params_entry *entry)
 {
 	char print_buf[MAX_LINE_SIZE];
 	char *fmt = "%s\n";
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_l2_forwarding_params_table_fmt_show(print_buf, fmt, table);
+	sja1105_l2_forwarding_params_entry_fmt_show(print_buf, fmt, entry);
 	puts(print_buf);
 }
 

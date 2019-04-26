@@ -41,6 +41,9 @@ avb_parameters_table_write(xmlTextWriterPtr writer,
 	for (i = 0; i < config->avb_params_count; i++) {
 		rc |= xmlTextWriterStartElement(writer, BAD_CAST "entry");
 		rc |= xml_write_field(writer, "index",    i);
+		rc |= xml_write_field(writer, "l2cbs", config->avb_params[i].l2cbs);
+		rc |= xml_write_field(writer, "cas_master", config->avb_params[i].cas_master);
+		rc |= xml_write_field(writer, "destmeta", config->avb_params[i].destmeta);
 		rc |= xml_write_field(writer, "destmeta", config->avb_params[i].destmeta);
 		rc |= xml_write_field(writer, "srcmeta",  config->avb_params[i].srcmeta);
 		rc |= xmlTextWriterEndElement(writer);

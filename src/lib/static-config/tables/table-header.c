@@ -147,6 +147,9 @@ void sja1105_table_header_show(struct sja1105_table_header *hdr)
 		case BLKID_XMII_MODE_PARAMS_TABLE:
 			printf("xMII Mode Parameters Table");
 			break;
+		case BLKID_SGMII_TABLE:
+			printf("SGMII Table");
+			break;
 		default:
 			printf("Unknown Table %" PRIX64 " ", hdr->block_id);
 	}

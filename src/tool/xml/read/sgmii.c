@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016, NXP Semiconductors
+ * Copyright (c) 2018, NXP Semiconductors
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,53 +28,64 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
-#include <inttypes.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-/* These are our own includes */
-#include <lib/include/static-config.h>
-#include <lib/include/clock.h>
-#include <lib/include/spi.h>
-#include <common.h>
+#include "internal.h"
 
-int sja1105_clocking_setup(struct sja1105_spi_setup *spi_setup,
-                           struct sja1105_xmii_params_entry *params,
-                           struct sja1105_mac_config_entry  *mac_config)
+static int entry_get(xmlNode *node, struct sja1105_sgmii_entry *entry)
 {
-	int speed_mbps;
 	int rc = 0;
-	int i;
+	rc |= xml_read_field(&entry->digital_error_cnt, "digital_error_cnt", node);
+	rc |= xml_read_field(&entry->digital_control_2, "digital_control_2", node);
+	rc |= xml_read_field(&entry->debug_control, "debug_control", node);
+	rc |= xml_read_field(&entry->test_control, "test_control", node);
+	rc |= xml_read_field(&entry->autoneg_control, "autoneg_control", node);
+	rc |= xml_read_field(&entry->digital_control_1, "digital_control_1", node);
+	rc |= xml_read_field(&entry->autoneg_adv, "autoneg_adv", node);
+	rc |= xml_read_field(&entry->basic_control, "basic_control", node);
+	if (rc < 0) {
+		loge("SGMII Table entry is incomplete!");
+		return -EINVAL;
+	}
+	return 0;
+}
 
-	for (i = 0; i < 5; i++) {
-		switch (mac_config[i].speed) {
-		case 1: speed_mbps = 1000; break;
-		case 2: speed_mbps = 100;  break;
-		case 3: speed_mbps = 10;   break;
-		default: loge("auto speed not yet supported"); return -1;
+static int parse_entry(xmlNode *node, struct sja1105_static_config *config)
+{
+	struct sja1105_sgmii_entry entry;
+	int rc;
+
+	if (config->sgmii_count >= MAX_SGMII_COUNT) {
+		loge("Cannot have more than %d SGMII Table entries!",
+		     MAX_SGMII_COUNT);
+		rc = -ERANGE;
+		goto out;
+	}
+	memset(&entry, 0, sizeof(entry));
+	rc = entry_get(node, &entry);
+	config->sgmii[config->sgmii_count++] = entry;
+out:
+	return rc;
+}
+
+int sgmii_table_parse(xmlNode *node, struct sja1105_static_config *config)
+{
+	xmlNode *c;
+	int rc = 0;
+
+	if (node->type != XML_ELEMENT_NODE) {
+		loge("SGMII Table node must be of element type!");
+		rc = -EINVAL;
+		goto out;
+	}
+	for (c = node->children; c != NULL; c = c->next) {
+		if (c->type != XML_ELEMENT_NODE) {
+			continue;
 		}
-		if (params->xmii_mode[i] == XMII_SPEED_MII) {
-			mii_clocking_setup(spi_setup, i, params->phy_mac[i]);
-		} else if (params->xmii_mode[i] == XMII_SPEED_RMII) {
-			rmii_clocking_setup(spi_setup, i, params->phy_mac[i]);
-		} else if (params->xmii_mode[i] == XMII_SPEED_RGMII) {
-			rgmii_clocking_setup(spi_setup, i, speed_mbps);
-		} else if (params->xmii_mode[i] == XMII_SPEED_SGMII &&
-		           IS_PQRS(spi_setup->device_id)) {
-			if ((i == 4) && (IS_R(spi_setup->device_id, spi_setup->part_nr) ||
-			                 IS_S(spi_setup->device_id, spi_setup->part_nr))) {
-				sgmii_clocking_setup(spi_setup, i, speed_mbps);
-			} else {
-				logv("Port %d is tri-stated", i);
-			}
-		} else {
-			loge("Invalid xmii_mode for port %d specified: %" PRIu64,
-			     i, params->xmii_mode[i]);
-			rc = -EINVAL;
+		rc = parse_entry(c, config);
+		if (rc < 0) {
 			goto out;
 		}
 	}
+	logv("read %d SGMII Table entries", config->sgmii_count);
 out:
 	return rc;
 }

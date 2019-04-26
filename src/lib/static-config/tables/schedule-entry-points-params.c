@@ -38,9 +38,9 @@
 #include <lib/include/gtable.h>
 #include <common.h>
 
-static void sja1105_schedule_entry_points_params_access(
+static void sja1105_schedule_entry_points_params_entry_access(
 		void *buf,
-		struct sja1105_schedule_entry_points_params *entry,
+		struct sja1105_schedule_entry_points_params_entry *entry,
 		int write)
 {
 	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
@@ -56,37 +56,28 @@ static void sja1105_schedule_entry_points_params_access(
 	pack_or_unpack(buf, &entry->clksrc,    31, 30, size);
 	pack_or_unpack(buf, &entry->actsubsch, 29, 27, size);
 }
+/*
+ * sja1105_schedule_entry_points_params_entry_pack
+ * sja1105_schedule_entry_points_params_entry_unpack
+ */
+DEFINE_COMMON_PACK_UNPACK_ACCESSORS(schedule_entry_points_params);
 
-void sja1105_schedule_entry_points_params_pack(
-		void *buf,
-		struct sja1105_schedule_entry_points_params *entry)
-{
-	sja1105_schedule_entry_points_params_access(buf, entry, 1);
-}
-
-void sja1105_schedule_entry_points_params_unpack(
-		void *buf,
-		struct sja1105_schedule_entry_points_params *entry)
-{
-	sja1105_schedule_entry_points_params_access(buf, entry, 0);
-}
-
-void sja1105_schedule_entry_points_params_table_fmt_show(
+void sja1105_schedule_entry_points_params_entry_fmt_show(
 		char *print_buf,
 		char *fmt,
-		struct sja1105_schedule_entry_points_params *entry)
+		struct sja1105_schedule_entry_points_params_entry *entry)
 {
 	formatted_append(print_buf, fmt, "CLKSRC    0x%" PRIX64, entry->clksrc);
 	formatted_append(print_buf, fmt, "ACTSUBSCH 0x%" PRIX64, entry->actsubsch);
 }
 
-void sja1105_schedule_entry_points_params_table_show(struct sja1105_schedule_entry_points_params *entry)
+void sja1105_schedule_entry_points_params_entry_show(struct sja1105_schedule_entry_points_params_entry *entry)
 {
 	char print_buf[MAX_LINE_SIZE];
 	char *fmt = "%s\n";
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_schedule_entry_points_params_table_fmt_show(print_buf, fmt, entry);
+	sja1105_schedule_entry_points_params_entry_fmt_show(print_buf, fmt, entry);
 	puts(print_buf);
 }
 

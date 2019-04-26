@@ -53,7 +53,8 @@ const char *SJA1105Q_DEVICE_ID_STR        = "SJA1105Q";
 const char *SJA1105R_DEVICE_ID_STR        = "SJA1105R";
 const char *SJA1105S_DEVICE_ID_STR        = "SJA1105S";
 const char *SJA1105PR_DEVICE_ID_STR       = "SJA1105P or SJA1105R";
-const char *SJA1105_DEVICE_ID_INVALID_STR = "Invalid";
+const char *SJA1105QS_DEVICE_ID_STR       = "SJA1105Q or SJA1105S";
+const char *SJA1105_NO_DEVICE_ID_STR      = "None";
 
 const char *sja1105_device_id_string_get(uint64_t device_id, uint64_t part_nr)
 {
@@ -63,18 +64,19 @@ const char *sja1105_device_id_string_get(uint64_t device_id, uint64_t part_nr)
 	if (device_id == SJA1105T_DEVICE_ID) {
 		return SJA1105T_DEVICE_ID_STR;
 	}
-	/* P and R have same Device ID, and differ by Part Number */
+	/* P and R have same Device ID, and differ by Part Number.
+	 * Same do Q and S.
+	 */
 	if (IS_P(device_id, part_nr)) {
 		return SJA1105P_DEVICE_ID_STR;
 	}
-	if (device_id == SJA1105Q_DEVICE_ID) {
+	if (IS_Q(device_id, part_nr)) {
 		return SJA1105Q_DEVICE_ID_STR;
 	}
-	/* P and R have same Device ID, and differ by Part Number */
 	if (IS_R(device_id, part_nr)) {
 		return SJA1105P_DEVICE_ID_STR;
 	}
-	if (device_id == SJA1105S_DEVICE_ID) {
+	if (IS_S(device_id, part_nr)) {
 		return SJA1105S_DEVICE_ID_STR;
 	}
 	/* Fallback: if we don't know/care what the part_nr is, and we
@@ -85,7 +87,10 @@ const char *sja1105_device_id_string_get(uint64_t device_id, uint64_t part_nr)
 	if (device_id == SJA1105PR_DEVICE_ID) {
 		return SJA1105PR_DEVICE_ID_STR;
 	}
-	return SJA1105_DEVICE_ID_INVALID_STR;
+	if (device_id == SJA1105QS_DEVICE_ID) {
+		return SJA1105QS_DEVICE_ID_STR;
+	}
+	return SJA1105_NO_DEVICE_ID_STR;
 }
 
 int sja1105_device_id_get(struct sja1105_spi_setup *spi_setup,
@@ -95,8 +100,7 @@ int sja1105_device_id_get(struct sja1105_spi_setup *spi_setup,
 		SJA1105E_DEVICE_ID,
 		SJA1105T_DEVICE_ID,
 		SJA1105PR_DEVICE_ID,
-		SJA1105Q_DEVICE_ID,
-		SJA1105S_DEVICE_ID,
+		SJA1105QS_DEVICE_ID,
 	};
 	uint64_t tmp_device_id;
 	uint64_t tmp_part_nr;
@@ -118,14 +122,14 @@ int sja1105_device_id_get(struct sja1105_spi_setup *spi_setup,
 		loge("sja1105_spi_send_int failed");
 		goto out_error;
 	}
-	*device_id = SJA1105_DEVICE_ID_INVALID;
+	*device_id = SJA1105_NO_DEVICE_ID;
 	for (i = 0; i < ARRAY_SIZE(compatible_device_ids); i++) {
 		if (tmp_device_id == compatible_device_ids[i]) {
 			*device_id = compatible_device_ids[i];
 			break;
 		}
 	}
-	if (*device_id == SJA1105_DEVICE_ID_INVALID) {
+	if (*device_id == SJA1105_NO_DEVICE_ID) {
 		loge("Unrecognized Device ID 0x%08" PRIx64, tmp_device_id);
 		rc = -EINVAL;
 		goto out_error;
@@ -242,7 +246,7 @@ int sja1105_spi_configure(struct sja1105_spi_setup *spi_setup)
 	logv("bits per word: %d", spi_setup->bits);
 	logv("max speed: %d KHz", spi_setup->speed / 1000);
 
-	if (spi_setup->device_id == SJA1105_DEVICE_ID_INVALID) {
+	if (spi_setup->device_id == SJA1105_NO_DEVICE_ID) {
 		/* Device ID was not overridden from sja1105.conf.
 		 * Check that we are talking with a compatible
 		 * device over SPI. */

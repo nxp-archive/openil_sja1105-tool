@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016, NXP Semiconductors
+ * Copyright (c) 2018, NXP Semiconductors
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,48 +34,25 @@
 #include <string.h>
 #include <stdio.h>
 /* These are our own includes */
-#include <lib/include/static-config.h>
+#include <lib/include/gtable.h>
 #include <lib/include/clock.h>
 #include <lib/include/spi.h>
 #include <common.h>
 
-int sja1105_clocking_setup(struct sja1105_spi_setup *spi_setup,
-                           struct sja1105_xmii_params_entry *params,
-                           struct sja1105_mac_config_entry  *mac_config)
+/* TODO:
+ * Standard clause 22 registers for the internal SGMII PCS are
+ * memory-mapped starting at SPI address 0x1F0000.
+ * The SGMII port should already have a basic initialization done
+ * through the static configuration tables.
+ * If any further SGMII initialization steps (autonegotiation or
+ * checking the link training status) need to be done, they
+ * might as well be added here.
+ */
+int sgmii_clocking_setup(struct sja1105_spi_setup __attribute__((unused)) *spi_setup,
+                         int port, int speed_mbps)
 {
-	int speed_mbps;
-	int rc = 0;
-	int i;
-
-	for (i = 0; i < 5; i++) {
-		switch (mac_config[i].speed) {
-		case 1: speed_mbps = 1000; break;
-		case 2: speed_mbps = 100;  break;
-		case 3: speed_mbps = 10;   break;
-		default: loge("auto speed not yet supported"); return -1;
-		}
-		if (params->xmii_mode[i] == XMII_SPEED_MII) {
-			mii_clocking_setup(spi_setup, i, params->phy_mac[i]);
-		} else if (params->xmii_mode[i] == XMII_SPEED_RMII) {
-			rmii_clocking_setup(spi_setup, i, params->phy_mac[i]);
-		} else if (params->xmii_mode[i] == XMII_SPEED_RGMII) {
-			rgmii_clocking_setup(spi_setup, i, speed_mbps);
-		} else if (params->xmii_mode[i] == XMII_SPEED_SGMII &&
-		           IS_PQRS(spi_setup->device_id)) {
-			if ((i == 4) && (IS_R(spi_setup->device_id, spi_setup->part_nr) ||
-			                 IS_S(spi_setup->device_id, spi_setup->part_nr))) {
-				sgmii_clocking_setup(spi_setup, i, speed_mbps);
-			} else {
-				logv("Port %d is tri-stated", i);
-			}
-		} else {
-			loge("Invalid xmii_mode for port %d specified: %" PRIu64,
-			     i, params->xmii_mode[i]);
-			rc = -EINVAL;
-			goto out;
-		}
-	}
-out:
-	return rc;
+	logv("TODO: Configure SGMII clocking for port %d speed %dMbps.",
+	     port, speed_mbps);
+	return 0;
 }
 

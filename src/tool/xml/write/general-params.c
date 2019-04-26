@@ -61,6 +61,11 @@ general_parameters_table_write(xmlTextWriterPtr writer,
 		rc |= xml_write_field(writer, "tpid", config->general_params[i].tpid);
 		rc |= xml_write_field(writer, "ignore2stf", config->general_params[i].ignore2stf);
 		rc |= xml_write_field(writer, "tpid2", config->general_params[i].tpid2);
+		rc |= xml_write_field(writer, "queue_ts", config->general_params[i].queue_ts);
+		rc |= xml_write_field(writer, "egrmirrvid", config->general_params[i].egrmirrvid);
+		rc |= xml_write_field(writer, "egrmirrpcp", config->general_params[i].egrmirrpcp);
+		rc |= xml_write_field(writer, "egrmirrdei", config->general_params[i].egrmirrdei);
+		rc |= xml_write_field(writer, "replay_port", config->general_params[i].replay_port);
 		rc |= xmlTextWriterEndElement(writer);
 		if (rc < 0) {
 			loge("error while writing general_params Table element %d", i);

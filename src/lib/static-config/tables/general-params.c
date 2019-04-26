@@ -39,98 +39,135 @@
 #include <lib/helpers.h>
 #include <common.h>
 
-static void sja1105_general_params_table_access(
+static void sja1105et_general_params_entry_access(
 		void *buf,
-		struct sja1105_general_params_table *table,
+		struct sja1105_general_params_entry *entry,
 		int write)
 {
 	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
-	int    size = SIZE_GENERAL_PARAMS_TABLE;
+	int    size = SIZE_GENERAL_PARAMS_ENTRY_ET;
 
 	if (write == 0) {
 		pack_or_unpack = gtable_unpack;
-		memset(table, 0, sizeof(*table));
+		memset(entry, 0, sizeof(*entry));
 	} else {
 		pack_or_unpack = gtable_pack;
 		memset(buf, 0, size);
 	}
-	pack_or_unpack(buf, &table->vllupformat, 319, 319, size);
-	pack_or_unpack(buf, &table->mirr_ptacu,  318, 318, size);
-	pack_or_unpack(buf, &table->switchid,    317, 315, size);
-	pack_or_unpack(buf, &table->hostprio,    314, 312, size);
-	pack_or_unpack(buf, &table->mac_fltres1, 311, 264, size);
-	pack_or_unpack(buf, &table->mac_fltres0, 263, 216, size);
-	pack_or_unpack(buf, &table->mac_flt1,    215, 168, size);
-	pack_or_unpack(buf, &table->mac_flt0,    167, 120, size);
-	pack_or_unpack(buf, &table->incl_srcpt1, 119, 119, size);
-	pack_or_unpack(buf, &table->incl_srcpt0, 118, 118, size);
-	pack_or_unpack(buf, &table->send_meta1,  117, 117, size);
-	pack_or_unpack(buf, &table->send_meta0,  116, 116, size);
-	pack_or_unpack(buf, &table->casc_port,   115, 113, size);
-	pack_or_unpack(buf, &table->host_port,   112, 110, size);
-	pack_or_unpack(buf, &table->mirr_port,   109, 107, size);
-	pack_or_unpack(buf, &table->vlmarker,    106, 75,  size);
-	pack_or_unpack(buf, &table->vlmask,      74, 43,   size);
-	pack_or_unpack(buf, &table->tpid,        42, 27,   size);
-	pack_or_unpack(buf, &table->ignore2stf,  26, 26,   size);
-	pack_or_unpack(buf, &table->tpid2,       25, 10,   size);
+	pack_or_unpack(buf, &entry->vllupformat, 319, 319, size);
+	pack_or_unpack(buf, &entry->mirr_ptacu,  318, 318, size);
+	pack_or_unpack(buf, &entry->switchid,    317, 315, size);
+	pack_or_unpack(buf, &entry->hostprio,    314, 312, size);
+	pack_or_unpack(buf, &entry->mac_fltres1, 311, 264, size);
+	pack_or_unpack(buf, &entry->mac_fltres0, 263, 216, size);
+	pack_or_unpack(buf, &entry->mac_flt1,    215, 168, size);
+	pack_or_unpack(buf, &entry->mac_flt0,    167, 120, size);
+	pack_or_unpack(buf, &entry->incl_srcpt1, 119, 119, size);
+	pack_or_unpack(buf, &entry->incl_srcpt0, 118, 118, size);
+	pack_or_unpack(buf, &entry->send_meta1,  117, 117, size);
+	pack_or_unpack(buf, &entry->send_meta0,  116, 116, size);
+	pack_or_unpack(buf, &entry->casc_port,   115, 113, size);
+	pack_or_unpack(buf, &entry->host_port,   112, 110, size);
+	pack_or_unpack(buf, &entry->mirr_port,   109, 107, size);
+	pack_or_unpack(buf, &entry->vlmarker,    106,  75, size);
+	pack_or_unpack(buf, &entry->vlmask,       74,  43, size);
+	pack_or_unpack(buf, &entry->tpid,         42,  27, size);
+	pack_or_unpack(buf, &entry->ignore2stf,   26,  26, size);
+	pack_or_unpack(buf, &entry->tpid2,        25,  10, size);
 }
 
-void sja1105_general_params_table_pack(void *buf, struct
-                                       sja1105_general_params_table *table)
+static void sja1105pqrs_general_params_entry_access(
+		void *buf,
+		struct sja1105_general_params_entry *entry,
+		int write)
 {
-	sja1105_general_params_table_access(buf, table, 1);
-}
+	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
+	int    size = SIZE_GENERAL_PARAMS_ENTRY_PQRS;
 
-void sja1105_general_params_table_unpack(void *buf, struct
-                                         sja1105_general_params_table *table)
-{
-	sja1105_general_params_table_access(buf, table, 0);
+	if (write == 0) {
+		pack_or_unpack = gtable_unpack;
+		memset(entry, 0, sizeof(*entry));
+	} else {
+		pack_or_unpack = gtable_pack;
+		memset(buf, 0, size);
+	}
+	pack_or_unpack(buf, &entry->vllupformat, 351, 351, size);
+	pack_or_unpack(buf, &entry->mirr_ptacu,  350, 350, size);
+	pack_or_unpack(buf, &entry->switchid,    349, 347, size);
+	pack_or_unpack(buf, &entry->hostprio,    346, 344, size);
+	pack_or_unpack(buf, &entry->mac_fltres1, 343, 296, size);
+	pack_or_unpack(buf, &entry->mac_fltres0, 295, 248, size);
+	pack_or_unpack(buf, &entry->mac_flt1,    247, 200, size);
+	pack_or_unpack(buf, &entry->mac_flt0,    199, 152, size);
+	pack_or_unpack(buf, &entry->incl_srcpt1, 151, 151, size);
+	pack_or_unpack(buf, &entry->incl_srcpt0, 150, 150, size);
+	pack_or_unpack(buf, &entry->send_meta1,  149, 149, size);
+	pack_or_unpack(buf, &entry->send_meta0,  148, 148, size);
+	pack_or_unpack(buf, &entry->casc_port,   147, 145, size);
+	pack_or_unpack(buf, &entry->host_port,   144, 142, size);
+	pack_or_unpack(buf, &entry->mirr_port,   141, 139, size);
+	pack_or_unpack(buf, &entry->vlmarker,    138, 107, size);
+	pack_or_unpack(buf, &entry->vlmask,      106,  75, size);
+	pack_or_unpack(buf, &entry->tpid,         74,  59, size);
+	pack_or_unpack(buf, &entry->ignore2stf,   58,  58, size);
+	pack_or_unpack(buf, &entry->tpid2,        57,  42, size);
+	pack_or_unpack(buf, &entry->queue_ts,     41,  41, size);
+	pack_or_unpack(buf, &entry->egrmirrvid,   40,  29, size);
+	pack_or_unpack(buf, &entry->egrmirrpcp,   28,  26, size);
+	pack_or_unpack(buf, &entry->egrmirrdei,   25,  25, size);
+	pack_or_unpack(buf, &entry->replay_port,  24,  22, size);
 }
+/* Device-specific pack/unpack accessors
+ * sja1105et_general_params_entry_pack
+ * sja1105et_general_params_entry_unpack
+ * sja1105pqrs_general_params_entry_pack
+ * sja1105pqrs_general_params_entry_unpack
+ */
+DEFINE_SEPARATE_PACK_UNPACK_ACCESSORS(general_params);
 
-void sja1105_general_params_table_fmt_show(
+void sja1105_general_params_entry_fmt_show(
 		char *print_buf,
 		char *fmt,
-		struct sja1105_general_params_table *table)
+		struct sja1105_general_params_entry *entry)
 {
 	char mac_buf[MAC_ADDR_SIZE];
 
-	formatted_append(print_buf, fmt, "VLLUPFORMAT 0x%" PRIX64, table->vllupformat);
-	formatted_append(print_buf, fmt, "MIRR_PTACU  0x%" PRIX64, table->mirr_ptacu);
-	formatted_append(print_buf, fmt, "SWITCHID    0x%" PRIX64, table->switchid);
-	formatted_append(print_buf, fmt, "HOSTPRIO    0x%" PRIX64, table->hostprio);
+	formatted_append(print_buf, fmt, "VLLUPFORMAT 0x%" PRIX64, entry->vllupformat);
+	formatted_append(print_buf, fmt, "MIRR_PTACU  0x%" PRIX64, entry->mirr_ptacu);
+	formatted_append(print_buf, fmt, "SWITCHID    0x%" PRIX64, entry->switchid);
+	formatted_append(print_buf, fmt, "HOSTPRIO    0x%" PRIX64, entry->hostprio);
 	memset(mac_buf, 0, sizeof(mac_buf));
-	mac_addr_sprintf(mac_buf, table->mac_fltres1);
+	mac_addr_sprintf(mac_buf, entry->mac_fltres1);
 	formatted_append(print_buf, fmt, "MAC_FLTRES1 %s", mac_buf);
 	memset(mac_buf, 0, sizeof(mac_buf));
-	mac_addr_sprintf(mac_buf, table->mac_fltres0);
+	mac_addr_sprintf(mac_buf, entry->mac_fltres0);
 	formatted_append(print_buf, fmt, "MAC_FLTRES0 %s", mac_buf);
 	memset(mac_buf, 0, sizeof(mac_buf));
-	mac_addr_sprintf(mac_buf, table->mac_flt1);
+	mac_addr_sprintf(mac_buf, entry->mac_flt1);
 	formatted_append(print_buf, fmt, "MAC_FLT1    %s", mac_buf);
 	memset(mac_buf, 0, sizeof(mac_buf));
-	mac_addr_sprintf(mac_buf, table->mac_flt0);
+	mac_addr_sprintf(mac_buf, entry->mac_flt0);
 	formatted_append(print_buf, fmt, "MAC_FLT0    %s", mac_buf);
-	formatted_append(print_buf, fmt, "INCL_SRCPT1 0x%" PRIX64, table->incl_srcpt1);
-	formatted_append(print_buf, fmt, "INCL_SRCPT0 0x%" PRIX64, table->incl_srcpt0);
-	formatted_append(print_buf, fmt, "SEND_META1  0x%" PRIX64, table->send_meta1);
-	formatted_append(print_buf, fmt, "SEND_META0  0x%" PRIX64, table->send_meta0);
-	formatted_append(print_buf, fmt, "CASC_PORT   0x%" PRIX64, table->casc_port);
-	formatted_append(print_buf, fmt, "HOST_PORT   0x%" PRIX64, table->host_port);
-	formatted_append(print_buf, fmt, "MIRR_PORT   0x%" PRIX64, table->mirr_port);
-	formatted_append(print_buf, fmt, "VLMARKER    0x%" PRIX64, table->vlmarker);
-	formatted_append(print_buf, fmt, "VLMASK      0x%" PRIX64, table->vlmask);
-	formatted_append(print_buf, fmt, "TPID        0x%" PRIX64, table->tpid);
-	formatted_append(print_buf, fmt, "IGNORE2STF  0x%" PRIX64, table->ignore2stf);
-	formatted_append(print_buf, fmt, "TPID2       0x%" PRIX64, table->tpid2);
+	formatted_append(print_buf, fmt, "INCL_SRCPT1 0x%" PRIX64, entry->incl_srcpt1);
+	formatted_append(print_buf, fmt, "INCL_SRCPT0 0x%" PRIX64, entry->incl_srcpt0);
+	formatted_append(print_buf, fmt, "SEND_META1  0x%" PRIX64, entry->send_meta1);
+	formatted_append(print_buf, fmt, "SEND_META0  0x%" PRIX64, entry->send_meta0);
+	formatted_append(print_buf, fmt, "CASC_PORT   0x%" PRIX64, entry->casc_port);
+	formatted_append(print_buf, fmt, "HOST_PORT   0x%" PRIX64, entry->host_port);
+	formatted_append(print_buf, fmt, "MIRR_PORT   0x%" PRIX64, entry->mirr_port);
+	formatted_append(print_buf, fmt, "VLMARKER    0x%" PRIX64, entry->vlmarker);
+	formatted_append(print_buf, fmt, "VLMASK      0x%" PRIX64, entry->vlmask);
+	formatted_append(print_buf, fmt, "TPID        0x%" PRIX64, entry->tpid);
+	formatted_append(print_buf, fmt, "IGNORE2STF  0x%" PRIX64, entry->ignore2stf);
+	formatted_append(print_buf, fmt, "TPID2       0x%" PRIX64, entry->tpid2);
 }
 
-void sja1105_general_params_table_show(struct sja1105_general_params_table *entry)
+void sja1105_general_params_entry_show(struct sja1105_general_params_entry *entry)
 {
 	char print_buf[MAX_LINE_SIZE];
 	char *fmt = "%s\n";
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_general_params_table_fmt_show(print_buf, fmt, entry);
+	sja1105_general_params_entry_fmt_show(print_buf, fmt, entry);
 	puts(print_buf);
 }

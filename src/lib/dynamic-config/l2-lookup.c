@@ -45,12 +45,6 @@
  * TODO: Update management routes for SJA1105 P/Q/R/S compatibility
  */
 
-/* Prototype for non-externally-visible function in
- * src/lib/static-config/tables/l2-lookup.c */
-void sja1105_l2_lookup_entry_access(void *buf,
-                                    struct sja1105_l2_lookup_entry *entry,
-                                    int write);
-
 /* Buffer is segregated into 2 parts:
  *   * ENTRY: a portion of SIZE_L2_LOOKUP_ENTRY (12) bytes,
  *            corresponding to addresses 0x20, 0x21 and 0x22
@@ -62,9 +56,9 @@ sja1105_dyn_l2_lookup_cmd_access(void *buf,
                                  int write)
 {
 	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
-	int    size = 4 + SIZE_L2_LOOKUP_ENTRY;
+	int    size = 4 + SIZE_L2_LOOKUP_ENTRY_ET;
 	uint8_t *entry_ptr = (uint8_t*) buf;
-	uint8_t *cmd_ptr   = (uint8_t*) buf + SIZE_L2_LOOKUP_ENTRY;
+	uint8_t *cmd_ptr   = (uint8_t*) buf + SIZE_L2_LOOKUP_ENTRY_ET;
 
 	if (write == 0) {
 		pack_or_unpack = gtable_unpack;
@@ -81,20 +75,20 @@ sja1105_dyn_l2_lookup_cmd_access(void *buf,
 	pack_or_unpack(cmd_ptr, &cmd->mgmtroute, 26, 26, 4);
 	if (cmd->mgmtroute) {
 		/* Management route */
-		pack_or_unpack(entry_ptr, &cmd->entry.mgmt.ts_regid,  85, 85, SIZE_L2_LOOKUP_ENTRY);
-		pack_or_unpack(entry_ptr, &cmd->entry.mgmt.egr_ts,    84, 84, SIZE_L2_LOOKUP_ENTRY);
-		pack_or_unpack(entry_ptr, &cmd->entry.mgmt.macaddr,   83, 36, SIZE_L2_LOOKUP_ENTRY);
-		pack_or_unpack(entry_ptr, &cmd->entry.mgmt.destports, 35, 31, SIZE_L2_LOOKUP_ENTRY);
-		pack_or_unpack(entry_ptr, &cmd->entry.mgmt.enfport,   30, 30, SIZE_L2_LOOKUP_ENTRY);
-		pack_or_unpack(entry_ptr, &cmd->entry.mgmt.index,     29, 20, SIZE_L2_LOOKUP_ENTRY);
+		pack_or_unpack(entry_ptr, &cmd->entry.mgmt.ts_regid,  85, 85, SIZE_L2_LOOKUP_ENTRY_ET);
+		pack_or_unpack(entry_ptr, &cmd->entry.mgmt.egr_ts,    84, 84, SIZE_L2_LOOKUP_ENTRY_ET);
+		pack_or_unpack(entry_ptr, &cmd->entry.mgmt.macaddr,   83, 36, SIZE_L2_LOOKUP_ENTRY_ET);
+		pack_or_unpack(entry_ptr, &cmd->entry.mgmt.destports, 35, 31, SIZE_L2_LOOKUP_ENTRY_ET);
+		pack_or_unpack(entry_ptr, &cmd->entry.mgmt.enfport,   30, 30, SIZE_L2_LOOKUP_ENTRY_ET);
+		pack_or_unpack(entry_ptr, &cmd->entry.mgmt.index,     29, 20, SIZE_L2_LOOKUP_ENTRY_ET);
 	} else {
 		/* Regular L2 lookup entry.
 		 * Code duplicated from src/lib/static-config/tables/l2-lookup.c */
-		pack_or_unpack(entry_ptr, &cmd->entry.l2.vlanid,    95, 84, SIZE_L2_LOOKUP_ENTRY);
-		pack_or_unpack(entry_ptr, &cmd->entry.l2.macaddr,   83, 36, SIZE_L2_LOOKUP_ENTRY);
-		pack_or_unpack(entry_ptr, &cmd->entry.l2.destports, 35, 31, SIZE_L2_LOOKUP_ENTRY);
-		pack_or_unpack(entry_ptr, &cmd->entry.l2.enfport,   30, 30, SIZE_L2_LOOKUP_ENTRY);
-		pack_or_unpack(entry_ptr, &cmd->entry.l2.index,     29, 20, SIZE_L2_LOOKUP_ENTRY);
+		pack_or_unpack(entry_ptr, &cmd->entry.l2.vlanid,    95, 84, SIZE_L2_LOOKUP_ENTRY_ET);
+		pack_or_unpack(entry_ptr, &cmd->entry.l2.macaddr,   83, 36, SIZE_L2_LOOKUP_ENTRY_ET);
+		pack_or_unpack(entry_ptr, &cmd->entry.l2.destports, 35, 31, SIZE_L2_LOOKUP_ENTRY_ET);
+		pack_or_unpack(entry_ptr, &cmd->entry.l2.enfport,   30, 30, SIZE_L2_LOOKUP_ENTRY_ET);
+		pack_or_unpack(entry_ptr, &cmd->entry.l2.index,     29, 20, SIZE_L2_LOOKUP_ENTRY_ET);
 	}
 }
 
@@ -144,7 +138,7 @@ sja1105_mgmt_route_commit(struct sja1105_spi_setup *spi_setup,
 	/* Access to CMD_ADDR = 0x23 is implicit and done
 	 * through the same SPI transaction */
 	const int ENTRY_ADDR = 0x20;
-	const int BUF_LEN = 4 + SIZE_L2_LOOKUP_ENTRY;
+	const int BUF_LEN = 4 + SIZE_L2_LOOKUP_ENTRY_ET;
 	/* SPI payload buffer */
 	uint8_t packed_buf[BUF_LEN];
 	/* Structure to hold command we are constructing,

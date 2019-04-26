@@ -28,54 +28,34 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
-#include <inttypes.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-/* These are our own includes */
-#include <lib/include/static-config.h>
-#include <lib/include/clock.h>
-#include <lib/include/spi.h>
-#include <common.h>
+#include "internal.h"
 
-int sja1105_clocking_setup(struct sja1105_spi_setup *spi_setup,
-                           struct sja1105_xmii_params_entry *params,
-                           struct sja1105_mac_config_entry  *mac_config)
+int
+sgmii_table_write(xmlTextWriterPtr writer,
+                  struct sja1105_static_config *config)
 {
-	int speed_mbps;
 	int rc = 0;
 	int i;
 
-	for (i = 0; i < 5; i++) {
-		switch (mac_config[i].speed) {
-		case 1: speed_mbps = 1000; break;
-		case 2: speed_mbps = 100;  break;
-		case 3: speed_mbps = 10;   break;
-		default: loge("auto speed not yet supported"); return -1;
-		}
-		if (params->xmii_mode[i] == XMII_SPEED_MII) {
-			mii_clocking_setup(spi_setup, i, params->phy_mac[i]);
-		} else if (params->xmii_mode[i] == XMII_SPEED_RMII) {
-			rmii_clocking_setup(spi_setup, i, params->phy_mac[i]);
-		} else if (params->xmii_mode[i] == XMII_SPEED_RGMII) {
-			rgmii_clocking_setup(spi_setup, i, speed_mbps);
-		} else if (params->xmii_mode[i] == XMII_SPEED_SGMII &&
-		           IS_PQRS(spi_setup->device_id)) {
-			if ((i == 4) && (IS_R(spi_setup->device_id, spi_setup->part_nr) ||
-			                 IS_S(spi_setup->device_id, spi_setup->part_nr))) {
-				sgmii_clocking_setup(spi_setup, i, speed_mbps);
-			} else {
-				logv("Port %d is tri-stated", i);
-			}
-		} else {
-			loge("Invalid xmii_mode for port %d specified: %" PRIu64,
-			     i, params->xmii_mode[i]);
-			rc = -EINVAL;
-			goto out;
+	logv("writing %d SGMII Table entries", config->sgmii_count);
+	for (i = 0; i < config->sgmii_count; i++) {
+		rc |= xmlTextWriterStartElement(writer, BAD_CAST "entry");
+		rc |= xml_write_field(writer, "index",       i);
+		rc |= xml_write_field(writer, "digital_error_cnt", config->sgmii[i].digital_error_cnt);
+		rc |= xml_write_field(writer, "digital_control_2", config->sgmii[i].digital_control_2);
+		rc |= xml_write_field(writer, "debug_control", config->sgmii[i].debug_control);
+		rc |= xml_write_field(writer, "test_control", config->sgmii[i].test_control);
+		rc |= xml_write_field(writer, "autoneg_control", config->sgmii[i].autoneg_control);
+		rc |= xml_write_field(writer, "digital_control_1", config->sgmii[i].digital_control_1);
+		rc |= xml_write_field(writer, "autoneg_adv", config->sgmii[i].autoneg_adv);
+		rc |= xml_write_field(writer, "basic_control", config->sgmii[i].basic_control);
+		rc |= xmlTextWriterEndElement(writer);
+		if (rc < 0) {
+			loge("error while writing SGMII Table element %d", i);
+			return -EINVAL;
 		}
 	}
-out:
-	return rc;
+	return 0;
 }
+
 

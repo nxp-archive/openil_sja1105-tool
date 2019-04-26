@@ -38,9 +38,9 @@
 #include <lib/include/gtable.h>
 #include <common.h>
 
-static void sja1105_vl_forwarding_params_table_access(
+static void sja1105_vl_forwarding_params_entry_access(
 		void *buf,
-		struct sja1105_vl_forwarding_params_table *table,
+		struct sja1105_vl_forwarding_params_entry *entry,
 		int write)
 {
 	int  (*pack_or_unpack)(void*, uint64_t*, int, int, int);
@@ -50,52 +50,43 @@ static void sja1105_vl_forwarding_params_table_access(
 
 	if (write == 0) {
 		pack_or_unpack = gtable_unpack;
-		memset(table, 0, sizeof(*table));
+		memset(entry, 0, sizeof(*entry));
 	} else {
 		pack_or_unpack = gtable_pack;
 		memset(buf, 0, size);
 	}
 	offset = 16;
 	for (i = 0; i < 8; i++) {
-		pack_or_unpack(buf, &table->partspc[i], offset + 9, offset + 0, size);
+		pack_or_unpack(buf, &entry->partspc[i], offset + 9, offset + 0, size);
 		offset += 10;
 	}
-	pack_or_unpack(buf, &table->debugen, 15, 15, size);
+	pack_or_unpack(buf, &entry->debugen, 15, 15, size);
 }
+/*
+ * sja1105_vl_forwarding_params_entry_pack
+ * sja1105_vl_forwarding_params_entry_unpack
+ */
+DEFINE_COMMON_PACK_UNPACK_ACCESSORS(vl_forwarding_params);
 
-void sja1105_vl_forwarding_params_table_pack(
-		void *buf,
-		struct sja1105_vl_forwarding_params_table *table)
-{
-	sja1105_vl_forwarding_params_table_access(buf, table, 1);
-}
-
-void sja1105_vl_forwarding_params_table_unpack(
-		void *buf,
-		struct sja1105_vl_forwarding_params_table *table)
-{
-	sja1105_vl_forwarding_params_table_access(buf, table, 0);
-}
-
-void sja1105_vl_forwarding_params_table_fmt_show(
+void sja1105_vl_forwarding_params_entry_fmt_show(
 		char *print_buf,
 		char *fmt,
-		struct sja1105_vl_forwarding_params_table *table)
+		struct sja1105_vl_forwarding_params_entry *entry)
 {
 	char buf[MAX_LINE_SIZE];
 
-	print_array(buf, table->partspc, 8);
-	formatted_append(print_buf, fmt, "PARTSPC  %s", table->partspc);
-	formatted_append(print_buf, fmt, "DEBUGEN  0x%" PRIX64, table->debugen);
+	print_array(buf, entry->partspc, 8);
+	formatted_append(print_buf, fmt, "PARTSPC  %s", buf);
+	formatted_append(print_buf, fmt, "DEBUGEN  0x%" PRIX64, entry->debugen);
 }
 
-void sja1105_vl_forwarding_params_table_show(struct sja1105_vl_forwarding_params_table *table)
+void sja1105_vl_forwarding_params_entry_show(struct sja1105_vl_forwarding_params_entry *entry)
 {
 	char print_buf[MAX_LINE_SIZE];
 	char *fmt = "%s\n";
 
 	memset(print_buf, 0, MAX_LINE_SIZE);
-	sja1105_vl_forwarding_params_table_fmt_show(print_buf, fmt, table);
+	sja1105_vl_forwarding_params_entry_fmt_show(print_buf, fmt, entry);
 	puts(print_buf);
 }
 

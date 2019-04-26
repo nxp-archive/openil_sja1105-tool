@@ -64,16 +64,11 @@ static void sja1105_schedule_entry_access(
 	pack_or_unpack(buf, &entry->vlindex,     35, 26, size);
 	pack_or_unpack(buf, &entry->delta,       25, 8,  size);
 }
-
-void sja1105_schedule_entry_unpack(void *buf, struct sja1105_schedule_entry *entry)
-{
-	sja1105_schedule_entry_access(buf, entry, 0);
-}
-
-void sja1105_schedule_entry_pack(void *buf, struct sja1105_schedule_entry *entry)
-{
-	sja1105_schedule_entry_access(buf, entry, 1);
-}
+/*
+ * sja1105_schedule_entry_pack
+ * sja1105_schedule_entry_unpack
+ */
+DEFINE_COMMON_PACK_UNPACK_ACCESSORS(schedule);
 
 void sja1105_schedule_entry_fmt_show(char *print_buf, char *fmt, struct sja1105_schedule_entry *entry)
 {

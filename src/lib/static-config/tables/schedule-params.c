@@ -61,20 +61,11 @@ static void sja1105_schedule_params_entry_access(
 		offset += 10;
 	}
 }
-
-void sja1105_schedule_params_entry_pack(
-		void *buf,
-		struct sja1105_schedule_params_entry *entry)
-{
-	sja1105_schedule_params_entry_access(buf, entry, 1);
-}
-
-void sja1105_schedule_params_entry_unpack(
-		void *buf,
-		struct sja1105_schedule_params_entry *entry)
-{
-	sja1105_schedule_params_entry_access(buf, entry, 0);
-}
+/*
+ * sja1105_schedule_params_entry_pack
+ * sja1105_schedule_params_entry_unpack
+ */
+DEFINE_COMMON_PACK_UNPACK_ACCESSORS(schedule_params);
 
 void sja1105_schedule_params_entry_fmt_show(
 		char *print_buf,
