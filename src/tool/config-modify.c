@@ -916,16 +916,6 @@ out:
 	return rc;
 }
 
-static int retagging_table_entry_modify(
-		__attribute__((unused)) struct sja1105_static_config *config,
-		__attribute__((unused)) int entry,
-		__attribute__((unused)) char *field_name,
-		__attribute__((unused)) char *field_val)
-{
-	loge("unimplemented");
-	return -1;
-}
-
 static int avb_params_table_entry_modify(
 		struct sja1105_static_config *config,
 		int    entry_index,
@@ -1039,7 +1029,6 @@ staging_area_modify(struct sja1105_staging_area *staging_area,
 		"clock-synchronization-parameters-table",
 		"avb-parameters-table",
 		"general-parameters-table",
-		"retagging-table",
 		"xmii-mode-parameters-table",
 		"sgmii-table",
 	};
@@ -1063,7 +1052,6 @@ staging_area_modify(struct sja1105_staging_area *staging_area,
 		clock_sync_params_table_entry_modify,
 		avb_params_table_entry_modify,
 		general_params_table_entry_modify,
-		retagging_table_entry_modify,
 		xmii_table_entry_modify,
 		sgmii_table_entry_modify,
 	};

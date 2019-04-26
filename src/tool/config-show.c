@@ -109,14 +109,6 @@ DECLARE_TABLE_SHOW_FN(avb_params, MAX_AVB_PARAMS_COUNT, "Audio/Video Bridging Pa
 DECLARE_TABLE_SHOW_FN(vl_forwarding_params, MAX_VL_FORWARDING_PARAMS_COUNT, "Virtual Link Forwarding Parameters Table", "%-50s\n")
 
 static int
-retagging_table_show(__attribute__((unused)) struct sja1105_static_config *config,
-                     __attribute__((unused)) int index)
-{
-	logv("Retagging Table unimplemented");
-	return 0;
-}
-
-static int
 clock_sync_params_table_show(__attribute__((unused)) struct sja1105_static_config *config,
                              __attribute__((unused)) int index)
 {
@@ -147,7 +139,6 @@ sja1105_staging_area_show(struct sja1105_staging_area *staging_area,
 		"clock-synchronization-parameters-table",
 		"avb-parameters-table",
 		"general-parameters-table",
-		"retagging-table",
 		"xmii-mode-parameters-table",
 		"sgmii-table",
 	};
@@ -170,7 +161,6 @@ sja1105_staging_area_show(struct sja1105_staging_area *staging_area,
 		clock_sync_params_table_show,
 		avb_params_table_show,
 		general_params_table_show,
-		retagging_table_show,
 		xmii_params_table_show,
 		sgmii_table_show,
 	};

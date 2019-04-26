@@ -137,7 +137,6 @@ parse_config_table(xmlNode *node, struct sja1105_static_config *config)
 		"clock-synchronization-parameters-table",
 		"avb-parameters-table",
 		"general-parameters-table",
-		"retagging-table",
 		"xmii-mode-parameters-table",
 		"sgmii-table",
 	};
@@ -161,7 +160,6 @@ parse_config_table(xmlNode *node, struct sja1105_static_config *config)
 		clock_synchronization_parameters_table_parse,
 		avb_parameters_table_parse,
 		general_parameters_table_parse,
-		retagging_table_parse,
 		xmii_mode_parameters_table_parse,
 		sgmii_table_parse,
 	};
@@ -169,11 +167,10 @@ parse_config_table(xmlNode *node, struct sja1105_static_config *config)
 	table_name = (char*) node->name;
 	rc = get_match(table_name, options, ARRAY_SIZE(options));
 	if (rc < 0) {
-		goto out;
+		loge("Unrecognized table %s, skipping...", table_name);
+		return 0;
 	}
-	rc = next_parse_config_table[rc](node, config);
-out:
-	return rc;
+	return next_parse_config_table[rc](node, config);
 }
 
 static int

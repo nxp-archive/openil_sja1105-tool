@@ -59,7 +59,6 @@
 #define SIZE_AVB_PARAMS_ENTRY_PQRS              16
 #define SIZE_GENERAL_PARAMS_ENTRY_ET            40
 #define SIZE_GENERAL_PARAMS_ENTRY_PQRS          44
-#define SIZE_RETAGGING_ENTRY                    8
 #define SIZE_XMII_MODE_PARAMS_ENTRY             4
 #define SIZE_SGMII_ENTRY                        144
 
@@ -82,7 +81,6 @@
 #define BLKID_CLK_SYNC_PARAMS_TABLE              0x0F
 #define BLKID_AVB_PARAMS_TABLE                   0x10
 #define BLKID_GENERAL_PARAMS_TABLE               0x11
-#define BLKID_RETAGGING_TABLE                    0x12
 #define BLKID_XMII_MODE_PARAMS_TABLE             0x4E
 #define BLKID_SGMII_TABLE                        0xC8
 
@@ -102,14 +100,12 @@
 #define MAX_L2_LOOKUP_PARAMS_COUNT               1
 #define MAX_L2_FORWARDING_PARAMS_COUNT           1
 #define MAX_GENERAL_PARAMS_COUNT                 1
-#define MAX_RETAGGING_COUNT                      32
 #define MAX_XMII_PARAMS_COUNT                    1
 #define MAX_SGMII_COUNT                          1
 #define MAX_AVB_PARAMS_COUNT                     1
 #define MAX_CLK_SYNC_COUNT                       1
 
 #define MAX_FRAME_MEMORY                         929
-#define MAX_FRAME_MEMORY_RETAGGING               910
 
 #define SJA1105E_DEVICE_ID         0x9C00000Cull
 #define SJA1105T_DEVICE_ID         0x9E00030Eull
@@ -413,16 +409,6 @@ struct sja1105_clk_sync_params_entry {
 	uint64_t srcport[8];
 };
 
-struct sja1105_retagging_entry {
-	uint64_t egr_port;
-	uint64_t ing_port;
-	uint64_t vlan_ing;
-	uint64_t vlan_egr;
-	uint64_t do_not_learn;
-	uint64_t use_dest_ports;
-	uint64_t destports;
-};
-
 #define STATIC_CONFIG_MEMBER(table, size)           \
 	struct sja1105_##table##_entry table[size]; \
 	int table##_count;                          \
@@ -447,7 +433,6 @@ struct sja1105_static_config {
 	STATIC_CONFIG_MEMBER(vl_forwarding, MAX_VL_FORWARDING_COUNT);
 	STATIC_CONFIG_MEMBER(vl_policing, MAX_VL_POLICING_COUNT);
 	STATIC_CONFIG_MEMBER(vl_lookup, MAX_VL_LOOKUP_COUNT);
-	STATIC_CONFIG_MEMBER(retagging, MAX_RETAGGING_COUNT);
 	STATIC_CONFIG_MEMBER(sgmii, MAX_SGMII_COUNT);
 };
 
