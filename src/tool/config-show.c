@@ -53,7 +53,7 @@
 		                                                              \
 		if (entry_count == 0) {                                       \
 			loge(STRING_NAME " is empty");                        \
-			return -1;                                            \
+			return 0;                                             \
 		}                                                             \
 		if (index < -1 || index >= entry_count) {                     \
 			loge("Index out of bounds!");                         \
@@ -180,6 +180,8 @@ sja1105_staging_area_show(struct sja1105_staging_area *staging_area,
 		       static_config->device_id, SJA1105_PART_NR_DONT_CARE));
 		for (i = 0; i < ARRAY_SIZE(next_config_table_show); i++) {
 			rc = next_config_table_show[i](static_config, -1);
+			if (rc < 0)
+				goto out;
 		}
 	} else {
 		index_ptr = strchr(table_name, '[');

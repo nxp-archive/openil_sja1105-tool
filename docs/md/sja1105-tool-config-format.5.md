@@ -226,7 +226,10 @@ following children:
 * "macaddr", bits 83-36
 * "destports", bits 35-31
 * "enfport", bits 30-30
-* "index", bits 29-20
+* Field "index" does not refer to bits 29-20 of the table entry.
+  Instead, the latter is calculated automatically and placed in the
+  staging area. The "index" field from the XML is merely a visual
+  indicator to a human readers.
 
 L2 POLICING TABLE
 -----------------
@@ -456,6 +459,13 @@ The following facts are noted:
 
 * The "index" attribute of each entry is not required nor is it
   interpreted by _sja1105-tool_; it is simply for ease of reading.
+  This is true even for the "l2-address-lookup-table", whose entries do
+  have a field which is actually called "index". In that case, the tool
+  performs automatic calculation of the correct index where the switch
+  hardware searches in the FDB, and places that number into the "index"
+  field of "l2-address-lookup-table" entries. That value and the "index"
+  value specified in the XML are completely separate, with the former
+  being non-user-modifiable, and the latter being ignored by the tool.
 * The first 5 entries in the L2 Forwarding Table are per-port.
     * *bc_domain* indicates the Broadcast Domain. The only limitation
       imposed by default is that broadcast frames received on an

@@ -30,23 +30,26 @@
  *****************************************************************************/
 #include "internal.h"
 
-static int entry_get(xmlNode *node, struct sja1105_l2_lookup_entry *entry)
+static int entry_get(xmlNode *node, struct sja1105_l2_lookup_entry *entry,
+                     uint64_t device_id)
 {
 	int rc = 0;
-	rc |= xml_read_field(&entry->tsreg, "tsreg", node);
-	rc |= xml_read_field(&entry->mirrvlan, "mirrvlan", node);
-	rc |= xml_read_field(&entry->takets, "takets", node);
-	rc |= xml_read_field(&entry->mirr, "mirr", node);
-	rc |= xml_read_field(&entry->retag, "retag", node);
-	rc |= xml_read_field(&entry->mask_iotag, "mask_iotag", node);
-	rc |= xml_read_field(&entry->mask_vlanid, "mask_vlanid", node);
-	rc |= xml_read_field(&entry->mask_macaddr, "mask_macaddr", node);
-	rc |= xml_read_field(&entry->iotag, "iotag", node);
+
+	if (IS_PQRS(device_id)) {
+		rc |= xml_read_field(&entry->tsreg, "tsreg", node);
+		rc |= xml_read_field(&entry->mirrvlan, "mirrvlan", node);
+		rc |= xml_read_field(&entry->takets, "takets", node);
+		rc |= xml_read_field(&entry->mirr, "mirr", node);
+		rc |= xml_read_field(&entry->retag, "retag", node);
+		rc |= xml_read_field(&entry->mask_iotag, "mask_iotag", node);
+		rc |= xml_read_field(&entry->mask_vlanid, "mask_vlanid", node);
+		rc |= xml_read_field(&entry->mask_macaddr, "mask_macaddr", node);
+		rc |= xml_read_field(&entry->iotag, "iotag", node);
+	}
 	rc |= xml_read_field(&entry->vlanid, "vlanid", node);
 	rc |= xml_read_field(&entry->macaddr, "macaddr", node);
 	rc |= xml_read_field(&entry->destports, "destports", node);
 	rc |= xml_read_field(&entry->enfport, "enfport", node);
-	rc |= xml_read_field(&entry->index, "index", node);
 	if (rc < 0) {
 		loge("L2 Lookup entry is incomplete!");
 		return -EINVAL;
@@ -66,7 +69,7 @@ static int parse_entry(xmlNode *node, struct sja1105_static_config *config)
 		goto out;
 	}
 	memset(&entry, 0, sizeof(entry));
-	rc = entry_get(node, &entry);
+	rc = entry_get(node, &entry, config->device_id);
 	config->l2_lookup[config->l2_lookup_count++] = entry;
 out:
 	return rc;

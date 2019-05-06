@@ -40,20 +40,21 @@ l2_address_lookup_table_write(xmlTextWriterPtr writer,
 	logv("writing %d L2 Lookup entries", config->l2_lookup_count);
 	for (i = 0; i < config->l2_lookup_count; i++) {
 		rc |= xmlTextWriterStartElement(writer, BAD_CAST "entry");
-		rc |= xml_write_field(writer, "tsreg",    config->l2_lookup[i].tsreg);
-		rc |= xml_write_field(writer, "mirrvlan",    config->l2_lookup[i].mirrvlan);
-		rc |= xml_write_field(writer, "takets",    config->l2_lookup[i].takets);
-		rc |= xml_write_field(writer, "mirr",    config->l2_lookup[i].mirr);
-		rc |= xml_write_field(writer, "retag",    config->l2_lookup[i].retag);
-		rc |= xml_write_field(writer, "mask_iotag",    config->l2_lookup[i].mask_iotag);
-		rc |= xml_write_field(writer, "mask_vlanid",    config->l2_lookup[i].mask_vlanid);
-		rc |= xml_write_field(writer, "mask_macaddr",    config->l2_lookup[i].mask_macaddr);
-		rc |= xml_write_field(writer, "iotag",    config->l2_lookup[i].iotag);
+		if (IS_PQRS(config->device_id)) {
+			rc |= xml_write_field(writer, "tsreg", config->l2_lookup[i].tsreg);
+			rc |= xml_write_field(writer, "mirrvlan", config->l2_lookup[i].mirrvlan);
+			rc |= xml_write_field(writer, "takets", config->l2_lookup[i].takets);
+			rc |= xml_write_field(writer, "mirr", config->l2_lookup[i].mirr);
+			rc |= xml_write_field(writer, "retag", config->l2_lookup[i].retag);
+			rc |= xml_write_field(writer, "mask_iotag", config->l2_lookup[i].mask_iotag);
+			rc |= xml_write_field(writer, "mask_vlanid", config->l2_lookup[i].mask_vlanid);
+			rc |= xml_write_field(writer, "mask_macaddr", config->l2_lookup[i].mask_macaddr);
+			rc |= xml_write_field(writer, "iotag", config->l2_lookup[i].iotag);
+		}
 		rc |= xml_write_field(writer, "vlanid",    config->l2_lookup[i].vlanid);
 		rc |= xml_write_field(writer, "macaddr",   config->l2_lookup[i].macaddr);
 		rc |= xml_write_field(writer, "destports", config->l2_lookup[i].destports);
 		rc |= xml_write_field(writer, "enfport",   config->l2_lookup[i].enfport);
-		rc |= xml_write_field(writer, "index",     config->l2_lookup[i].index);
 		rc |= xmlTextWriterEndElement(writer);
 		if (rc < 0) {
 			loge("error while writing l2_lookup Table element %d", i);
