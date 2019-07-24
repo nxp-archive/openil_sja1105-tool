@@ -28,27 +28,27 @@ To compile this demo you need to have setup a Linux machine with the
 following:
 
 * An ARMv7 toolchain for the LS1021. You can get one from [Linaro](
-https://releases.linaro.org/components/toolchain/binaries/latest/arm-linux-gnueabihf/)
-(version used here is 6.3.1).
+https://releases.linaro.org/components/toolchain/binaries/latest-7/arm-linux-gnueabihf/)
+(version used here is 7.4.1).
 
 ```bash
 cd <base_dir>
 mkdir linaro-armv7-toolchain
 cd linaro-armv7-toolchain
-wget https://releases.linaro.org/components/toolchain/binaries/latest/arm-linux-gnueabihf/gcc-linaro-6.3.1-2017.05-x86_64_arm-linux-gnueabihf.tar.xz
-wget https://releases.linaro.org/components/toolchain/binaries/latest/arm-linux-gnueabihf/sysroot-glibc-linaro-2.23-2017.05-arm-linux-gnueabihf.tar.xz
-tar xvf gcc-linaro-6.3.1-2017.05-x86_64_arm-linux-gnueabihf.tar.xz
-tar xvf sysroot-glibc-linaro-2.23-2017.05-arm-linux-gnueabihf.tar.xz
-# rm -rf gcc-linaro-6.3.1-2017.05-x86_64_arm-linux-gnueabihf.tar.xz
-# rm -rf sysroot-glibc-linaro-2.23-2017.05-arm-linux-gnueabihf.tar.xz
+wget https://releases.linaro.org/components/toolchain/binaries/latest-7/arm-linux-gnueabihf/gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabihf.tar.xz
+wget https://releases.linaro.org/components/toolchain/binaries/latest-7/arm-linux-gnueabihf/sysroot-glibc-linaro-2.25-2019.02-arm-linux-gnueabihf.tar.xz
+tar xvf gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabihf.tar.xz
+tar xvf sysroot-glibc-linaro-2.25-2019.02-arm-linux-gnueabihf.tar.xz
+# rm -rf gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabihf.tar.xz
+# rm -rf sysroot-glibc-linaro-2.25-2019.02-arm-linux-gnueabihf.tar.xz
 # Copy and paste this command down until (and including) the EOF
 cat << 'EOF' > envsetup
 #!/bin/bash
 
 export TOPDIR=$(cd "$(dirname "${BASH_SOURCE[0]}" )" && pwd)
-export SYSROOT_PATH="${TOPDIR}/sysroot-glibc-linaro-2.23-2017.05-arm-linux-gnueabihf"
+export SYSROOT_PATH="${TOPDIR}/sysroot-glibc-linaro-2.25-2019.02-arm-linux-gnueabihf"
 export PKG_CONFIG_PATH="${SYSROOT_PATH}/usr/lib/pkgconfig"
-export PATH="${TOPDIR}/gcc-linaro-6.3.1-2017.05-x86_64_arm-linux-gnueabihf/bin:$PATH"
+export PATH="${TOPDIR}/gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabihf/bin:$PATH"
 export CC="arm-linux-gnueabihf-gcc  -march=armv7-a -mfloat-abi=hard -mfpu=neon -mtune=cortex-a7 --sysroot=${SYSROOT_PATH}"
 export CXX="arm-linux-gnueabihf-g++  -march=armv7-a -mfloat-abi=hard -mfpu=neon -mtune=cortex-a7 --sysroot=${SYSROOT_PATH}"
 export CPP="arm-linux-gnueabihf-gcc -E  -march=armv7-a -mfloat-abi=hard -mfpu=neon -mtune=cortex-a7 --sysroot=${SYSROOT_PATH}"
