@@ -4,3 +4,8 @@ sja1105-tool
 tags
 src/helpers/sja1105.bin
 src/helpers/_build
+*.o
+*.so
+.cproject
+.project
+sja1105-tool

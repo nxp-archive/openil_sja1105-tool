@@ -37,14 +37,14 @@
 struct sja1105_spi_setup {
 	uint64_t    device_id;
 	uint64_t    part_nr; /* Needed for P/R distinction (same switch core) */
-	const char *device;
+	char *device;
 	uint8_t     mode;
 	uint8_t     bits;
 	uint32_t    speed;
 	uint16_t    delay;
 	int         cs_change;
 	int         dry_run;
-	const char *staging_area;
+	char *staging_area;
 	int         flush;
 	int         fd;
 };

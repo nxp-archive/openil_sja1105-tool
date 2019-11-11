@@ -51,35 +51,34 @@ static int status_ports(struct sja1105_spi_setup *spi_setup,
 	/* XXX Maybe not quite right? */
 	int   size = 10 * MAX_LINE_SIZE;
 	int   rc;
-	int   i;
+	int   i, j;
 
 	if (port_no == -1) {
 		/* Show for all ports */
 		for (i = 0; i < 5; i++) {
-			print_buf[i] = (char*) calloc(size, sizeof(char));
-		}
-		for (i = 0; i < 5; i++) {
 			rc = sja1105_port_status_get(spi_setup, &status, i);
 			if (rc < 0) {
 				loge("sja1105_port_status_get failed");
+				/* free all buffers that have been allocated so far
+				   before leaving the loop and the function: */
+				for (j = 0; j < i; j++) free(print_buf[j]);
 				goto out;
 			}
+			print_buf[i] = (char*) calloc(size, sizeof(char));
 			sja1105_port_status_show(&status, i, print_buf[i],
 			                         spi_setup->device_id);
 		}
 		linewise_concat(print_buf, 5);
 
-		for (i = 0; i < 5; i++) {
-			free(print_buf[i]);
-		}
+		for (i = 0; i < 5; i++) free(print_buf[i]);
 	} else {
 		/* Show for single port */
-		print_buf[0] = (char*) calloc(size, sizeof(char));
 		rc = sja1105_port_status_get(spi_setup, &status, port_no);
 		if (rc < 0) {
 			loge("sja1105_port_status_get failed");
 			goto out;
 		}
+		print_buf[0] = (char*) calloc(size, sizeof(char));
 		sja1105_port_status_show(&status, port_no, print_buf[0],
 		                         spi_setup->device_id);
 		printf("%s\n", print_buf[0]);

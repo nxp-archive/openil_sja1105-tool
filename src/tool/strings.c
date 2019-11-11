@@ -82,11 +82,11 @@ int get_match(const char *cmd, const char **options, int option_count)
 			printf("   * %s\n", cmd_matches[i]);
 		}
 	};
-	for (i = 0; i < match_count; i++) {
-		free(cmd_matches[i]);
-	}
 out:
-	free(cmd_matches);
+	for (i = 0; i < option_count; i++) {
+		if (cmd_matches[i]) free(cmd_matches[i]);
+	}
+	if (cmd_matches) free(cmd_matches);
 out_1:
 	return (match_count == 1) ? match_index : -1;
 }
@@ -226,7 +226,16 @@ void linewise_concat(char **buffers, int count)
 	int i;
 
 	next_line    = (char**) calloc(count, sizeof(char*));
+	if (!next_line) {
+		loge("calloc() failed!");
+		return;
+	}
 	current_line = (char**) calloc(count, sizeof(char*));
+	if (!current_line) {
+		free(next_line);
+		loge("calloc() failed!");
+		return;
+	}
 
 	for (i = 0; i < count; i++) {
 		current_line[i] = buffers[i];

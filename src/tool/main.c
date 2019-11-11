@@ -147,11 +147,11 @@ void cleanup(struct sja1105_spi_setup *spi_setup)
 	extern const char *default_staging_area;
 
 	if (spi_setup->device && spi_setup->device != default_device) {
-		free((char*) spi_setup->device);
+		if (spi_setup->device) free(spi_setup->device);
 	}
 	if (spi_setup->staging_area &&
 	    spi_setup->staging_area != default_staging_area) {
-		free((char*) spi_setup->staging_area);
+		if (spi_setup->staging_area) free(spi_setup->staging_area);
 	}
 	if (spi_setup->fd) {
 		close(spi_setup->fd);

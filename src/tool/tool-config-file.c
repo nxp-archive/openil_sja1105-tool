@@ -81,8 +81,8 @@ config_set_defaults(struct sja1105_spi_setup *spi_setup,
 		struct_ptr->field = value; \
 	}
 	SET_DEFAULT_VAL(spi_setup, device_id, default_device_id, logv, "0x%" PRIx64);
-	SET_DEFAULT_VAL(spi_setup, device, default_device, logi, "%s");
-	SET_DEFAULT_VAL(spi_setup, staging_area, default_staging_area, logi, "%s");
+	SET_DEFAULT_VAL(spi_setup, device, strdup(default_device), logi, "%s");
+	SET_DEFAULT_VAL(spi_setup, staging_area, strdup(default_staging_area), logi, "%s");
 	SET_DEFAULT_VAL(spi_setup, mode, SPI_CPHA, logi, "0x%x" );
 	SET_DEFAULT_VAL(spi_setup, bits, 8, logi, "%d");
 	SET_DEFAULT_VAL(spi_setup, speed, 1000000, logi, "%u");

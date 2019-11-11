@@ -31,6 +31,7 @@
 #ifndef _SJA1105_TOOL_COMMON_H
 #define _SJA1105_TOOL_COMMON_H
 
+#include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <errno.h>
